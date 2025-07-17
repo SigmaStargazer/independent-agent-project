@@ -2,8 +2,11 @@ import socket
 import threading
 import time
 import asyncio
+import os
 
 from agent_framwork.base.singleton import singleton
+
+DEFAULT_PORT_CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'config')
 
 @singleton
 class AgentServer:
@@ -13,7 +16,9 @@ class AgentServer:
         self.port = self.server_socket.getsockname()[1] # 获取实际分配的端口号
         print(f'Server bound to port {self.port}')
         # 将端口号写入文件， 用于和client共享
-        with open('../server_port.txt', 'w') as f:
+        print(DEFAULT_PORT_CONFIG_PATH)
+        # with open('../server_port.txt', 'w') as f:
+        with open('server_port.txt', 'w') as f:
             f.write(str(self.port))
 
         self.loop = asyncio.get_event_loop()
@@ -23,8 +28,8 @@ class AgentServer:
         print('Waiting for connection...')
 
         while True:
-            # 接受一个新连接
-            sock, addr = self.server_socket.accept()
+            # 异步等待client连接
+            sock, addr = await asyncio.to_thread(self.server_socket.accept)
             print('接受一个新连接')
             self.loop.create_task(self.tcplink(sock, addr))
             
