@@ -6,7 +6,7 @@ import os
 
 from agent_framwork.base.singleton import singleton
 
-DEFAULT_PORT_CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'config')
+DEFAULT_PORT_CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'Config', 'server_port.txt'))
 
 @singleton
 class AgentServer:
@@ -18,7 +18,7 @@ class AgentServer:
         # 将端口号写入文件， 用于和client共享
         print(DEFAULT_PORT_CONFIG_PATH)
         # with open('../server_port.txt', 'w') as f:
-        with open('server_port.txt', 'w') as f:
+        with open(DEFAULT_PORT_CONFIG_PATH, 'w') as f:
             f.write(str(self.port))
 
         self.loop = asyncio.get_event_loop()
