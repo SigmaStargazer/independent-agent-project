@@ -19,7 +19,7 @@ class ClientProgram
                 throw new DirectoryNotFoundException("Unable to find the Src directory.");
             }
 
-            string filePath = Path.Combine(projectRoot, "Config","server_port.txt");
+            string filePath = Path.Combine(projectRoot, "Data", "Config", "agent_server_port.txt");
             //Console.WriteLine($"rootPath: {rootPath}");
             Console.WriteLine($"projectRoot: {projectRoot}");
             //Console.WriteLine($"currentDirectory: {currentDirectory}");

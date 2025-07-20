@@ -1,0 +1,4 @@
+protoc --python_out=. message.proto
+protoc --csharp_out=. message.proto
+
+protoc --version
