@@ -2,7 +2,7 @@ import sys
 import os
 import asyncio
 
-from agent_framwork.network.servers import AgentServerProtobuff
+from .network.servers import AgentServerProtobuff
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

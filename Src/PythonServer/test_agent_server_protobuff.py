@@ -2,14 +2,18 @@ import sys
 import os
 import asyncio
 
-from agent_framwork.network.servers import AgentServerProtobuff
+from network.servers import AgentServerProtobuff
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 PORT_CONFIG_FILE = os.path.abspath(os.path.join(PROJECT_ROOT, 'Data', 'Config', 'agent_server_port.txt'))
 
+# 添加proto路径
+sys.path.append(os.path.join(PROJECT_ROOT, 'Lib', 'proto'))
+PROTO_MODULE_NAME = 'message_pb2'
+
 # 获取单例
-server = AgentServerProtobuff(port_config_file=PORT_CONFIG_FILE)
+server = AgentServerProtobuff(port_config_file=PORT_CONFIG_FILE, proto_module_name=PROTO_MODULE_NAME)
 
 # ======================
 # 定义消息处理函数
