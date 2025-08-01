@@ -22,13 +22,13 @@ server = AgentServerProtobuff(port_config_file=PORT_CONFIG_FILE, proto_module_na
 # ======================
 
 @server.on_message("LoginRequest")
-def handle_login_request(msg, context):
+async def handle_login_request(msg, context):
     print(f"Login request: {msg.username}")
     response = context['server'].message_types['LoginResponse']()
     response.success = True
     response.message = "Login successful"
     response.user_id = 1001
-    context['server'].send_message(response, context)
+    await context['server'].send_message(response, context)
 
 @server.on_message("ChatMessage")
 async def handle_chat_message(msg, context):
@@ -37,10 +37,10 @@ async def handle_chat_message(msg, context):
     reply.sender = "server"
     reply.text = f"Echo: {msg.text}"
     await asyncio.sleep(1)  # 模拟异步操作
-    context['server'].send_message(reply, context)
+    await context['server'].send_message(reply, context)
 
 @server.on_message("AgentCreateRequest")
-def handle_agent_create_request(msg, context):
+async def handle_agent_create_request(msg, context):
     name = msg.name
     desc = msg.desc
     print(f"创建Agent: {name}: {desc}")
@@ -49,13 +49,13 @@ def handle_agent_create_request(msg, context):
         response = context['server'].message_types['AgentCreateResponse']()
         response.success = True
         response.errormsg = ""
-        context['server'].send_message(response, context)
+        await context['server'].send_message(response, context)
     except Exception as e:
         response = context['server'].message_types['AgentCreateResponse']()
         response.success = False
         response.errormsg = str(e)
         print(f"创建Agent失败: {str(e)}")
-        context['server'].send_message(response, context)
+        await context['server'].send_message(response, context)
 
 @server.on_message("StartSceneRequest")
 async def handle_start_scene_request(msg, context):
@@ -73,7 +73,7 @@ async def handle_agent_send_msg_request(msg, context):
     agent = msg.agent
     user_message = msg.user_message
     try:
-        await AgentManager().agents[agent].asend_message(user_message)
+        await AgentManager().agents.get(agent).asend_message(user_message)
     except Exception as e:
         print(f"发送消息失败: {str(e)}")
 

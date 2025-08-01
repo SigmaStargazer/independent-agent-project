@@ -23,6 +23,9 @@ class AgentServerProtobuff:
         # 消息事件映射
         self.message_events = {}
 
+        # 客户端连接管理：键为客户端ID，值为连接上下文
+        self.clients = {}  # addr -> writer
+
         # 事件循环
         self.loop = asyncio.get_event_loop()
 
@@ -77,7 +80,7 @@ class AgentServerProtobuff:
         print(f"Server started on port {self.port}")
 
         # 保存端口到配置文件
-        with open(self.port_config_file, 'w') as f:
+        with open(self.port_config_file, 'w', encoding='utf-8') as f:
             f.write(str(self.port))
 
         async with server:
@@ -86,93 +89,172 @@ class AgentServerProtobuff:
     async def handle_connection(self, reader, writer):
         addr = writer.get_extra_info('peername')
         print(f"New connection from {addr}")
+        self.clients[addr] = writer  # 保存连接
 
-        while True:
-            try:
-                # 1) 读 4 字节名字长度
+        try:
+            while True:
                 try:
-                    name_len_bytes = await reader.readexactly(4)
-                except asyncio.IncompleteReadError as e:
-                    if e.partial == b'':
-                        # 对端正常关闭连接
-                        break
-                    else:
-                        # 只收到部分数据，协议异常
-                        print(f"Protocol error reading name_len from {addr}: {e}")
-                        break
-                name_len = int.from_bytes(name_len_bytes, 'big')
-
-                # 2) 读名字
-                try:
-                    name_bytes = await reader.readexactly(name_len)
-                except asyncio.IncompleteReadError as e:
-                    print(f"Incomplete name from {addr}: {e}")
-                    break
-                name = name_bytes.decode()
-
-                # 3) 读 4 字节 body 长度
-                try:
-                    body_len_bytes = await reader.readexactly(4)
-                except asyncio.IncompleteReadError as e:
-                    print(f"Incomplete body_len from {addr}: {e}")
-                    break
-                body_len = int.from_bytes(body_len_bytes, 'big')
-
-                # 4) 读 body
-                try:
-                    body = await reader.readexactly(body_len)
-                except asyncio.IncompleteReadError as e:
-                    print(f"Incomplete body from {addr}: {e}")
-                    break
-
-                # ==== 至此消息已完整 ====
-                cls = self.message_types.get(name)
-                if cls is None:
-                    print(f"Unknown message: {name} from {addr}")
-                    continue
-                msg = cls()
-                try:
-                    msg.ParseFromString(body)
-                except Exception as e:
-                    print(f"Protobuf parse error from {addr}: {e}")
-                    continue
-
-                print(f"Received message type: {name} from {addr}")
-                context = {
-                    'writer': writer,
-                    'reader': reader,
-                    'address': addr,
-                    'server': self
-                }
-
-                # 触发处理器
-                if name in self.message_events:
-                    for handler in self.message_events[name].handlers:
-                        if asyncio.iscoroutinefunction(handler):
-                            await handler(msg, context)
+                    # 1) 读 4 字节名字长度
+                    try:
+                        name_len_bytes = await reader.readexactly(4)
+                    except asyncio.IncompleteReadError as e:
+                        if e.partial == b'':
+                            # 对端正常关闭连接
+                            break
                         else:
-                            handler(msg, context)
-                else:
-                    print(f"No handler registered for message type: {name}")
+                            # 只收到部分数据，协议异常
+                            print(f"Protocol error reading name_len from {addr}: {e}")
+                            break
+                    name_len = int.from_bytes(name_len_bytes, 'big')
 
-            # 捕获其他未预期的异常
-            except Exception as e:
-                print(f"Unexpected error handling connection from {addr}: {e}")
-                break
+                    # 2) 读名字
+                    try:
+                        name_bytes = await reader.readexactly(name_len)
+                    except asyncio.IncompleteReadError as e:
+                        print(f"Incomplete name from {addr}: {e}")
+                        break
+                    name = name_bytes.decode()
 
-        # 关闭连接
-        writer.close()
-        await writer.wait_closed()
-        print(f"Connection from {addr} closed.")
+                    # 3) 读 4 字节 body 长度
+                    try:
+                        body_len_bytes = await reader.readexactly(4)
+                    except asyncio.IncompleteReadError as e:
+                        print(f"Incomplete body_len from {addr}: {e}")
+                        break
+                    body_len = int.from_bytes(body_len_bytes, 'big')
 
-    def send_message(self, message: Message, context, flush=True):
-        """回包：4 字节大端长度 + Protobuf body"""
+                    # 4) 读 body
+                    try:
+                        body = await reader.readexactly(body_len)
+                    except asyncio.IncompleteReadError as e:
+                        print(f"Incomplete body from {addr}: {e}")
+                        break
+
+                    # ==== 至此消息已完整 ====
+                    cls = self.message_types.get(name)
+                    if cls is None:
+                        print(f"Unknown message: {name} from {addr}")
+                        continue
+                    msg = cls()
+                    try:
+                        msg.ParseFromString(body)
+                    except Exception as e:
+                        print(f"Protobuf parse error from {addr}: {e}")
+                        continue
+
+                    print(f"Received message type: {name} from {addr}")
+                    context = {
+                        'writer': writer,
+                        'reader': reader,
+                        'address': addr,
+                        'server': self
+                    }
+
+                    # 触发处理器
+                    if name in self.message_events:
+                        for handler in self.message_events[name].handlers:
+                            if asyncio.iscoroutinefunction(handler):
+                                await handler(msg, context)
+                            else:
+                                handler(msg, context)
+                    else:
+                        print(f"No handler registered for message type: {name}")
+
+                # 捕获其他未预期的异常
+                except Exception as e:
+                    print(f"Unexpected error handling connection from {addr}: {e}")
+                    break
+        finally:
+            writer.close()
+            await writer.wait_closed()
+            del self.clients[addr]  # 移除连接
+            print(f"Connection from {addr} closed.")
+
+    async def send_message(self, message: Message, context, *, flush: bool = True):
+        """
+        异步发送一条 Protobuf 消息。
+        如果 flush=True（默认），则在写完数据后立刻 await drain()。
+        """
+        message_type_name = message.DESCRIPTOR.name
+        name_bytes = message_type_name.encode('utf-8')
         body = message.SerializeToString()
-        header = len(body).to_bytes(4, byteorder='big')  # 大端 4 字节
+
+        name_len = len(name_bytes).to_bytes(4, byteorder='big')
+        body_len = len(body).to_bytes(4, byteorder='big')
         writer = context['writer']
-        writer.write(header + body)
-        if flush:
-            asyncio.create_task(writer.drain())
+
+        try:
+            # 1) 检查 socket 是否仍然有效
+            sock = writer.get_extra_info('socket')
+            if sock is None or sock.fileno() == -1:
+                print(f"Connection is closed for client: {context['address']}")
+                self._remove_client(context['address'])
+                return
+
+            # 2) 写数据
+            writer.write(name_len + name_bytes + body_len + body)
+            if flush:
+                await writer.drain()          # 关键：同步等待刷缓存
+        except (ConnectionResetError, BrokenPipeError, OSError) as e:
+            print(f"Failed to send message to {context['address']}: {e}")
+            self._remove_client(context['address'])
+
+    async def broadcast_message(self, message: Message):
+        """向所有连接的客户端广播消息"""
+        body = message.SerializeToString()
+        message_type_name = message.DESCRIPTOR.name
+        name_bytes = message_type_name.encode('utf-8')
+        
+        name_len = len(name_bytes).to_bytes(4, byteorder='big')
+        body_len = len(body).to_bytes(4, byteorder='big')
+        data = name_len + name_bytes + body_len + body
+        
+        # 复制当前客户端列表，避免在迭代过程中修改
+        clients_to_remove = []
+        tasks = []
+        
+        for addr, writer in self.clients.items():
+            try:
+                # 检查连接是否有效
+                if writer.get_extra_info('socket').fileno() == -1:
+                    clients_to_remove.append(addr)
+                    continue
+                    
+                # 发送消息
+                writer.write(data)
+                tasks.append(writer.drain())
+            except Exception as e:
+                print(f"Failed to send message to {addr}: {e}")
+                clients_to_remove.append(addr)
+        
+        # 移除无效连接
+        for addr in clients_to_remove:
+            del self.clients[addr]
+            print(f"Removed disconnected client: {addr}")
+        
+        # 等待所有有效的客户端的drain完成
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    async def send_to_all_except(self, message: Message, exclude_addr):
+        """向除指定客户端外的所有客户端发送消息"""
+        body = message.SerializeToString()
+        message_type_name = message.DESCRIPTOR.name
+        name_bytes = message_type_name.encode('utf-8')
+        
+        name_len = len(name_bytes).to_bytes(4, byteorder='big')
+        body_len = len(body).to_bytes(4, byteorder='big')
+        data = name_len + name_bytes + body_len + body
+        
+        tasks = []
+        for addr, writer in self.clients.items():
+            if addr != exclude_addr:
+                task = writer.write(data)
+                if writer.get_extra_info('socket').fileno() != -1:
+                    tasks.append(writer.drain())
+        
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     def _parse_message_body(self, body: bytes):
         """body 里只有 Protobuf 二进制，不包含长度头"""
@@ -190,49 +272,3 @@ class AgentServerProtobuff:
         """关闭服务器"""
         self.server_socket.close()
         print("Server shut down")
-
-# @singleton
-# class AgentServer:
-#     def __init__(self, port=0, port_config_file=None):
-#         # 默认端口配置文件
-#         if port_config_file is None:
-#             port_config_file = os.path.join(os.path.dirname(__file__), 'agent_server_port.txt')
-#         self.port_config_file = port_config_file
-
-#         # 创建 socket
-#         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#         self.server_socket.bind(('localhost', port))
-#         self.port = self.server_socket.getsockname()[1]
-#         with open(self.port_config_file, 'w') as f:
-#             f.write(str(self.port))
-#         print(f"Server bound to port {self.port}")
-
-#         self.loop = asyncio.get_event_loop()
-
-#     async def astart(self, listen_backlog=128):
-#         self.server_socket.listen(listen_backlog)
-#         print('Waiting for connection...')
-
-#         while True:
-#             # 异步等待client连接
-#             sock, addr = await asyncio.to_thread(self.server_socket.accept)
-#             print('接受一个新连接')
-#             self.loop.create_task(self.tcplink(sock, addr))
-            
-#     async def tcplink(self, sock: socket.socket, addr):
-#         """
-#         连接建立后，服务器执行以下操作：
-#         1）发一条欢迎消息；
-#         2）等待客户端数据，并加上Hello再发送给客户端；
-#         3）如果客户端发送了exit字符串，就直接关闭连接。
-#         """
-#         print('Accept new connection from %s:%s...' % addr)
-#         sock.send(f'Welcome!'.encode('utf-8'))
-#         while True:
-#             data = await self.loop.run_in_executor(None, sock.recv, 1024)
-#             if not data or data.decode('utf-8') == 'exit':
-#                 break
-#             await asyncio.sleep(1)
-#             sock.send(('Hello, %s!' % data.decode('utf-8')).encode('utf-8'))
-#         sock.close()
-#         print('Connection from %s:%s closed.' % addr)
