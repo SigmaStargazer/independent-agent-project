@@ -8,7 +8,7 @@ namespace CSharpClient
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main_2(string[] args)
         {
             int port;
             try

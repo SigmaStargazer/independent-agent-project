@@ -7,7 +7,7 @@ namespace CSharpClient
 {
     class ClientProgram
     {
-        static void Main_1(string[] args)
+        static void Main_0(string[] args)
         {
             int port;
             try

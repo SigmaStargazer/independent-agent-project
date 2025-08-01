@@ -70,7 +70,8 @@ class AgentServerProtobuff:
         server = await asyncio.start_server(
             self.handle_connection,
             'localhost',
-            self.port
+            self.port,
+            backlog=listen_backlog
         )
         self.port = server.sockets[0].getsockname()[1]  # 获取实际绑定的端口
         print(f"Server started on port {self.port}")
@@ -85,19 +86,58 @@ class AgentServerProtobuff:
     async def handle_connection(self, reader, writer):
         addr = writer.get_extra_info('peername')
         print(f"New connection from {addr}")
-        try:
-            while True:
-                data = await reader.read(4096)
-                if not data:
+
+        while True:
+            try:
+                # 1) 读 4 字节名字长度
+                try:
+                    name_len_bytes = await reader.readexactly(4)
+                except asyncio.IncompleteReadError as e:
+                    if e.partial == b'':
+                        # 对端正常关闭连接
+                        break
+                    else:
+                        # 只收到部分数据，协议异常
+                        print(f"Protocol error reading name_len from {addr}: {e}")
+                        break
+                name_len = int.from_bytes(name_len_bytes, 'big')
+
+                # 2) 读名字
+                try:
+                    name_bytes = await reader.readexactly(name_len)
+                except asyncio.IncompleteReadError as e:
+                    print(f"Incomplete name from {addr}: {e}")
+                    break
+                name = name_bytes.decode()
+
+                # 3) 读 4 字节 body 长度
+                try:
+                    body_len_bytes = await reader.readexactly(4)
+                except asyncio.IncompleteReadError as e:
+                    print(f"Incomplete body_len from {addr}: {e}")
+                    break
+                body_len = int.from_bytes(body_len_bytes, 'big')
+
+                # 4) 读 body
+                try:
+                    body = await reader.readexactly(body_len)
+                except asyncio.IncompleteReadError as e:
+                    print(f"Incomplete body from {addr}: {e}")
                     break
 
-                message = self._parse_message(data)
-                if message is None:
+                # ==== 至此消息已完整 ====
+                cls = self.message_types.get(name)
+                if cls is None:
+                    print(f"Unknown message: {name} from {addr}")
+                    continue
+                msg = cls()
+                try:
+                    msg.ParseFromString(body)
+                except Exception as e:
+                    print(f"Protobuf parse error from {addr}: {e}")
                     continue
 
-                message_type = type(message).__name__
-                print(f"Received message type: {message_type}")
-
+                print(f"Received message type: {name} from {addr}")
                 context = {
                     'writer': writer,
                     'reader': reader,
@@ -105,40 +145,45 @@ class AgentServerProtobuff:
                     'server': self
                 }
 
-                if message_type in self.message_events:
-                    for handler in self.message_events[message_type].handlers:
+                # 触发处理器
+                if name in self.message_events:
+                    for handler in self.message_events[name].handlers:
                         if asyncio.iscoroutinefunction(handler):
-                            await handler(message, context)
+                            await handler(msg, context)
                         else:
-                            handler(message, context)
+                            handler(msg, context)
                 else:
-                    print(f"No handler registered for message type: {message_type}")
-        except Exception as e:
-            print(f"Error handling connection: {e}")
-        finally:
-            writer.close()
-            await writer.wait_closed()
-            print(f"Connection from {addr} closed.")
+                    print(f"No handler registered for message type: {name}")
 
-    def send_message(self, message: Message, context):
-        """发送 protobuf 消息"""
-        try:
-            data = message.SerializeToString()
-            writer = context['writer']
-            writer.write(data)
-        except Exception as e:
-            print(f"Failed to send message: {e}")
+            # 捕获其他未预期的异常
+            except Exception as e:
+                print(f"Unexpected error handling connection from {addr}: {e}")
+                break
 
-    def _parse_message(self, data):
-        """尝试解析所有已知消息类型"""
+        # 关闭连接
+        writer.close()
+        await writer.wait_closed()
+        print(f"Connection from {addr} closed.")
+
+    def send_message(self, message: Message, context, flush=True):
+        """回包：4 字节大端长度 + Protobuf body"""
+        body = message.SerializeToString()
+        header = len(body).to_bytes(4, byteorder='big')  # 大端 4 字节
+        writer = context['writer']
+        writer.write(header + body)
+        if flush:
+            asyncio.create_task(writer.drain())
+
+    def _parse_message_body(self, body: bytes):
+        """body 里只有 Protobuf 二进制，不包含长度头"""
         for name, cls in self.message_types.items():
             try:
                 msg = cls()
-                msg.ParseFromString(data)
+                msg.ParseFromString(body)
                 return msg
             except Exception:
                 continue
-        print("Failed to parse message")
+        print("Failed to parse message body")
         return None
 
     def shutdown(self):
@@ -146,48 +191,48 @@ class AgentServerProtobuff:
         self.server_socket.close()
         print("Server shut down")
 
-@singleton
-class AgentServer:
-    def __init__(self, port=0, port_config_file=None):
-        # 默认端口配置文件
-        if port_config_file is None:
-            port_config_file = os.path.join(os.path.dirname(__file__), 'agent_server_port.txt')
-        self.port_config_file = port_config_file
+# @singleton
+# class AgentServer:
+#     def __init__(self, port=0, port_config_file=None):
+#         # 默认端口配置文件
+#         if port_config_file is None:
+#             port_config_file = os.path.join(os.path.dirname(__file__), 'agent_server_port.txt')
+#         self.port_config_file = port_config_file
 
-        # 创建 socket
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind(('localhost', port))
-        self.port = self.server_socket.getsockname()[1]
-        with open(self.port_config_file, 'w') as f:
-            f.write(str(self.port))
-        print(f"Server bound to port {self.port}")
+#         # 创建 socket
+#         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#         self.server_socket.bind(('localhost', port))
+#         self.port = self.server_socket.getsockname()[1]
+#         with open(self.port_config_file, 'w') as f:
+#             f.write(str(self.port))
+#         print(f"Server bound to port {self.port}")
 
-        self.loop = asyncio.get_event_loop()
+#         self.loop = asyncio.get_event_loop()
 
-    async def astart(self, listen_backlog=128):
-        self.server_socket.listen(listen_backlog)
-        print('Waiting for connection...')
+#     async def astart(self, listen_backlog=128):
+#         self.server_socket.listen(listen_backlog)
+#         print('Waiting for connection...')
 
-        while True:
-            # 异步等待client连接
-            sock, addr = await asyncio.to_thread(self.server_socket.accept)
-            print('接受一个新连接')
-            self.loop.create_task(self.tcplink(sock, addr))
+#         while True:
+#             # 异步等待client连接
+#             sock, addr = await asyncio.to_thread(self.server_socket.accept)
+#             print('接受一个新连接')
+#             self.loop.create_task(self.tcplink(sock, addr))
             
-    async def tcplink(self, sock: socket.socket, addr):
-        """
-        连接建立后，服务器执行以下操作：
-        1）发一条欢迎消息；
-        2）等待客户端数据，并加上Hello再发送给客户端；
-        3）如果客户端发送了exit字符串，就直接关闭连接。
-        """
-        print('Accept new connection from %s:%s...' % addr)
-        sock.send(f'Welcome!'.encode('utf-8'))
-        while True:
-            data = await self.loop.run_in_executor(None, sock.recv, 1024)
-            if not data or data.decode('utf-8') == 'exit':
-                break
-            await asyncio.sleep(1)
-            sock.send(('Hello, %s!' % data.decode('utf-8')).encode('utf-8'))
-        sock.close()
-        print('Connection from %s:%s closed.' % addr)
+#     async def tcplink(self, sock: socket.socket, addr):
+#         """
+#         连接建立后，服务器执行以下操作：
+#         1）发一条欢迎消息；
+#         2）等待客户端数据，并加上Hello再发送给客户端；
+#         3）如果客户端发送了exit字符串，就直接关闭连接。
+#         """
+#         print('Accept new connection from %s:%s...' % addr)
+#         sock.send(f'Welcome!'.encode('utf-8'))
+#         while True:
+#             data = await self.loop.run_in_executor(None, sock.recv, 1024)
+#             if not data or data.decode('utf-8') == 'exit':
+#                 break
+#             await asyncio.sleep(1)
+#             sock.send(('Hello, %s!' % data.decode('utf-8')).encode('utf-8'))
+#         sock.close()
+#         print('Connection from %s:%s closed.' % addr)

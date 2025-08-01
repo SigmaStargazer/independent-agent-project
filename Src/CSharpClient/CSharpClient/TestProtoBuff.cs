@@ -7,7 +7,7 @@ namespace CSharpClient
 {
     public class Client
     {
-        public static void Main_2()
+        public static void Main_1()
         {
             try
             {

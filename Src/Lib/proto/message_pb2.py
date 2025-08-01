@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmessage.proto\x12\x17IndependentAgentProject\"4\n\x06Person\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03\x61ge\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"B\n\rLoginResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\"+\n\x0b\x43hatMessage\x12\x0e\n\x06sender\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\tB&\x90\x01\x00\xaa\x02 IndependentAgentProject.Protobufb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmessage.proto\x12\x17IndependentAgentProject\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"#\n\x11StartSceneRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\">\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\"=\n\x18\x41gentSendMessageResponse\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t\"4\n\x06Person\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03\x61ge\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"B\n\rLoginResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\"+\n\x0b\x43hatMessage\x12\x0e\n\x06sender\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01\x42&\x90\x01\x00\xaa\x02 IndependentAgentProject.Protobufb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,12 +32,24 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'message_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\220\001\000\252\002 IndependentAgentProject.Protobuf'
-  _globals['_PERSON']._serialized_start=42
-  _globals['_PERSON']._serialized_end=94
-  _globals['_LOGINREQUEST']._serialized_start=96
-  _globals['_LOGINREQUEST']._serialized_end=146
-  _globals['_LOGINRESPONSE']._serialized_start=148
-  _globals['_LOGINRESPONSE']._serialized_end=214
-  _globals['_CHATMESSAGE']._serialized_start=216
-  _globals['_CHATMESSAGE']._serialized_end=259
+  _globals['_RESULT']._serialized_start=533
+  _globals['_RESULT']._serialized_end=566
+  _globals['_AGENTCREATEREQUEST']._serialized_start=42
+  _globals['_AGENTCREATEREQUEST']._serialized_end=90
+  _globals['_AGENTCREATERESPONSE']._serialized_start=92
+  _globals['_AGENTCREATERESPONSE']._serialized_end=148
+  _globals['_STARTSCENEREQUEST']._serialized_start=150
+  _globals['_STARTSCENEREQUEST']._serialized_end=185
+  _globals['_AGENTSENDMESSAGEREQUEST']._serialized_start=187
+  _globals['_AGENTSENDMESSAGEREQUEST']._serialized_end=249
+  _globals['_AGENTSENDMESSAGERESPONSE']._serialized_start=251
+  _globals['_AGENTSENDMESSAGERESPONSE']._serialized_end=312
+  _globals['_PERSON']._serialized_start=314
+  _globals['_PERSON']._serialized_end=366
+  _globals['_LOGINREQUEST']._serialized_start=368
+  _globals['_LOGINREQUEST']._serialized_end=418
+  _globals['_LOGINRESPONSE']._serialized_start=420
+  _globals['_LOGINRESPONSE']._serialized_end=486
+  _globals['_CHATMESSAGE']._serialized_start=488
+  _globals['_CHATMESSAGE']._serialized_end=531
 # @@protoc_insertion_point(module_scope)

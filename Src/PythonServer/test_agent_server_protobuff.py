@@ -3,6 +3,8 @@ import os
 import asyncio
 
 from network.servers import AgentServerProtobuff
+from agent_framwork.managers.agent_manager import AgentManager
+from agent_framwork.systems.time_system import TimeSystem
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -36,6 +38,44 @@ async def handle_chat_message(msg, context):
     reply.text = f"Echo: {msg.text}"
     await asyncio.sleep(1)  # 模拟异步操作
     context['server'].send_message(reply, context)
+
+@server.on_message("AgentCreateRequest")
+def handle_agent_create_request(msg, context):
+    name = msg.name
+    desc = msg.desc
+    print(f"创建Agent: {name}: {desc}")
+    try:
+        AgentManager().add_agent(name=name, description=desc)
+        response = context['server'].message_types['AgentCreateResponse']()
+        response.success = True
+        response.errormsg = ""
+        context['server'].send_message(response, context)
+    except Exception as e:
+        response = context['server'].message_types['AgentCreateResponse']()
+        response.success = False
+        response.errormsg = str(e)
+        print(f"创建Agent失败: {str(e)}")
+        context['server'].send_message(response, context)
+
+@server.on_message("StartSceneRequest")
+async def handle_start_scene_request(msg, context):
+    map_id = msg.map_id
+    print(f"启动场景: {map_id}")
+    try:
+        AgentManager().start()
+        await TimeSystem().aset_speed(1440)
+        await TimeSystem().astart_time(year=2016,month=1,day=1)
+    except Exception as e:
+        print(f"场景启动失败: {str(e)}")
+
+@server.on_message("AgentSendMessageRequest")
+async def handle_agent_send_msg_request(msg, context):
+    agent = msg.agent
+    user_message = msg.user_message
+    try:
+        await AgentManager().agents[agent].asend_message(user_message)
+    except Exception as e:
+        print(f"发送消息失败: {str(e)}")
 
 # ======================
 # 启动服务器

@@ -5,6 +5,48 @@ package IndependentAgentProject;
 option csharp_namespace = "IndependentAgentProject.Protobuf";
 option py_generic_services = false;
 
+////////////////////////////////////////////////////////////////
+//
+//  Basic Defines
+//
+////////////////////////////////////////////////////////////////
+
+enum RESULT
+{
+	SUCCESS = 0;
+	FAILED = 1;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  Messages
+//
+////////////////////////////////////////////////////////////////
+
+message AgentCreateRequest {
+	string name = 1;
+	string desc = 2;
+}
+
+message AgentCreateResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+message StartSceneRequest {
+	int32 map_id = 1;
+}
+
+message AgentSendMessageRequest {
+	string agent = 1;
+	string user_message = 2;
+}
+
+message AgentSendMessageResponse {
+	string agent = 1;
+	string ai_message = 2;
+}
+
 message Person {
   string name = 1;
   int32 age = 2;
@@ -26,3 +68,4 @@ message ChatMessage {
     string sender = 1;
     string text = 2;
 }
+
