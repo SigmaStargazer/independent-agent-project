@@ -94,12 +94,19 @@ namespace CSharpClient
         static async Task SendInitialMessages()
         {
             // 创建Agent
-            var agentCreateRequest = new AgentCreateRequest
+            var agentCreateRequest_1 = new AgentCreateRequest
             {
                 Name = "小明",
-                Desc = ""
+                Desc = "是一个帮助机器人"
             };
-            await SendAsync(agentCreateRequest, stream);
+            await SendAsync(agentCreateRequest_1, stream);
+
+            var agentCreateRequest_2 = new AgentCreateRequest
+            {
+                Name = "小红",
+                Desc = "是用户的秘书"
+            };
+            await SendAsync(agentCreateRequest_2, stream);
 
             // 开始场景
             var startSceneRequest = new StartSceneRequest
@@ -109,10 +116,10 @@ namespace CSharpClient
             await SendAsync(startSceneRequest, stream);
 
             // 发送聊天信息
-            var agentSendMessageRequest = new AgentSendMessageRequest
+            var agentSendMessageRequest = new UserSendMessageRequest
             {
                 Agent = "小明",
-                UserMessage = "闹个每天8点的起床铃，9点的上班铃声"
+                UserMessage = "和小红说，闹个每天8点的起床铃，9点的上班铃声，然后让她每天闹铃响时用通讯工具通知我"
             };
             await SendAsync(agentSendMessageRequest, stream);
         }
@@ -159,10 +166,19 @@ namespace CSharpClient
                         //    Console.WriteLine($"Received data update: {updateData.Data}");
                         //}
                         // 可以添加更多消息类型的处理...
-                        if (msg is AgentCreateResponse response)
+                        if (msg is AgentCreateResponse agentCreateResponse)
                         {
-                            Console.WriteLine($"Received AgentCreateResponse: {response}");
-                            // 在这里处理响应数据
+                            Console.WriteLine($"Received AgentCreateResponse: {agentCreateResponse}");
+                        }
+
+                        if (msg is StartSceneResponse startSceneResponse)
+                        {
+                            Console.WriteLine($"Received StartSceneResponse: {startSceneResponse}");
+                        }
+
+                        if (msg is AgentSendMessageRequest agentSendMessageRequest)
+                        {
+                            Console.WriteLine($"Received AgentSendMessageRequest: {agentSendMessageRequest}");
                         }
                     }
                     else

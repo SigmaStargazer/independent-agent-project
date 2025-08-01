@@ -23,6 +23,7 @@ enum RESULT
 //
 ////////////////////////////////////////////////////////////////
 
+// 创建Agent
 message AgentCreateRequest {
 	string name = 1;
 	string desc = 2;
@@ -33,19 +34,30 @@ message AgentCreateResponse {
 	string errormsg = 2;
 }
 
+// 开启场景
 message StartSceneRequest {
 	int32 map_id = 1;
 }
 
-message AgentSendMessageRequest {
+message StartSceneResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+// 用户向智能体发消息
+message UserSendMessageRequest {
 	string agent = 1;
 	string user_message = 2;
 }
 
-message AgentSendMessageResponse {
+// 智能体向用户发消息
+message AgentSendMessageRequest {
 	string agent = 1;
 	string ai_message = 2;
 }
+
+
+// 以下为测试用消息
 
 message Person {
   string name = 1;

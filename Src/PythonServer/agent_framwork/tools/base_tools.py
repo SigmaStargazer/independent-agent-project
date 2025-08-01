@@ -9,10 +9,11 @@ from agent_framwork.systems.time_system import TimeSystem
 # https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode.inject_tool_args
 
 @tool
-async def communication(agent: Annotated[str, InjectedState("name")],recipient: str, message: str) -> str:
-    """向目标发送一则消息
+async def communicate_to_agent(agent: Annotated[str, InjectedState("name")],recipient: str, message: str) -> str:
+    """向目标agent发送一则消息
     Args:
         recipient(str): 信息接收人名字
+        message(str): 你想要发送的消息
     """
     from agent_framwork.managers.agent_manager import AgentManager
     if recipient in AgentManager().agents:
@@ -20,6 +21,24 @@ async def communication(agent: Annotated[str, InjectedState("name")],recipient: 
         return f"[{agent}]向[{recipient}]发送了一则消息: {message}"
     else:
         return f"收信人[{recipient}]不存在！"
+    
+@tool
+async def communicate_to_user(agent: Annotated[str, InjectedState("name")], message: str) -> str:
+    """向用户发送一则消息
+    Args:
+        message(str): 你想要发送的消息
+    """
+    from network.servers import AgentServerProtobuff
+    try:
+        request = AgentServerProtobuff().message_types['AgentSendMessageRequest']()
+        request.agent = agent
+        request.ai_message = message
+        await AgentServerProtobuff().broadcast_message(request)
+        print(f"[{agent}]向用户发送消息成功: {message}")
+        return f"向用户发送了一则消息: {message}"
+    except Exception as e:
+        print(f"[{agent}]向用户发送消息失败: {message}, {e}")
+        return f"向用户发送消息失败: {e}"
 
 @tool
 async def get_agent_list() -> list:

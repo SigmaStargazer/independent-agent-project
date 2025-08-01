@@ -28,24 +28,26 @@ namespace IndependentAgentProject.Protobuf {
             "Z2VudENyZWF0ZVJlcXVlc3QSDAoEbmFtZRgBIAEoCRIMCgRkZXNjGAIgASgJ",
             "IjgKE0FnZW50Q3JlYXRlUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBIQCghl",
             "cnJvcm1zZxgCIAEoCSIjChFTdGFydFNjZW5lUmVxdWVzdBIOCgZtYXBfaWQY",
-            "ASABKAUiPgoXQWdlbnRTZW5kTWVzc2FnZVJlcXVlc3QSDQoFYWdlbnQYASAB",
-            "KAkSFAoMdXNlcl9tZXNzYWdlGAIgASgJIj0KGEFnZW50U2VuZE1lc3NhZ2VS",
-            "ZXNwb25zZRINCgVhZ2VudBgBIAEoCRISCgphaV9tZXNzYWdlGAIgASgJIjQK",
-            "BlBlcnNvbhIMCgRuYW1lGAEgASgJEgsKA2FnZRgCIAEoBRIPCgdtZXNzYWdl",
-            "GAMgASgJIjIKDExvZ2luUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCRIQCghw",
-            "YXNzd29yZBgCIAEoCSJCCg1Mb2dpblJlc3BvbnNlEg8KB3N1Y2Nlc3MYASAB",
-            "KAgSDwoHbWVzc2FnZRgCIAEoCRIPCgd1c2VyX2lkGAMgASgFIisKC0NoYXRN",
-            "ZXNzYWdlEg4KBnNlbmRlchgBIAEoCRIMCgR0ZXh0GAIgASgJKiEKBlJFU1VM",
-            "VBILCgdTVUNDRVNTEAASCgoGRkFJTEVEEAFCJpABAKoCIEluZGVwZW5kZW50",
-            "QWdlbnRQcm9qZWN0LlByb3RvYnVmYgZwcm90bzM="));
+            "ASABKAUiNwoSU3RhcnRTY2VuZVJlc3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgS",
+            "EAoIZXJyb3Jtc2cYAiABKAkiPQoWVXNlclNlbmRNZXNzYWdlUmVxdWVzdBIN",
+            "CgVhZ2VudBgBIAEoCRIUCgx1c2VyX21lc3NhZ2UYAiABKAkiPAoXQWdlbnRT",
+            "ZW5kTWVzc2FnZVJlcXVlc3QSDQoFYWdlbnQYASABKAkSEgoKYWlfbWVzc2Fn",
+            "ZRgCIAEoCSI0CgZQZXJzb24SDAoEbmFtZRgBIAEoCRILCgNhZ2UYAiABKAUS",
+            "DwoHbWVzc2FnZRgDIAEoCSIyCgxMb2dpblJlcXVlc3QSEAoIdXNlcm5hbWUY",
+            "ASABKAkSEAoIcGFzc3dvcmQYAiABKAkiQgoNTG9naW5SZXNwb25zZRIPCgdz",
+            "dWNjZXNzGAEgASgIEg8KB21lc3NhZ2UYAiABKAkSDwoHdXNlcl9pZBgDIAEo",
+            "BSIrCgtDaGF0TWVzc2FnZRIOCgZzZW5kZXIYASABKAkSDAoEdGV4dBgCIAEo",
+            "CSohCgZSRVNVTFQSCwoHU1VDQ0VTUxAAEgoKBkZBSUxFRBABQiaQAQCqAiBJ",
+            "bmRlcGVuZGVudEFnZW50UHJvamVjdC5Qcm90b2J1ZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::IndependentAgentProject.Protobuf.RESULT), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.AgentCreateRequest), global::IndependentAgentProject.Protobuf.AgentCreateRequest.Parser, new[]{ "Name", "Desc" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.AgentCreateResponse), global::IndependentAgentProject.Protobuf.AgentCreateResponse.Parser, new[]{ "Success", "Errormsg" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.StartSceneRequest), global::IndependentAgentProject.Protobuf.StartSceneRequest.Parser, new[]{ "MapId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.AgentSendMessageRequest), global::IndependentAgentProject.Protobuf.AgentSendMessageRequest.Parser, new[]{ "Agent", "UserMessage" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.AgentSendMessageResponse), global::IndependentAgentProject.Protobuf.AgentSendMessageResponse.Parser, new[]{ "Agent", "AiMessage" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.StartSceneResponse), global::IndependentAgentProject.Protobuf.StartSceneResponse.Parser, new[]{ "Success", "Errormsg" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.UserSendMessageRequest), global::IndependentAgentProject.Protobuf.UserSendMessageRequest.Parser, new[]{ "Agent", "UserMessage" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.AgentSendMessageRequest), global::IndependentAgentProject.Protobuf.AgentSendMessageRequest.Parser, new[]{ "Agent", "AiMessage" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.Person), global::IndependentAgentProject.Protobuf.Person.Parser, new[]{ "Name", "Age", "Message" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.LoginRequest), global::IndependentAgentProject.Protobuf.LoginRequest.Parser, new[]{ "Username", "Password" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::IndependentAgentProject.Protobuf.LoginResponse), global::IndependentAgentProject.Protobuf.LoginResponse.Parser, new[]{ "Success", "Message", "UserId" }, null, null, null, null),
@@ -64,6 +66,9 @@ namespace IndependentAgentProject.Protobuf {
   #endregion
 
   #region Messages
+  /// <summary>
+  /// 创建Agent
+  /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class AgentCreateRequest : pb::IMessage<AgentCreateRequest>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -534,6 +539,9 @@ namespace IndependentAgentProject.Protobuf {
 
   }
 
+  /// <summary>
+  /// 开启场景
+  /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class StartSceneRequest : pb::IMessage<StartSceneRequest>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -733,16 +741,16 @@ namespace IndependentAgentProject.Protobuf {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class AgentSendMessageRequest : pb::IMessage<AgentSendMessageRequest>
+  public sealed partial class StartSceneResponse : pb::IMessage<StartSceneResponse>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<AgentSendMessageRequest> _parser = new pb::MessageParser<AgentSendMessageRequest>(() => new AgentSendMessageRequest());
+    private static readonly pb::MessageParser<StartSceneResponse> _parser = new pb::MessageParser<StartSceneResponse>(() => new StartSceneResponse());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<AgentSendMessageRequest> Parser { get { return _parser; } }
+    public static pb::MessageParser<StartSceneResponse> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -758,7 +766,7 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public AgentSendMessageRequest() {
+    public StartSceneResponse() {
       OnConstruction();
     }
 
@@ -766,7 +774,245 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public AgentSendMessageRequest(AgentSendMessageRequest other) : this() {
+    public StartSceneResponse(StartSceneResponse other) : this() {
+      success_ = other.success_;
+      errormsg_ = other.errormsg_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public StartSceneResponse Clone() {
+      return new StartSceneResponse(this);
+    }
+
+    /// <summary>Field number for the "success" field.</summary>
+    public const int SuccessFieldNumber = 1;
+    private bool success_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Success {
+      get { return success_; }
+      set {
+        success_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "errormsg" field.</summary>
+    public const int ErrormsgFieldNumber = 2;
+    private string errormsg_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Errormsg {
+      get { return errormsg_; }
+      set {
+        errormsg_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as StartSceneResponse);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(StartSceneResponse other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Success != other.Success) return false;
+      if (Errormsg != other.Errormsg) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Success != false) hash ^= Success.GetHashCode();
+      if (Errormsg.Length != 0) hash ^= Errormsg.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Success != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Success);
+      }
+      if (Errormsg.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Errormsg);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Success != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Success);
+      }
+      if (Errormsg.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Errormsg);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Success != false) {
+        size += 1 + 1;
+      }
+      if (Errormsg.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Errormsg);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(StartSceneResponse other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Success != false) {
+        Success = other.Success;
+      }
+      if (other.Errormsg.Length != 0) {
+        Errormsg = other.Errormsg;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Success = input.ReadBool();
+            break;
+          }
+          case 18: {
+            Errormsg = input.ReadString();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Success = input.ReadBool();
+            break;
+          }
+          case 18: {
+            Errormsg = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  /// <summary>
+  /// 用户向智能体发消息
+  /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class UserSendMessageRequest : pb::IMessage<UserSendMessageRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<UserSendMessageRequest> _parser = new pb::MessageParser<UserSendMessageRequest>(() => new UserSendMessageRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<UserSendMessageRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UserSendMessageRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public UserSendMessageRequest(UserSendMessageRequest other) : this() {
       agent_ = other.agent_;
       userMessage_ = other.userMessage_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -774,8 +1020,8 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public AgentSendMessageRequest Clone() {
-      return new AgentSendMessageRequest(this);
+    public UserSendMessageRequest Clone() {
+      return new UserSendMessageRequest(this);
     }
 
     /// <summary>Field number for the "agent" field.</summary>
@@ -805,12 +1051,12 @@ namespace IndependentAgentProject.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as AgentSendMessageRequest);
+      return Equals(other as UserSendMessageRequest);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(AgentSendMessageRequest other) {
+    public bool Equals(UserSendMessageRequest other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -896,7 +1142,7 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(AgentSendMessageRequest other) {
+    public void MergeFrom(UserSendMessageRequest other) {
       if (other == null) {
         return;
       }
@@ -967,22 +1213,25 @@ namespace IndependentAgentProject.Protobuf {
 
   }
 
+  /// <summary>
+  /// 智能体向用户发消息
+  /// </summary>
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class AgentSendMessageResponse : pb::IMessage<AgentSendMessageResponse>
+  public sealed partial class AgentSendMessageRequest : pb::IMessage<AgentSendMessageRequest>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<AgentSendMessageResponse> _parser = new pb::MessageParser<AgentSendMessageResponse>(() => new AgentSendMessageResponse());
+    private static readonly pb::MessageParser<AgentSendMessageRequest> _parser = new pb::MessageParser<AgentSendMessageRequest>(() => new AgentSendMessageRequest());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<AgentSendMessageResponse> Parser { get { return _parser; } }
+    public static pb::MessageParser<AgentSendMessageRequest> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[4]; }
+      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -993,7 +1242,7 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public AgentSendMessageResponse() {
+    public AgentSendMessageRequest() {
       OnConstruction();
     }
 
@@ -1001,7 +1250,7 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public AgentSendMessageResponse(AgentSendMessageResponse other) : this() {
+    public AgentSendMessageRequest(AgentSendMessageRequest other) : this() {
       agent_ = other.agent_;
       aiMessage_ = other.aiMessage_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -1009,8 +1258,8 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public AgentSendMessageResponse Clone() {
-      return new AgentSendMessageResponse(this);
+    public AgentSendMessageRequest Clone() {
+      return new AgentSendMessageRequest(this);
     }
 
     /// <summary>Field number for the "agent" field.</summary>
@@ -1040,12 +1289,12 @@ namespace IndependentAgentProject.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as AgentSendMessageResponse);
+      return Equals(other as AgentSendMessageRequest);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(AgentSendMessageResponse other) {
+    public bool Equals(AgentSendMessageRequest other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -1131,7 +1380,7 @@ namespace IndependentAgentProject.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(AgentSendMessageResponse other) {
+    public void MergeFrom(AgentSendMessageRequest other) {
       if (other == null) {
         return;
       }
@@ -1217,7 +1466,7 @@ namespace IndependentAgentProject.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[5]; }
+      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1489,7 +1738,7 @@ namespace IndependentAgentProject.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[6]; }
+      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1724,7 +1973,7 @@ namespace IndependentAgentProject.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[7]; }
+      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1996,7 +2245,7 @@ namespace IndependentAgentProject.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[8]; }
+      get { return global::IndependentAgentProject.Protobuf.MessageReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

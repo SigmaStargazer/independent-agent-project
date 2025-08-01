@@ -44,14 +44,13 @@ async def handle_agent_create_request(msg, context):
     name = msg.name
     desc = msg.desc
     print(f"创建Agent: {name}: {desc}")
+    response = context['server'].message_types['AgentCreateResponse']()
     try:
         AgentManager().add_agent(name=name, description=desc)
-        response = context['server'].message_types['AgentCreateResponse']()
         response.success = True
         response.errormsg = ""
         await context['server'].send_message(response, context)
     except Exception as e:
-        response = context['server'].message_types['AgentCreateResponse']()
         response.success = False
         response.errormsg = str(e)
         print(f"创建Agent失败: {str(e)}")
@@ -61,19 +60,30 @@ async def handle_agent_create_request(msg, context):
 async def handle_start_scene_request(msg, context):
     map_id = msg.map_id
     print(f"启动场景: {map_id}")
+    response = context['server'].message_types['StartSceneResponse']()
     try:
         AgentManager().start()
         await TimeSystem().aset_speed(1440)
         await TimeSystem().astart_time(year=2016,month=1,day=1)
+        response.success = True
+        response.errormsg = ""
+        await context['server'].send_message(response, context)
     except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
         print(f"场景启动失败: {str(e)}")
+        await context['server'].send_message(response, context)
 
-@server.on_message("AgentSendMessageRequest")
-async def handle_agent_send_msg_request(msg, context):
+@server.on_message("UserSendMessageRequest")
+async def handle_user_send_msg_request(msg, context):
     agent = msg.agent
     user_message = msg.user_message
     try:
-        await AgentManager().agents.get(agent).asend_message(user_message)
+        to_agent_message = f"""用户向你发送了一则消息: {user_message}
+注意:
+请使用相应工具回复用户。
+"""
+        await AgentManager().agents.get(agent).asend_message(to_agent_message)
     except Exception as e:
         print(f"发送消息失败: {str(e)}")
 

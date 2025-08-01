@@ -39,7 +39,8 @@ model = ChatOpenAI(
     )
 output_parser = StrOutputParser()
 
-tools = [base_tools.communication, 
+tools = [base_tools.communicate_to_agent, 
+         base_tools.communicate_to_user,
          base_tools.get_agent_list, 
          base_tools.get_cur_time,
          base_tools.add_alarm,
@@ -58,7 +59,10 @@ def _filter_messages(messages, k=20):
 
 # 提示词模板
 system_template = """你的名字是{name}，{description}。
-向你发送信息的是系统管理员，它会不断告诉你关于周遭的情况。你需要根据情况做出相应的反应"""
+向你发送信息的是系统管理员，它会不断告诉你关于周遭的情况。你需要根据情况做出相应的反应
+注意：
+你的直接回复只会被当作你的心理活动，不会被任何人看到。
+如果需要与用户、agent等具体某一对象进行交流，请使用相应的工具。"""
 prompt_template = ChatPromptTemplate.from_messages(
     [
         ("system", system_template),
