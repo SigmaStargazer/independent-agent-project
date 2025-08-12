@@ -4,6 +4,7 @@ package IndependentAgentProject;
 
 option csharp_namespace = "IndependentAgentProject.Protobuf";
 option py_generic_services = false;
+option cc_enable_arenas = true;
 
 ////////////////////////////////////////////////////////////////
 //
@@ -22,6 +23,23 @@ enum RESULT
 //  Messages
 //
 ////////////////////////////////////////////////////////////////
+
+message NetMessage{
+	NetMessageRequest Request = 1;
+	NetMessageResponse Response = 2;
+}
+
+message NetMessageRequest{
+	AgentCreateRequest agentCreateRequest = 1;
+	StartSceneRequest startSceneRequest = 2;
+	UserSendMessageRequest userSendMessageRequest = 3;
+	AgentSendMessageRequest agentSendMessageRequest = 4;
+}
+
+message NetMessageResponse{
+	AgentCreateResponse agentCreateResponse = 1;
+	StartSceneResponse startSceneResponse = 2;
+}
 
 // 创建Agent
 message AgentCreateRequest {
@@ -58,6 +76,12 @@ message AgentSendMessageRequest {
 
 
 // 以下为测试用消息
+
+message TestMessage {
+  string name = 1;
+  int32 age = 2;
+  string message = 3;
+}
 
 message Person {
   string name = 1;

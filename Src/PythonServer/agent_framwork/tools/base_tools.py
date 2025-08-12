@@ -17,28 +17,46 @@ async def communicate_to_agent(agent: Annotated[str, InjectedState("name")],reci
     """
     from agent_framwork.managers.agent_manager import AgentManager
     if recipient in AgentManager().agents:
-        await AgentManager().agents[recipient].asend_message(f"[{agent}]向你发送了一则消息: {message}")
-        return f"[{agent}]向[{recipient}]发送了一则消息: {message}"
+        await AgentManager().agents[recipient].asend_message(f"Agent[{agent}]向你发送了一则消息: {message}")
+        return f"[{agent}]向Agent[{recipient}]发送了一则消息: {message}"
     else:
         return f"收信人[{recipient}]不存在！"
     
-@tool
+# @tool
+# async def communicate_to_user(agent: Annotated[str, InjectedState("name")], message: str) -> str:
+#     """向用户发送一则消息
+#     Args:
+#         message(str): 你想要发送的消息
+#     """
+#     # from network.servers import AgentServerProtobuff
+#     from network.servers import AgentServerNetMessage
+#     try:
+#         request = AgentServerNetMessage().message_types['AgentSendMessageRequest']()
+#         request.agent = agent
+#         request.ai_message = message
+#         await AgentServerNetMessage().broadcast_message(request)
+#         print(f"[{agent}]向用户发送消息成功: {message}")
+#         return f"你向用户发送了一则消息: {message}"
+#     except Exception as e:
+#         print(f"[{agent}]向用户发送消息失败: {message}, {e}")
+#         return f"你向用户发送消息失败: {e}"
+
 async def communicate_to_user(agent: Annotated[str, InjectedState("name")], message: str) -> str:
     """向用户发送一则消息
     Args:
         message(str): 你想要发送的消息
     """
-    from network.servers import AgentServerProtobuff
+    from network.servers import AgentServerNetMessage
     try:
-        request = AgentServerProtobuff().message_types['AgentSendMessageRequest']()
+        request = AgentServerNetMessage().message_types['AgentSendMessageRequest']()
         request.agent = agent
         request.ai_message = message
-        await AgentServerProtobuff().broadcast_message(request)
+        await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}]向用户发送消息成功: {message}")
-        return f"向用户发送了一则消息: {message}"
+        return f"你向用户发送了一则消息: {message}"
     except Exception as e:
         print(f"[{agent}]向用户发送消息失败: {message}, {e}")
-        return f"向用户发送消息失败: {e}"
+        return f"你向用户发送消息失败: {e}"
 
 @tool
 async def get_agent_list() -> list:

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package IndependentAgentProject;
+
+option csharp_namespace = "IndependentAgentProject.Protobuf";
+option py_generic_services = false;
+option cc_enable_arenas = true;
+
+////////////////////////////////////////////////////////////////
+//
+//  Basic Defines
+//
+////////////////////////////////////////////////////////////////
+
+enum RESULT
+{
+	SUCCESS = 0;
+	FAILED = 1;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  Messages
+//
+////////////////////////////////////////////////////////////////
+
+message NetMessage{
+	NetMessageRequest Request = 1;
+	NetMessageResponse Response = 2;
+}
+
+message NetMessageRequest{
+	AgentCreateRequest agentCreateRequest = 1;
+	StartSceneRequest startSceneRequest = 2;
+	UserSendMessageRequest userSendMessageRequest = 3;
+	AgentSendMessageRequest agentSendMessageRequest = 4;
+}
+
+message NetMessageResponse{
+	AgentCreateResponse agentCreateResponse = 1;
+	StartSceneResponse startSceneResponse = 2;
+}
+
+// 创建Agent
+message AgentCreateRequest {
+	string name = 1;
+	string desc = 2;
+}
+
+message AgentCreateResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+// 开启场景
+message StartSceneRequest {
+	int32 map_id = 1;
+}
+
+message StartSceneResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+// 用户向智能体发消息
+message UserSendMessageRequest {
+	string agent = 1;
+	string user_message = 2;
+}
+
+// 智能体向用户发消息
+message AgentSendMessageRequest {
+	string agent = 1;
+	string ai_message = 2;
+}
+
+
+// 以下为测试用消息
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+  string message = 3;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    bool success = 1;
+    string message = 2;
+    int32 user_id = 3;
+}
+
+message ChatMessage {
+    string sender = 1;
+    string text = 2;
+}
+

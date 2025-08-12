@@ -1,0 +1,14 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Pp]ackage[Cc]ache/
+/[Uu]ser[Ss]ettings/
+/[Pp]roject[Ss]ettings/*.asset
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

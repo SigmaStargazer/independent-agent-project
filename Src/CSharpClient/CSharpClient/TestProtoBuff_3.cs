@@ -1,5 +1,5 @@
-﻿using Google.Protobuf;
-using IndependentAgentProject.Protobuf;
+﻿using IndependentAgentProject.Protobuf;
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,12 +17,11 @@ namespace CSharpClient
         static bool isConnected = true;
         static TcpClient currentClient;
 
-        // 修改1: 正确获取所有消息类型
         static readonly Dictionary<string, Type> MessageTypes =
             typeof(IndependentAgentProject.Protobuf.AgentCreateRequest).Assembly
                 .GetTypes()
                 .Where(t => t.Namespace == "IndependentAgentProject.Protobuf" &&
-                           typeof(IMessage).IsAssignableFrom(t) &&
+                           typeof(IExtensible).IsAssignableFrom(t) &&
                            !t.IsAbstract)
                 .ToDictionary(t => t.Name);
 
@@ -86,7 +85,7 @@ namespace CSharpClient
             await receiveTask;
         }
 
-        static async Task Main(string[] args)
+        static async Task Main_2(string[] args)
         {
             await ConnectAndRun();
         }
@@ -119,9 +118,16 @@ namespace CSharpClient
             var agentSendMessageRequest = new UserSendMessageRequest
             {
                 Agent = "小明",
-                UserMessage = "和小红说，闹个每天8点的起床铃，9点的上班铃声，然后让她每天闹铃响时用通讯工具通知我"
+                UserMessage = "和小红说，让她闹个每天8点的起床铃，9点的上班铃声，然后每天闹铃响时让她直接通知我。"
             };
             await SendAsync(agentSendMessageRequest, stream);
+
+            //var agentSendMessageRequest = new UserSendMessageRequest
+            //{
+            //    Agent = "小明",
+            //    UserMessage = "你是谁？"
+            //};
+            //await SendAsync(agentSendMessageRequest, stream);
         }
 
         static async Task ReceiveMessages()
@@ -156,8 +162,8 @@ namespace CSharpClient
                     // 使用预加载的消息类型字典
                     if (MessageTypes.TryGetValue(name, out Type messageType))
                     {
-                        var msg = (IMessage)Activator.CreateInstance(messageType);
-                        msg.MergeFrom(body);
+                        // 修改2: 使用正确的 protobuf-net 反序列化方式
+                        var msg = Serializer.NonGeneric.Deserialize(messageType, new MemoryStream(body));
                         Console.WriteLine($"Received message: {name}");
 
                         // 处理特定类型的消息
@@ -168,17 +174,17 @@ namespace CSharpClient
                         // 可以添加更多消息类型的处理...
                         if (msg is AgentCreateResponse agentCreateResponse)
                         {
-                            Console.WriteLine($"Received AgentCreateResponse: {agentCreateResponse}");
+                            Console.WriteLine($"Received AgentCreateResponse: Success={agentCreateResponse.Success}, Errormsg={agentCreateResponse.Errormsg}");
                         }
 
                         if (msg is StartSceneResponse startSceneResponse)
                         {
-                            Console.WriteLine($"Received StartSceneResponse: {startSceneResponse}");
+                            Console.WriteLine($"Received StartSceneResponse: Success={startSceneResponse.Success}, Errormsg={startSceneResponse.Errormsg}");
                         }
 
                         if (msg is AgentSendMessageRequest agentSendMessageRequest)
                         {
-                            Console.WriteLine($"Received AgentSendMessageRequest: {agentSendMessageRequest}");
+                            Console.WriteLine($"Received AgentSendMessageRequest: Agent={agentSendMessageRequest.Agent}, AiMessage={agentSendMessageRequest.AiMessage}");
                         }
                     }
                     else
@@ -205,11 +211,17 @@ namespace CSharpClient
 
         private static string GetMessageName<T>() => typeof(T).Name;
 
-        private static async Task SendAsync<T>(T message, NetworkStream stream) where T : IMessage
+        private static async Task SendAsync<T>(T message, NetworkStream stream) where T : IExtensible
         {
             string name = GetMessageName<T>();
             byte[] nameBytes = Encoding.UTF8.GetBytes(name);
-            byte[] body = message.ToByteArray();
+            // 使用 protobuf-net 的序列化方法
+            byte[] body;
+            using (var ms = new MemoryStream())
+            {
+                Serializer.Serialize(ms, message);
+                body = ms.ToArray();
+            }
 
             // 结构：4字节名字长度 + 名字 + 4字节body长度 + body
             byte[] nameLen = BitConverter.GetBytes(nameBytes.Length);

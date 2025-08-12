@@ -1,0 +1,1 @@
+xcopy /E /I /Y "..\Src\Lib\AgentProtocol\bin\Debug\*" "..\Src\ShootingEditor2D\Assets\References\"

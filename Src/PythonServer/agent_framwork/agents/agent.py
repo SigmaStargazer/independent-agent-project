@@ -30,6 +30,11 @@ model_api_base = "https://api.moonshot.cn/v1"
 model_api_key = "sk-0cYUM2FsdWqmyJeth1He0FXlCVlcxScjNb3YPYHjl78vyEgY"
 model_name = "kimi-k2-0711-preview"
 
+# # 智谱
+# model_api_base = "https://open.bigmodel.cn/api/paas/v4"
+# model_api_key = "61383e606d871c028870a8f251a77f08.JH0An7yUOzhd8cIi"
+# model_name = "glm-4.5"
+
 model = ChatOpenAI(
         model_name = model_name,
         openai_api_base = model_api_base,
@@ -58,11 +63,12 @@ def _filter_messages(messages, k=20):
         return messages[-k:]
 
 # 提示词模板
-system_template = """你的名字是{name}，{description}。
+system_template = """你扮演的角色名叫{name}，{description}。
 向你发送信息的是系统管理员，它会不断告诉你关于周遭的情况。你需要根据情况做出相应的反应
-注意：
-你的直接回复只会被当作你的心理活动，不会被任何人看到。
-如果需要与用户、agent等具体某一对象进行交流，请使用相应的工具。"""
+规则：
+1）仅当你使用了工具时，才会对外界产生实际影响。
+2）你的直接回复只作为你的心理活动，不会被任何人看到。
+因此如果你需要与用户、agent等具体某一对象进行交流，也请使用相应的工具，避免你想要传递的信息无法传达给对方。"""
 prompt_template = ChatPromptTemplate.from_messages(
     [
         ("system", system_template),

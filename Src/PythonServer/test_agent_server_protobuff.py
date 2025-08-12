@@ -79,10 +79,7 @@ async def handle_user_send_msg_request(msg, context):
     agent = msg.agent
     user_message = msg.user_message
     try:
-        to_agent_message = f"""用户向你发送了一则消息: {user_message}
-注意:
-请使用相应工具回复用户。
-"""
+        to_agent_message = f"""用户向你发送了一则消息: {user_message}"""
         await AgentManager().agents.get(agent).asend_message(to_agent_message)
     except Exception as e:
         print(f"发送消息失败: {str(e)}")

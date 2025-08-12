@@ -1,0 +1,8 @@
+protocol添加到当前解决方案下：
+1、在解决方案资源管理器中，右键点击解决方案
+选择"添加" → "现有项目"
+浏览并选择 Protocol.csproj 文件
+2、右键点击主项目 → "添加" → "项目引用" → 勾选Protocol项目
+3、报错找不到Protobuf：工具→管理nuget包→安装protobuf-net
+
+https://zhuanlan.zhihu.com/p/573019243
