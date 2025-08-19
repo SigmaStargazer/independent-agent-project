@@ -18,15 +18,15 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
-  package='IndependentAgentProject',
+  package='SkillBridge.Message',
   syntax='proto3',
-  serialized_pb=_b('\n\rmessage.proto\x12\x17IndependentAgentProject\"\x88\x01\n\nNetMessage\x12;\n\x07Request\x18\x01 \x01(\x0b\x32*.IndependentAgentProject.NetMessageRequest\x12=\n\x08Response\x18\x02 \x01(\x0b\x32+.IndependentAgentProject.NetMessageResponse\"\xc7\x02\n\x11NetMessageRequest\x12G\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32+.IndependentAgentProject.AgentCreateRequest\x12\x45\n\x11startSceneRequest\x18\x02 \x01(\x0b\x32*.IndependentAgentProject.StartSceneRequest\x12O\n\x16userSendMessageRequest\x18\x03 \x01(\x0b\x32/.IndependentAgentProject.UserSendMessageRequest\x12Q\n\x17\x61gentSendMessageRequest\x18\x04 \x01(\x0b\x32\x30.IndependentAgentProject.AgentSendMessageRequest\"\xa8\x01\n\x12NetMessageResponse\x12I\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32,.IndependentAgentProject.AgentCreateResponse\x12G\n\x12startSceneResponse\x18\x02 \x01(\x0b\x32+.IndependentAgentProject.StartSceneResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"#\n\x11StartSceneRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12StartSceneResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"=\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\"<\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t\"4\n\x06Person\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03\x61ge\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"B\n\rLoginResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\"+\n\x0b\x43hatMessage\x12\x0e\n\x06sender\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01\x42)\x90\x01\x00\xf8\x01\x01\xaa\x02 IndependentAgentProject.Protobufb\x06proto3')
+  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\xb7\x02\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12\x41\n\x11sceneStartRequest\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12K\n\x16userSendMessageRequest\x18\x03 \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\x04 \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\"\xa0\x01\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x43\n\x12sceneStartResponse\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"=\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\"<\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 _RESULT = _descriptor.EnumDescriptor(
   name='RESULT',
-  full_name='IndependentAgentProject.RESULT',
+  full_name='SkillBridge.Message.RESULT',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -41,8 +41,8 @@ _RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1228,
-  serialized_end=1261,
+  serialized_start=973,
+  serialized_end=1006,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT)
 
@@ -54,20 +54,20 @@ FAILED = 1
 
 _NETMESSAGE = _descriptor.Descriptor(
   name='NetMessage',
-  full_name='IndependentAgentProject.NetMessage',
+  full_name='SkillBridge.Message.NetMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='Request', full_name='IndependentAgentProject.NetMessage.Request', index=0,
+      name='Request', full_name='SkillBridge.Message.NetMessage.Request', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='Response', full_name='IndependentAgentProject.NetMessage.Response', index=1,
+      name='Response', full_name='SkillBridge.Message.NetMessage.Response', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -85,41 +85,41 @@ _NETMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=43,
-  serialized_end=179,
+  serialized_start=39,
+  serialized_end=167,
 )
 
 
 _NETMESSAGEREQUEST = _descriptor.Descriptor(
   name='NetMessageRequest',
-  full_name='IndependentAgentProject.NetMessageRequest',
+  full_name='SkillBridge.Message.NetMessageRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='agentCreateRequest', full_name='IndependentAgentProject.NetMessageRequest.agentCreateRequest', index=0,
+      name='agentCreateRequest', full_name='SkillBridge.Message.NetMessageRequest.agentCreateRequest', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='startSceneRequest', full_name='IndependentAgentProject.NetMessageRequest.startSceneRequest', index=1,
+      name='sceneStartRequest', full_name='SkillBridge.Message.NetMessageRequest.sceneStartRequest', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='userSendMessageRequest', full_name='IndependentAgentProject.NetMessageRequest.userSendMessageRequest', index=2,
+      name='userSendMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendMessageRequest', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentSendMessageRequest', full_name='IndependentAgentProject.NetMessageRequest.agentSendMessageRequest', index=3,
+      name='agentSendMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.agentSendMessageRequest', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -137,27 +137,27 @@ _NETMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=182,
-  serialized_end=509,
+  serialized_start=170,
+  serialized_end=481,
 )
 
 
 _NETMESSAGERESPONSE = _descriptor.Descriptor(
   name='NetMessageResponse',
-  full_name='IndependentAgentProject.NetMessageResponse',
+  full_name='SkillBridge.Message.NetMessageResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='agentCreateResponse', full_name='IndependentAgentProject.NetMessageResponse.agentCreateResponse', index=0,
+      name='agentCreateResponse', full_name='SkillBridge.Message.NetMessageResponse.agentCreateResponse', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='startSceneResponse', full_name='IndependentAgentProject.NetMessageResponse.startSceneResponse', index=1,
+      name='sceneStartResponse', full_name='SkillBridge.Message.NetMessageResponse.sceneStartResponse', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -175,27 +175,27 @@ _NETMESSAGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=512,
-  serialized_end=680,
+  serialized_start=484,
+  serialized_end=644,
 )
 
 
 _AGENTCREATEREQUEST = _descriptor.Descriptor(
   name='AgentCreateRequest',
-  full_name='IndependentAgentProject.AgentCreateRequest',
+  full_name='SkillBridge.Message.AgentCreateRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='IndependentAgentProject.AgentCreateRequest.name', index=0,
+      name='name', full_name='SkillBridge.Message.AgentCreateRequest.name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='desc', full_name='IndependentAgentProject.AgentCreateRequest.desc', index=1,
+      name='desc', full_name='SkillBridge.Message.AgentCreateRequest.desc', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -213,27 +213,27 @@ _AGENTCREATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=682,
-  serialized_end=730,
+  serialized_start=646,
+  serialized_end=694,
 )
 
 
 _AGENTCREATERESPONSE = _descriptor.Descriptor(
   name='AgentCreateResponse',
-  full_name='IndependentAgentProject.AgentCreateResponse',
+  full_name='SkillBridge.Message.AgentCreateResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='IndependentAgentProject.AgentCreateResponse.success', index=0,
+      name='success', full_name='SkillBridge.Message.AgentCreateResponse.success', index=0,
       number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='errormsg', full_name='IndependentAgentProject.AgentCreateResponse.errormsg', index=1,
+      name='errormsg', full_name='SkillBridge.Message.AgentCreateResponse.errormsg', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -251,20 +251,20 @@ _AGENTCREATERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=732,
-  serialized_end=788,
+  serialized_start=696,
+  serialized_end=752,
 )
 
 
-_STARTSCENEREQUEST = _descriptor.Descriptor(
-  name='StartSceneRequest',
-  full_name='IndependentAgentProject.StartSceneRequest',
+_SCENESTARTREQUEST = _descriptor.Descriptor(
+  name='SceneStartRequest',
+  full_name='SkillBridge.Message.SceneStartRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='map_id', full_name='IndependentAgentProject.StartSceneRequest.map_id', index=0,
+      name='map_id', full_name='SkillBridge.Message.SceneStartRequest.map_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -282,27 +282,27 @@ _STARTSCENEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=790,
-  serialized_end=825,
+  serialized_start=754,
+  serialized_end=789,
 )
 
 
-_STARTSCENERESPONSE = _descriptor.Descriptor(
-  name='StartSceneResponse',
-  full_name='IndependentAgentProject.StartSceneResponse',
+_SCENESTARTRESPONSE = _descriptor.Descriptor(
+  name='SceneStartResponse',
+  full_name='SkillBridge.Message.SceneStartResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='IndependentAgentProject.StartSceneResponse.success', index=0,
+      name='success', full_name='SkillBridge.Message.SceneStartResponse.success', index=0,
       number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='errormsg', full_name='IndependentAgentProject.StartSceneResponse.errormsg', index=1,
+      name='errormsg', full_name='SkillBridge.Message.SceneStartResponse.errormsg', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -320,27 +320,27 @@ _STARTSCENERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=827,
-  serialized_end=882,
+  serialized_start=791,
+  serialized_end=846,
 )
 
 
 _USERSENDMESSAGEREQUEST = _descriptor.Descriptor(
   name='UserSendMessageRequest',
-  full_name='IndependentAgentProject.UserSendMessageRequest',
+  full_name='SkillBridge.Message.UserSendMessageRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='agent', full_name='IndependentAgentProject.UserSendMessageRequest.agent', index=0,
+      name='agent', full_name='SkillBridge.Message.UserSendMessageRequest.agent', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='user_message', full_name='IndependentAgentProject.UserSendMessageRequest.user_message', index=1,
+      name='user_message', full_name='SkillBridge.Message.UserSendMessageRequest.user_message', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -358,27 +358,27 @@ _USERSENDMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=884,
-  serialized_end=945,
+  serialized_start=848,
+  serialized_end=909,
 )
 
 
 _AGENTSENDMESSAGEREQUEST = _descriptor.Descriptor(
   name='AgentSendMessageRequest',
-  full_name='IndependentAgentProject.AgentSendMessageRequest',
+  full_name='SkillBridge.Message.AgentSendMessageRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='agent', full_name='IndependentAgentProject.AgentSendMessageRequest.agent', index=0,
+      name='agent', full_name='SkillBridge.Message.AgentSendMessageRequest.agent', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='ai_message', full_name='IndependentAgentProject.AgentSendMessageRequest.ai_message', index=1,
+      name='ai_message', full_name='SkillBridge.Message.AgentSendMessageRequest.ai_message', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -396,291 +396,93 @@ _AGENTSENDMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=947,
-  serialized_end=1007,
-)
-
-
-_PERSON = _descriptor.Descriptor(
-  name='Person',
-  full_name='IndependentAgentProject.Person',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='name', full_name='IndependentAgentProject.Person.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='age', full_name='IndependentAgentProject.Person.age', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='message', full_name='IndependentAgentProject.Person.message', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1009,
-  serialized_end=1061,
-)
-
-
-_LOGINREQUEST = _descriptor.Descriptor(
-  name='LoginRequest',
-  full_name='IndependentAgentProject.LoginRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='username', full_name='IndependentAgentProject.LoginRequest.username', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='password', full_name='IndependentAgentProject.LoginRequest.password', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1063,
-  serialized_end=1113,
-)
-
-
-_LOGINRESPONSE = _descriptor.Descriptor(
-  name='LoginResponse',
-  full_name='IndependentAgentProject.LoginResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='IndependentAgentProject.LoginResponse.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='message', full_name='IndependentAgentProject.LoginResponse.message', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='user_id', full_name='IndependentAgentProject.LoginResponse.user_id', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1115,
-  serialized_end=1181,
-)
-
-
-_CHATMESSAGE = _descriptor.Descriptor(
-  name='ChatMessage',
-  full_name='IndependentAgentProject.ChatMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='sender', full_name='IndependentAgentProject.ChatMessage.sender', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='text', full_name='IndependentAgentProject.ChatMessage.text', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1183,
-  serialized_end=1226,
+  serialized_start=911,
+  serialized_end=971,
 )
 
 _NETMESSAGE.fields_by_name['Request'].message_type = _NETMESSAGEREQUEST
 _NETMESSAGE.fields_by_name['Response'].message_type = _NETMESSAGERESPONSE
 _NETMESSAGEREQUEST.fields_by_name['agentCreateRequest'].message_type = _AGENTCREATEREQUEST
-_NETMESSAGEREQUEST.fields_by_name['startSceneRequest'].message_type = _STARTSCENEREQUEST
+_NETMESSAGEREQUEST.fields_by_name['sceneStartRequest'].message_type = _SCENESTARTREQUEST
 _NETMESSAGEREQUEST.fields_by_name['userSendMessageRequest'].message_type = _USERSENDMESSAGEREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentSendMessageRequest'].message_type = _AGENTSENDMESSAGEREQUEST
 _NETMESSAGERESPONSE.fields_by_name['agentCreateResponse'].message_type = _AGENTCREATERESPONSE
-_NETMESSAGERESPONSE.fields_by_name['startSceneResponse'].message_type = _STARTSCENERESPONSE
+_NETMESSAGERESPONSE.fields_by_name['sceneStartResponse'].message_type = _SCENESTARTRESPONSE
 DESCRIPTOR.message_types_by_name['NetMessage'] = _NETMESSAGE
 DESCRIPTOR.message_types_by_name['NetMessageRequest'] = _NETMESSAGEREQUEST
 DESCRIPTOR.message_types_by_name['NetMessageResponse'] = _NETMESSAGERESPONSE
 DESCRIPTOR.message_types_by_name['AgentCreateRequest'] = _AGENTCREATEREQUEST
 DESCRIPTOR.message_types_by_name['AgentCreateResponse'] = _AGENTCREATERESPONSE
-DESCRIPTOR.message_types_by_name['StartSceneRequest'] = _STARTSCENEREQUEST
-DESCRIPTOR.message_types_by_name['StartSceneResponse'] = _STARTSCENERESPONSE
+DESCRIPTOR.message_types_by_name['SceneStartRequest'] = _SCENESTARTREQUEST
+DESCRIPTOR.message_types_by_name['SceneStartResponse'] = _SCENESTARTRESPONSE
 DESCRIPTOR.message_types_by_name['UserSendMessageRequest'] = _USERSENDMESSAGEREQUEST
 DESCRIPTOR.message_types_by_name['AgentSendMessageRequest'] = _AGENTSENDMESSAGEREQUEST
-DESCRIPTOR.message_types_by_name['Person'] = _PERSON
-DESCRIPTOR.message_types_by_name['LoginRequest'] = _LOGINREQUEST
-DESCRIPTOR.message_types_by_name['LoginResponse'] = _LOGINRESPONSE
-DESCRIPTOR.message_types_by_name['ChatMessage'] = _CHATMESSAGE
 DESCRIPTOR.enum_types_by_name['RESULT'] = _RESULT
 
 NetMessage = _reflection.GeneratedProtocolMessageType('NetMessage', (_message.Message,), dict(
   DESCRIPTOR = _NETMESSAGE,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.NetMessage)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.NetMessage)
   ))
 _sym_db.RegisterMessage(NetMessage)
 
 NetMessageRequest = _reflection.GeneratedProtocolMessageType('NetMessageRequest', (_message.Message,), dict(
   DESCRIPTOR = _NETMESSAGEREQUEST,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.NetMessageRequest)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.NetMessageRequest)
   ))
 _sym_db.RegisterMessage(NetMessageRequest)
 
 NetMessageResponse = _reflection.GeneratedProtocolMessageType('NetMessageResponse', (_message.Message,), dict(
   DESCRIPTOR = _NETMESSAGERESPONSE,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.NetMessageResponse)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.NetMessageResponse)
   ))
 _sym_db.RegisterMessage(NetMessageResponse)
 
 AgentCreateRequest = _reflection.GeneratedProtocolMessageType('AgentCreateRequest', (_message.Message,), dict(
   DESCRIPTOR = _AGENTCREATEREQUEST,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.AgentCreateRequest)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentCreateRequest)
   ))
 _sym_db.RegisterMessage(AgentCreateRequest)
 
 AgentCreateResponse = _reflection.GeneratedProtocolMessageType('AgentCreateResponse', (_message.Message,), dict(
   DESCRIPTOR = _AGENTCREATERESPONSE,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.AgentCreateResponse)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentCreateResponse)
   ))
 _sym_db.RegisterMessage(AgentCreateResponse)
 
-StartSceneRequest = _reflection.GeneratedProtocolMessageType('StartSceneRequest', (_message.Message,), dict(
-  DESCRIPTOR = _STARTSCENEREQUEST,
+SceneStartRequest = _reflection.GeneratedProtocolMessageType('SceneStartRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SCENESTARTREQUEST,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.StartSceneRequest)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.SceneStartRequest)
   ))
-_sym_db.RegisterMessage(StartSceneRequest)
+_sym_db.RegisterMessage(SceneStartRequest)
 
-StartSceneResponse = _reflection.GeneratedProtocolMessageType('StartSceneResponse', (_message.Message,), dict(
-  DESCRIPTOR = _STARTSCENERESPONSE,
+SceneStartResponse = _reflection.GeneratedProtocolMessageType('SceneStartResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SCENESTARTRESPONSE,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.StartSceneResponse)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.SceneStartResponse)
   ))
-_sym_db.RegisterMessage(StartSceneResponse)
+_sym_db.RegisterMessage(SceneStartResponse)
 
 UserSendMessageRequest = _reflection.GeneratedProtocolMessageType('UserSendMessageRequest', (_message.Message,), dict(
   DESCRIPTOR = _USERSENDMESSAGEREQUEST,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.UserSendMessageRequest)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendMessageRequest)
   ))
 _sym_db.RegisterMessage(UserSendMessageRequest)
 
 AgentSendMessageRequest = _reflection.GeneratedProtocolMessageType('AgentSendMessageRequest', (_message.Message,), dict(
   DESCRIPTOR = _AGENTSENDMESSAGEREQUEST,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.AgentSendMessageRequest)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentSendMessageRequest)
   ))
 _sym_db.RegisterMessage(AgentSendMessageRequest)
 
-Person = _reflection.GeneratedProtocolMessageType('Person', (_message.Message,), dict(
-  DESCRIPTOR = _PERSON,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.Person)
-  ))
-_sym_db.RegisterMessage(Person)
-
-LoginRequest = _reflection.GeneratedProtocolMessageType('LoginRequest', (_message.Message,), dict(
-  DESCRIPTOR = _LOGINREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.LoginRequest)
-  ))
-_sym_db.RegisterMessage(LoginRequest)
-
-LoginResponse = _reflection.GeneratedProtocolMessageType('LoginResponse', (_message.Message,), dict(
-  DESCRIPTOR = _LOGINRESPONSE,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.LoginResponse)
-  ))
-_sym_db.RegisterMessage(LoginResponse)
-
-ChatMessage = _reflection.GeneratedProtocolMessageType('ChatMessage', (_message.Message,), dict(
-  DESCRIPTOR = _CHATMESSAGE,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:IndependentAgentProject.ChatMessage)
-  ))
-_sym_db.RegisterMessage(ChatMessage)
-
 
 DESCRIPTOR.has_options = True
-DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\220\001\000\370\001\001\252\002 IndependentAgentProject.Protobuf'))
+DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\220\001\000\370\001\001\252\002\023SkillBridge.Message'))
 # @@protoc_insertion_point(module_scope)

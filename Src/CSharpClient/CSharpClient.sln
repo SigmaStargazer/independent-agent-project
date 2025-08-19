@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpClient", "CSharpClient\CSharpClient.csproj", "{9E2163B1-5095-4B64-89E6-CF947C46863E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentProtocol", "..\Lib\AgentProtocol\AgentProtocol.csproj", "{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protocol", "..\Lib\AgentProtocol\Protocol.csproj", "{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

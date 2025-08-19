@@ -25,3 +25,12 @@ E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-proj
 E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\Protocol\obj\Debug\Protocol.csproj.Up2Date
 E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\Protocol\obj\Debug\Protocol.dll
 E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\Protocol\obj\Debug\Protocol.pdb
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\bin\Debug\Protocol.dll
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\bin\Debug\Protocol.pdb
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\bin\Debug\protobuf-net.dll
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\bin\Debug\protobuf-net.xml
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\obj\Debug\Protocol.csproj.AssemblyReference.cache
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\obj\Debug\Protocol.csproj.CoreCompileInputs.cache
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\obj\Debug\Protocol.csproj.Up2Date
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\obj\Debug\Protocol.dll
+E:\UnityWorkSpace\独立智能体异步通信架构应用\independent-agent-project\Src\Lib\AgentProtocol\obj\Debug\Protocol.pdb

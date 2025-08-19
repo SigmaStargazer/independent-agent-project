@@ -85,7 +85,7 @@ class AgentServerNetMessage:
     async def astart(self, listen_backlog=128):
         server = await asyncio.start_server(
             self.handle_connection,
-            'localhost',
+            '127.0.0.1',
             self.port,
             backlog=listen_backlog
         )
@@ -115,6 +115,10 @@ class AgentServerNetMessage:
                     body = await reader.readexactly(msg_len)
                     net_msg = NetMessage()
                     net_msg.ParseFromString(body)
+
+                    # 测试
+                    print(f"Raw header: {len_bytes.hex()}  body-len={msg_len}")
+                    print(f"Raw body  : {body.hex()}")
 
                     # 3) 提取子消息
                     sub_msg, sub_name = self._extract_sub_message(net_msg)
@@ -324,7 +328,8 @@ class AgentServerProtobuff:
     async def astart(self, listen_backlog=128):
         server = await asyncio.start_server(
             self.handle_connection,
-            'localhost',
+            # 'localhost',
+            '127.0.0.1',
             self.port,
             backlog=listen_backlog
         )

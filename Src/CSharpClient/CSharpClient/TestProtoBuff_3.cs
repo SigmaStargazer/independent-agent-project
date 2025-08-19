@@ -1,4 +1,4 @@
-﻿using IndependentAgentProject.Protobuf;
+﻿using SkillBridge.Message;
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace CSharpClient
         static TcpClient currentClient;
 
         static readonly Dictionary<string, Type> MessageTypes =
-            typeof(IndependentAgentProject.Protobuf.AgentCreateRequest).Assembly
+            typeof(SkillBridge.Message.AgentCreateRequest).Assembly
                 .GetTypes()
                 .Where(t => t.Namespace == "IndependentAgentProject.Protobuf" &&
                            typeof(IExtensible).IsAssignableFrom(t) &&
@@ -108,11 +108,11 @@ namespace CSharpClient
             await SendAsync(agentCreateRequest_2, stream);
 
             // 开始场景
-            var startSceneRequest = new StartSceneRequest
+            var sceneStartRequest = new SceneStartRequest
             {
                 MapId = 1
             };
-            await SendAsync(startSceneRequest, stream);
+            await SendAsync(sceneStartRequest, stream);
 
             // 发送聊天信息
             var agentSendMessageRequest = new UserSendMessageRequest
@@ -177,9 +177,9 @@ namespace CSharpClient
                             Console.WriteLine($"Received AgentCreateResponse: Success={agentCreateResponse.Success}, Errormsg={agentCreateResponse.Errormsg}");
                         }
 
-                        if (msg is StartSceneResponse startSceneResponse)
+                        if (msg is SceneStartResponse sceneStartResponse)
                         {
-                            Console.WriteLine($"Received StartSceneResponse: Success={startSceneResponse.Success}, Errormsg={startSceneResponse.Errormsg}");
+                            Console.WriteLine($"Received StartSceneResponse: Success={sceneStartResponse.Success}, Errormsg={sceneStartResponse.Errormsg}");
                         }
 
                         if (msg is AgentSendMessageRequest agentSendMessageRequest)

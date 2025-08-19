@@ -3,7 +3,7 @@
 // Input: message.proto
 
 #pragma warning disable CS1591, CS0612, CS3021, IDE1006
-namespace IndependentAgentProject.Protobuf
+namespace SkillBridge.Message
 {
 
     [global::ProtoBuf.ProtoContract()]
@@ -32,7 +32,7 @@ namespace IndependentAgentProject.Protobuf
         public AgentCreateRequest agentCreateRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(2)]
-        public StartSceneRequest startSceneRequest { get; set; }
+        public SceneStartRequest sceneStartRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(3)]
         public UserSendMessageRequest userSendMessageRequest { get; set; }
@@ -53,7 +53,7 @@ namespace IndependentAgentProject.Protobuf
         public AgentCreateResponse agentCreateResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(2)]
-        public StartSceneResponse startSceneResponse { get; set; }
+        public SceneStartResponse sceneStartResponse { get; set; }
 
     }
 
@@ -91,7 +91,7 @@ namespace IndependentAgentProject.Protobuf
     }
 
     [global::ProtoBuf.ProtoContract()]
-    public partial class StartSceneRequest : global::ProtoBuf.IExtensible
+    public partial class SceneStartRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
@@ -103,7 +103,7 @@ namespace IndependentAgentProject.Protobuf
     }
 
     [global::ProtoBuf.ProtoContract()]
-    public partial class StartSceneResponse : global::ProtoBuf.IExtensible
+    public partial class SceneStartResponse : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
@@ -149,79 +149,6 @@ namespace IndependentAgentProject.Protobuf
         [global::ProtoBuf.ProtoMember(2, Name = @"ai_message")]
         [global::System.ComponentModel.DefaultValue("")]
         public string AiMessage { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class Person : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"name")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Name { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"age")]
-        public int Age { get; set; }
-
-        [global::ProtoBuf.ProtoMember(3, Name = @"message")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Message { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class LoginRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"username")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Username { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"password")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Password { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class LoginResponse : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
-        public bool Success { get; set; }
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"message")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Message { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(3, Name = @"user_id")]
-        public int UserId { get; set; }
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class ChatMessage : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"sender")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Sender { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"text")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Text { get; set; } = "";
 
     }
 

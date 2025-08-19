@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package IndependentAgentProject;
+package SkillBridge.Message;
 
-option csharp_namespace = "IndependentAgentProject.Protobuf";
+option csharp_namespace = "SkillBridge.Message";
 option py_generic_services = false;
 option cc_enable_arenas = true;
 
@@ -11,11 +11,89 @@ option cc_enable_arenas = true;
 //  Basic Defines
 //
 ////////////////////////////////////////////////////////////////
-
 enum RESULT
 {
 	SUCCESS = 0;
 	FAILED = 1;
+}
+
+enum CHARACTER_TYPE
+{
+	Player = 0;
+	NPC = 1;
+	Monster = 2;
+}
+
+enum CHARACTER_CLASS
+{
+	NONE = 0;
+	WARRIOR = 1;
+	WIZARD = 2;
+	ARCHER = 3;
+}
+
+enum CHARACTER_STATE
+{
+	IDLE = 0;
+	MOVE = 1;
+}
+
+enum ENTITY_EVENT
+{
+	NONE = 0;
+	IDLE = 1;
+	MOVE_FWD = 2;
+	MOVE_BACK = 3;
+	JUMP = 4;
+}
+
+message NUserInfo {
+	int32 id = 1;
+	NPlayerInfo player = 2;
+}
+
+message NPlayerInfo {
+	int32 id = 1;
+	repeated NCharacterInfo characters = 2;
+}
+
+message NCharacterInfo {
+	int32 id = 1;
+	int32 tid = 2;
+	string name = 3;
+	CHARACTER_TYPE type = 4;
+	CHARACTER_CLASS class = 5;
+	int32 level = 6;
+	int32 mapId = 7;
+	NEntity entity = 8;
+}
+
+message NVector3
+{
+	int32 x = 1;
+	int32 y = 2;
+	int32 z = 3;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  Entities
+//
+////////////////////////////////////////////////////////////////
+
+
+message NEntity {
+	int32 id = 1;
+	NVector3 position = 2;
+	NVector3 direction = 3;
+	int32 speed = 4;
+}
+
+message NEntitySync {
+	int32 id = 1;
+	ENTITY_EVENT event = 2;
+	NEntity entity = 3;
+	
 }
 
 ////////////////////////////////////////////////////////////////
@@ -31,14 +109,14 @@ message NetMessage{
 
 message NetMessageRequest{
 	AgentCreateRequest agentCreateRequest = 1;
-	StartSceneRequest startSceneRequest = 2;
+	SceneStartRequest sceneStartRequest = 2;
 	UserSendMessageRequest userSendMessageRequest = 3;
 	AgentSendMessageRequest agentSendMessageRequest = 4;
 }
 
 message NetMessageResponse{
 	AgentCreateResponse agentCreateResponse = 1;
-	StartSceneResponse startSceneResponse = 2;
+	SceneStartResponse sceneStartResponse = 2;
 }
 
 // 创建Agent
@@ -53,11 +131,11 @@ message AgentCreateResponse {
 }
 
 // 开启场景
-message StartSceneRequest {
+message SceneStartRequest {
 	int32 map_id = 1;
 }
 
-message StartSceneResponse {
+message SceneStartResponse {
 	bool success = 1;
 	string errormsg = 2;
 }
@@ -73,29 +151,3 @@ message AgentSendMessageRequest {
 	string agent = 1;
 	string ai_message = 2;
 }
-
-
-// 以下为测试用消息
-
-message Person {
-  string name = 1;
-  int32 age = 2;
-  string message = 3;
-}
-
-message LoginRequest {
-    string username = 1;
-    string password = 2;
-}
-
-message LoginResponse {
-    bool success = 1;
-    string message = 2;
-    int32 user_id = 3;
-}
-
-message ChatMessage {
-    string sender = 1;
-    string text = 2;
-}
-

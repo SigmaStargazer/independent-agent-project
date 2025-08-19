@@ -12,8 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Lib\AgentProtocol\AgentProtocol.csproj" />
-    <ProjectReference Include="..\..\Lib\Protocol\Protocol.csproj" />
+    <ProjectReference Include="..\..\Lib\AgentProtocol\Protocol.csproj" />
   </ItemGroup>
 
 </Project>

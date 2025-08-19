@@ -20,24 +20,6 @@ server = AgentServerNetMessage(port_config_file=PORT_CONFIG_FILE)
 # 定义消息处理函数
 # ======================
 
-@server.on_message("LoginRequest")
-async def handle_login_request(msg, context):
-    print(f"Login request: {msg.username}")
-    response = context['server'].message_types['LoginResponse']()
-    response.success = True
-    response.message = "Login successful"
-    response.user_id = 1001
-    await context['server'].send_message(response, context)
-
-@server.on_message("ChatMessage")
-async def handle_chat_message(msg, context):
-    print(f"Chat message from {msg.sender}: {msg.text}")
-    reply = context['server'].message_types['ChatMessage']()
-    reply.sender = "server"
-    reply.text = f"Echo: {msg.text}"
-    await asyncio.sleep(1)  # 模拟异步操作
-    await context['server'].send_message(reply, context)
-
 @server.on_message("agentCreateRequest")
 async def handle_agent_create_request(msg, context):
     name = msg.name
@@ -55,11 +37,11 @@ async def handle_agent_create_request(msg, context):
         print(f"创建Agent失败: {str(e)}")
         await context['server'].send_message(response, context)
 
-@server.on_message("startSceneRequest")
-async def handle_start_scene_request(msg, context):
+@server.on_message("sceneStartRequest")
+async def handle_scene_start_request(msg, context):
     map_id = msg.map_id
     print(f"启动场景: {map_id}")
-    response = context['server'].message_types['StartSceneResponse']()
+    response = context['server'].message_types['SceneStartResponse']()
     try:
         AgentManager().start()
         await TimeSystem().aset_speed(1440)
