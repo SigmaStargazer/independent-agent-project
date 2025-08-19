@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace CSharpClient
 {
-    class TestProtoBuff_4
+    class TestProtoBuff_5
     {
         static NetworkStream stream;
         static bool isConnected = true;
@@ -85,7 +85,7 @@ namespace CSharpClient
             await receiveTask;
         }
 
-        static async Task Main_4(string[] args)
+        static async Task Main(string[] args)
         {
             await ConnectAndRun();
         }
@@ -164,12 +164,12 @@ namespace CSharpClient
             {
                 while (isConnected)
                 {
-                    // 1. 4 字节 NetMessage 长度（大端）
+                    // 1. 4 字节 NetMessage 长度（小端）
                     byte[] lenBuf = new byte[4];
                     await ReadExactlyAsync(stream, lenBuf, 0, 4);
                     int len = BitConverter.ToInt32(lenBuf, 0);
-                    if (BitConverter.IsLittleEndian)
-                        len = System.Net.IPAddress.NetworkToHostOrder(len);
+                    //if (BitConverter.IsLittleEndian)
+                    //    len = System.Net.IPAddress.NetworkToHostOrder(len);
 
                     // 2. 读完整 NetMessage
                     byte[] body = new byte[len];
@@ -225,10 +225,10 @@ namespace CSharpClient
                 body = ms.ToArray();
             }
 
-            // 2. 4 字节长度头（大端）
+            //// 2. 4 字节长度头（小端）
             var header = BitConverter.GetBytes(body.Length);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(header);
+            //if (BitConverter.IsLittleEndian)
+            //    Array.Reverse(header);
 
             // 3. 发送
             await stream.WriteAsync(header);
