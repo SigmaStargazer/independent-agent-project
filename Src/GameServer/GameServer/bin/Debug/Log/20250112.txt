@@ -1,0 +1,94 @@
+
+2025-01-12 01:26:34,470 [1] [INFO ] [GameServer] ：Game Server Init
+2025-01-12 01:26:35,274 [1] [INFO ] [GameServer] ：UserService Start.
+2025-01-12 01:26:35,278 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-01-12 01:26:35,360 [6] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,371 [9] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,373 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,375 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,378 [12] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,380 [11] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,380 [8] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,380 [10] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 01:26:35,394 [1] [WARN ] [GameServer] ：NetService Started
+2025-01-12 01:27:08,683 [3] [WARN ] [GameServer] ：Client[127.0.0.1:57770]] Connected
+2025-01-12 01:27:08,761 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 01:27:08,928 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 01:27:26,425 [17] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 01:29:40,960 [14] [WARN ] [GameServer] ：Client[127.0.0.1:58017]] Connected
+2025-01-12 01:29:41,067 [13] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 01:29:41,068 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 01:30:20,889 [16] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 01:54:48,860 [16] [WARN ] [GameServer] ：Client[127.0.0.1:64478]] Connected
+2025-01-12 01:54:48,931 [16] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 01:54:48,932 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 01:55:17,784 [16] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 01:56:26,684 [69] [WARN ] [GameServer] ：Client[127.0.0.1:64621]] Connected
+2025-01-12 01:56:26,758 [71] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 01:56:26,759 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 01:58:16,261 [69] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 01:59:27,806 [69] [WARN ] [GameServer] ：Client[127.0.0.1:55411]] Connected
+2025-01-12 01:59:27,887 [69] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 01:59:27,888 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 02:01:06,780 [79] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 02:08:27,793 [79] [WARN ] [GameServer] ：Client[127.0.0.1:61141]] Connected
+2025-01-12 02:08:27,902 [79] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 02:08:27,903 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 02:09:12,515 [46] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 02:11:27,022 [43] [WARN ] [GameServer] ：Client[127.0.0.1:61703]] Connected
+2025-01-12 02:11:27,121 [37] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 02:11:27,122 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 02:11:46,530 [37] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 16:51:10,299 [1] [INFO ] [GameServer] ：Game Server Init
+2025-01-12 16:51:11,101 [1] [INFO ] [GameServer] ：UserService Start.
+2025-01-12 16:51:11,104 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-01-12 16:51:11,140 [10] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,140 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,149 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,150 [15] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,159 [6] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,170 [13] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,217 [18] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,231 [14] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 16:51:11,324 [1] [WARN ] [GameServer] ：NetService Started
+2025-01-12 16:52:27,840 [3] [WARN ] [GameServer] ：Client[127.0.0.1:62279]] Connected
+2025-01-12 16:52:27,935 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 16:52:28,099 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 16:52:39,633 [16] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-01-12 16:52:39,639 [5] [INFO ] [GameServer] ：UserGameEnterRequest: charaIdx:3 charaName:chara3 Map:1
+2025-01-12 16:52:39,713 [5] [ERROR] [GameServer] ：Message handler exception:, 给定关键字不在字典中。, mscorlib,    在 System.ThrowHelper.ThrowKeyNotFoundException()
+   在 System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   在 GameServer.Managers.MapManager.get_Item(Int32 key) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Managers\MapManager.cs:行号 32
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 166
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-01-12 16:53:24,099 [16] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 17:00:31,902 [1] [INFO ] [GameServer] ：Game Server Init
+2025-01-12 17:00:32,213 [1] [INFO ] [GameServer] ：UserService Start.
+2025-01-12 17:00:32,217 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-01-12 17:00:32,470 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-01-12 17:00:32,471 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-01-12 17:00:32,471 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-01-12 17:00:32,472 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-01-12 17:00:32,474 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-01-12 17:00:32,534 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,534 [8] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,535 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,535 [13] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,535 [14] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,543 [15] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,551 [6] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,557 [17] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-01-12 17:00:32,588 [1] [WARN ] [GameServer] ：NetService Started
+2025-01-12 17:02:26,019 [3] [WARN ] [GameServer] ：Client[127.0.0.1:51015]] Connected
+2025-01-12 17:02:26,128 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 17:02:26,313 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 17:02:30,455 [16] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-01-12 17:02:30,459 [5] [INFO ] [GameServer] ：UserGameEnterRequest: charaIdx:3 charaName:chara3 Map:1
+2025-01-12 17:02:30,466 [5] [INFO ] [GameServer] ：CharacterEnter: Map:1 characterId:0
+2025-01-12 17:09:17,692 [16] [WARN ] [GameServer] ：Client[] Disconnected
+2025-01-12 17:13:03,006 [16] [WARN ] [GameServer] ：Client[127.0.0.1:51824]] Connected
+2025-01-12 17:13:03,092 [16] [WARN ] [GameServer] ：Client[] DataReceived Len:26
+2025-01-12 17:13:03,092 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser  Pass:Abc123
+2025-01-12 17:13:14,487 [31] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-01-12 17:13:14,488 [5] [INFO ] [GameServer] ：UserGameEnterRequest: charaIdx:3 charaName:chara3 Map:1
+2025-01-12 17:13:14,488 [5] [INFO ] [GameServer] ：CharacterEnter: Map:1 characterId:0

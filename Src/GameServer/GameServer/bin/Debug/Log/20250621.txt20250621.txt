@@ -1,0 +1,17 @@
+
+2025-06-21 21:56:28,646 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-21 21:56:28,829 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-21 21:56:28,833 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-21 21:56:29,021 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-21 21:56:29,023 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-21 21:56:29,024 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-21 21:56:29,024 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-21 21:56:29,026 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-06-21 21:56:51,767 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-21 21:56:52,068 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-21 21:56:52,071 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-21 21:56:52,288 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-21 21:56:52,290 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-21 21:56:52,291 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-21 21:56:52,291 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-21 21:56:52,293 [1] [WARN ] [GameServer] ：Starting Listener...

@@ -1,0 +1,183 @@
+
+2025-06-20 07:33:13,565 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-20 07:33:13,938 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-20 07:33:13,942 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-20 07:33:14,205 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-20 07:33:14,205 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-20 07:33:14,206 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-20 07:33:14,208 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-20 07:33:14,209 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-06-20 07:33:14,231 [12] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,255 [11] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,231 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,231 [19] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,231 [20] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,255 [17] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,255 [14] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,255 [9] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:33:14,316 [1] [WARN ] [GameServer] ：NetService Started
+2025-06-20 07:33:47,056 [3] [WARN ] [GameServer] ：Client[127.0.0.1:50513]] Connected
+2025-06-20 07:33:47,117 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 07:33:47,339 [7] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-20 07:34:03,414 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-20 07:34:03,505 [7] [ERROR] [GameServer] ：Message handler exception:, 指定的参数已超出有效值的范围。
+参数名: index, System.Core,    在 System.Linq.Enumerable.ElementAt[TSource](IEnumerable`1 source, Int32 index)
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 162
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 07:47:31,305 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-20 07:47:31,555 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-20 07:47:31,559 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-20 07:47:31,738 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-20 07:47:31,738 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-20 07:47:31,739 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-20 07:47:31,739 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-20 07:47:31,741 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-06-20 07:47:31,754 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,755 [14] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,756 [15] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,760 [11] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,760 [12] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,788 [10] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,788 [6] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,788 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 07:47:31,848 [1] [WARN ] [GameServer] ：NetService Started
+2025-06-20 07:48:33,726 [3] [WARN ] [GameServer] ：Client[127.0.0.1:52871]] Connected
+2025-06-20 07:48:33,789 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 07:48:33,982 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-20 07:48:56,313 [16] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-20 07:50:54,824 [5] [ERROR] [GameServer] ：Message handler exception:, 指定的参数已超出有效值的范围。
+参数名: index, System.Core,    在 System.Linq.Enumerable.ElementAt[TSource](IEnumerable`1 source, Int32 index)
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 162
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 08:01:25,558 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-20 08:01:25,818 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-20 08:01:25,821 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-20 08:01:26,047 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-20 08:01:26,048 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-20 08:01:26,049 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-20 08:01:26,049 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-20 08:01:26,050 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-06-20 08:01:26,121 [11] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,122 [13] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,122 [9] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,125 [10] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,125 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,126 [8] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,127 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,128 [12] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 08:01:26,163 [1] [WARN ] [GameServer] ：NetService Started
+2025-06-20 08:01:59,791 [3] [WARN ] [GameServer] ：Client[127.0.0.1:54514]] Connected
+2025-06-20 08:01:59,863 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 08:02:00,081 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-20 08:02:16,016 [6] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-20 08:02:16,023 [5] [INFO ] [GameServer] ：COUNT:2
+2025-06-20 08:02:16,024 [5] [INFO ] [GameServer] ：characterIdx:5
+2025-06-20 13:40:40,461 [3] [WARN ] [GameServer] ：Client[] Disconnected
+2025-06-20 13:40:40,463 [3] [WARN ] [GameServer] ：Client[127.0.0.1:61381]] Connected
+2025-06-20 13:40:40,466 [21] [WARN ] [GameServer] ：Client[] DataReceived Len:90
+2025-06-20 13:40:40,467 [7] [INFO ] [GameServer] ：UserLoginRequest: User:tsetuser3  Pass:Abc123456
+2025-06-20 13:40:40,467 [8] [INFO ] [GameServer] ：UserLoginRequest: User:tsetuser3  Pass:Abc123456
+2025-06-20 13:40:40,467 [9] [INFO ] [GameServer] ：UserLoginRequest: User:tsetuser3  Pass:Abc123456
+2025-06-20 13:40:40,599 [8] [ERROR] [GameServer] ：Message handler exception:System.InvalidOperationException: 已有打开的与此 Command 相关联的 DataReader，必须首先将它关闭。
+   在 System.Data.SqlClient.SqlInternalConnectionTds.ValidateConnectionForExecute(SqlCommand command)
+   在 System.Data.SqlClient.SqlCommand.ValidateCommand(String method, Boolean async)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
+   在 System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
+   在 System.Data.Entity.Infrastructure.Interception.InternalDispatcher`1.Dispatch[TTarget,TInterceptionContext,TResult](TTarget target, Func`3 operation, TInterceptionContext interceptionContext, Action`3 executing, Action`3 executed)
+   在 System.Data.Entity.Infrastructure.Interception.DbCommandDispatcher.Reader(DbCommand command, DbCommandInterceptionContext interceptionContext)
+   在 System.Data.Entity.Core.EntityClient.Internal.EntityCommandDefinition.ExecuteStoreCommands(EntityCommand entityCommand, CommandBehavior behavior), 执行命令定义时出错。有关详细信息，请参阅内部异常。, EntityFramework,    在 System.Data.Entity.Core.EntityClient.Internal.EntityCommandDefinition.ExecuteStoreCommands(EntityCommand entityCommand, CommandBehavior behavior)
+   在 System.Data.Entity.Core.Objects.Internal.ObjectQueryExecutionPlan.Execute[TResultType](ObjectContext context, ObjectParameterCollection parameterValues)
+   在 System.Data.Entity.Core.Objects.ObjectContext.ExecuteInTransaction[T](Func`1 func, IDbExecutionStrategy executionStrategy, Boolean startLocalTransaction, Boolean releaseConnectionOnSuccess)
+   在 System.Data.Entity.Core.Objects.ObjectQuery`1.<>c__DisplayClass7.<GetResults>b__5()
+   在 System.Data.Entity.SqlServer.DefaultSqlExecutionStrategy.Execute[TResult](Func`1 operation)
+   在 System.Data.Entity.Core.Objects.ObjectQuery`1.GetResults(Nullable`1 forMergeOption)
+   在 System.Data.Entity.Core.Objects.ObjectQuery`1.<System.Collections.Generic.IEnumerable<T>.GetEnumerator>b__0()
+   在 System.Data.Entity.Internal.LazyEnumerator`1.MoveNext()
+   在 System.Linq.Enumerable.FirstOrDefault[TSource](IEnumerable`1 source)
+   在 GameServer.Services.UserService.OnLogin(NetConnection`1 sender, UserLoginRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 40
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 13:40:40,599 [5] [ERROR] [GameServer] ：Message handler exception:, 指定的参数已超出有效值的范围。
+参数名: index, System.Core,    在 System.Linq.Enumerable.ElementAt[TSource](IEnumerable`1 source, Int32 index)
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 164
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 13:40:40,601 [9] [ERROR] [GameServer] ：Message handler exception:System.ArgumentOutOfRangeException: SqlDbType 枚举值 9 无效。
+参数名: SqlDbType
+   在 System.Data.SqlClient.MetaType.GetSqlDataType(Int32 tdsType, UInt32 userType, Int32 length)
+   在 System.Data.SqlClient.TdsParser.TryProcessTypeInfo(TdsParserStateObject stateObj, SqlMetaDataPriv col, UInt32 userType)
+   在 System.Data.SqlClient.TdsParser.TryCommonProcessMetaData(TdsParserStateObject stateObj, _SqlMetaData col, Nullable`1 cipherTable, Boolean fColMD, SqlCommandColumnEncryptionSetting columnEncryptionSetting)
+   在 System.Data.SqlClient.TdsParser.TryProcessMetaData(Int32 cColumns, TdsParserStateObject stateObj, _SqlMetaDataSet& metaData, SqlCommandColumnEncryptionSetting columnEncryptionSetting)
+   在 System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   在 System.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   在 System.Data.SqlClient.SqlDataReader.get_MetaData()
+   在 System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
+   在 System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
+   在 System.Data.Entity.Infrastructure.Interception.InternalDispatcher`1.Dispatch[TTarget,TInterceptionContext,TResult](TTarget target, Func`3 operation, TInterceptionContext interceptionContext, Action`3 executing, Action`3 executed)
+   在 System.Data.Entity.Infrastructure.Interception.DbCommandDispatcher.Reader(DbCommand command, DbCommandInterceptionContext interceptionContext)
+   在 System.Data.Entity.Core.EntityClient.Internal.EntityCommandDefinition.ExecuteStoreCommands(EntityCommand entityCommand, CommandBehavior behavior), 执行命令定义时出错。有关详细信息，请参阅内部异常。, EntityFramework,    在 System.Data.Entity.Core.EntityClient.Internal.EntityCommandDefinition.ExecuteStoreCommands(EntityCommand entityCommand, CommandBehavior behavior)
+   在 System.Data.Entity.Core.Objects.Internal.ObjectQueryExecutionPlan.Execute[TResultType](ObjectContext context, ObjectParameterCollection parameterValues)
+   在 System.Data.Entity.Core.Objects.ObjectContext.ExecuteInTransaction[T](Func`1 func, IDbExecutionStrategy executionStrategy, Boolean startLocalTransaction, Boolean releaseConnectionOnSuccess)
+   在 System.Data.Entity.Core.Objects.ObjectQuery`1.<>c__DisplayClass7.<GetResults>b__5()
+   在 System.Data.Entity.SqlServer.DefaultSqlExecutionStrategy.Execute[TResult](Func`1 operation)
+   在 System.Data.Entity.Core.Objects.ObjectQuery`1.GetResults(Nullable`1 forMergeOption)
+   在 System.Data.Entity.Core.Objects.ObjectQuery`1.<System.Collections.Generic.IEnumerable<T>.GetEnumerator>b__0()
+   在 System.Data.Entity.Internal.LazyEnumerator`1.MoveNext()
+   在 System.Linq.Enumerable.FirstOrDefault[TSource](IEnumerable`1 source)
+   在 GameServer.Services.UserService.OnLogin(NetConnection`1 sender, UserLoginRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 40
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 13:40:40,600 [7] [ERROR] [GameServer] ：Message handler exception:, 内部连接致命错误。错误状态: 15，标记: 0, System.Data,    在 System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   在 System.Data.SqlClient.SqlDataReader.TryCloseInternal(Boolean closeReader)
+   在 System.Data.SqlClient.SqlDataReader.Close()
+   在 System.Data.Common.DbDataReader.Dispose(Boolean disposing)
+   在 System.Data.Entity.Core.Common.Internal.Materialization.Shaper`1.Finally()
+   在 System.Data.Entity.Core.Common.Internal.Materialization.Shaper`1.SimpleEnumerator.MoveNext()
+   在 System.Linq.Enumerable.FirstOrDefault[TSource](IEnumerable`1 source)
+   在 GameServer.Services.UserService.OnLogin(NetConnection`1 sender, UserLoginRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 40
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 13:40:45,423 [23] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 13:40:45,425 [5] [INFO ] [GameServer] ：UserLoginRequest: User:tsetuser3  Pass:Abc123456
+2025-06-20 13:40:57,823 [21] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 13:40:57,825 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-20 13:41:03,021 [21] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-20 13:41:03,021 [5] [INFO ] [GameServer] ：COUNT:2
+2025-06-20 13:41:03,023 [5] [INFO ] [GameServer] ：characterIdx:5
+2025-06-20 13:41:55,919 [21] [WARN ] [GameServer] ：Client[] Disconnected
+2025-06-20 13:41:55,940 [5] [ERROR] [GameServer] ：Message handler exception:, 指定的参数已超出有效值的范围。
+参数名: index, System.Core,    在 System.Linq.Enumerable.ElementAt[TSource](IEnumerable`1 source, Int32 index)
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 164
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-20 13:42:16,294 [21] [WARN ] [GameServer] ：Client[127.0.0.1:61742]] Connected
+2025-06-20 13:42:16,371 [21] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 13:42:16,372 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-20 13:43:07,099 [21] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-20 13:43:07,100 [5] [INFO ] [GameServer] ：COUNT:2
+2025-06-20 13:43:07,101 [5] [INFO ] [GameServer] ：characterIdx:5
+2025-06-20 13:45:39,832 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-20 13:45:40,143 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-20 13:45:40,148 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-20 13:45:40,386 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-20 13:45:40,386 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-20 13:45:40,387 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-20 13:45:40,388 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-20 13:45:40,389 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-06-20 13:45:40,444 [11] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,444 [6] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,444 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,444 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,444 [12] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,451 [9] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,652 [10] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,652 [8] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-20 13:45:40,763 [1] [WARN ] [GameServer] ：NetService Started
+2025-06-20 13:47:27,571 [3] [WARN ] [GameServer] ：Client[127.0.0.1:62513]] Connected
+2025-06-20 13:47:27,646 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-20 13:47:27,911 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-20 13:47:36,660 [13] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-20 13:47:36,668 [6] [INFO ] [GameServer] ：COUNT:2
+2025-06-20 13:47:36,669 [6] [INFO ] [GameServer] ：characterIdx:1
+2025-06-20 13:47:36,671 [6] [INFO ] [GameServer] ：UserGameEnterRequest: charaIdx:5 charaName:Archer Master Map:1
+2025-06-20 13:47:36,681 [6] [INFO ] [GameServer] ：CharacterEnter: Map:1 characterId:0
+2025-06-20 13:47:53,496 [13] [WARN ] [GameServer] ：Client[] Disconnected

@@ -1,0 +1,38 @@
+
+2025-06-17 13:24:51,384 [1] [INFO ] [GameServer] ：Game Server Init
+2025-06-17 13:24:51,740 [1] [INFO ] [GameServer] ：UserService Start.
+2025-06-17 13:24:51,744 [1] [INFO ] [GameServer] ：DataManager > DataManager()
+2025-06-17 13:24:51,946 [1] [INFO ] [GameServer] ：MapManager.Init > Map:1:奥特兰
+2025-06-17 13:24:51,947 [1] [INFO ] [GameServer] ：MapManager.Init > Map:2:野外1
+2025-06-17 13:24:51,948 [1] [INFO ] [GameServer] ：MapManager.Init > Map:3:野外2
+2025-06-17 13:24:51,948 [1] [INFO ] [GameServer] ：MapManager.Init > Map:4:副本1
+2025-06-17 13:24:51,951 [1] [WARN ] [GameServer] ：Starting Listener...
+2025-06-17 13:24:51,990 [6] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:51,990 [14] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,022 [8] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,022 [7] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,023 [13] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,022 [5] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,023 [12] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,023 [10] [WARN ] [GameServer] ：MessageDistribute thread start
+2025-06-17 13:24:52,062 [1] [WARN ] [GameServer] ：NetService Started
+2025-06-17 13:25:34,840 [3] [WARN ] [GameServer] ：Client[127.0.0.1:64713]] Connected
+2025-06-17 13:25:34,911 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-17 13:25:35,162 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-17 13:26:12,541 [9] [WARN ] [GameServer] ：Client[] DataReceived Len:25
+2025-06-17 13:26:12,549 [5] [INFO ] [GameServer] ：UserCreateCharacterRequest: CharaClass:Archer CharaName:Archer Master
+2025-06-17 13:26:31,056 [9] [WARN ] [GameServer] ：Client[] Disconnected
+2025-06-17 13:26:58,292 [9] [WARN ] [GameServer] ：Client[127.0.0.1:65428]] Connected
+2025-06-17 13:26:58,363 [9] [WARN ] [GameServer] ：Client[] DataReceived Len:30
+2025-06-17 13:26:58,365 [5] [INFO ] [GameServer] ：UserLoginRequest: User:testuser3  Pass:Abc123456
+2025-06-17 13:27:08,285 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-17 13:27:08,395 [5] [ERROR] [GameServer] ：Message handler exception:, 指定的参数已超出有效值的范围。
+参数名: index, System.Core,    在 System.Linq.Enumerable.ElementAt[TSource](IEnumerable`1 source, Int32 index)
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 162
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-17 13:27:25,827 [3] [WARN ] [GameServer] ：Client[] DataReceived Len:10
+2025-06-17 13:27:25,861 [5] [ERROR] [GameServer] ：Message handler exception:, 指定的参数已超出有效值的范围。
+参数名: index, System.Core,    在 System.Linq.Enumerable.ElementAt[TSource](IEnumerable`1 source, Int32 index)
+   在 GameServer.Services.UserService.OnGameEnter(NetConnection`1 sender, UserGameEnterRequest request) 位置 E:\UnityWorkSpace\mymmo\Src\Server\GameServer\GameServer\Services\UserSerevice.cs:行号 162
+   在 Network.MessageDistributer`1.RaiseEvent[Tm](T sender, Tm msg) 位置 E:\UnityWorkSpace\mymmo\Src\Lib\Common\Network\MessageDistributer.cs:行号 106
+2025-06-17 13:28:12,011 [3] [WARN ] [GameServer] ：Client[] Disconnected

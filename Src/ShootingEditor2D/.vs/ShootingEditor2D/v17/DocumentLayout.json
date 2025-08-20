@@ -3,7 +3,7 @@
   "WorkspaceRootPath": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\agentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\shootingeditor2d\\assets\\scripts\\agentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\agentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -11,7 +11,7 @@
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\services\\agentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\shootingeditor2d\\assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -112,7 +112,7 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\AgentClientTest.cs",
               "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\AgentClientTest.cs",
               "RelativeToolTip": "Assets\\Scripts\\AgentClientTest.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAuwBYAAABAAAAAAAAAAA==",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAuwBkAAABfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-13T07:44:41.508Z",
               "IsPinned": true,
@@ -126,7 +126,7 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\Services\\AgentService.cs",
               "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Services\\AgentService.cs",
               "RelativeToolTip": "Assets\\Scripts\\Services\\AgentService.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAAAqwDIAAAA7AAAAAAAAAA==",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAIwEEAAABGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-13T01:53:45.768Z",
               "IsPinned": true,
@@ -142,8 +142,7 @@
               "RelativeToolTip": "Assets\\Scripts\\Network\\AgentClient.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-13T06:34:43.563Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-13T06:34:43.563Z"
             },
             {
               "$type": "Document",
@@ -155,8 +154,7 @@
               "RelativeToolTip": "Assets\\Scripts\\Network\\ClientBase.cs",
               "ViewState": "AgIAAJEBAAAAAAAAAAAMwK0BAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-05T01:18:40.236Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-05T01:18:40.236Z"
             },
             {
               "$type": "Document",
@@ -168,8 +166,7 @@
               "RelativeToolTip": "Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
               "ViewState": "AgIAACEAAAAAAAAAAAAAAAMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-05T01:16:10.153Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-05T01:16:10.153Z"
             },
             {
               "$type": "Document",

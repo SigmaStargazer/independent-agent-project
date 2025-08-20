@@ -1,0 +1,214 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\gameserver\\network\\netconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\network\\netconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\gameserver\\gameserver\\services\\userserevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\services\\userserevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE169E52-A80E-4C19-B75B-823907B4ECEF}|..\\Lib\\Common\\Common.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\lib\\common\\network\\messagedispatch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\gameserver\\network\\netsession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\network\\netsession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\gameserver\\gameserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\gameserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\gameserver\\network\\netservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\network\\netservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\gameserver\\network\\extensionmethods.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\network\\extensionmethods.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}|..\\Lib\\AgentProtocol\\Protocol.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\lib\\agentprotocol\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\gameserver\\core\\vector3int.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C54695D-AC9F-455B-846D-0E865991F681}|GameServer\\GameServer.csproj|solutionrelative:gameserver\\core\\vector3int.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE169E52-A80E-4C19-B75B-823907B4ECEF}|..\\Lib\\Common\\Common.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\lib\\common\\messageextend.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\UnityWorkSpace\\mymmo\\Src\\Lib\\Common\\Network\\PackageHandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\UnityWorkSpace\\mymmo\\Src\\Lib\\Common\\Network\\MessageDistributer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UserSerevice.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Services\\UserSerevice.cs",
+              "RelativeDocumentMoniker": "GameServer\\Services\\UserSerevice.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Services\\UserSerevice.cs",
+              "RelativeToolTip": "GameServer\\Services\\UserSerevice.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAIwDQAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-16T14:10:44.291Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "GameServer.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\GameServer.cs",
+              "RelativeDocumentMoniker": "GameServer\\GameServer.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\GameServer.cs",
+              "RelativeToolTip": "GameServer\\GameServer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwBoAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-06T06:51:47.881Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MessageDispatch.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\Lib\\Common\\Network\\MessageDispatch.cs",
+              "RelativeDocumentMoniker": "..\\Lib\\Common\\Network\\MessageDispatch.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\Lib\\Common\\Network\\MessageDispatch.cs",
+              "RelativeToolTip": "..\\Lib\\Common\\Network\\MessageDispatch.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-14T08:10:09.54Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "NetSession.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\NetSession.cs",
+              "RelativeDocumentMoniker": "GameServer\\Network\\NetSession.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\NetSession.cs",
+              "RelativeToolTip": "GameServer\\Network\\NetSession.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-14T08:03:47.094Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NetConnection.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\NetConnection.cs",
+              "RelativeDocumentMoniker": "GameServer\\Network\\NetConnection.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\NetConnection.cs",
+              "RelativeToolTip": "GameServer\\Network\\NetConnection.cs",
+              "ViewState": "AgIAAN0AAAAAAAAAAAAiwOQAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-20T12:58:43.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MessageDistributer.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\mymmo\\Src\\Lib\\Common\\Network\\MessageDistributer.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\mymmo\\Src\\Lib\\Common\\Network\\MessageDistributer.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\mymmo\\Src\\Lib\\Common\\Network\\MessageDistributer.cs",
+              "RelativeToolTip": "..\\..\\..\\..\\mymmo\\Src\\Lib\\Common\\Network\\MessageDistributer.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAADcAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-06T02:15:38.242Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ExtensionMethods.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\ExtensionMethods.cs",
+              "RelativeDocumentMoniker": "GameServer\\Network\\ExtensionMethods.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\ExtensionMethods.cs",
+              "RelativeToolTip": "GameServer\\Network\\ExtensionMethods.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-20T12:58:38.222Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "NetService.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\NetService.cs",
+              "RelativeDocumentMoniker": "GameServer\\Network\\NetService.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Network\\NetService.cs",
+              "RelativeToolTip": "GameServer\\Network\\NetService.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAhwA0AAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-20T12:58:57.708Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "MessageExtend.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\Lib\\Common\\MessageExtend.cs",
+              "RelativeDocumentMoniker": "..\\Lib\\Common\\MessageExtend.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\Lib\\Common\\MessageExtend.cs",
+              "RelativeToolTip": "..\\Lib\\Common\\MessageExtend.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-14T08:04:20.738Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Vector3Int.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Core\\Vector3Int.cs",
+              "RelativeDocumentMoniker": "GameServer\\Core\\Vector3Int.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\GameServer\\GameServer\\Core\\Vector3Int.cs",
+              "RelativeToolTip": "GameServer\\Core\\Vector3Int.cs",
+              "ViewState": "AgIAAOQAAAAAAAAAAAAvwPEAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-14T08:09:55.167Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "message.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\Lib\\AgentProtocol\\message.cs",
+              "RelativeDocumentMoniker": "..\\Lib\\AgentProtocol\\message.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\Lib\\AgentProtocol\\message.cs",
+              "RelativeToolTip": "..\\Lib\\AgentProtocol\\message.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwUAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-15T00:54:11.714Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PackageHandler.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\mymmo\\Src\\Lib\\Common\\Network\\PackageHandler.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\mymmo\\Src\\Lib\\Common\\Network\\PackageHandler.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\mymmo\\Src\\Lib\\Common\\Network\\PackageHandler.cs",
+              "RelativeToolTip": "..\\..\\..\\..\\mymmo\\Src\\Lib\\Common\\Network\\PackageHandler.cs",
+              "ViewState": "AgIAAEgAAAAAAAAAAAASwFUAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-20T12:59:35.475Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
