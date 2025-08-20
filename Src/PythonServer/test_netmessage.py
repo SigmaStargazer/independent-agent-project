@@ -3,6 +3,7 @@ import os
 import asyncio
 
 from network.servers import AgentServerNetMessage
+from network import message_pb2
 from agent_framwork.managers.agent_manager import AgentManager
 from agent_framwork.systems.time_system import TimeSystem
 
@@ -20,12 +21,12 @@ server = AgentServerNetMessage(port_config_file=PORT_CONFIG_FILE)
 # 定义消息处理函数
 # ======================
 
-@server.on_message("agentCreateRequest")
+@server.on_message(message_pb2.AgentCreateRequest)
 async def handle_agent_create_request(msg, context):
     name = msg.name
     desc = msg.desc
     print(f"创建Agent: {name}: {desc}")
-    response = context['server'].message_types['AgentCreateResponse']() 
+    response = message_pb2.AgentCreateResponse()
     try:
         AgentManager().add_agent(name=name, description=desc)
         response.success = True
@@ -37,11 +38,11 @@ async def handle_agent_create_request(msg, context):
         print(f"创建Agent失败: {str(e)}")
         await context['server'].send_message(response, context)
 
-@server.on_message("sceneStartRequest")
+@server.on_message(message_pb2.SceneStartRequest)
 async def handle_scene_start_request(msg, context):
     map_id = msg.map_id
     print(f"启动场景: {map_id}")
-    response = context['server'].message_types['SceneStartResponse']()
+    response = message_pb2.SceneStartResponse()
     try:
         AgentManager().start()
         await TimeSystem().aset_speed(1440)
@@ -55,7 +56,7 @@ async def handle_scene_start_request(msg, context):
         print(f"场景启动失败: {str(e)}")
         await context['server'].send_message(response, context)
 
-@server.on_message("userSendMessageRequest")
+@server.on_message(message_pb2.UserSendMessageRequest)
 async def handle_user_send_msg_request(msg, context):
     agent = msg.agent
     user_message = msg.user_message

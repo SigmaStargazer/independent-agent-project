@@ -47,8 +47,9 @@ async def communicate_to_user(agent: Annotated[str, InjectedState("name")], mess
         message(str): 你想要发送的消息
     """
     from network.servers import AgentServerNetMessage
+    from network import message_pb2
     try:
-        request = AgentServerNetMessage().message_types['AgentSendMessageRequest']()
+        request = message_pb2.AgentSendMessageRequest()
         request.agent = agent
         request.ai_message = message
         await AgentServerNetMessage().broadcast_message(request)
