@@ -91,7 +91,10 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 async def chatbot(state: State):
-    response = await chain.ainvoke({"messages": state["messages"], "name": state["name"], "description": state["description"]})
+    response = await chain.ainvoke({
+        "messages": state["messages"], 
+        "name": state["name"], 
+        "description": state["description"]})
     return {"messages": [response]}
 
 graph_builder.add_node("chatbot", chatbot)
@@ -108,10 +111,10 @@ graph_builder.add_edge(START, "chatbot")
 
 # Agent类
 class Agent:
-    def __init__(self, name: str, description: str, memory: MemorySaver):
+    def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
-        self.memory = memory
+        self.memory = MemorySaver()
 
         self.config = {"configurable": {"thread_id": self.name}}
         self.queue = asyncio.Queue()  # 每个智能体都有自己的消息队列

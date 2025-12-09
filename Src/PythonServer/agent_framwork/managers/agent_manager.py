@@ -1,9 +1,8 @@
 import asyncio
-from langgraph.checkpoint.memory import MemorySaver
 
 from agent_framwork.base.singleton import singleton
-from agent_framwork.agents.agent import Agent
-
+# from agent_framwork.agents.agent import Agent
+from agent_framwork.agents.agent_with_mem import Agent
 
 @singleton
 class AgentManager:
@@ -14,14 +13,16 @@ class AgentManager:
     def __init__(self):
         self.agents = {}
         self.processing_tasks = {}
-        self.memory = MemorySaver()
 
     def add_agent(self, name:str, description:str):
         """
         添加agent到agent manager
         """
-        agent = Agent(name=name, description=description, memory=self.memory)
-        self.agents[agent.name] = agent
+        if self.agents.get(name):
+            print(f"[Agent Manager]: Agent {name}已存在")
+        else:
+            agent = Agent(name=name, description=description)
+            self.agents[agent.name] = agent
 
     def start(self):
         """

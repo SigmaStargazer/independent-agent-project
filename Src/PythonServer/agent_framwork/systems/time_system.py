@@ -98,14 +98,20 @@ class TimeSystem:
             self.running = True
             self._task = asyncio.create_task(self._atime_loop())
 
-    async def aget_current_time_str(self):
+    async def aget_current_time(self, to_str = False):
         async with self._lock:
             if self.virtual_time is None:
                 return "未启动"
             if not self.running:
-                return self.virtual_time.strftime('%Y-%m-%d %H:%M:%S')
+                if not to_str:
+                    return self.virtual_time.strftime("【%Y年%m月%d日 %H:%M】")
+                else:
+                    return self.virtual_time
             current_real_time = asyncio.get_event_loop().time()
             elapsed_real = current_real_time - self.real_start_time
             virtual_elapsed = elapsed_real * self.speed
             current_time = self.virtual_time + timedelta(seconds=virtual_elapsed)
-            return current_time.strftime('%Y-%m-%d %H:%M:%S')
+            if not to_str:
+                return current_time.strftime("【%Y年%m月%d日 %H:%M】")
+            else:
+                return current_time
