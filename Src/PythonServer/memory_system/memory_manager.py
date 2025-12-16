@@ -1,127 +1,110 @@
 import asyncio
+import kuzu
+from agent_framwork.base.singleton import singleton
 
+# Graphiti 核心组件
 from graphiti_core import Graphiti
-from graphiti_core.driver.kuzu_driver import KuzuDriver # kuzu配置
-
+from graphiti_core.driver.kuzu_driver import KuzuDriver
 from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
 from graphiti_core.llm_client.config import LLMConfig
 from graphiti_core.embedder.openai import OpenAIEmbedder, OpenAIEmbedderConfig
 from graphiti_core.cross_encoder.openai_reranker_client import OpenAIRerankerClient
 
-from agent_framwork.base.singleton import singleton
-import kuzu
-
+# 配置参数
 model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
 model_name = "qwen-max"
 embedding_model_name = "text-embedding-v4"
 reranker_model_name = "gte-rerank-v2"
-
-# 数据库名
 db_name = "db/graphiti.kuzu"
 
+class _SharedKuzuDriver(KuzuDriver):
+    def __init__(self, db_instance, conn_instance):
+        # 1. 屏蔽父类初始化，防止重复打开文件
+        # 2. 注入全局 DB 和 局部 Conn
+        self.db = db_instance
+        self.client = conn_instance
+
 @singleton
-class MemoryManager:
+class MemorySystem:
     def __init__(self):
-        self.graphiti = None # graphiti
+        self._llm_config = LLMConfig(
+                api_key=model_api_key, model=model_name,
+                small_model=model_name, base_url=model_api_base
+            )
+        self._kuzu_db = None       # 全局 DB
+        self._embedder = None
+        self._reranker = None
         self._initialized = False
         self._init_lock = None
-        self.kuzu_driver = None
-        self.conn = None
-
-    @property
-    def connection(self):
-        if self.conn is None:
-            raise RuntimeError("MemoryManager 未初始化！请先调用 await initialize()")
-        return self.conn
 
     async def initialize(self):
-        if self._initialized:
-            return self
-
-        if self._init_lock is None:
-            self._init_lock = asyncio.Lock()
+        if self._initialized: return self
+        if self._init_lock is None: self._init_lock = asyncio.Lock()
 
         async with self._init_lock:
-            if self._initialized:
-                return self
-
-            llm_config = LLMConfig(
-                api_key=model_api_key,
-                model=model_name,
-                small_model=model_name,
-                base_url=model_api_base,
-            )
-
-            self.kuzu_driver = KuzuDriver(
-                db=db_name
-            )
-            self.conn = self.kuzu_driver.client
-
-            self.graphiti = Graphiti(
-                graph_driver=self.kuzu_driver,
-                llm_client=OpenAIGenericClient(config=llm_config),
-                embedder=OpenAIEmbedder(
-                    config=OpenAIEmbedderConfig(
-                        api_key=model_api_key,
-                        embedding_model=embedding_model_name,
-                        base_url=model_api_base,
-                    )
-                ),
-                cross_encoder=OpenAIRerankerClient(
-                    config=LLMConfig(
-                        api_key=model_api_key,
-                        model=reranker_model_name,
-                        base_url=model_api_base
-                    )
+            if self._initialized: return self
+            
+            # 1. 初始化所有依赖组件
+            self._embedder = OpenAIEmbedder(
+                config=OpenAIEmbedderConfig(
+                    api_key=model_api_key, embedding_model=embedding_model_name,
+                    base_url=model_api_base
                 )
             )
-            await self._init_graphiti()
+            self._reranker = OpenAIRerankerClient(
+                config=LLMConfig(
+                    api_key=model_api_key, model=reranker_model_name,
+                    base_url=model_api_base
+                )
+            )
+
+            # 2. 初始化全局 DB
+            print("💾 [MemorySystem] 正在挂载全局数据库...")
+            self._kuzu_db = kuzu.Database(db_name)
+            
+            # 3. 首次建索引 (内部封装，外部无感)
+            temp_conn = kuzu.AsyncConnection(self._kuzu_db)
+            temp_driver = _SharedKuzuDriver(self._kuzu_db, temp_conn)
+            print("🏗️ [MemorySystem] 正在检查/创建表结构 (Schema)...")
+            try:
+                # 这一步会执行 CREATE NODE TABLE IF NOT EXISTS ...
+                temp_driver.setup_schema() 
+            except Exception as e:
+                print(f"⚠️ Schema setup warning (可忽略): {e}")
+            temp_graphiti = Graphiti(
+                graph_driver=temp_driver,
+                llm_client=OpenAIGenericClient(config=self._llm_config),
+                embedder=self._embedder,
+                cross_encoder=self._reranker
+            )
+            print("⏳ [MemorySystem] 检查数据库索引...")
+            await temp_graphiti.build_indices_and_constraints()
+            print("✅ [MemorySystem] 数据库完全就绪")
+            
             self._initialized = True
         return self
 
-    async def _init_graphiti(self):
-        """初始化 Graphiti 的索引和约束"""
-        try:
-            await self.graphiti.build_indices_and_constraints()
-            print("✅ Graphiti_kuzu索引和约束已构建完成")
-        except Exception as e:
-            print(f"❌ 初始化失败: {e}")
-            raise
-
-    async def close(self):
-        """显式关闭资源，释放 Kuzu 文件锁"""
-        import gc # 引入垃圾回收
-
+    # 【核心修改】直接返回组装好的一对对象
+    def create_session(self):
+        """
+        工厂方法：为 Agent 创建一个新的会话。
+        返回: (kuzu.Connection, Graphiti)
+        """
         if not self._initialized:
-            return
+            raise RuntimeError("MemoryManager 未初始化")
 
-        print("🛑 [1/3] 正在关闭连接池...")
-        try:
-            # 1. 显式关闭 AsyncConnection (这会停止后台线程池)
-            if self.conn:
-                if hasattr(self.conn, 'close'):
-                    self.conn.close() # 这一步至关重要，它会等待线程结束
-            
-            # 2. 切断引用链 (让引用计数归零)
-            self.conn = None
-            
-            # 如果 kuzu_driver 持有 db，也要手动切断
-            if self.kuzu_driver:
-                self.kuzu_driver.db = None # 释放 Database 对象引用
-                self.kuzu_driver = None
-            
-            self.graphiti = None
-            self._db = None 
+        # 1. 创建属于这个会话的独立连接
+        conn = kuzu.AsyncConnection(self._kuzu_db)
+        # 2. 内部组装 Graphiti
+        driver = _SharedKuzuDriver(self._kuzu_db, conn)
 
-            # 3. 【核心绝招】强制垃圾回收
-            # Python 的 GC 是懒惰的，必须手动踢一脚
-            # 只有 Database 对象被 GC 销毁，文件锁才会释放
-            gc.collect()
-            
-            self._initialized = False
-            print("✅ [2/3] Python 对象引用已清理")
-            print("✅ [3/3] 垃圾回收完成，数据库锁应已释放")
-            
-        except Exception as e:
-            print(f"⚠️ 关闭资源时出错: {e}")
+        graphiti = Graphiti(
+            graph_driver=driver,
+            llm_client=OpenAIGenericClient(config=self._llm_config),
+            embedder=self._embedder,
+            cross_encoder=self._reranker
+        )
+        
+        # 3. 同时返回两者
+        return conn, graphiti

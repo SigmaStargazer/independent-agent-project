@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableConfig
 
 from typing import Annotated, Literal
 from typing_extensions import TypedDict
@@ -16,7 +16,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 
 # from contextlib import ExitStack
 from langgraph.checkpoint.memory import MemorySaver
-from memory_system.memory_manager import MemoryManager
+from memory_system.memory_manager import MemorySystem
 
 from graphiti_core.nodes import EpisodeType
 from graphiti_core.search import search_config_recipes
@@ -25,6 +25,9 @@ from agent_framwork.tools import base_tools
 from agent_framwork.systems.time_system import TimeSystem
 
 from tools.perf_tool import perf_print
+
+from graphiti_core import Graphiti
+import kuzu
 
 # # 千问
 # model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -99,7 +102,7 @@ chain = (
     )
 
 # 记忆管理器
-memory_manager = MemoryManager()
+memory_manager = MemorySystem()
 
 # 定义状态
 class State(TypedDict):
@@ -114,7 +117,7 @@ class State(TypedDict):
     logged_tool_call_ids: list[str] # 用于记忆工具调用时，去重tool_message中重试的部分
 
 # 定义节点
-async def search_memory(state: State):
+async def search_memory(state: State, config: RunnableConfig):
     """
     根据用户问题，检索事实记忆和情景记忆
     """
@@ -122,14 +125,18 @@ async def search_memory(state: State):
     group_id = state['group_id']
     limit = 1 # 检索的记忆数量
 
+    configuration = config.get("configurable", {})
+    graphiti = configuration.get("graphiti")
+    conn = configuration.get("conn")
+
     mem_fact = ""
     mem_episode = ""
     
-    perf_print("memory_manager初始化开始")
-    await memory_manager.initialize()  # 确保初始化完成
+    # perf_print("memory_manager初始化开始")
+    # await memory_manager.initialize()  # 确保初始化完成
 
     perf_print("rag事实记忆开始")
-    memories = await memory_manager.graphiti.search(
+    memories = await graphiti.search(
         query, 
         # COMBINED 检索能一次性获取事实（edges）、实体（nodes）和主题（communities）。
         # RRF速度快
@@ -150,7 +157,7 @@ async def search_memory(state: State):
     perf_print("rag情景记忆开始")
     time_key = "valid_at" # 表里的时间key
     episodes_uuid_list = []
-    memories = await memory_manager.graphiti._search(
+    memories = await graphiti._search(
         query, 
         config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
         group_ids=[group_id]
@@ -168,7 +175,7 @@ async def search_memory(state: State):
     # print(cypher)
     # 检索episodes的实际内容
     try:
-        response = await memory_manager.conn.execute(cypher)
+        response = await conn.execute(cypher)
         for row in response.rows_as_dict():
             memory = row['n']
             mem_episode += f"情景: \"{memory['content']}\"\n"
@@ -251,7 +258,7 @@ async def cache_tool_mem(state: State):
     for tool_call in last_ai_message.tool_calls:
         tid = tool_call["id"]
         if tid not in logged_ids:
-            cur_time = await TimeSystem().aget_current_time(to_str = False)
+            cur_time = await TimeSystem().aget_current_time(to_str = True)
             new_entries.append(f"{cur_time}{state['name']} 使用了 {tool_call['name']}，输入为 {tool_call['args']}")
             new_ids.append(tid)
 
@@ -264,18 +271,20 @@ async def cache_tool_mem(state: State):
         "logged_tool_call_ids": list(logged_ids)  # 注意：set 不能直接存，需转 list 或保持为 set（取决于 state schema）
     }
 
-async def save_memory(state: State):
+async def save_memory(state: State, config: RunnableConfig):
     """
     将所有缓存记忆存入graphiti
     """
     mem_to_save = state['mem_to_save']
+    configuration = config.get("configurable", {})
+    graphiti = configuration.get("graphiti")
     
     perf_print("存储记忆开始")
     print("【待存储记忆start】")
     print(mem_to_save)
     print("【待存储记忆end】")
-    curtime = await TimeSystem().aget_current_time()
-    await MemoryManager().graphiti.add_episode(
+    curtime = await TimeSystem().aget_current_time(to_str=False)
+    await graphiti.add_episode(
         name=f"{state['name']}_mem_{curtime}",
         episode_body=mem_to_save,
         source=EpisodeType.text,
@@ -333,12 +342,21 @@ class Agent:
     def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
-        
+
         self.group_id = name.encode('utf-8').hex()
         # 需要将group_id转成中文，可使用：bytes.fromhex(group_id).decode('utf-8')
 
+        # 记忆管理
+        self.conn, self.graphiti = MemorySystem().create_session()
         self.memory = MemorySaver()
-        self.config = {"configurable": {"thread_id": self.name}}
+        self.config = {
+            "configurable": {
+                "thread_id": self.name,
+                "conn": self.conn,
+                "graphiti": self.graphiti
+                }
+                }
+        
 
         self.queue = asyncio.Queue()  # 每个智能体都有自己的消息队列
 
@@ -378,7 +396,8 @@ class Agent:
                                 response = await self.graph.ainvoke({"messages": [("user", full_messages)], 
                                                                     "name": self.name, 
                                                                     "description": self.description,
-                                                                    "group_id": self.group_id}, 
+                                                                    "group_id": self.group_id,
+                                                                    }, 
                                                                     self.config)
                                 output = response["messages"][-1].content
                                 print(f"[{self.name}]Response: {output}")

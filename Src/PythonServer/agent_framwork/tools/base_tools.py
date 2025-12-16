@@ -1,6 +1,7 @@
 from langchain_core.tools import tool
 from typing_extensions import Annotated
 from langgraph.prebuilt import InjectedState
+from langchain_core.runnables import RunnableConfig
 
 from graphiti_core.search import search_config_recipes
 
@@ -124,9 +125,11 @@ async def remove_alarm(agent: Annotated[str, InjectedState("name")], alarm_id: i
 ====记忆====
 """
 @tool
-async def search_fact_memories(name: Annotated[str, InjectedState('name')], 
-group_id: Annotated[str, InjectedState('group_id')], 
-query: str):
+async def search_fact_memories(
+    name: Annotated[str, InjectedState('name')], 
+    group_id: Annotated[str, InjectedState('group_id')],
+    config: RunnableConfig,
+    query: str):
     """
     寻找事实记忆
     Args:
@@ -134,13 +137,16 @@ query: str):
     Return:
         str: 根据回忆的线索找到的事实记忆。如果想知道事实生效或失效的具体情况，你需要再根据时间去回忆当时的情景
     """
-    from memory_system.memory_manager import MemoryManager
+    # from memory_system.memory_manager import MemorySystem
     # graphiti = await init_graphiti()
-    memory_manager = MemoryManager()
-    await memory_manager.initialize()  # 确保初始化完成
+    # memory_manager = MemorySystem()
+    # await memory_manager.initialize()  # 确保初始化完成
+    configuration = config.get("configurable", {})
+    graphiti = configuration.get("graphiti")
+
     search_config = search_config_recipes.COMBINED_HYBRID_SEARCH_RRF
     search_config.limit = 10
-    memories = await memory_manager.graphiti._search(query, 
+    memories = await graphiti._search(query, 
     config=search_config, 
     group_ids=[group_id])
 
@@ -167,12 +173,14 @@ query: str):
     return mem_longtime
 
 @tool
-async def search_episode_memories(name: Annotated[str, InjectedState('name')], 
-group_id: Annotated[str, InjectedState('group_id')], 
-query: str = "",
-start_time: str = "",
-end_time: str = "",
-limit: int = 10):
+async def search_episode_memories(
+    name: Annotated[str, InjectedState('name')], 
+    group_id: Annotated[str, InjectedState('group_id')], 
+    config: RunnableConfig,
+    query: str = "",
+    start_time: str = "",
+    end_time: str = "",
+    limit: int = 10):
     """
     寻找情景记忆。可根据情景的大致描述、情景发生的时间段等信息进行寻找。
     * query、start_time、end_time均非必填，但需至少一项不为空，作为线索检索记忆。
@@ -187,19 +195,23 @@ limit: int = 10):
     """
     if not (query or start_time or end_time):
         return "(query, start_time, end_time)均为空！请至少提供一条线索以检索记忆"
+
+    configuration = config.get("configurable", {})
+    conn = configuration.get("conn")
+    graphiti = configuration.get("graphiti")
     
-    from memory_system.memory_manager import MemoryManager
+    # from memory_system.memory_manager import MemorySystem
     time_key = "valid_at" # 表里的时间key
 
-    memory_manager = MemoryManager()
-    await memory_manager.initialize()  # 确保初始化完成
+    # memory_manager = MemorySystem()
+    # await memory_manager.initialize()  # 确保初始化完成
 
     # 设置事件筛选条件:
     condition = "" # cypher语句中的筛选条件
     mem_desc = "" # 待存储到记忆的描述
     # 1. 根据episode_desc筛选uuid
     if query:
-        memories = await memory_manager.graphiti._search(query, 
+        memories = await graphiti._search(query, 
         config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
         group_ids=[group_id])
         # 向量匹配，寻找episodes的uuid
@@ -237,7 +249,7 @@ limit: int = 10):
     # 检索episodes的实际内容
     mem_longtime = ""
     try:
-        response = await memory_manager.conn.execute(query)
+        response = await conn.execute(query)
         for row in response.rows_as_dict():
             memory = row['n']
             mem_longtime += f"情景: \"{memory['content']}\"\n"

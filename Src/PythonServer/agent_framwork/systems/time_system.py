@@ -101,9 +101,12 @@ class TimeSystem:
     async def aget_current_time(self, to_str = False):
         async with self._lock:
             if self.virtual_time is None:
-                return "未启动"
+                if to_str:
+                    return "未启动"
+                else:
+                    return None
             if not self.running:
-                if not to_str:
+                if to_str:
                     return self.virtual_time.strftime("【%Y年%m月%d日 %H:%M】")
                 else:
                     return self.virtual_time
@@ -111,7 +114,7 @@ class TimeSystem:
             elapsed_real = current_real_time - self.real_start_time
             virtual_elapsed = elapsed_real * self.speed
             current_time = self.virtual_time + timedelta(seconds=virtual_elapsed)
-            if not to_str:
+            if to_str:
                 return current_time.strftime("【%Y年%m月%d日 %H:%M】")
             else:
                 return current_time
