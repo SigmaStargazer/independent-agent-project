@@ -71,7 +71,7 @@ async def get_agent_list() -> list:
 @tool
 async def get_cur_time() -> str:
     """获取当前时间"""
-    now = await TimeSystem().aget_current_time_str()
+    now = await TimeSystem().aget_current_time()
     return now
 
 # 闹钟相关的工具
@@ -88,7 +88,7 @@ async def add_alarm(agent: Annotated[str, InjectedState("name")],hour:int, minut
     """
     from agent_framwork.managers.agent_manager import AgentManager
     async def call_back_func(user_id, *args):
-        # now = await TimeSystem().aget_current_time_str()
+        # now = await TimeSystem().aget_current_time()
         await AgentManager().agents[user_id].asend_message(f"[{description}]闹钟已响！")
         return None
     alarm_id = await AlarmSystem().aadd_alarm(user_id=agent, hour=hour, minute=minute, repeat=repeat, description=description)
@@ -137,7 +137,7 @@ query: str):
     from memory_system.memory_manager import MemoryManager
     # graphiti = await init_graphiti()
     memory_manager = MemoryManager()
-    await memory_manager.initialize()  # 确保初始化完成
+    # await memory_manager.initialize()  # 确保初始化完成
     search_config = search_config_recipes.COMBINED_HYBRID_SEARCH_RRF
     search_config.limit = 10
     memories = await memory_manager.graphiti._search(query, 
@@ -192,7 +192,7 @@ limit: int = 10):
     time_key = "valid_at" # 表里的时间key
 
     memory_manager = MemoryManager()
-    await memory_manager.initialize()  # 确保初始化完成
+    # await memory_manager.initialize()  # 确保初始化完成
 
     # 设置事件筛选条件:
     condition = "" # cypher语句中的筛选条件

@@ -99,19 +99,31 @@ class TimeSystem:
             self._task = asyncio.create_task(self._atime_loop())
 
     async def aget_current_time(self, to_str = False):
+        """
+        获取当前虚拟时间
+        Args:
+            to_str: 是否返回字符串格式，默认False。
+                如果为True，则返回字符串格式；否则返回datetime对象。如果未启动，则返回None。
+        Returns:
+            datetime: 当前虚拟时间
+            str: 当前虚拟时间字符串格式，格式为/"%Y年%m月%d日 %H:%M/"。如果未启动，则返回"未启动"
+        """
         async with self._lock:
             if self.virtual_time is None:
-                return "未启动"
+                if to_str:
+                    return "未启动"
+                else:
+                    return None
             if not self.running:
-                if not to_str:
-                    return self.virtual_time.strftime("【%Y年%m月%d日 %H:%M】")
+                if to_str:
+                    return self.virtual_time.strftime("%Y年%m月%d日 %H:%M")
                 else:
                     return self.virtual_time
             current_real_time = asyncio.get_event_loop().time()
             elapsed_real = current_real_time - self.real_start_time
             virtual_elapsed = elapsed_real * self.speed
             current_time = self.virtual_time + timedelta(seconds=virtual_elapsed)
-            if not to_str:
-                return current_time.strftime("【%Y年%m月%d日 %H:%M】")
+            if to_str:
+                return current_time.strftime("%Y年%m月%d日 %H:%M")
             else:
                 return current_time

@@ -125,8 +125,8 @@ async def search_memory(state: State):
     mem_fact = ""
     mem_episode = ""
     
-    perf_print("memory_manager初始化开始")
-    await memory_manager.initialize()  # 确保初始化完成
+    # perf_print("memory_manager初始化开始")
+    # await memory_manager.initialize()  # 确保初始化完成
 
     perf_print("rag事实记忆开始")
     memories = await memory_manager.graphiti.search(
@@ -184,7 +184,7 @@ async def search_memory(state: State):
     # 需要存储接收到的用户信息
     perf_print("缓存记忆开始")
     cur_time = await TimeSystem().aget_current_time(to_str = True)
-    mem_to_save = f"{cur_time}{state['name']}收到信息: {query}"
+    mem_to_save = f"[{cur_time}]{state['name']}收到信息: {query}"
     perf_print("缓存记忆完成")
     
     print(mem_to_save) # 测试
@@ -197,7 +197,7 @@ async def search_memory(state: State):
 async def chatbot(state: State):
     mem_to_save = state['mem_to_save']
 
-    cur_time = await TimeSystem().aget_current_time(to_str = False)
+    cur_time = await TimeSystem().aget_current_time()
     prompt = await prompt_template.ainvoke({"messages": state['messages'],
                                      "name": state['name'],
                                      "description": state['description'],
@@ -218,7 +218,7 @@ async def chatbot(state: State):
     if response.content.strip(): # 工具调用时，response.content为空
         perf_print("缓存记忆开始")
         cur_time = await TimeSystem().aget_current_time(to_str = True)
-        mem_to_save += "\n" + f"{cur_time}{state['name']}心想: {response.content}"
+        mem_to_save += "\n" + f"[{cur_time}]{state['name']}心想: {response.content}"
         perf_print("缓存记忆完成")
         # print(mem_to_save)
     
@@ -251,8 +251,8 @@ async def cache_tool_mem(state: State):
     for tool_call in last_ai_message.tool_calls:
         tid = tool_call["id"]
         if tid not in logged_ids:
-            cur_time = await TimeSystem().aget_current_time(to_str = False)
-            new_entries.append(f"{cur_time}{state['name']} 使用了 {tool_call['name']}，输入为 {tool_call['args']}")
+            cur_time = await TimeSystem().aget_current_time(to_str = True)
+            new_entries.append(f"[{cur_time}]{state['name']} 使用了 {tool_call['name']}，输入为 {tool_call['args']}")
             new_ids.append(tid)
 
     if new_entries:
@@ -373,20 +373,20 @@ class Agent:
                         print(f"[{self.name}]Processing message: {full_messages}")
                         ## 重试
                         # for i in range(3):
-                        while True:
-                            try:
-                                response = await self.graph.ainvoke({"messages": [("user", full_messages)], 
-                                                                    "name": self.name, 
-                                                                    "description": self.description,
-                                                                    "group_id": self.group_id}, 
-                                                                    self.config)
-                                output = response["messages"][-1].content
-                                print(f"[{self.name}]Response: {output}")
-                                full_messages = ""
-                                break
-                            except Exception as e:
-                                print(f"[{self.name}]Error occurred: {e}")
-                                await asyncio.sleep(1)
+                        # while True:
+                        try:
+                            response = await self.graph.ainvoke({"messages": [("user", full_messages)], 
+                                                                "name": self.name, 
+                                                                "description": self.description,
+                                                                "group_id": self.group_id}, 
+                                                                self.config)
+                            output = response["messages"][-1].content
+                            print(f"[{self.name}]Response: {output}")
+                            full_messages = ""
+                            # break
+                        except Exception as e:
+                            print(f"[{self.name}]Error occurred: {e}")
+                            await asyncio.sleep(1)
                                 # if i < 2:
                                 #     time.sleep(2)  # 等待2秒再重试
                     else:

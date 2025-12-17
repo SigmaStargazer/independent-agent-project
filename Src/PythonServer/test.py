@@ -3,6 +3,7 @@ import asyncio
 from agent_framwork.managers.agent_manager import AgentManager
 from agent_framwork.systems.time_system import TimeSystem
 from agent_framwork.systems.alarm_system import AlarmSystem
+from memory_system.memory_manager import MemoryManager
 
 # async def async_callback(user_id, alarm_id, current_time):
 #     print(f"[ASYNC] 用户 {user_id} 的闹钟 {alarm_id} 被触发 @ {current_time}")
@@ -10,24 +11,64 @@ from agent_framwork.systems.alarm_system import AlarmSystem
 #     print("异步回调完成")
 
 async def main():
+    # """
+    # 记忆寻回
+    # """
+    # await MemorySystem().initialize()
+    
+    # AgentManager().add_agent(name="小明", description="是一个帮助机器人")
+    # # AgentManager().add_agent(name="小红", description="是用户的秘书")
+    # AgentManager().start()
+
+    # await TimeSystem().aset_speed(1440)
+    # await TimeSystem().astart_time(year=2016,month=1,day=1)
+
+    # await AgentManager().agents["小明"].asend_message('来自用户: 小红是不是llm工程师？')
+
+    # await asyncio.sleep(300)
+    # AgentManager().finish()
+
     """
-    闹钟删除 测试2: 删除不存在的闹钟id
+    记忆存储
     """
+    await MemoryManager().initialize()
+    
     AgentManager().add_agent(name="小明", description="是一个帮助机器人")
-    AgentManager().add_agent(name="小红", description="是用户的秘书")
+    # AgentManager().add_agent(name="小红", description="是用户的秘书")
     AgentManager().start()
 
     await TimeSystem().aset_speed(1440)
     await TimeSystem().astart_time(year=2016,month=1,day=1)
 
-    await AgentManager().agents["小明"].asend_message('闹个每天8点的起床铃，9点的上班铃声')
+    await AgentManager().agents["小明"].asend_message('来自用户: 小红是公司的llm工程师')
 
     await asyncio.sleep(1)
 
-    await AgentManager().agents["小明"].asend_message('8点的起床铃删了吧，闹钟id为4的闹钟也删了')
+    await AgentManager().agents["小明"].asend_message('来自用户: 小红转岗为Agent工程师了')
 
-    await asyncio.sleep(60)
+    await asyncio.sleep(300)
     AgentManager().finish()
+
+    # """
+    # 闹钟删除 测试2: 删除不存在的闹钟id
+    # """
+    # await MemorySystem().initialize()
+
+    # AgentManager().add_agent(name="小明", description="是一个帮助机器人")
+    # AgentManager().add_agent(name="小红", description="是用户的秘书")
+    # AgentManager().start()
+
+    # await TimeSystem().aset_speed(1440)
+    # await TimeSystem().astart_time(year=2016,month=1,day=1)
+
+    # await AgentManager().agents["小明"].asend_message('闹个每天8点的起床铃，9点的上班铃声')
+
+    # await asyncio.sleep(1)
+
+    # await AgentManager().agents["小明"].asend_message('8点的起床铃删了吧，闹钟id为4的闹钟也删了')
+
+    # await asyncio.sleep(60)
+    # AgentManager().finish()
 
     # """
     # 闹钟删除 测试

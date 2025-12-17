@@ -123,7 +123,7 @@ class Agent:
         print(f"[{self.name}]Agent is created.")
 
     async def asend_message(self, message: str):
-        now = await TimeSystem().aget_current_time_str()
+        now = await TimeSystem().aget_current_time(to_str = True)
         if now == "未启动":
             print(f"[{self.name}]Get message: {message}")
             await self.queue.put(message)
