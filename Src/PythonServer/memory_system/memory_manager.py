@@ -62,9 +62,23 @@ class MemorySystem:
             # 2. 初始化全局 DB
             print("💾 [MemorySystem] 正在挂载全局数据库...")
             self._kuzu_db = kuzu.Database(db_name)
+
+            # 必须在使用 Graphiti 之前加载 FTS 扩展
+            print("🔌 [MemorySystem] 正在加载 FTS 扩展...")
+            _init_conn = kuzu.AsyncConnection(self._kuzu_db)
+            try:
+                # 安装 FTS (只需运行一次，但多次运行无害)
+                await _init_conn.execute("INSTALL FTS")
+                # 加载 FTS (每次启动 DB 都需要)
+                await _init_conn.execute("LOAD EXTENSION FTS")
+                print("✅ [MemorySystem] FTS 扩展加载成功")
+            except Exception as e:
+                print(f"❌ [MemorySystem] FTS 扩展加载失败: {e}")
+                raise e
             
             # 3. 首次建索引 (内部封装，外部无感)
-            temp_conn = kuzu.AsyncConnection(self._kuzu_db)
+            # 强制限制最大并发查询数为 1，确保串行执行写操作
+            temp_conn = kuzu.AsyncConnection(self._kuzu_db, max_concurrent_queries=1)
             temp_driver = _SharedKuzuDriver(self._kuzu_db, temp_conn)
             print("🏗️ [MemorySystem] 正在检查/创建表结构 (Schema)...")
             try:
@@ -95,7 +109,8 @@ class MemorySystem:
             raise RuntimeError("MemoryManager 未初始化")
 
         # 1. 创建属于这个会话的独立连接
-        conn = kuzu.AsyncConnection(self._kuzu_db)
+        # 限制并发数为 1，降低多 Agent 写入冲突的概率
+        conn = kuzu.AsyncConnection(self._kuzu_db, max_concurrent_queries=1)
         # 2. 内部组装 Graphiti
         driver = _SharedKuzuDriver(self._kuzu_db, conn)
 
