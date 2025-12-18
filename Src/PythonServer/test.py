@@ -42,7 +42,7 @@ async def main():
 
     await AgentManager().agents["小明"].asend_message('来自用户: 小红是公司的llm工程师')
 
-    await asyncio.sleep(1)
+    await asyncio.sleep(30)
 
     await AgentManager().agents["小明"].asend_message('来自用户: 小红转岗为Agent工程师了')
 
