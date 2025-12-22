@@ -393,3 +393,11 @@ class Agent:
                         await asyncio.sleep(0.1)
         except asyncio.CancelledError:
             print(f"[{self.name}]Processing task has been cancelled.")
+
+    async def clear_langgraph_memory(self):
+        """删除 LangGraph MemorySaver 中的对话状态"""
+        # 创建新的 MemorySaver 实例替换旧的
+        self.memory = MemorySaver()
+        # 重新编译 graph 以应用新的 checkpointer
+        self.graph = graph_builder.compile(checkpointer=self.memory)
+        print(f"[{self.name}] LangGraph 对话记忆已清空")

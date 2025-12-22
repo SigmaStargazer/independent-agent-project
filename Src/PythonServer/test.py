@@ -11,25 +11,8 @@ from memory_system.memory_manager import MemoryManager
 #     print("异步回调完成")
 
 async def main():
-    # """
-    # 记忆寻回
-    # """
-    # await MemorySystem().initialize()
-    
-    # AgentManager().add_agent(name="小明", description="是一个帮助机器人")
-    # # AgentManager().add_agent(name="小红", description="是用户的秘书")
-    # AgentManager().start()
-
-    # await TimeSystem().aset_speed(1440)
-    # await TimeSystem().astart_time(year=2016,month=1,day=1)
-
-    # await AgentManager().agents["小明"].asend_message('来自用户: 小红是不是llm工程师？')
-
-    # await asyncio.sleep(300)
-    # AgentManager().finish()
-
     """
-    记忆存储
+    记忆寻回
     """
     await MemoryManager().initialize()
     
@@ -38,16 +21,33 @@ async def main():
     AgentManager().start()
 
     await TimeSystem().aset_speed(1440)
-    await TimeSystem().astart_time(year=2016,month=1,day=1)
+    await TimeSystem().astart_time(year=2016,month=2,day=1)
 
-    await AgentManager().agents["小明"].asend_message('来自用户: 小红是公司的llm工程师')
-
-    await asyncio.sleep(30)
-
-    await AgentManager().agents["小明"].asend_message('来自用户: 小红转岗为Agent工程师了')
+    await AgentManager().agents["小明"].asend_message('来自用户: 小红是不是llm工程师？')
 
     await asyncio.sleep(300)
     AgentManager().finish()
+
+    # """
+    # 记忆存储
+    # """
+    # await MemoryManager().initialize()
+    
+    # AgentManager().add_agent(name="小明", description="是一个帮助机器人")
+    # # AgentManager().add_agent(name="小红", description="是用户的秘书")
+    # AgentManager().start()
+
+    # await TimeSystem().aset_speed(1440)
+    # await TimeSystem().astart_time(year=2016,month=1,day=1)
+
+    # await AgentManager().agents["小明"].asend_message('来自用户: 小红是公司的llm工程师')
+
+    # await asyncio.sleep(30)
+
+    # await AgentManager().agents["小明"].asend_message('来自用户: 小红转岗为Agent工程师了')
+
+    # await asyncio.sleep(300)
+    # AgentManager().finish()
 
     # """
     # 闹钟删除 测试2: 删除不存在的闹钟id
