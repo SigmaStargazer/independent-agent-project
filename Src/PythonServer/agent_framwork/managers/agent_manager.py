@@ -4,6 +4,8 @@ from agent_framwork.base.singleton import singleton
 # from agent_framwork.agents.agent import Agent
 from agent_framwork.agents.agent_with_mem import Agent
 
+from memory_system.memory_manager import MemoryManager
+
 @singleton
 class AgentManager:
     """
@@ -14,15 +16,27 @@ class AgentManager:
         self.agents = {}
         self.processing_tasks = {}
 
-    def add_agent(self, name:str, description:str):
+    async def create_agent(self, name:str, description:str):
         """
         添加agent到agent manager
         """
         if self.agents.get(name):
             print(f"[Agent Manager]: Agent {name}已存在")
-        else:
-            agent = Agent(name=name, description=description)
-            self.agents[agent.name] = agent
+            return
+
+#         # 读取是否已有该agent
+#         group_id = name.encode('utf-8').hex()
+#         cypher = f"""
+# MATCH (n: Entity {{group_id: '{group_id}'}})
+# RETURN n"""
+#         response = await MemoryManager().conn.execute(cypher)
+#         if not response:
+#             print(f"[Agent Manager]: Agent {name}不存在")
+#             return
+
+        # 创建agent
+        agent = Agent(name=name, description=description)
+        self.agents[agent.name] = agent
 
     def start(self):
         """

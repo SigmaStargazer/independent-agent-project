@@ -158,17 +158,33 @@ async def search_memory(state: State):
     for memory in memories.edges:
         if hasattr(memory, 'episodes') and memory.episodes:
             episodes_uuid_list += memory.episodes
-    condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
+
+    # 构造参数字典
+    params = {}
+    condition = ""
+    if episodes_uuid_list:
+        condition = "WHERE n.uuid IN $uuids"
+        params["uuids"] = episodes_uuid_list
+    params["limit"] = int(limit) 
     cypher = f"""
-        MATCH (n: Episodic) {condition}
+        MATCH (n:Episodic) {condition}
         RETURN n
         ORDER BY n.{time_key} ASC
-        LIMIT {limit};
-        """ 
+        LIMIT $limit
+    """
+    
+    # condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
+    # cypher = f"""
+    #     MATCH (n: Episodic) {condition}
+    #     RETURN n
+    #     ORDER BY n.{time_key} ASC
+    #     LIMIT {limit};
+    #     """ 
     # print(cypher)
     # 检索episodes的实际内容
     try:
-        response = await memory_manager.conn.execute(cypher)
+        # response = await memory_manager.conn.execute(cypher)
+        response = await memory_manager.conn.execute(cypher, parameters=params)
         for row in response.rows_as_dict():
             memory = row['n']
             mem_episode += f"情景: \"{memory['content']}\"\n"
@@ -184,7 +200,8 @@ async def search_memory(state: State):
     # 需要存储接收到的用户信息
     perf_print("缓存记忆开始")
     cur_time = await TimeSystem().aget_current_time(to_str = True)
-    mem_to_save = f"[{cur_time}]{state['name']}收到信息: {query}"
+    mem_to_save = query
+    mem_to_save += f"\n[{cur_time}]我已读上述信息"
     perf_print("缓存记忆完成")
     
     print(mem_to_save) # 测试
@@ -218,7 +235,7 @@ async def chatbot(state: State):
     if response.content.strip(): # 工具调用时，response.content为空
         perf_print("缓存记忆开始")
         cur_time = await TimeSystem().aget_current_time(to_str = True)
-        mem_to_save += "\n" + f"[{cur_time}]{state['name']}心想: {response.content}"
+        mem_to_save += "\n" + f"[{cur_time}]我心想: {response.content}"
         perf_print("缓存记忆完成")
         # print(mem_to_save)
     
@@ -252,7 +269,7 @@ async def cache_tool_mem(state: State):
         tid = tool_call["id"]
         if tid not in logged_ids:
             cur_time = await TimeSystem().aget_current_time(to_str = True)
-            new_entries.append(f"[{cur_time}]{state['name']} 使用了 {tool_call['name']}，输入为 {tool_call['args']}")
+            new_entries.append(f"[{cur_time}]我使用了 {tool_call['name']}，输入为 {tool_call['args']}")
             new_ids.append(tid)
 
     if new_entries:

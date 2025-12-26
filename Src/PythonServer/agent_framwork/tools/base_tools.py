@@ -11,16 +11,18 @@ from agent_framwork.systems.time_system import TimeSystem
 # https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode.inject_tool_args
 
 @tool
-async def communicate_to_agent(agent: Annotated[str, InjectedState("name")],recipient: str, message: str) -> str:
+async def communicate_to_agent(sender: Annotated[str, InjectedState("name")],recipient: str, message: str) -> str:
     """向目标agent发送一则消息
     Args:
         recipient(str): 信息接收人名字
         message(str): 你想要发送的消息
     """
+    if sender == recipient:
+        return f"请不要给自己发送信息！"
     from agent_framwork.managers.agent_manager import AgentManager
     if recipient in AgentManager().agents:
-        await AgentManager().agents[recipient].asend_message(f"Agent[{agent}]向你发送了一则消息: {message}")
-        return f"[{agent}]向Agent[{recipient}]发送了一则消息: {message}"
+        await AgentManager().agents[recipient].asend_message(f"Agent[{sender}]向你发送了一则消息: {message}")
+        return f"[{sender}]向Agent[{recipient}]发送了一则消息: {message}"
     else:
         return f"收信人[{recipient}]不存在！"
     

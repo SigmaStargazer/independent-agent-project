@@ -28,7 +28,7 @@ async def handle_agent_create_request(msg, context):
     print(f"创建Agent: {name}: {desc}")
     response = message_pb2.AgentCreateResponse()
     try:
-        AgentManager().add_agent(name=name, description=desc)
+        AgentManager().create_agent(name=name, description=desc)
         response.success = True
         response.errormsg = ""
         await context['server'].send_message(response, context)
