@@ -94,7 +94,6 @@ Only extract facts that:
 - involve two DISTINCT ENTITIES from the ENTITIES list,
 - are clearly stated or unambiguously implied in the CURRENT MESSAGE,
     and can be represented as edges in a knowledge graph.
-- Facts should include entity names rather than pronouns whenever possible.
 - The FACT TYPES provide a list of the most important types of facts, make sure to extract facts of these types
 - The FACT TYPES are not an exhaustive list, extract all facts from the message even if they do not fit into one
     of the FACT TYPES
@@ -104,6 +103,19 @@ You may use information from the PREVIOUS MESSAGES only to disambiguate referenc
 
 
 {context['custom_prompt']}
+
+# ENTITY RESOLUTION RULES (IMPORTANT)
+
+1. **Self-Reference Handling**: The entity list contains a specific entity named **"I"**. This represents the first-person speaker/agent itself.
+   - ALL self-references of first-person speaker (e.g., "I", "me", "my", "myself", "我们", "我", "本人") MUST be mapped to the **"I"** entity.
+   - Do NOT map self-references to the speaker's specific proper name (e.g., "小明", "Alice"), even if the name is explicitly stated in the text (e.g., "I am Xiaoming"). The goal is to anchor actions to the "I" node.
+   - Example: If the text says "I work at Arasaka", extract the triple as **("I", WORKS_AT, "Arasaka")**, NOT ("Xiaoming", WORKS_AT, "Arasaka").
+
+2. **Alias Equivalence**: If the entity list contains both "I" and a proper name (e.g., "小明") that is the speaker's name, 
+   - Extract a fact linking them with the relation type **"IS"** (e.g., ("I", "IS", "小明")).
+   - This ensures the two nodes are logically connected, even if historical data already exists.
+
+3. **Other Entities**: For entities other than the self ("I"), use specific entity names rather than pronouns (e.g., use "Xiaoming" instead of "he/she").
 
 # EXTRACTION RULES
 

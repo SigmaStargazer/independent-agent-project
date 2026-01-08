@@ -1,4 +1,6 @@
 import asyncio
+from datetime import datetime
+from typing import Dict
 
 from agent_framwork.base.singleton import singleton
 # from agent_framwork.agents.agent import Agent
@@ -13,30 +15,70 @@ class AgentManager:
     单例，可直接 AgentManager().start() 这样的方式来使用内部的函数
     """
     def __init__(self):
-        self.agents = {}
+        self.agents: Dict[str, Agent] = {}
         self.processing_tasks = {}
 
-    async def create_agent(self, name:str, description:str):
+    async def create_agent(self, name:str, summary:str, create_time:datetime):
         """
-        添加agent到agent manager
+        创建agent，存入self.agents。并将简介存入graphiti中
+        Args:
+            name(str): agent名称
+            summary(str): agent简介
+            cur_time(datetime): 当前时间
         """
+        # 1.1. 检查agent manager是否已有该agent
         if self.agents.get(name):
-            print(f"[Agent Manager]: Agent {name}已存在")
+            print(f"[Agent Manager]: Agent {name} 已存在")
             return
 
-#         # 读取是否已有该agent
-#         group_id = name.encode('utf-8').hex()
-#         cypher = f"""
-# MATCH (n: Entity {{group_id: '{group_id}'}})
-# RETURN n"""
-#         response = await MemoryManager().conn.execute(cypher)
-#         if not response:
-#             print(f"[Agent Manager]: Agent {name}不存在")
-#             return
+        # 1.2. 检查graphiti是否已有该agent
+        group_id = name.encode('utf-8').hex()
+        cypher = f"""
+MATCH (n: Entity {{group_id: '{group_id}'}})
+RETURN n"""
+        result = await MemoryManager().conn.execute(cypher)
+        if result.has_next():
+            print(f"[Agent Manager]: Agent {name} 已存在")
+            return
 
-        # 创建agent
-        agent = Agent(name=name, description=description)
+        # 2. 创建agent，存self.agents
+        agent = Agent(name=name)
         self.agents[agent.name] = agent
+
+        # 3. 初始化agent的设定和记忆
+        await MemoryManager().init_agent_summary(
+            name=name, 
+            summary=summary, 
+            create_time=create_time)
+
+    # async def create_agent(self, name:str, description:str):
+    #     """
+    #     添加agent到agent manager
+    #     """
+    #     if self.agents.get(name):
+    #         print(f"[Agent Manager]: Agent {name}已存在")
+    #         return
+
+    #     # 创建agent
+    #     agent = Agent(name=name, description=description)
+    #     self.agents[agent.name] = agent
+
+    async def load_agent(self):
+        """
+        从graphiti加载agent到self.agents
+        """
+        # 1. 获取kuzu中的所有group_id
+        cypher = f"""
+        MATCH (n)
+        WHERE n.group_id IS NOT NULL
+        RETURN DISTINCT n.group_id as group_id"""
+
+        response = await MemoryManager().conn.execute(cypher)
+        for row in response.rows_as_dict():
+            group_id = row['group_id']
+            name = bytes.fromhex(group_id).decode('utf-8')
+            agent = Agent(name=name)
+            self.agents[agent.name] = agent
 
     def start(self):
         """

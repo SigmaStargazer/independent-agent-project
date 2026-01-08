@@ -1,3 +1,4 @@
+from ast import Str
 import asyncio
 import time
 
@@ -71,20 +72,31 @@ def _filter_messages(messages, k=20):
         return messages[-k:]
 
 # 提示词模板
-system_template = """你扮演的角色名叫{name}，{description}。
-向你发送信息的是系统管理员，它会不断告诉你关于周遭的情况。你需要根据情况做出相应的反应
-规则：
-1）仅当你使用了工具时，才会对外界产生实际影响。
-2）你的直接回复只作为你的心理活动，不会被任何人看到。
-因此如果你需要与用户、agent等具体某一对象进行交流，也请使用相应的工具，避免你想要传递的信息无法传达给对方。
+# system_template = """你扮演的角色名叫{name}，{description}。
+# 向你发送信息的是系统管理员，它会不断告诉你关于周遭的情况。你需要根据情况做出相应的反应
+# 规则：
+# 1）仅当你使用了工具时，才会对外界产生实际影响。
+# 2）你的直接回复只作为你的心理活动，不会被任何人看到。
+# 因此如果你需要与用户、agent等具体某一对象进行交流，也请使用相应的工具，避免你想要传递的信息无法传达给对方。
 
-现在时间:
+# # 现在时间:
+# {curtime}
+# # 你刚联想到:
+# {mem_fact}
+
+# {mem_episode}
+# """
+system_template = """{mem_summary}
+
+# 现在时间:
 {curtime}
-你刚联想到:
+# 你刚联想到:
 {mem_fact}
 
 {mem_episode}
 """
+
+
 prompt_template = ChatPromptTemplate.from_messages(
     [
         ("system", system_template),
@@ -105,9 +117,9 @@ memory_manager = MemoryManager()
 class State(TypedDict):
     name: str # agent名称
     index: int # agent id
-    description: str # agent描述
     messages: Annotated[list, add_messages] # agent上下文
     group_id: str # graphiti的group_id，用于分区
+    mem_summary: str # 检索到的agent简介
     mem_fact: str # 检索到的事实记忆
     mem_episode: str # 检索到的情景记忆
     mem_to_save: str # 待存储的记忆
@@ -122,11 +134,13 @@ async def search_memory(state: State):
     group_id = state['group_id']
     limit = 1 # 检索的记忆数量
 
+    mem_summary = ""
     mem_fact = ""
     mem_episode = ""
     
-    # perf_print("memory_manager初始化开始")
-    # await memory_manager.initialize()  # 确保初始化完成
+    perf_print("加载agent简介开始")
+    mem_summary = await memory_manager.load_agent_summary(name=state['name'])
+    perf_print("加载agent简介完成")
 
     perf_print("rag事实记忆开始")
     memories = await memory_manager.graphiti.search(
@@ -201,11 +215,12 @@ async def search_memory(state: State):
     perf_print("缓存记忆开始")
     cur_time = await TimeSystem().aget_current_time(to_str = True)
     mem_to_save = query
-    mem_to_save += f"\n[{cur_time}]我已读上述信息"
+    mem_to_save += f"\n[{cur_time}]我开始注意到上述信息"
     perf_print("缓存记忆完成")
     
     print(mem_to_save) # 测试
     return {
+        "mem_summary": mem_summary,
         "mem_fact": mem_fact, 
         "mem_episode": mem_episode,
         "mem_to_save": mem_to_save
@@ -217,8 +232,8 @@ async def chatbot(state: State):
     cur_time = await TimeSystem().aget_current_time()
     prompt = await prompt_template.ainvoke({"messages": state['messages'],
                                      "name": state['name'],
-                                     "description": state['description'],
                                      "curtime": cur_time,
+                                     "mem_summary": state['mem_summary'],
                                      "mem_fact": state['mem_fact'],
                                      "mem_episode": state['mem_episode']})
     # print(f"【prompt】:{prompt}") # 测试
@@ -347,9 +362,8 @@ graph_builder.add_edge("save_memory", END)
 
 # Agent类
 class Agent:
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str):
         self.name = name
-        self.description = description
         
         self.group_id = name.encode('utf-8').hex()
         # 需要将group_id转成中文，可使用：bytes.fromhex(group_id).decode('utf-8')
@@ -394,7 +408,6 @@ class Agent:
                         try:
                             response = await self.graph.ainvoke({"messages": [("user", full_messages)], 
                                                                 "name": self.name, 
-                                                                "description": self.description,
                                                                 "group_id": self.group_id}, 
                                                                 self.config)
                             output = response["messages"][-1].content

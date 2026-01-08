@@ -100,7 +100,7 @@ Instructions:
 
 You are given a conversation context and a CURRENT MESSAGE. Your task is to extract **entity nodes** mentioned **explicitly or implicitly** in the CURRENT MESSAGE.
 Pronoun references such as he/she/they or this/that/those should be disambiguated to the names of the 
-reference entities. Only extract distinct entities from the CURRENT MESSAGE. Don't extract pronouns like you, me, he/she/they, we/us as entities.
+reference entities. Only extract distinct entities from the CURRENT MESSAGE. Don't extract pronouns like you, he/she/they, we/us as entities.
 
 1. **Speaker Extraction**: Always extract the speaker (the part before the colon `:` in each dialogue line) as the first entity node.
    - If the speaker is mentioned again in the message, treat both mentions as a **single entity**.
@@ -119,6 +119,16 @@ reference entities. Only extract distinct entities from the CURRENT MESSAGE. Don
 
 5. **Formatting**:
    - Be **explicit and unambiguous** in naming entities (e.g., use full names when available).
+
+6. **Self-Reference Normalization (CRITICAL)**:
+   - If the text mentions the first-person speaker (e.g., "I", "me", "my", "myself", "我", "本人", "自分"), regardless of the language, 
+   - You MUST extract it as the entity named **"I"**.
+   - This ensures all references to the self are mapped to a single entity node.
+
+7. **Alias Handling**:
+   - If the text mentions a proper name (e.g., "小明") that is explicitly stated to be the name of the first-person speaker (e.g., "我是小明"), 
+   - Treat this name as an **alias for "I"** and do NOT create a separate entity node for it.
+   - Instead, extract it as the "I" entity to avoid duplicate nodes.
 
 {context['custom_prompt']}
 """
@@ -153,6 +163,14 @@ Indicate the classified entity type by providing its entity_type_id.
 Guidelines:
 1. Always try to extract an entities that the JSON represents. This will often be something like a "name" or "user field
 2. Do NOT extract any properties that contain dates
+3. **Self-Reference Normalization (CRITICAL)**:
+   - If the text mentions the first-person speaker (e.g., "I", "me", "my", "myself", "我", "本人", "自分"), regardless of the language, 
+   - You MUST extract it as the entity named **"I"**.
+   - This ensures all references to the self are mapped to a single entity node.
+4. **Alias Handling**:
+   - If the text mentions a proper name (e.g., "小明") that is explicitly stated to be the name of the first-person speaker (e.g., "我是小明"), 
+   - Treat this name as an **alias for "I"** and do NOT create a separate entity node for it.
+   - Instead, extract it as the "I" entity to avoid duplicate nodes.
 """
 #     user_prompt = f"""
 # <ENTITY TYPES>
@@ -233,6 +251,14 @@ Guidelines:
 2. Avoid creating nodes for relationships or actions.
 3. Avoid creating nodes for temporal information like dates, times or years (these will be added to edges later).
 4. Be as explicit as possible in your node names, using full names and avoiding abbreviations.
+5. **Self-Reference Normalization (CRITICAL)**:
+   - If the text mentions the first-person speaker (e.g., "I", "me", "my", "myself", "我", "本人", "自分"), regardless of the language, 
+   - You MUST extract it as the entity named **"I"**.
+   - This ensures all references to the self are mapped to a single entity node.
+6. **Alias Handling**:
+   - If the text mentions a proper name (e.g., "小明") that is explicitly stated to be the name of the first-person speaker (e.g., "我是小明"), 
+   - Treat this name as an **alias for "I"** and do NOT create a separate entity node for it.
+   - Instead, extract it as the "I" entity to avoid duplicate nodes.
 """
     return [
         Message(role='system', content=sys_prompt),
@@ -314,6 +340,8 @@ def extract_attributes(context: dict[str, Any]) -> list[Message]:
         Given the above MESSAGES and the following ENTITY, update any of its attributes based on the information provided
         in MESSAGES. Use the provided attribute descriptions to better understand how each attribute should be determined.
 
+        Important: In the MESSAGES, any reference to the first-person speaker (e.g., "I", "me", "my", "myself", "我", "本人", "自分") refers to this exact ENTITY named "I".
+
         Guidelines:
         1. Do not hallucinate entity property values if they cannot be found in the current context.
         2. Only use the provided MESSAGES and ENTITY to set attribute values.
@@ -343,6 +371,8 @@ def extract_summary(context: dict[str, Any]) -> list[Message]:
 
         Given the above MESSAGES and the following ENTITY, update the summary that combines relevant information about the entity
         from the messages and relevant information from the existing summary.
+
+        Important: In the MESSAGES, any reference to the first-person speaker (e.g., "I", "me", "my", "myself", "我", "本人", "自分") refers to this exact ENTITY named "I".
         
         Guidelines:
         1. Do not hallucinate entity summary information if they cannot be found in the current context.

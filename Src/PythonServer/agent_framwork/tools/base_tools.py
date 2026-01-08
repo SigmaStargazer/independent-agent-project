@@ -21,7 +21,7 @@ async def communicate_to_agent(sender: Annotated[str, InjectedState("name")],rec
         return f"请不要给自己发送信息！"
     from agent_framwork.managers.agent_manager import AgentManager
     if recipient in AgentManager().agents:
-        await AgentManager().agents[recipient].asend_message(f"Agent[{sender}]向你发送了一则消息: {message}")
+        await AgentManager().agents[recipient].asend_message(f"{sender}: {message}")
         return f"[{sender}]向Agent[{recipient}]发送了一则消息: {message}"
     else:
         return f"收信人[{recipient}]不存在！"

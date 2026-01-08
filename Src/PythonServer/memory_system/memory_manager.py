@@ -1,7 +1,12 @@
 import asyncio
+from datetime import datetime
+from uuid import uuid4
 
 from graphiti_core import Graphiti
 from graphiti_core.driver.kuzu_driver import KuzuDriver # kuzu配置
+
+from graphiti_core.nodes import EntityNode, EpisodeType
+from graphiti_core.search import search_config_recipes
 
 from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
 from graphiti_core.llm_client.config import LLMConfig
@@ -40,6 +45,7 @@ class MemoryManager:
         self._kuzu_driver = None
         self.conn = None
         self.graphiti = None # graphiti
+        self._embedder = None
 
     async def initialize(self):
         if self._initialized: return self
@@ -100,6 +106,192 @@ class MemoryManager:
             
             self._initialized = True
         return self
+
+
+    async def init_agent_summary(self, name: str, summary: str, create_time: datetime):
+        """
+        初始化agent的简介
+        Args:
+            name(str): agent名称
+            summary(str): agent的简介
+            create_time(datetime): 创建时间
+        """
+
+        # 实例化实体节点
+        uuid = str(uuid4())
+        group_id = name.encode('utf-8').hex()
+        my_entity = EntityNode(
+            uuid=uuid,
+            name="I",
+            group_id=group_id,
+            created_at=create_time,  # type: ignore
+            summary=summary,
+        )
+        await my_entity.generate_name_embedding(self._embedder)
+        # 保存实体节点
+        await my_entity.save(self.graphiti.driver)
+
+        # (临时)将summary给add_episode，生成初始图谱
+        result = await self._save_memory(name=name, memory=summary, curtime=create_time, wait_result=True)
+        # 删除summary所对应episode节点，只保留其生成的实体关系
+        episode = result.episode
+        await episode.delete(self.graphiti.driver)
+
+    async def load_agent_summary(self, name: str) -> str:
+        """
+        获取agent的简介
+        Args:
+            name(str): 实体名称
+        Return:
+            str: agent的简介
+        """
+        summary = ""
+
+        group_id = name.encode('utf-8').hex()
+        cypher = f"""
+        MATCH (n:Entity{{name: "I", group_id: "{group_id}"}})
+        RETURN n
+        """
+        try:
+            response = await self.conn.execute(cypher)
+            for row in response.rows_as_dict():
+                summary = row['n']['summary']
+                break
+        except Exception as e:
+            print(f"加载智能体{name}简介失败: {e}")
+
+        return summary
+
+    async def _save_memory(self, name: str, memory: str, curtime: datetime, wait_result: bool = False):
+        group_id = name.encode('utf-8').hex()
+        try:
+            if wait_result:
+                result = await MemoryManager().graphiti.add_episode(
+                    name=f"{name}_mem_{curtime}",
+                    episode_body=memory,
+                    source=EpisodeType.text,
+                    source_description=f"{name}_mem_{curtime}", 
+                    reference_time=curtime,
+                    group_id=group_id
+                )
+                return result
+            else:
+                await MemoryManager().graphiti.add_episode(
+                    name=f"{name}_mem_{curtime}",
+                    episode_body=memory,
+                    source=EpisodeType.text,
+                    source_description=f"{name}_mem_{curtime}", 
+                    reference_time=curtime,
+                    group_id=group_id
+                )
+                return result
+        except Exception as e:
+            print(f"存储记忆失败: {e}")
+
+    async def save_memory(self, name: str, memory: str, curtime: datetime,):
+        """
+        存储记忆
+        Args:
+            name(str): agent名称
+            memory(str): 记忆
+            curtime(datetime): 记忆产生时间
+        """
+        await self._save_memory(name=name, memory=memory, curtime=curtime, wait_result=False)
+
+    async def search_fact_memory(self, name: str, query: str, limit: int = 1):
+        """
+        根据用户问题，检索事实记忆
+        Args:
+            name(str): agent名称
+            query(str): 用户问题
+            limit(int): 检索的记忆数量
+        Return:
+            str: 检索到的记忆
+        """
+        mem_fact = ""
+
+        group_id = name.encode('utf-8').hex()
+        memories = await self.graphiti.search(
+            query, 
+            # COMBINED 检索能一次性获取事实（edges）、实体（nodes）和主题（communities）。
+            # RRF速度快
+            # config=search_config_recipes.COMBINED_HYBRID_SEARCH_RRF, 
+            num_results = limit,
+            group_ids=[group_id]
+        )
+
+        for memory in memories:
+            mem_fact += f"- {memory.fact}\n"
+            if hasattr(memory, 'valid_at') and memory.valid_at:
+                mem_fact += f'事实产生时间: {memory.valid_at}\n'
+            if hasattr(memory, 'invalid_at') and memory.invalid_at:
+                mem_fact += f'事实失效时间: {memory.invalid_at}\n'
+        print(f'{mem_fact}')
+        return mem_fact
+
+    async def search_episode_memory(self, name: str, query: str, limit: int = 1):
+        """
+        根据用户问题，检索情景记忆
+        Args:
+            name(str): agent名称
+            query(str): 用户问题
+            limit(int): 检索的记忆数量
+        Return:
+            str: 检索到的记忆
+        """
+        time_key = "valid_at" # 表里的时间key
+
+        mem_episode = ""
+
+        group_id = name.encode('utf-8').hex()
+        episodes_uuid_list = []
+        memories = await self.graphiti._search(
+            query, 
+            config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
+            group_ids=[group_id]
+        )
+        for memory in memories.edges:
+            if hasattr(memory, 'episodes') and memory.episodes:
+                episodes_uuid_list += memory.episodes
+
+        # 构造参数字典
+        params = {}
+        condition = ""
+        if episodes_uuid_list:
+            condition = "WHERE n.uuid IN $uuids"
+            params["uuids"] = episodes_uuid_list
+        params["limit"] = int(limit) 
+        cypher = f"""
+            MATCH (n:Episodic) {condition}
+            RETURN n
+            ORDER BY n.{time_key} ASC
+            LIMIT $limit
+        """
+        
+        # condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
+        # cypher = f"""
+        #     MATCH (n: Episodic) {condition}
+        #     RETURN n
+        #     ORDER BY n.{time_key} ASC
+        #     LIMIT {limit};
+        #     """ 
+        # print(cypher)
+        # 检索episodes的实际内容
+        try:
+            # response = await memory_manager.conn.execute(cypher)
+            response = await self.conn.execute(cypher, parameters=params)
+            for row in response.rows_as_dict():
+                memory = row['n']
+                mem_episode += f"情景: \"{memory['content']}\"\n"
+                # if 'valid_at' in memory:
+                #     valid_at_time_str = memory[time_key].strftime('%Y-%m-%d %H:%M:%S')
+                #     mem_episode += f"发生时间: {valid_at_time_str}\n"
+                mem_episode += "---\n"
+        except RuntimeError as e: # 一般为刚刚建立库，检索失败
+            print(f"情景记忆检索失败: {e}")
+        print(f'{mem_episode}')
+
+        return mem_episode
 
     async def close(self):
         """显式关闭资源，释放 Kuzu 文件锁"""

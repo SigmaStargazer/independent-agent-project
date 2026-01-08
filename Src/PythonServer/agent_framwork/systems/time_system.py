@@ -70,33 +70,58 @@ class TimeSystem:
             self.real_start_time = asyncio.get_event_loop().time()
             self.running = True
 
-    async def arestart_time(self, year, month, day):
+    # async def arestart_time(self, year, month, day):
+    #     async with self._lock:
+    #         self.running = False
+    #         if self._task and not self._task.done():
+    #             self._task.cancel()
+    #             try:
+    #                 await self._task
+    #             except asyncio.CancelledError:
+    #                 pass
+
+    #         self.virtual_time = datetime(year, month, day)
+    #         self.real_start_time = asyncio.get_event_loop().time()
+    #         self.speed = 1.0
+    #         self.running = True
+    #         self._task = asyncio.create_task(self._atime_loop())
+
+    async def aset_time(self, year, month, day):
+        """
+        设置虚拟时间。
+        - 如果系统未启动，仅设置时间基准。
+        - 如果系统正在运行，时间会立即跳变到设定时间，并保持继续运行。
+        """
         async with self._lock:
-            self.running = False
-            if self._task and not self._task.done():
-                self._task.cancel()
-                try:
-                    await self._task
-                except asyncio.CancelledError:
-                    pass
-
             self.virtual_time = datetime(year, month, day)
-            self.real_start_time = asyncio.get_event_loop().time()
-            self.speed = 1.0
-            self.running = True
-            self._task = asyncio.create_task(self._atime_loop())
+            
+            # 【关键点】：如果系统正在运行，必须重置真实时间锚点
+            # 这样下一帧计算时，(current_real - real_start_time) 接近 0
+            # 新时间 = 设定时间 + 0，实现了瞬间跳变
+            if self.running:
+                self.real_start_time = asyncio.get_event_loop().time()
 
-    async def astart_time(self, year, month, day):
-        """显式启动时间系统，并设置初始虚拟时间"""
+    async def astart_time(self):
+        """
+        启动时间系统。需要先调用aset_time设置时间。
+        """
         async with self._lock:
             if self.running:
                 print("时间系统已经在运行。")
                 return
 
-            self.virtual_time = datetime(year, month, day)
+            # 兼容性处理：如果从未调用过 aset_time，virtual_time 可能为 None
+            # 此时给它一个默认值，或者根据业务需求抛出异常
+            if self.virtual_time is None:
+                print("请先调用aset_time设置时间。")
+                return
+
+            # 启动系统，重置锚点，开始计时
             self.real_start_time = asyncio.get_event_loop().time()
             self.running = True
-            self._task = asyncio.create_task(self._atime_loop())
+            # 防止重复创建 task
+            if self._task is None or self._task.done():
+                self._task = asyncio.create_task(self._atime_loop())
 
     async def aget_current_time(self, to_str = False):
         """
