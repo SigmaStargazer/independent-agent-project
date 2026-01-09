@@ -1,11 +1,10 @@
-from ast import Str
+# from ast import Str
 import asyncio
-import time
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
+from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnablePassthrough
 
 from typing import Annotated, Literal
@@ -13,19 +12,19 @@ from typing_extensions import TypedDict
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import ToolNode
 
 # from contextlib import ExitStack
 from langgraph.checkpoint.memory import MemorySaver
 from memory_system.memory_manager import MemoryManager
 
-from graphiti_core.nodes import EpisodeType
-from graphiti_core.search import search_config_recipes
+# from graphiti_core.nodes import EpisodeType
+# from graphiti_core.search import search_config_recipes
 
 from agent_framwork.tools import base_tools
 from agent_framwork.systems.time_system import TimeSystem
 
-from tools.perf_tool import perf_print
+from tools.perf_tool import aperf_print
 
 # # 千问
 # model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -40,7 +39,7 @@ from tools.perf_tool import perf_print
 # 智谱
 model_api_base = "https://open.bigmodel.cn/api/paas/v4"
 model_api_key = "61383e606d871c028870a8f251a77f08.JH0An7yUOzhd8cIi"
-model_name = "glm-4.6"
+model_name = "glm-4.7"
 
 model = ChatOpenAI(
         model_name = model_name,
@@ -88,12 +87,15 @@ def _filter_messages(messages, k=20):
 # """
 system_template = """{mem_summary}
 
-# 现在时间:
+<现在时间>
 {curtime}
-# 你刚联想到:
+</现在时间>
+
+<回想>
 {mem_fact}
 
 {mem_episode}
+</回想>
 """
 
 
@@ -118,7 +120,7 @@ class State(TypedDict):
     name: str # agent名称
     index: int # agent id
     messages: Annotated[list, add_messages] # agent上下文
-    group_id: str # graphiti的group_id，用于分区
+    # group_id: str # graphiti的group_id，用于分区
     mem_summary: str # 检索到的agent简介
     mem_fact: str # 检索到的事实记忆
     mem_episode: str # 检索到的情景记忆
@@ -130,95 +132,35 @@ async def search_memory(state: State):
     """
     根据用户问题，检索事实记忆和情景记忆
     """
+    name = state['name']
     query = state['messages'][-1].content
-    group_id = state['group_id']
+    # group_id = state['group_id']
     limit = 1 # 检索的记忆数量
 
     mem_summary = ""
     mem_fact = ""
     mem_episode = ""
     
-    perf_print("加载agent简介开始")
+    await aperf_print(f"[{name}]加载agent简介开始")
     mem_summary = await memory_manager.load_agent_summary(name=state['name'])
-    perf_print("加载agent简介完成")
+    await aperf_print(f"[{name}]加载agent简介完成")
 
-    perf_print("rag事实记忆开始")
-    memories = await memory_manager.graphiti.search(
-        query, 
-        # COMBINED 检索能一次性获取事实（edges）、实体（nodes）和主题（communities）。
-        # RRF速度快
-        # config=search_config_recipes.COMBINED_HYBRID_SEARCH_RRF, 
-        num_results = limit,
-        group_ids=[group_id]
-    )
-    for memory in memories:
-        # print(memory) # 测试
-        mem_fact += f"- {memory.fact}\n"
-        if hasattr(memory, 'valid_at') and memory.valid_at:
-            mem_fact += f'事实产生时间: {memory.valid_at}\n'
-        if hasattr(memory, 'invalid_at') and memory.invalid_at:
-            mem_fact += f'事实失效时间: {memory.invalid_at}\n'
-    print(f'{mem_fact}')
-    perf_print("rag事实记忆完成")
+    await aperf_print(f"[{name}]rag事实记忆开始")
+    mem_fact = await memory_manager.search_fact_memory(name=state['name'], query=query, limit=limit)
+    await aperf_print(f"[{name}]rag事实记忆完成")
 
-    perf_print("rag情景记忆开始")
-    time_key = "valid_at" # 表里的时间key
-    episodes_uuid_list = []
-    memories = await memory_manager.graphiti._search(
-        query, 
-        config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
-        group_ids=[group_id]
-    )
-    for memory in memories.edges:
-        if hasattr(memory, 'episodes') and memory.episodes:
-            episodes_uuid_list += memory.episodes
-
-    # 构造参数字典
-    params = {}
-    condition = ""
-    if episodes_uuid_list:
-        condition = "WHERE n.uuid IN $uuids"
-        params["uuids"] = episodes_uuid_list
-    params["limit"] = int(limit) 
-    cypher = f"""
-        MATCH (n:Episodic) {condition}
-        RETURN n
-        ORDER BY n.{time_key} ASC
-        LIMIT $limit
-    """
-    
-    # condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
-    # cypher = f"""
-    #     MATCH (n: Episodic) {condition}
-    #     RETURN n
-    #     ORDER BY n.{time_key} ASC
-    #     LIMIT {limit};
-    #     """ 
-    # print(cypher)
-    # 检索episodes的实际内容
-    try:
-        # response = await memory_manager.conn.execute(cypher)
-        response = await memory_manager.conn.execute(cypher, parameters=params)
-        for row in response.rows_as_dict():
-            memory = row['n']
-            mem_episode += f"情景: \"{memory['content']}\"\n"
-            # if 'valid_at' in memory:
-            #     valid_at_time_str = memory[time_key].strftime('%Y-%m-%d %H:%M:%S')
-            #     mem_episode += f"发生时间: {valid_at_time_str}\n"
-            mem_episode += "---\n"
-    except RuntimeError as e: # 一般为刚刚建立库，检索失败
-        print(f"情景记忆检索失败: {e}")
-    print(f'{mem_episode}')
-    perf_print("rag情景记忆完成")
+    await aperf_print(f"[{name}]rag情景记忆开始")
+    mem_episode = await memory_manager.search_episode_memory(name=state['name'], query=query, limit=limit)
+    await aperf_print(f"[{name}]rag情景记忆完成")
 
     # 需要存储接收到的用户信息
-    perf_print("缓存记忆开始")
+    await aperf_print(f"[{name}]缓存输入记忆开始")
     cur_time = await TimeSystem().aget_current_time(to_str = True)
     mem_to_save = query
     mem_to_save += f"\n[{cur_time}]我开始注意到上述信息"
-    perf_print("缓存记忆完成")
+    await aperf_print(f"[{name}]缓存输入记忆完成")
     
-    print(mem_to_save) # 测试
+    # print(mem_to_save) # 测试
     return {
         "mem_summary": mem_summary,
         "mem_fact": mem_fact, 
@@ -227,6 +169,7 @@ async def search_memory(state: State):
     }
 
 async def chatbot(state: State):
+    name = state['name']
     mem_to_save = state['mem_to_save']
 
     cur_time = await TimeSystem().aget_current_time()
@@ -236,22 +179,23 @@ async def chatbot(state: State):
                                      "mem_summary": state['mem_summary'],
                                      "mem_fact": state['mem_fact'],
                                      "mem_episode": state['mem_episode']})
-    # print(f"【prompt】:{prompt}") # 测试
-    # for message in prompt.messages:
-    #     message.pretty_print()
-    # response = await llm_with_tools.ainvoke(prompt)
-    perf_print("模型输出开始")
+    # 测试：打印prompt
+    print(f"【prompt】:") 
+    for message in prompt.messages:
+        message.pretty_print()
+
+    await aperf_print(f"[{name}]模型输出开始")
     response = await llm_with_tools.ainvoke(prompt)
     print(response.content)
-    perf_print("模型输出完成")
+    await aperf_print(f"[{name}]模型输出完成")
     
 
     # 需要存储接收到的用户信息
     if response.content.strip(): # 工具调用时，response.content为空
-        perf_print("缓存记忆开始")
+        await aperf_print(f"[{name}]缓存模型输出记忆开始")
         cur_time = await TimeSystem().aget_current_time(to_str = True)
         mem_to_save += "\n" + f"[{cur_time}]我心想: {response.content}"
-        perf_print("缓存记忆完成")
+        await aperf_print(f"[{name}]缓存模型输出记忆完成")
         # print(mem_to_save)
     
     return {
@@ -300,22 +244,13 @@ async def save_memory(state: State):
     """
     将所有缓存记忆存入graphiti
     """
+    name = state['name']
     mem_to_save = state['mem_to_save']
     
-    perf_print("存储记忆开始")
-    print("【待存储记忆start】")
-    print(mem_to_save)
-    print("【待存储记忆end】")
+    await aperf_print(f"[{name}]存储记忆开始")
     curtime = await TimeSystem().aget_current_time()
-    await MemoryManager().graphiti.add_episode(
-        name=f"{state['name']}_mem_{curtime}",
-        episode_body=mem_to_save,
-        source=EpisodeType.text,
-        source_description=f"{state['name']}_mem_{curtime}", 
-        reference_time=curtime,
-        group_id=state['group_id']
-    )
-    perf_print("存储记忆完成")
+    await MemoryManager().save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
+    await aperf_print(f"[{name}]存储记忆完成")
 
     return {"mem_to_save": ""}
 
@@ -344,10 +279,6 @@ graph_builder.add_node("save_memory", save_memory)
 
 graph_builder.add_edge(START, "search_memory")
 graph_builder.add_edge("search_memory", "chatbot")
-# graph_builder.add_conditional_edges(
-#     "chatbot",
-#     tools_condition,
-# )
 graph_builder.add_conditional_edges(
     "chatbot",
     route_chatbot,
@@ -365,7 +296,7 @@ class Agent:
     def __init__(self, name: str):
         self.name = name
         
-        self.group_id = name.encode('utf-8').hex()
+        # self.group_id = name.encode('utf-8').hex()
         # 需要将group_id转成中文，可使用：bytes.fromhex(group_id).decode('utf-8')
 
         self.memory = MemorySaver()
@@ -408,7 +339,8 @@ class Agent:
                         try:
                             response = await self.graph.ainvoke({"messages": [("user", full_messages)], 
                                                                 "name": self.name, 
-                                                                "group_id": self.group_id}, 
+                                                                # "group_id": self.group_id
+                                                                }, 
                                                                 self.config)
                             output = response["messages"][-1].content
                             print(f"[{self.name}]Response: {output}")

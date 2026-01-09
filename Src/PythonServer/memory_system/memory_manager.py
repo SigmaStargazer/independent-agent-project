@@ -184,7 +184,6 @@ class MemoryManager:
                     reference_time=curtime,
                     group_id=group_id
                 )
-                return result
         except Exception as e:
             print(f"存储记忆失败: {e}")
 
@@ -208,28 +207,66 @@ class MemoryManager:
         Return:
             str: 检索到的记忆
         """
-        mem_fact = ""
-
+        # from memory_system.memory_manager import MemoryManager
+        # # graphiti = await init_graphiti()
+        # memory_manager = MemoryManager()
+        # # await memory_manager.initialize()  # 确保初始化完成
         group_id = name.encode('utf-8').hex()
-        memories = await self.graphiti.search(
-            query, 
-            # COMBINED 检索能一次性获取事实（edges）、实体（nodes）和主题（communities）。
-            # RRF速度快
-            # config=search_config_recipes.COMBINED_HYBRID_SEARCH_RRF, 
-            num_results = limit,
-            group_ids=[group_id]
-        )
+        search_config = search_config_recipes.COMBINED_HYBRID_SEARCH_RRF
+        search_config.limit = limit+1
+        memories = await self.graphiti._search(query, 
+            config=search_config, 
+            group_ids=[group_id])
 
-        for memory in memories:
-            mem_fact += f"- {memory.fact}\n"
-            if hasattr(memory, 'valid_at') and memory.valid_at:
-                mem_fact += f'事实产生时间: {memory.valid_at}\n'
-            if hasattr(memory, 'invalid_at') and memory.invalid_at:
-                mem_fact += f'事实失效时间: {memory.invalid_at}\n'
-        print(f'{mem_fact}')
+        # print(f"memories: {memories}")
+
+        mem_fact = ""
+        summary = ""
+        fact = ""
+        # 1.获取实体
+        for mode in memories.nodes:
+            if mode.name != "I":
+                summary += f"- {mode.name}: {mode.summary}\n"
+        if summary:
+            mem_fact  += "# 事物\n" + summary + "\n"
+        # 2.获取事实
+        for edge in memories.edges[:limit]:
+            fact += f"- {edge.fact}\n"
+            if hasattr(edge, 'valid_at') and edge.valid_at:
+                valid_at_time_str = edge.valid_at.strftime('%Y-%m-%d %H:%M:%S')
+                fact += f"事实生效时间: {valid_at_time_str}\n"
+            if hasattr(edge, 'invalid_at') and edge.invalid_at:
+                invalid_at_time_str = edge.invalid_at.strftime('%Y-%m-%d %H:%M:%S')
+                fact += f"事实失效时间: {invalid_at_time_str}\n"
+        if fact:
+            mem_fact  += "# 事实\n" + fact + "\n"
+        # mem_fact = ""
+
+        # group_id = name.encode('utf-8').hex()
+        # memories = await self.graphiti.search(
+        #     query, 
+        #     # COMBINED 检索能一次性获取事实（edges）、实体（nodes）和主题（communities）。
+        #     # RRF速度快
+        #     # config=search_config_recipes.COMBINED_HYBRID_SEARCH_RRF, 
+        #     num_results = limit,
+        #     group_ids=[group_id]
+        # )
+
+        # for memory in memories:
+        #     mem_fact += f"- {memory.fact}\n"
+        #     if hasattr(memory, 'valid_at') and memory.valid_at:
+        #         mem_fact += f'事实产生时间: {memory.valid_at}\n'
+        #     if hasattr(memory, 'invalid_at') and memory.invalid_at:
+        #         mem_fact += f'事实失效时间: {memory.invalid_at}\n'
+        # print(f'{mem_fact}')
         return mem_fact
 
-    async def search_episode_memory(self, name: str, query: str, limit: int = 1):
+    async def search_episode_memory(self, 
+    name: str, 
+    query: str,
+    start_time: str = "",
+    end_time: str = "",
+    limit: int = 1):
         """
         根据用户问题，检索情景记忆
         Args:
@@ -239,57 +276,121 @@ class MemoryManager:
         Return:
             str: 检索到的记忆
         """
+        if not (query or start_time or end_time):
+            print("(query, start_time, end_time)均为空！请至少提供一条线索以检索记忆")
+            return "(query, start_time, end_time)均为空！请至少提供一条线索以检索记忆"
+        
         time_key = "valid_at" # 表里的时间key
-
-        mem_episode = ""
-
         group_id = name.encode('utf-8').hex()
-        episodes_uuid_list = []
-        memories = await self.graphiti._search(
-            query, 
-            config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
-            group_ids=[group_id]
-        )
-        for memory in memories.edges:
-            if hasattr(memory, 'episodes') and memory.episodes:
-                episodes_uuid_list += memory.episodes
 
-        # 构造参数字典
-        params = {}
-        condition = ""
-        if episodes_uuid_list:
-            condition = "WHERE n.uuid IN $uuids"
-            params["uuids"] = episodes_uuid_list
-        params["limit"] = int(limit) 
-        cypher = f"""
-            MATCH (n:Episodic) {condition}
+        # 设置事件筛选条件:
+        condition = "" # cypher语句中的筛选条件
+        mem_desc = "" # 待存储到记忆的描述
+        # 1. 根据episode_desc筛选uuid
+        if query:
+            memories = await self.graphiti._search(query, 
+            config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
+            group_ids=[group_id])
+            # 向量匹配，寻找episodes的uuid
+            episodes_uuid_list = []
+            for edge in memories.edges:
+                if hasattr(edge, 'episodes') and edge.episodes:
+                    episodes_uuid_list += edge.episodes
+            condition += f"n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
+            mem_desc += f"有关\"{query}\""
+        # 2. 根据start_time筛选
+        if start_time:
+            condition += f" AND " if condition else ""
+            condition += f"n.{time_key} >= TIMESTAMP('{start_time}')"
+            mem_desc += f"，" if mem_desc else ""
+            mem_desc += f"从{start_time}之后"
+        # 3. 根据end_time筛选
+        if end_time:
+            condition += f" AND " if condition else ""
+            condition += f"n.{time_key} <= TIMESTAMP('{end_time}')"
+            mem_desc += f"，" if mem_desc else ""
+            mem_desc += f"到{end_time}之前"
+
+        condition = f"WHERE {condition}" if condition else ""
+        mem_desc = f"{name}回想了" + mem_desc + "的情景" if mem_desc else ""
+
+        query = f"""
+            MATCH (n: Episodic) {condition}
             RETURN n
             ORDER BY n.{time_key} ASC
-            LIMIT $limit
-        """
+            LIMIT {max(1, min(limit,20))};
+            """ 
+
+        # print(query)# 测试
         
-        # condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
-        # cypher = f"""
-        #     MATCH (n: Episodic) {condition}
-        #     RETURN n
-        #     ORDER BY n.{time_key} ASC
-        #     LIMIT {limit};
-        #     """ 
-        # print(cypher)
         # 检索episodes的实际内容
+        mem_episode = ""
         try:
-            # response = await memory_manager.conn.execute(cypher)
-            response = await self.conn.execute(cypher, parameters=params)
+            response = await self.conn.execute(query)
             for row in response.rows_as_dict():
                 memory = row['n']
                 mem_episode += f"情景: \"{memory['content']}\"\n"
                 # if 'valid_at' in memory:
                 #     valid_at_time_str = memory[time_key].strftime('%Y-%m-%d %H:%M:%S')
-                #     mem_episode += f"发生时间: {valid_at_time_str}\n"
+                #     mem_longtime += f"发生时间: {valid_at_time_str}\n"
                 mem_episode += "---\n"
         except RuntimeError as e: # 一般为刚刚建立库，检索失败
             print(f"情景记忆检索失败: {e}")
-        print(f'{mem_episode}')
+        if mem_episode:
+            mem_episode = "# 情景\n" + mem_episode
+
+
+        # time_key = "valid_at" # 表里的时间key
+
+        # mem_episode = ""
+
+        # group_id = name.encode('utf-8').hex()
+        # episodes_uuid_list = []
+        # memories = await self.graphiti._search(
+        #     query, 
+        #     config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
+        #     group_ids=[group_id]
+        # )
+        # for memory in memories.edges:
+        #     if hasattr(memory, 'episodes') and memory.episodes:
+        #         episodes_uuid_list += memory.episodes
+
+        # # 构造参数字典
+        # params = {}
+        # condition = ""
+        # if episodes_uuid_list:
+        #     condition = "WHERE n.uuid IN $uuids"
+        #     params["uuids"] = episodes_uuid_list
+        # params["limit"] = int(limit) 
+        # cypher = f"""
+        #     MATCH (n:Episodic) {condition}
+        #     RETURN n
+        #     ORDER BY n.{time_key} ASC
+        #     LIMIT $limit
+        # """
+        
+        # # condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
+        # # cypher = f"""
+        # #     MATCH (n: Episodic) {condition}
+        # #     RETURN n
+        # #     ORDER BY n.{time_key} ASC
+        # #     LIMIT {limit};
+        # #     """ 
+        # # print(cypher)
+        # # 检索episodes的实际内容
+        # try:
+        #     # response = await memory_manager.conn.execute(cypher)
+        #     response = await self.conn.execute(cypher, parameters=params)
+        #     for row in response.rows_as_dict():
+        #         memory = row['n']
+        #         mem_episode += f"情景: \"{memory['content']}\"\n"
+        #         # if 'valid_at' in memory:
+        #         #     valid_at_time_str = memory[time_key].strftime('%Y-%m-%d %H:%M:%S')
+        #         #     mem_episode += f"发生时间: {valid_at_time_str}\n"
+        #         mem_episode += "---\n"
+        # except RuntimeError as e: # 一般为刚刚建立库，检索失败
+        #     print(f"情景记忆检索失败: {e}")
+        # print(f'{mem_episode}')
 
         return mem_episode
 

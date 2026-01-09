@@ -11,27 +11,92 @@ from memory_system.memory_manager import MemoryManager
 #     print("异步回调完成")
 
 async def main():
+
     """
-    对话agent
+    1.9 简单测试
+    """
+    # # 初始化
+    # await MemoryManager().initialize()
+    # await TimeSystem().aset_speed(1440)
+    # await TimeSystem().aset_time(year=2016,month=1,day=1)
+    # # await time_system.astart_time()    # 先不启动
+    # name = "小明"
+    # summary = "是一个帮助机器人"
+    # cur_time = await TimeSystem().aget_current_time()
+    # await AgentManager().create_agent(
+    #     name=name, 
+    #     summary=summary, 
+    #     create_time=cur_time
+    #     )
+
+    # await TimeSystem().astart_time()    # 先不启动
+    # AgentManager().start()
+
+    # await AgentManager().agents["小明"].asend_message('用户: 小红是公司的llm工程师')
+    # # await asyncio.sleep(5)
+    # # await AgentManager().agents["小明"].asend_message('用户: 小红转岗为Agent工程师了')
+
+    # await asyncio.sleep(60)
+    # AgentManager().finish()
+
+    # # 加载对话
+    # await MemoryManager().initialize()
+    # await TimeSystem().aset_speed(1440)
+    # await TimeSystem().aset_time(year=2016,month=1,day=1)
+
+    # await AgentManager().load_agent()
+
+    # await TimeSystem().astart_time()    # 先不启动
+    # AgentManager().start()
+
+    # # await TimeSystem().aset_time(year=2016,month=1,day=2)
+    # # await AgentManager().agents["小明"].asend_message('用户: 小红转岗为Agent工程师了')
+
+    # # await TimeSystem().aset_time(year=2016,month=1,day=3)
+    # # await AgentManager().agents["小明"].asend_message('用户: 小红的岗位是啥？')
+
+    # await TimeSystem().aset_time(year=2016,month=1,day=4)
+    # await AgentManager().agents["小明"].asend_message('小亮: 2号发生过什么事情吗？')
+
+    # await asyncio.sleep(60)
+    # AgentManager().finish()
+
+    """"
+    1.8 记忆检索测试
     """
     await MemoryManager().initialize()
-    await TimeSystem().aset_speed(1440)
-    await TimeSystem().aset_time(year=2016,month=1,day=1)
 
-    await AgentManager().load_agent()
+    # 事实记忆
+    mem_fact = await MemoryManager().search_fact_memory(name="小明", query="工程师", limit=2)
+    print(mem_fact)
 
-    await TimeSystem().astart_time()    # 先不启动
-    AgentManager().start()
+    # # 情景记忆
+    # mem_episode = await MemoryManager().search_episode_memory(name="小磊", query="小落是谁？", limit=1)
+    # print(mem_episode)
 
-    # await AgentManager().agents["小落"].asend_message('一个奇怪的男人: 你认识小磊吗？')
-    await AgentManager().agents["小磊"].asend_message('老板: 鉴于你协助黑客入侵公司的服务器，你被开除了！')
 
-    await asyncio.sleep(300)
-    AgentManager().finish()
+    # """
+    # 1.8 对话agent
+    # """
+    # await MemoryManager().initialize()
+    # await TimeSystem().aset_speed(1440)
+    # await TimeSystem().aset_time(year=2016,month=1,day=1)
+
+    # await AgentManager().load_agent()
+
+    # await TimeSystem().astart_time()    # 先不启动
+    # AgentManager().start()
+
+    # # await AgentManager().agents["小落"].asend_message('一个奇怪的男人: 你认识小磊吗？')
+    # # await AgentManager().agents["小磊"].asend_message('老板: 鉴于你协助黑客入侵公司的服务器，你被开除了！')
+    # await AgentManager().agents["小落"].asend_message('(荒板的杀手突然闯进家门)')
+
+    # await asyncio.sleep(300)
+    # AgentManager().finish()
 
     
     # """
-    # 加载agent
+    # 1.8 加载agent
     # """
     # await MemoryManager().initialize()
     
@@ -41,7 +106,7 @@ async def main():
 
 
 #     """
-#     创建agent
+#     1.8 创建agent
 #     """
 #     await MemoryManager().initialize()
 #     await TimeSystem().aset_speed(1440)
