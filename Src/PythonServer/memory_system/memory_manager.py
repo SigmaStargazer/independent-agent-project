@@ -1,3 +1,5 @@
+import os
+import shutil
 import asyncio
 from datetime import datetime
 from uuid import uuid4
@@ -23,7 +25,10 @@ embedding_model_name = "text-embedding-v4"
 reranker_model_name = "gte-rerank-v2"
 
 # 数据库名
-db_name = "db/graphiti.kuzu"
+# db_name = "db/graphiti.kuzu"
+db_path = "db"
+db_name = "graphiti.kuzu"
+db_backup_path = "db/backup"
 
 class _SharedKuzuDriver(KuzuDriver):
     def __init__(self, db_instance, conn_instance):
@@ -70,7 +75,7 @@ class MemoryManager:
 
             # 2. 初始化全局 DB
             print("💾 [MemorySystem] 正在挂载全局数据库...")
-            self._kuzu_db = kuzu.Database(db_name)
+            self._kuzu_db = kuzu.Database(os.path.join(db_path, db_name))
             
             # 3. 首次建索引 (内部封装，外部无感)
             # self.conn = kuzu.AsyncConnection(self._kuzu_db)
@@ -393,6 +398,68 @@ class MemoryManager:
         # print(f'{mem_episode}')
 
         return mem_episode
+
+    async def backup_memory(self, db_backup_name: str):
+        """
+        将db文件备份
+        """
+        shutil.copy(os.path.join(db_path, db_name), os.path.join(db_backup_path, db_backup_name))
+
+    async def restore_memory(self, db_backup_name: str):
+        """
+        将备份的文件恢复到db
+        """
+        shutil.copy(os.path.join(db_backup_path, db_backup_name), os.path.join(db_path, db_name))
+
+    async def delete_memory(self, name: str, start_time: datetime, end_time: datetime):
+        """
+        删除记忆
+        Args:
+            name(str): agent名称
+            start_time(datetime): 开始时间
+            end_time(datetime): 结束时间
+        """
+        group_id = name.encode('utf-8').hex()
+        condition = f"WHERE n.group_id = '{group_id}'"
+        if start_time:
+            condition += f" AND n.valid_at >= TIMESTAMP('{start_time}')"
+        if end_time:
+            condition += f" AND n.valid_at <= TIMESTAMP('{end_time}')"
+        
+        query = f"""
+            MATCH (n) 
+            {condition}
+            DETACH DELETE n
+        """
+        await self.conn.execute(query)
+
+    async def delete_all_memory(self):
+        """
+        高性能清空：关闭连接 -> 物理删除数据库文件夹 -> 重新初始化
+        """
+        print("⚠️ [MemorySystem] 正在执行全库物理删除...")
+        
+        # 1. 必须先关闭资源，释放 Kuzu 的文件锁
+        # 复用你写好的 close 方法，它包含了 gc.collect()，这非常关键
+        await self.close()
+
+        # 2. 物理删除数据库文件夹
+        full_db_path = os.path.join(db_path, db_name)
+        if os.path.exists(full_db_path):
+            try:
+                shutil.rmtree(full_db_path)
+                print(f"🗑️ [MemorySystem] 数据库文件夹已物理移除: {full_db_path}")
+            except Exception as e:
+                print(f"❌ 删除数据库文件失败 (文件可能仍被占用): {e}")
+                raise e
+        else:
+            print("ℹ️ 数据库路径不存在，跳过删除。")
+
+        # 3. 重新初始化
+        # 你的 initialize 方法里包含了 setup_schema()，会自动重建表结构和索引
+        print("🔄 [MemorySystem] 正在重建数据库环境...")
+        await self.initialize()
+        print("✅ [MemorySystem] 记忆库已重置完成")
 
     async def close(self):
         """显式关闭资源，释放 Kuzu 文件锁"""
