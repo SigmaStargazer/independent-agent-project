@@ -3,32 +3,56 @@
   "WorkspaceRootPath": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\agentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\agentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\services\\agentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\shootingeditor2d\\assets\\scripts\\services\\agentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\services\\agentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\shootingeditor2d\\assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\shootingeditor2d\\assets\\scripts\\viewcontroller\\ui\\uiagentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uiagentclienttest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\frameworkdesign\\framework\\singleton\\monosingleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\frameworkdesign\\framework\\singleton\\monosingleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\gameplay\\agent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\gameplay\\agent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|e:\\unityworkspace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\src\\shootingeditor2d\\assets\\scripts\\viewcontroller\\ui\\uicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\network\\clientbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\network\\agentclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\network\\agentclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\frameworkdesign\\framework\\singleton\\singleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\frameworkdesign\\framework\\singleton\\singleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\ui\\uigamestart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uigamestart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\ui\\uigameover.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uigameover.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\ui\\uigamepass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uigamepass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\gameplay\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\gameplay\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\frameworkdesign\\framework\\bindableproperty\\bindableproperty.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\frameworkdesign\\framework\\bindableproperty\\bindableproperty.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\frameworkdesign\\framework\\singleton\\monosingleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\frameworkdesign\\framework\\singleton\\monosingleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\frameworkdesign\\framework\\singleton\\singleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\frameworkdesign\\framework\\singleton\\singleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\command\\shootcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -67,18 +91,6 @@
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\utiilty\\recthelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\ui\\uigamepass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uigamepass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\ui\\uigamestart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uigamestart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\ui\\uigameover.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\ui\\uigameover.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\assets\\scripts\\viewcontroller\\gameplay\\bulletpickitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4D9C44D-FED7-126F-3A67-6108A745171A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\viewcontroller\\gameplay\\bulletpickitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -107,34 +119,97 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AgentClientTest.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\AgentClientTest.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\AgentClientTest.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\AgentClientTest.cs",
-              "RelativeToolTip": "Assets\\Scripts\\AgentClientTest.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAuwBYAAABAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-13T07:44:41.508Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
               "Title": "AgentService.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Services\\AgentService.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Services\\AgentService.cs",
               "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Services\\AgentService.cs",
               "RelativeToolTip": "Assets\\Scripts\\Services\\AgentService.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAAAqwDIAAAA7AAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABoAAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-13T01:53:45.768Z",
-              "IsPinned": true,
+              "WhenOpened": "2026-01-15T01:04:10.572Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "UIController.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIController.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACsAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T03:25:56.263Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UIAgentClientTest.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIAgentClientTest.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIAgentClientTest.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIAgentClientTest.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIAgentClientTest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T03:21:30.006Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "UIGameStart.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAADwvxgAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2023-11-04T18:32:34.094Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "UIGamePass.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2023-11-04T18:32:34.098Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UIGameOver.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2023-11-04T18:32:34.097Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
+              "Title": "ClientBase.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Network\\ClientBase.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Network\\ClientBase.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Network\\ClientBase.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Network\\ClientBase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAK0BAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-05T01:18:40.236Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "AgentClient.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Network\\AgentClient.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Network\\AgentClient.cs",
@@ -148,32 +223,31 @@
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "ClientBase.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Network\\ClientBase.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\Network\\ClientBase.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Network\\ClientBase.cs",
-              "RelativeToolTip": "Assets\\Scripts\\Network\\ClientBase.cs",
-              "ViewState": "AgIAAJEBAAAAAAAAAAAMwK0BAAAoAAAAAAAAAA==",
+              "Title": "Agent.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\Agent.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\Gameplay\\Agent.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\Agent.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\Gameplay\\Agent.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAI0AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-05T01:18:40.236Z",
+              "WhenOpened": "2026-01-14T01:05:12.307Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "MonoSingleton.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
-              "RelativeDocumentMoniker": "Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
-              "RelativeToolTip": "Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAAAMAAAABAAAAAAAAAA==",
+              "DocumentIndex": 10,
+              "Title": "BindableProperty.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs",
+              "RelativeDocumentMoniker": "Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs",
+              "RelativeToolTip": "Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAAAQAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-05T01:16:10.153Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-26T13:07:20.41Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 12,
               "Title": "Singleton.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\Singleton\\Singleton.cs",
               "RelativeDocumentMoniker": "Assets\\FrameworkDesign\\Framework\\Singleton\\Singleton.cs",
@@ -185,19 +259,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "BindableProperty.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs",
-              "RelativeDocumentMoniker": "Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs*",
-              "RelativeToolTip": "..\\..\\..\\..\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\BindableProperty\\BindableProperty.cs*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAARAAAAAAAAAA==",
+              "DocumentIndex": 11,
+              "Title": "MonoSingleton.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
+              "RelativeDocumentMoniker": "Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
+              "RelativeToolTip": "Assets\\FrameworkDesign\\Framework\\Singleton\\MonoSingleton.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAAAMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-26T13:07:20.41Z"
+              "WhenOpened": "2025-08-05T01:16:10.153Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
+              "Title": "Player.cs",
+              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\Player.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\Gameplay\\Player.cs",
+              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\Player.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ViewController\\Gameplay\\Player.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T01:01:07.726Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
               "Title": "ShootCommand.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Command\\ShootCommand.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Command\\ShootCommand.cs",
@@ -209,7 +295,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 14,
               "Title": "ShiftGunCommand.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Command\\ShiftGunCommand.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Command\\ShiftGunCommand.cs",
@@ -221,7 +307,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 15,
               "Title": "FullBulletCommand .cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Command\\FullBulletCommand .cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Command\\FullBulletCommand .cs",
@@ -233,7 +319,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 16,
               "Title": "IGunSystem.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\System\\GunSystem\\IGunSystem.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\System\\GunSystem\\IGunSystem.cs",
@@ -245,7 +331,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 17,
               "Title": "Bullet.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\Bullet.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\Gameplay\\Bullet.cs",
@@ -257,7 +343,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 18,
               "Title": "ITimeSystem.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\System\\TimeSystem\\ITimeSystem.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\System\\TimeSystem\\ITimeSystem.cs",
@@ -269,7 +355,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 19,
               "Title": "TimeSystemTest.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Tests\\TimeSystem\\TimeSystemTest.cs",
               "RelativeDocumentMoniker": "Assets\\Tests\\TimeSystem\\TimeSystemTest.cs",
@@ -281,7 +367,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 20,
               "Title": "Trigger2DCheck.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\Trigger2DCheck.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\Gameplay\\Trigger2DCheck.cs",
@@ -293,7 +379,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 21,
               "Title": "RectHelper.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\Utiilty\\RectHelper.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Utiilty\\RectHelper.cs",
@@ -305,43 +391,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "UIGamePass.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
-              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIGamePass.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAACYAAAABAAAA",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAPMSURBVEhL7ZRNaBRnGMf/77uzM\u002BuymcVtdhPXTQV3D7LSikKxWApDKUgvHqw74q3Qg0gPFT2IhkJz6C1N8ZAcqiD1JJscChXbBBNXSNgaoqHE\u002BBFn0\u002Bxm2GQzutmdnXzMZt737aFuQKG055Lf6Tk8/\u002BfP88ED7PC/h7SCubk5pa7UE1PFKWX0xSiMZQNO04Esy0hFUpBl2Rr6csgCgLJdjpaqpeiVX6\u002BgVC1ZdzJ37HAsnLg\u002BdV25kb/hQoVpfG24AEBbBnWlnpCE1CeEyEIgCwlZIpEsISRLKc36iT/Tyg3wQEYSUtbHfVl4yIRj4YQPvj6JS1kAfaIqulq5BABmFme0JXvp1IPSA91yrKjjOggHwpAlGRKVIFEJIOg5\u002B/HZ/gAPZEaMkcyjxUfaXeMuVtdXc3vDe2e1/Zr\u002BzHoWfWg\u002BtCihgyAYLHxTyEkA8NJ5qVXXq1\u002BN/zmOkBLCoc5D7uHEYTMWirkEBKZtYnNr0wryoMooO16ulw9OFCfQcBvggh\u002Bs2JWue4V76trWGoQQqiDiOAF5AiDnA4DYpzFtobqgOa4Dbb\u002BGk\u002B\u002BdLAbl4AXP836EwGCtWRsklEwe2XfEcjad39uD7Wq6I/3BbGUWDbfx05n3zwyc\u002B\u002Bjch4yzyNOVp0UCcoH4yHB1rLouAcDj8mPIfhlxNY6gP5jrbOscEkLkVVW1WrMEgNM4DQDGq/oriwkGxaeAEGKd/\u002BS8AQF3YmEChBAXAgWj27DQWrJpm1jdWMUedQ82tjbut7W19b9dHK8vrVKrJBdri\u002B1mzYTLXAgh2q/mriafW8\u002BV6noVQggFQDL1XSq6beBxD5xzUEr/Xug/0LqWMWNM773fiyV7CYwz/dYft/ou/XKpa2RuBJzzhID4Hh4yaBnEQjGElBAqjQrmq/Nv192GUWZT0OF4OD57bN8xhJQQKKGzHW0dw1pSs5PvJEEIsQnIiKDiCQBIAHAgdgBMMJg1E0KI9ss/X04fffcoIqEIms0mik4RTtOx4mrcAjBg1SySiqRi0\u002BVp1DfrQ7e/uP0bo6zrWv5aaro8XYCHHwo9BWPb4ET6BFbWVnBz6iYkKulccI1SCiooqI\u002BCcgoZ8gCAAQBQqJJljOWooCCUrKiqalu2dREcCjy4JEIWW10TAMi/yGvLjeVT\u002BWJer23UoltsC7uDuxGQAvD7/JAlGRDo6f6s\u002B9uW8L\u002By/YtGZ0aTwif6JkuTqfH5cSw3liEgEN4VRjqWRtAfHOj9vLf/Tfm/s/2LXMU1Pe5dpILqjDOdCaZzwXXiER0cun\u002BXP/umdIcdXvMX9CTHFwZwxFMAAAAASUVORK5CYII=",
-              "WhenOpened": "2023-11-04T18:32:34.098Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "UIGameStart.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
-              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIGameStart.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAB0AAAAzAAAA",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAPMSURBVEhL7ZRNaBRnGMf/77uzM\u002BuymcVtdhPXTQV3D7LSikKxWApDKUgvHqw74q3Qg0gPFT2IhkJz6C1N8ZAcqiD1JJscChXbBBNXSNgaoqHE\u002BBFn0\u002Bxm2GQzutmdnXzMZt737aFuQKG055Lf6Tk8/\u002BfP88ED7PC/h7SCubk5pa7UE1PFKWX0xSiMZQNO04Esy0hFUpBl2Rr6csgCgLJdjpaqpeiVX6\u002BgVC1ZdzJ37HAsnLg\u002BdV25kb/hQoVpfG24AEBbBnWlnpCE1CeEyEIgCwlZIpEsISRLKc36iT/Tyg3wQEYSUtbHfVl4yIRj4YQPvj6JS1kAfaIqulq5BABmFme0JXvp1IPSA91yrKjjOggHwpAlGRKVIFEJIOg5\u002B/HZ/gAPZEaMkcyjxUfaXeMuVtdXc3vDe2e1/Zr\u002BzHoWfWg\u002BtCihgyAYLHxTyEkA8NJ5qVXXq1\u002BN/zmOkBLCoc5D7uHEYTMWirkEBKZtYnNr0wryoMooO16ulw9OFCfQcBvggh\u002Bs2JWue4V76trWGoQQqiDiOAF5AiDnA4DYpzFtobqgOa4Dbb\u002BGk\u002B\u002BdLAbl4AXP836EwGCtWRsklEwe2XfEcjad39uD7Wq6I/3BbGUWDbfx05n3zwyc\u002B\u002Bjch4yzyNOVp0UCcoH4yHB1rLouAcDj8mPIfhlxNY6gP5jrbOscEkLkVVW1WrMEgNM4DQDGq/oriwkGxaeAEGKd/\u002BS8AQF3YmEChBAXAgWj27DQWrJpm1jdWMUedQ82tjbut7W19b9dHK8vrVKrJBdri\u002B1mzYTLXAgh2q/mriafW8\u002BV6noVQggFQDL1XSq6beBxD5xzUEr/Xug/0LqWMWNM773fiyV7CYwz/dYft/ou/XKpa2RuBJzzhID4Hh4yaBnEQjGElBAqjQrmq/Nv192GUWZT0OF4OD57bN8xhJQQKKGzHW0dw1pSs5PvJEEIsQnIiKDiCQBIAHAgdgBMMJg1E0KI9ss/X04fffcoIqEIms0mik4RTtOx4mrcAjBg1SySiqRi0\u002BVp1DfrQ7e/uP0bo6zrWv5aaro8XYCHHwo9BWPb4ET6BFbWVnBz6iYkKulccI1SCiooqI\u002BCcgoZ8gCAAQBQqJJljOWooCCUrKiqalu2dREcCjy4JEIWW10TAMi/yGvLjeVT\u002BWJer23UoltsC7uDuxGQAvD7/JAlGRDo6f6s\u002B9uW8L\u002By/YtGZ0aTwif6JkuTqfH5cSw3liEgEN4VRjqWRtAfHOj9vLf/Tfm/s/2LXMU1Pe5dpILqjDOdCaZzwXXiER0cun\u002BXP/umdIcdXvMX9CTHFwZwxFMAAAAASUVORK5CYII=",
-              "WhenOpened": "2023-11-04T18:32:34.094Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "UIGameOver.cs",
-              "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
-              "ToolTip": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
-              "RelativeToolTip": "Assets\\Scripts\\ViewController\\UI\\UIGameOver.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAB0AAAAmAAAA",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAPMSURBVEhL7ZRNaBRnGMf/77uzM\u002BuymcVtdhPXTQV3D7LSikKxWApDKUgvHqw74q3Qg0gPFT2IhkJz6C1N8ZAcqiD1JJscChXbBBNXSNgaoqHE\u002BBFn0\u002Bxm2GQzutmdnXzMZt737aFuQKG055Lf6Tk8/\u002BfP88ED7PC/h7SCubk5pa7UE1PFKWX0xSiMZQNO04Esy0hFUpBl2Rr6csgCgLJdjpaqpeiVX6\u002BgVC1ZdzJ37HAsnLg\u002BdV25kb/hQoVpfG24AEBbBnWlnpCE1CeEyEIgCwlZIpEsISRLKc36iT/Tyg3wQEYSUtbHfVl4yIRj4YQPvj6JS1kAfaIqulq5BABmFme0JXvp1IPSA91yrKjjOggHwpAlGRKVIFEJIOg5\u002B/HZ/gAPZEaMkcyjxUfaXeMuVtdXc3vDe2e1/Zr\u002BzHoWfWg\u002BtCihgyAYLHxTyEkA8NJ5qVXXq1\u002BN/zmOkBLCoc5D7uHEYTMWirkEBKZtYnNr0wryoMooO16ulw9OFCfQcBvggh\u002Bs2JWue4V76trWGoQQqiDiOAF5AiDnA4DYpzFtobqgOa4Dbb\u002BGk\u002B\u002BdLAbl4AXP836EwGCtWRsklEwe2XfEcjad39uD7Wq6I/3BbGUWDbfx05n3zwyc\u002B\u002Bjch4yzyNOVp0UCcoH4yHB1rLouAcDj8mPIfhlxNY6gP5jrbOscEkLkVVW1WrMEgNM4DQDGq/oriwkGxaeAEGKd/\u002BS8AQF3YmEChBAXAgWj27DQWrJpm1jdWMUedQ82tjbut7W19b9dHK8vrVKrJBdri\u002B1mzYTLXAgh2q/mriafW8\u002BV6noVQggFQDL1XSq6beBxD5xzUEr/Xug/0LqWMWNM773fiyV7CYwz/dYft/ou/XKpa2RuBJzzhID4Hh4yaBnEQjGElBAqjQrmq/Nv192GUWZT0OF4OD57bN8xhJQQKKGzHW0dw1pSs5PvJEEIsQnIiKDiCQBIAHAgdgBMMJg1E0KI9ss/X04fffcoIqEIms0mik4RTtOx4mrcAjBg1SySiqRi0\u002BVp1DfrQ7e/uP0bo6zrWv5aaro8XYCHHwo9BWPb4ET6BFbWVnBz6iYkKulccI1SCiooqI\u002BCcgoZ8gCAAQBQqJJljOWooCCUrKiqalu2dREcCjy4JEIWW10TAMi/yGvLjeVT\u002BWJer23UoltsC7uDuxGQAvD7/JAlGRDo6f6s\u002B9uW8L\u002By/YtGZ0aTwif6JkuTqfH5cSw3liEgEN4VRjqWRtAfHOj9vLf/Tfm/s/2LXMU1Pe5dpILqjDOdCaZzwXXiER0cun\u002BXP/umdIcdXvMX9CTHFwZwxFMAAAAASUVORK5CYII=",
-              "WhenOpened": "2023-11-04T18:32:34.097Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 22,
               "Title": "BulletPickItem.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\BulletPickItem.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\Gameplay\\BulletPickItem.cs",
@@ -353,7 +403,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 23,
               "Title": "AttackPlayer.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\Scripts\\ViewController\\Gameplay\\AttackPlayer.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ViewController\\Gameplay\\AttackPlayer.cs",
@@ -365,7 +415,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 24,
               "Title": "ICanSendEvent.cs",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\FrameworkDesign\\Framework\\Architecture\\Rule\\ICanSendEvent.cs",
               "RelativeDocumentMoniker": "Assets\\FrameworkDesign\\Framework\\Architecture\\Rule\\ICanSendEvent.cs",
@@ -377,7 +427,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 25,
               "Title": "LevelFileTest.xml",
               "DocumentMoniker": "E:\\UnityWorkSpace\\\u72EC\u7ACB\u667A\u80FD\u4F53\u5F02\u6B65\u901A\u4FE1\u67B6\u6784\u5E94\u7528\\independent-agent-project\\Src\\ShootingEditor2D\\Assets\\LevelFile\\LevelFileTest.xml",
               "RelativeDocumentMoniker": "Assets\\LevelFile\\LevelFileTest.xml",

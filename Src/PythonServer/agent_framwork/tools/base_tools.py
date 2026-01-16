@@ -60,6 +60,28 @@ async def communicate_to_user(agent: Annotated[str, InjectedState("name")], mess
         return f"你向用户发送消息失败: {e}"
 
 @tool
+async def move(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
+    """向指定方向移动指定距离
+    Args:
+        direction(str): 方向，填left或者right
+        distance(float): 距离
+    """
+    if direction not in ["left", "right"]:
+        return "方向错误，请填left或者right"
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+
+    try:
+        request = message_pb2.AgentMoveRequest()
+        request.is_right = direction == "right"
+        request.distance = distance
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]向开始向{direction}移动了{distance}距离，请等待移动完成")
+        return f"[{agent}]向开始向{direction}移动了{distance}距离，请等待移动完成"
+    except Exception as e:
+        return f"移动失败: {e}"
+
+@tool
 async def get_agent_list() -> list:
     """获取所有agent的清单"""
     from agent_framwork.managers.agent_manager import AgentManager

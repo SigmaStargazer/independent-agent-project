@@ -48,6 +48,7 @@ tools = [base_tools.communicate_to_agent,
          base_tools.communicate_to_user,
          base_tools.get_agent_list, 
          base_tools.get_cur_time,
+         base_tools.move,
          base_tools.add_alarm,
          base_tools.get_alarm_list,
          base_tools.remove_alarm]

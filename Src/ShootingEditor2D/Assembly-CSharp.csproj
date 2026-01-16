@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\ViewController\LevelEditor\LevelEditor.cs" />
     <Compile Include="Assets\Scripts\Network\NetClient.cs" />
     <Compile Include="Assets\FrameworkDesign\Framework\Architecture\IModel.cs" />
+    <Compile Include="Assets\Scripts\ViewController\Gameplay\Agent.cs" />
     <Compile Include="Assets\Scripts\ViewController\Gameplay\Gun.cs" />
     <Compile Include="Assets\FrameworkDesign\Framework\Architecture\Architecture.cs" />
     <Compile Include="Assets\Scripts\Command\PickGunCommand.cs" />
@@ -74,7 +75,7 @@
     <Compile Include="Assets\FrameworkDesign\Framework\Command\ICommand.cs" />
     <Compile Include="Assets\FrameworkDesign\Framework\Architecture\IBelongToArchitecture.cs" />
     <Compile Include="Assets\Scripts\ViewController\Gameplay\SupplyStation.cs" />
-    <Compile Include="Assets\Scripts\AgentClientTest.cs" />
+    <Compile Include="Assets\Scripts\ViewController\UI\UIAgentClientTest.cs" />
     <Compile Include="Assets\FrameworkDesign\Framework\Architecture\ICanSetArchitecture.cs" />
     <Compile Include="Assets\Scripts\ViewController\Gameplay\Enemy.cs" />
     <Compile Include="Assets\Scripts\Network\AgentClient.cs" />

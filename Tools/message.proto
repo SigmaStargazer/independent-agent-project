@@ -40,11 +40,17 @@ enum CHARACTER_STATE
 
 enum ENTITY_EVENT
 {
-	NONE = 0;
-	IDLE = 1;
-	MOVE_FWD = 2;
-	MOVE_BACK = 3;
-	JUMP = 4;
+	EVT_NONE = 0;    // 改名：加上 EVT_ 前缀
+	EVT_IDLE = 1;    // 改名：加上 EVT_ 前缀
+	EVT_MOVE_FWD = 2;
+	EVT_MOVE_BACK = 3;
+	EVT_JUMP = 4;
+}
+
+enum DIRECTION
+{
+	LEFT = 0;
+	RIGHT = 1;
 }
 
 message NUserInfo {
@@ -112,6 +118,7 @@ message NetMessageRequest{
 	SceneStartRequest sceneStartRequest = 2;
 	UserSendMessageRequest userSendMessageRequest = 3;
 	AgentSendMessageRequest agentSendMessageRequest = 4;
+	AgentMoveRequest agentMoveRequest = 5;
 }
 
 message NetMessageResponse{
@@ -150,4 +157,10 @@ message UserSendMessageRequest {
 message AgentSendMessageRequest {
 	string agent = 1;
 	string ai_message = 2;
+}
+
+// 向指定方向移动指定距离
+message AgentMoveRequest {
+	bool is_right = 1;
+	float distance = 2;
 }
