@@ -1,39 +1,36 @@
 # Independent-Agent-Project
 
 #### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+本项目演示了 **Python (智能体)** 与 **C# (环境)** 之间的跨语言交互控制，用于验证智能体系统的通信链路与控制逻辑。
 
 #### 软件架构
-软件架构说明
+采用 **Client-Server (C/S)** 架构：
+
+1. **Python 服务端 (Brain)**:
+   - 托管智能体核心逻辑，下发控制指令。
+2. **C# 客户端 (Environment)**:
+   - 构建模拟工作环境，处理物理/逻辑反馈。
+3. **数据通信**:
+   - 使用 **Protobuf** 进行高效消息序列化。
+   - 字节序标准：**Little-Endian (小端)**。
 
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+clone后，使用以下命令安装依赖：
+
+```
+uv sync
+```
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1. 单独测试智能体
 
-#### 参与贡献
+   运行test.py文件
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+2. 测试智能体与客户端连接
 
+   * 服务端：运行test_agent_server_protobuff.py
 
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+   * 客户端：运行CSharpClient.sln文件，或者运行unity客户端

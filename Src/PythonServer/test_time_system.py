@@ -172,7 +172,7 @@ if __name__ == "__main__":
             break
 
         elif choice == "t":
-            print(f"当前虚拟时间：{TimeSystem().aget_current_time_str()}")
+            print(f"当前虚拟时间：{TimeSystem().aget_current_time()}")
 
         else:
             print("无效选项。")
