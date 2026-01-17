@@ -9,8 +9,8 @@ win：
 Mac：
 0、环境准备：
 赋予权限：
-chmod +x 1.genproto.sh
-chmod +x 2.copyprotocol.sh
+chmod +x 1.genproto.command
+chmod +x 2.copyprotocol.command
 
 安装依赖：
 dotnet tool install --global protobuf-net.Protogen

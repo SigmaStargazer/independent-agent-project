@@ -124,10 +124,16 @@
   <ItemGroup>
     <None Include="Assets/LevelFile/LevelFileTest.xml" />
     <None Include="Assets/References/Protocol.dll" />
+    <None Include="Assets/References/protobuf-net.Core.dll" />
     <None Include="Assets/References/protobuf-net.dll" />
     <None Include="Assets/References/log4net.xml" />
     <None Include="Assets/References/protobuf-net.xml" />
+    <None Include="Assets/References/System.Numerics.Vectors.dll" />
     <None Include="Assets/References/log4net.dll" />
+    <None Include="Assets/References/System.Memory.dll" />
+    <None Include="Assets/References/System.Collections.Immutable.dll" />
+    <None Include="Assets/References/System.Runtime.CompilerServices.Unsafe.dll" />
+    <None Include="Assets/References/System.Buffers.dll" />
     <None Include="Assets/References/Common.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +415,15 @@
     </Reference>
     <Reference Include="log4net">
       <HintPath>Assets/References/log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net.Core">
+      <HintPath>Assets/References/protobuf-net.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>Assets/References/System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>Assets/References/System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>/Applications/Unity/Hub/Editor/2021.3.23f1c1/Unity.app/Contents/NetStandard/ref/2.1.0/netstandard.dll</HintPath>
