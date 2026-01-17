@@ -4,7 +4,7 @@ setlocal
 
 :: ================= 配置区域 =================
 :: 源路径 (C# 类库输出目录) - 去掉末尾的 \*，在命令里加
-set SOURCE_PATH=..\Src\Lib\AgentProtocol\bin\Debug
+set SOURCE_PATH=..\Src\Lib\AgentProtocol\bin\Debug\netstandard2.1
 
 :: 目标路径 (Unity 工程目录)
 set DEST_PATH=..\Src\ShootingEditor2D\Assets\References

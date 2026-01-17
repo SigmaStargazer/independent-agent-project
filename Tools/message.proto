@@ -137,6 +137,15 @@ message AgentCreateResponse {
 	string errormsg = 2;
 }
 
+// 加载Agent
+message AgentLoadRequest {
+}
+
+message AgentLoadResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
 // 开启场景
 message SceneStartRequest {
 	int32 map_id = 1;

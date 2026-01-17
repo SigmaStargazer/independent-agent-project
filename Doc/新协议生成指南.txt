@@ -1,3 +1,22 @@
+win：
 1、运行Tools/1.genproto.cmd
 2、打开Src/CSharpClient/CSharpClient.sln，重新生成解决方案
 3、运行Tools/2.copyprotocol.cmd
+
+
+
+
+Mac：
+0、环境准备：
+赋予权限：
+chmod +x 1.genproto.sh
+chmod +x 2.copyprotocol.sh
+
+安装依赖：
+dotnet tool install --global protobuf-net.Protogen
+
+将两个文件的.sh改成.command
+
+1、运行Tools/1.genproto.command
+2、打开Src/CSharpClient/CSharpClient.sln，重新生成解决方案
+3、运行Tools/2.copyprotocol.command
