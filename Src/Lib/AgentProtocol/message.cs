@@ -153,15 +153,18 @@ namespace SkillBridge.Message
         public AgentCreateRequest agentCreateRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(2)]
-        public SceneStartRequest sceneStartRequest { get; set; }
+        public AgentLoadRequest agentLoadRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(3)]
-        public UserSendMessageRequest userSendMessageRequest { get; set; }
+        public SceneStartRequest sceneStartRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(4)]
-        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+        public UserSendMessageRequest userSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(5)]
+        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(6)]
         public AgentMoveRequest agentMoveRequest { get; set; }
 
     }
@@ -177,6 +180,9 @@ namespace SkillBridge.Message
         public AgentCreateResponse agentCreateResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(2)]
+        public AgentLoadResponse agentLoadResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(3)]
         public SceneStartResponse sceneStartResponse { get; set; }
 
     }
@@ -209,6 +215,34 @@ namespace SkillBridge.Message
         public bool Success { get; set; }
 
         [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentLoadRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentLoadResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"agent_names")]
+        public global::System.Collections.Generic.List<string> AgentNames { get; } = new global::System.Collections.Generic.List<string>();
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"errormsg")]
         [global::System.ComponentModel.DefaultValue("")]
         public string Errormsg { get; set; } = "";
 

@@ -9,8 +9,10 @@ using SkillBridge.Message;
 
 public class UIAgentClientTest : MonoBehaviour
 {
-    public InputField inputField;
-    public Text text;
+    public InputField nameInputField;
+    public InputField descInputField;
+    public InputField messageInputField;
+    public Text aiMessageText;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,7 +33,23 @@ public class UIAgentClientTest : MonoBehaviour
         AgentService.Instance.SendUserMessage("小明", "和小红说，让她闹个每天8点的起床铃，9点的上班铃声，然后每天闹铃响时让她直接通知我。");
     }
 
-    public void OnClickSendText()
+    public void OnClickCreateAgent()
+    { 
+        if (nameInputField != null && !string.IsNullOrEmpty(nameInputField.text) && descInputField != null && !string.IsNullOrEmpty(descInputField.text))
+        {
+            AgentService.Instance.SendAgentCreate(nameInputField.text, descInputField.text);
+        }
+        else
+        {
+            Debug.LogWarning("输入框未绑定或内容为空！");
+        }
+    }
+
+    public void OnClickLoadAgent()
+    {
+    }
+
+    public void OnClickSendMessage()
     {
         // 创建Agent
         AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
@@ -39,18 +57,18 @@ public class UIAgentClientTest : MonoBehaviour
         AgentService.Instance.SendSceneStart(1);
 
         // 发送消息
-        if (inputField != null && !string.IsNullOrEmpty(inputField.text))
+        if (messageInputField != null && !string.IsNullOrEmpty(messageInputField.text))
         {
             // 获取输入框的内容
-            string content = inputField.text;
+            string userMessage = messageInputField.text;
 
             // 发送给小明
-            AgentService.Instance.SendUserMessage("小明", content);
+            AgentService.Instance.SendUserMessage("小明", userMessage);
 
             // 清空输入框
-            inputField.text = "";
+            messageInputField.text = "";
 
-            Debug.Log($"已发送消息给小明: {content}");
+            Debug.Log($"已发送消息给小明: {userMessage}");
         }
         else
         {
@@ -59,7 +77,7 @@ public class UIAgentClientTest : MonoBehaviour
     }
     private void OnGetAgentMessage(string agent, string ai_message)
     {
-        text.text = $"{agent}: {ai_message}";
+        aiMessageText.text = $"{agent}: {ai_message}";
     }
 
 

@@ -18,18 +18,19 @@ class AgentManager:
         self.agents: Dict[str, Agent] = {}
         self.processing_tasks = {}
 
-    async def create_agent(self, name:str, summary:str, create_time:datetime):
+    async def create_agent(self, name:str, summary:str, create_time:datetime) -> str:
         """
         创建agent，存入self.agents。并将简介存入graphiti中
         Args:
             name(str): agent名称
             summary(str): agent简介
             cur_time(datetime): 当前时间
+        return:
+            str: 创建结果
         """
         # 1.1. 检查agent manager是否已有该agent
         if self.agents.get(name):
-            print(f"[Agent Manager]: Agent {name} 已存在")
-            return
+            return f"[Agent Manager]: Agent {name} 已存在"
 
         # 1.2. 检查graphiti是否已有该agent
         group_id = name.encode('utf-8').hex()
@@ -38,8 +39,7 @@ MATCH (n: Entity {{group_id: '{group_id}'}})
 RETURN n"""
         result = await MemoryManager().conn.execute(cypher)
         if result.has_next():
-            print(f"[Agent Manager]: Agent {name} 已存在")
-            return
+            return f"[Agent Manager]: Agent {name} 已存在"
 
         # 2. 创建agent，存self.agents
         agent = Agent(name=name)
@@ -50,6 +50,8 @@ RETURN n"""
             name=name, 
             summary=summary, 
             create_time=create_time)
+
+        return f"[Agent Manager]: Agent {name} 创建成功"
 
     # async def create_agent(self, name:str, description:str):
     #     """
@@ -63,9 +65,11 @@ RETURN n"""
     #     agent = Agent(name=name, description=description)
     #     self.agents[agent.name] = agent
 
-    async def load_agent(self):
+    async def load_agent(self) -> list[str]:
         """
         从graphiti加载agent到self.agents
+        Return:
+            list[str]: agent名称列表
         """
         # 1. 获取kuzu中的所有group_id
         cypher = f"""
@@ -74,11 +78,16 @@ RETURN n"""
         RETURN DISTINCT n.group_id as group_id"""
 
         response = await MemoryManager().conn.execute(cypher)
+        agent_names = []
         for row in response.rows_as_dict():
             group_id = row['group_id']
             name = bytes.fromhex(group_id).decode('utf-8')
-            agent = Agent(name=name)
-            self.agents[agent.name] = agent
+            agent_names.append(name)
+            if name not in self.agents:
+                agent = Agent(name=name)
+                self.agents[agent.name] = agent
+        print(f"加载Agent: {agent_names}")
+        return agent_names
 
     def start(self):
         """

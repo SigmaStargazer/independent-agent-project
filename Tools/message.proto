@@ -115,15 +115,17 @@ message NetMessage{
 
 message NetMessageRequest{
 	AgentCreateRequest agentCreateRequest = 1;
-	SceneStartRequest sceneStartRequest = 2;
-	UserSendMessageRequest userSendMessageRequest = 3;
-	AgentSendMessageRequest agentSendMessageRequest = 4;
-	AgentMoveRequest agentMoveRequest = 5;
+	AgentLoadRequest agentLoadRequest = 2;
+	SceneStartRequest sceneStartRequest = 3;
+	UserSendMessageRequest userSendMessageRequest = 4;
+	AgentSendMessageRequest agentSendMessageRequest = 5;
+	AgentMoveRequest agentMoveRequest = 6;
 }
 
 message NetMessageResponse{
 	AgentCreateResponse agentCreateResponse = 1;
-	SceneStartResponse sceneStartResponse = 2;
+	AgentLoadResponse agentLoadResponse = 2;
+	SceneStartResponse sceneStartResponse = 3;
 }
 
 // 创建Agent
@@ -135,6 +137,16 @@ message AgentCreateRequest {
 message AgentCreateResponse {
 	bool success = 1;
 	string errormsg = 2;
+}
+
+// 加载Agent
+message AgentLoadRequest {
+}
+
+message AgentLoadResponse {
+	bool success = 1;
+	repeated string agent_names = 2;
+	string errormsg = 3;
 }
 
 // 开启场景

@@ -39,36 +39,36 @@ async def main():
     # await asyncio.sleep(60)
     # AgentManager().finish()
 
-    # # 加载对话
-    # await MemoryManager().initialize()
-    # await TimeSystem().aset_speed(1440)
-    # await TimeSystem().aset_time(year=2016,month=1,day=1)
+    # 加载对话
+    await MemoryManager().initialize()
+    await TimeSystem().aset_speed(1440)
+    await TimeSystem().aset_time(year=2016,month=1,day=1)
 
-    # await AgentManager().load_agent()
+    await AgentManager().load_agent()
 
-    # await TimeSystem().astart_time()    # 先不启动
-    # AgentManager().start()
+    await TimeSystem().astart_time()    # 先不启动
+    AgentManager().start()
 
     # # await TimeSystem().aset_time(year=2016,month=1,day=2)
     # # await AgentManager().agents["小明"].asend_message('用户: 小红转岗为Agent工程师了')
 
-    # # await TimeSystem().aset_time(year=2016,month=1,day=3)
-    # # await AgentManager().agents["小明"].asend_message('用户: 小红的岗位是啥？')
+    await TimeSystem().aset_time(year=2016,month=1,day=3)
+    await AgentManager().agents["小明"].asend_message('用户: 小红的岗位是啥？')
 
     # await TimeSystem().aset_time(year=2016,month=1,day=4)
     # await AgentManager().agents["小明"].asend_message('小亮: 2号发生过什么事情吗？')
 
-    # await asyncio.sleep(60)
-    # AgentManager().finish()
+    await asyncio.sleep(60)
+    AgentManager().finish()
 
-    """"
-    1.8 记忆检索测试
-    """
-    await MemoryManager().initialize()
+    # """"
+    # 1.8 记忆检索测试
+    # """
+    # await MemoryManager().initialize()
 
-    # 事实记忆
-    mem_fact = await MemoryManager().search_fact_memory(name="小明", query="工程师", limit=2)
-    print(mem_fact)
+    # # 事实记忆
+    # mem_fact = await MemoryManager().search_fact_memory(name="小明", query="工程师", limit=2)
+    # print(mem_fact)
 
     # # 情景记忆
     # mem_episode = await MemoryManager().search_episode_memory(name="小磊", query="小落是谁？", limit=1)

@@ -4,8 +4,10 @@ import asyncio
 
 from network.servers import AgentServerNetMessage
 from network import message_pb2
+
 from agent_framwork.managers.agent_manager import AgentManager
 from agent_framwork.systems.time_system import TimeSystem
+from memory_system.memory_manager import MemoryManager
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -26,16 +28,58 @@ async def handle_agent_create_request(msg, context):
     name = msg.name
     desc = msg.desc
     print(f"创建Agent: {name}: {desc}")
+
+    await MemoryManager().initialize()
+    await TimeSystem().aset_time(year=2016,month=1,day=1)
+    cur_time = await TimeSystem().aget_current_time()
+    
     response = message_pb2.AgentCreateResponse()
     try:
-        AgentManager().create_agent(name=name, description=desc)
+        result = await AgentManager().create_agent(
+            name=name, 
+            summary=desc,
+            create_time=cur_time
+            )
+        response.success = True
+        response.errormsg = f"创建Agent: {result}"
+        await context['server'].send_message(response, context)
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"创建Agent失败: {str(e)}")
+        await context['server'].send_message(response, context)
+
+# @server.on_message(message_pb2.AgentCreateRequest)
+# async def handle_agent_create_request(msg, context):
+#     name = msg.name
+#     desc = msg.desc
+#     print(f"创建Agent: {name}: {desc}")
+#     response = message_pb2.AgentCreateResponse()
+#     try:
+#         AgentManager().create_agent(name=name, description=desc)
+#         response.success = True
+#         response.errormsg = ""
+#         await context['server'].send_message(response, context)
+#     except Exception as e:
+#         response.success = False
+#         response.errormsg = str(e)
+#         print(f"创建Agent失败: {str(e)}")
+#         await context['server'].send_message(response, context)
+
+@server.on_message(message_pb2.AgentLoadRequest)
+async def handle_agent_load_request(msg, context):
+    print("加载Agent")
+    response = message_pb2.AgentLoadResponse()
+    try:
+        agent_names = await AgentManager().load_agent()
+        response.agent_names.extend(agent_names)
         response.success = True
         response.errormsg = ""
         await context['server'].send_message(response, context)
     except Exception as e:
         response.success = False
         response.errormsg = str(e)
-        print(f"创建Agent失败: {str(e)}")
+        print(f"加载Agent失败: {str(e)}")
         await context['server'].send_message(response, context)
 
 @server.on_message(message_pb2.SceneStartRequest)
@@ -44,9 +88,13 @@ async def handle_scene_start_request(msg, context):
     print(f"启动场景: {map_id}")
     response = message_pb2.SceneStartResponse()
     try:
-        AgentManager().start()
+        await MemoryManager().initialize()
+        
         await TimeSystem().aset_speed(1440)
-        await TimeSystem().astart_time(year=2016,month=1,day=1)
+        await TimeSystem().aset_time(year=2016,month=1,day=1)
+        await TimeSystem().astart_time()    # 先不启动
+        
+        AgentManager().start()
         response.success = True
         response.errormsg = ""
         await context['server'].send_message(response, context)
@@ -55,6 +103,24 @@ async def handle_scene_start_request(msg, context):
         response.errormsg = str(e)
         print(f"场景启动失败: {str(e)}")
         await context['server'].send_message(response, context)
+
+# @server.on_message(message_pb2.SceneStartRequest)
+# async def handle_scene_start_request(msg, context):
+#     map_id = msg.map_id
+#     print(f"启动场景: {map_id}")
+#     response = message_pb2.SceneStartResponse()
+#     try:
+#         AgentManager().start()
+#         await TimeSystem().aset_speed(1440)
+#         await TimeSystem().astart_time(year=2016,month=1,day=1)
+#         response.success = True
+#         response.errormsg = ""
+#         await context['server'].send_message(response, context)
+#     except Exception as e:
+#         response.success = False
+#         response.errormsg = str(e)
+#         print(f"场景启动失败: {str(e)}")
+#         await context['server'].send_message(response, context)
 
 @server.on_message(message_pb2.UserSendMessageRequest)
 async def handle_user_send_msg_request(msg, context):
