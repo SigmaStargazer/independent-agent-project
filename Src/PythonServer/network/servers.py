@@ -160,6 +160,7 @@ class AgentServerNetMessage:
             return
 
         body = net_msg.SerializeToString()
+        print(f"DEBUG: 实际发送的二进制长度: {len(body)}, 内容: {body.hex()}")
         writer = context['writer']
         writer.write(len(body).to_bytes(4, 'little') + body)
         await writer.drain()
@@ -240,5 +241,6 @@ class AgentServerNetMessage:
 
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
+            print(f"DEBUG: Sending NetMessage: {net_msg}")
 
 

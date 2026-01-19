@@ -27,8 +27,8 @@ server = AgentServerNetMessage(port_config_file=PORT_CONFIG_FILE)
 async def handle_agent_create_request(msg, context):
     name = msg.name
     desc = msg.desc
-    print(f"创建Agent: {name}: {desc}")
 
+    print(f"创建Agent: {name}: {desc}")
     await MemoryManager().initialize()
     await TimeSystem().aset_time(year=2016,month=1,day=1)
     cur_time = await TimeSystem().aget_current_time()
@@ -69,12 +69,14 @@ async def handle_agent_create_request(msg, context):
 @server.on_message(message_pb2.AgentLoadRequest)
 async def handle_agent_load_request(msg, context):
     print("加载Agent")
+    await MemoryManager().initialize()
     response = message_pb2.AgentLoadResponse()
     try:
         agent_names = await AgentManager().load_agent()
-        response.agent_names.extend(agent_names)
+        response.agent_names.extend(agent_names) # agent_names 的list
         response.success = True
         response.errormsg = ""
+        print(f"加载Agent成功: {agent_names}")
         await context['server'].send_message(response, context)
     except Exception as e:
         response.success = False

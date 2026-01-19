@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.PackageManager.Requests;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,6 +23,7 @@ namespace Services
         //public UnityEngine.Events.UnityAction<Result, string> OnCreateAgent;
         //public UnityEngine.Events.UnityAction<Result, string> OnStartScene;
         public UnityEngine.Events.UnityAction<bool, string> OnCreateAgent;
+        public UnityEngine.Events.UnityAction<List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
         public UnityEngine.Events.UnityAction<bool, float> OnMoveAgent;
@@ -33,6 +35,7 @@ namespace Services
             AgentClient.Instance.OnConnect += OnGameServerConnect;
             AgentClient.Instance.OnDisconnect += OnGameServerDisconnect;
             MessageDistributer.Instance.Subscribe<AgentCreateResponse>(this.OnAgentCreate);// 记得写订阅消息和注销
+            MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -41,6 +44,7 @@ namespace Services
         public void Dispose()
         {
             MessageDistributer.Instance.Unsubscribe<AgentCreateResponse>(this.OnAgentCreate);
+            MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -136,7 +140,9 @@ namespace Services
             }
             return false;
         }
+
         // 创建Agent
+        // 发送消息
         public void SendAgentCreate(string name, string desc)
         {
             Debug.LogFormat("AgentCreateRequest::name :{0} desc:{1}", name, desc);
@@ -158,6 +164,7 @@ namespace Services
                 this.ConnectToServer();
             }
         }
+        // 收到请求后
         void OnAgentCreate(object sender, AgentCreateResponse response)
         {
             Debug.LogFormat("OnAgentCreate:{0} [{1}]", response.Success, response.Errormsg);
@@ -166,6 +173,46 @@ namespace Services
                 this.OnCreateAgent(response.Success, response.Errormsg);
             }
         }
+
+        // 加载Agent
+        // 发送消息
+        public void SendAgentLoad()
+        {
+            Debug.LogFormat("AgentLoadRequest");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.agentLoadRequest = new AgentLoadRequest();
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                this.pendingMessage = null;
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                this.pendingMessage = message;
+                this.ConnectToServer();
+            }
+        }
+
+        // 收到请求后
+        void OnAgentLoad(object sender, AgentLoadResponse response)
+        {
+            if (response.Success)
+            {
+                string agentNamesStr = string.Join(", ", response.AgentNames);
+                Debug.LogFormat("OnAgentLoad:{0} [{1}]", response.Success, agentNamesStr);
+                if (this.OnLoadAgent != null)
+                {
+                    this.OnLoadAgent(response.AgentNames);
+                }
+            }
+            else
+            {
+                Debug.LogFormat("OnAgentLoad:{0} [{1}]", response.Success, response.Errormsg);
+            }
+        }
+
         // 启动场景
         public void SendSceneStart(int map_id)
         {

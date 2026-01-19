@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpClient", "CSharpClien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protocol", "..\Lib\AgentProtocol\Protocol.csproj", "{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{9FA3D6BD-1EC1-3BA5-80CB-CE02773A58D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\Lib\Common\Common.csproj", "{CE169E52-A80E-4C19-B75B-823907B4ECEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,10 @@ Global
 		{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECF59EEE-D33E-41EE-B2F8-B59BCDBA856F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE169E52-A80E-4C19-B75B-823907B4ECEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE169E52-A80E-4C19-B75B-823907B4ECEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE169E52-A80E-4C19-B75B-823907B4ECEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE169E52-A80E-4C19-B75B-823907B4ECEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

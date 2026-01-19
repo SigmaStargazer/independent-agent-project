@@ -47,6 +47,7 @@ public class UIAgentClientTest : MonoBehaviour
 
     public void OnClickLoadAgent()
     {
+        AgentService.Instance.SendAgentLoad();
     }
 
     public void OnClickSendMessage()

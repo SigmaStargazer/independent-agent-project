@@ -1,57 +1,59 @@
 @echo off
 @chcp 65001 >nul
-setlocal
+setlocal enabledelayedexpansion
 
 :: ================= 配置区域 =================
-:: 源路径 (C# 类库输出目录) - 去掉末尾的 \*，在命令里加
-set SOURCE_PATH=..\Src\Lib\AgentProtocol\bin\Debug
-
-:: 目标路径 (Unity 工程目录)
+:: 目标路径
 set DEST_PATH=..\Src\ShootingEditor2D\Assets\References
 
-:: ================= 执行区域 =================
+:: 源路径列表
+set SOURCES="..\Src\Lib\AgentProtocol\bin\Debug" "..\Src\Lib\Common\bin\Debug"
+
+:: 要排除的文件（支持通配符，多个文件用空格隔开）
+set EXCLUDE_FILES=UnityEngine.dll UnityEngine.*.dll UnityEditor.dll
+:: ============================================
 
 echo ==============================================
-echo [INFO] 正在部署 DLL 到 Unity...
-echo 源: %SOURCE_PATH%
-echo 标: %DEST_PATH%
+echo [INFO] 正在部署 DLL 到 Unity (已排除系统库)...
 echo ==============================================
 
-:: 1. 检查源目录是否存在 (防止没编译就运行脚本)
-if not exist "%SOURCE_PATH%" (
-    echo.
-    echo [ERROR] 源目录不存在！
-    echo 请先在 Visual Studio 中编译 AgentProtocol 项目。
-    echo 路径: %SOURCE_PATH%
-    pause
-    exit /b 1
-)
+:: 确保目标目录存在
+if not exist "%DEST_PATH%" mkdir "%DEST_PATH%"
 
-:: 2. 执行复制
-:: /S: 复制目录和子目录(不包括空目录) -> 比 /E 更干净一点，除非你需要空目录
-:: /I: 如果目标不存在，默认作为目录处理
-:: /Y: 直接覆盖不提示
-xcopy /S /I /Y "%SOURCE_PATH%\*" "%DEST_PATH%\"
+for %%S in (%SOURCES%) do (
+    set "SRC=%%~S"
+    echo [PROCESS] 正在同步: !SRC!
+    
+    if not exist "!SRC!" (
+        echo [ERROR] 源目录不存在: !SRC!
+        goto :ERROR_EXIT
+    )
 
-:: 3. 错误检查 (关键！Unity 经常锁定 DLL)
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ==============================================
-    echo [ERROR] 复制失败！
-    echo ----------------------------------------------
-    echo 可能原因：
-    echo 1. Unity 正在运行且锁定了 DLL 文件。
-    echo    -> 请尝试关闭 Unity 或者让 Unity 重新加载脚本。
-    echo 2. 目标路径只读或权限不足。
-    echo ==============================================
-    pause
-    exit /b %ERRORLEVEL%
+    :: 使用 robocopy 代替 xcopy
+    :: /S: 复制子目录 (不含空目录)
+    :: /XF: 排除指定文件 (Exclude Files)
+    :: /R:3: 失败重试3次 (防止瞬间锁定)
+    :: /W:1: 重试等待1秒
+    :: /NJH /NJS: 减少日志输出，保持界面整洁
+    robocopy "!SRC!" "%DEST_PATH%" * /S /XF %EXCLUDE_FILES% /R:3 /W:1 /NJH /NJS
+    
+    :: robocopy 的退出码比较特殊：0-7 都算成功 (有文件复制或没有变化)
+    if !ERRORLEVEL! GEQ 8 (
+        echo [ERROR] 复制过程中出错，错误码: !ERRORLEVEL!
+        goto :ERROR_EXIT
+    )
 )
 
 echo.
 echo ==============================================
 echo [SUCCESS] 部署完成！
+echo 已排除: %EXCLUDE_FILES%
 echo ==============================================
-
-:: 稍微停顿，如果是双击运行可以看到结果
 pause
+exit /b 0
+
+:ERROR_EXIT
+echo.
+echo [FAIL] 部署失败，请检查 Unity 是否锁定文件。
+pause
+exit /b 1

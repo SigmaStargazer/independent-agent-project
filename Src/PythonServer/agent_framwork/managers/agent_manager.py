@@ -86,7 +86,7 @@ RETURN n"""
             if name not in self.agents:
                 agent = Agent(name=name)
                 self.agents[agent.name] = agent
-        print(f"加载Agent: {agent_names}")
+        # print(f"加载Agent: {agent_names}")
         return agent_names
 
     def start(self):
