@@ -23,7 +23,7 @@ namespace Services
         //public UnityEngine.Events.UnityAction<Result, string> OnCreateAgent;
         //public UnityEngine.Events.UnityAction<Result, string> OnStartScene;
         public UnityEngine.Events.UnityAction<bool, string> OnCreateAgent;
-        public UnityEngine.Events.UnityAction<List<string>> OnLoadAgent;
+        public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
         public UnityEngine.Events.UnityAction<bool, float> OnMoveAgent;
@@ -198,18 +198,10 @@ namespace Services
         // 收到请求后
         void OnAgentLoad(object sender, AgentLoadResponse response)
         {
-            if (response.Success)
+            Debug.LogFormat("OnAgentLoad:{0} [{1}]", response.Success, response.Errormsg);
+            if (this.OnLoadAgent != null)
             {
-                string agentNamesStr = string.Join(", ", response.AgentNames);
-                Debug.LogFormat("OnAgentLoad:{0} [{1}]", response.Success, agentNamesStr);
-                if (this.OnLoadAgent != null)
-                {
-                    this.OnLoadAgent(response.AgentNames);
-                }
-            }
-            else
-            {
-                Debug.LogFormat("OnAgentLoad:{0} [{1}]", response.Success, response.Errormsg);
+                this.OnLoadAgent(response.Success, response.AgentNames);
             }
         }
 

@@ -7,6 +7,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using SkillBridge.Message;
 
+using UnityEngine.SceneManagement;
+
 public class UIAgentClientTest : MonoBehaviour
 {
     public InputField nameInputField;
@@ -16,7 +18,9 @@ public class UIAgentClientTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        AgentService.Instance.OnLoadAgent = this.OnLoadAgent;
         AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+        AgentService.Instance.OnStartScene = this.OnStartScene;
     }
 
     // Update is called once per frame
@@ -24,14 +28,14 @@ public class UIAgentClientTest : MonoBehaviour
     {
         
     }
-    public void OnClickSend()
-    {
-        // 创建Agent
-        AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
-        AgentService.Instance.SendAgentCreate("小红", "是用户的秘书");
-        AgentService.Instance.SendSceneStart(1);
-        AgentService.Instance.SendUserMessage("小明", "和小红说，让她闹个每天8点的起床铃，9点的上班铃声，然后每天闹铃响时让她直接通知我。");
-    }
+    //public void OnClickSend()
+    //{
+    //    // 创建Agent
+    //    AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
+    //    AgentService.Instance.SendAgentCreate("小红", "是用户的秘书");
+    //    AgentService.Instance.SendSceneStart(1);
+    //    AgentService.Instance.SendUserMessage("小明", "和小红说，让她闹个每天8点的起床铃，9点的上班铃声，然后每天闹铃响时让她直接通知我。");
+    //}
 
     public void OnClickCreateAgent()
     { 
@@ -50,12 +54,35 @@ public class UIAgentClientTest : MonoBehaviour
         AgentService.Instance.SendAgentLoad();
     }
 
+    void OnLoadAgent(bool Success, List<string> agentNames)
+    {
+        if (Success)
+        {
+            Debug.Log($"已加载的Agent: {string.Join(", ", agentNames)}");
+            AgentService.Instance.SendSceneStart(1); // 加载场景
+        }
+        else
+        {
+            Debug.LogWarning("加载Agent失败！");
+        }
+    }
+
+    public void OnClickStartScene()
+    {
+        AgentService.Instance.SendSceneStart(1);
+    }
+
+    void OnStartScene(bool result, string reason)
+    {
+        SceneManager.LoadScene("AgentClientTest2");
+    }
+
     public void OnClickSendMessage()
     {
-        // 创建Agent
-        AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
-        AgentService.Instance.SendAgentCreate("小红", "是用户的秘书");
-        AgentService.Instance.SendSceneStart(1);
+        //// 创建Agent
+        //AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
+        //AgentService.Instance.SendAgentCreate("小红", "是用户的秘书");
+        //AgentService.Instance.SendSceneStart(1);
 
         // 发送消息
         if (messageInputField != null && !string.IsNullOrEmpty(messageInputField.text))

@@ -58,7 +58,8 @@ tools = [base_tools.communicate_to_agent,
          base_tools.get_alarm_list,
          base_tools.remove_alarm,
          base_tools.search_fact_memories,
-         base_tools.search_episode_memories]
+         base_tools.search_episode_memories,
+         base_tools.move]
 
 llm_with_tools = model.bind_tools(tools)
 

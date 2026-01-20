@@ -29,8 +29,8 @@ async def handle_agent_create_request(msg, context):
     desc = msg.desc
 
     print(f"创建Agent: {name}: {desc}")
-    await MemoryManager().initialize()
-    await TimeSystem().aset_time(year=2016,month=1,day=1)
+    # await MemoryManager().initialize()
+    # await TimeSystem().aset_time(year=2016,month=1,day=1)
     cur_time = await TimeSystem().aget_current_time()
     
     response = message_pb2.AgentCreateResponse()
@@ -41,7 +41,6 @@ async def handle_agent_create_request(msg, context):
             create_time=cur_time
             )
         response.success = True
-        response.errormsg = f"创建Agent: {result}"
         await context['server'].send_message(response, context)
     except Exception as e:
         response.success = False
@@ -49,33 +48,16 @@ async def handle_agent_create_request(msg, context):
         print(f"创建Agent失败: {str(e)}")
         await context['server'].send_message(response, context)
 
-# @server.on_message(message_pb2.AgentCreateRequest)
-# async def handle_agent_create_request(msg, context):
-#     name = msg.name
-#     desc = msg.desc
-#     print(f"创建Agent: {name}: {desc}")
-#     response = message_pb2.AgentCreateResponse()
-#     try:
-#         AgentManager().create_agent(name=name, description=desc)
-#         response.success = True
-#         response.errormsg = ""
-#         await context['server'].send_message(response, context)
-#     except Exception as e:
-#         response.success = False
-#         response.errormsg = str(e)
-#         print(f"创建Agent失败: {str(e)}")
-#         await context['server'].send_message(response, context)
-
 @server.on_message(message_pb2.AgentLoadRequest)
 async def handle_agent_load_request(msg, context):
     print("加载Agent")
-    await MemoryManager().initialize()
+    # await MemoryManager().initialize()
     response = message_pb2.AgentLoadResponse()
     try:
         agent_names = await AgentManager().load_agent()
         response.agent_names.extend(agent_names) # agent_names 的list
         response.success = True
-        response.errormsg = ""
+        # response.errormsg = ""
         print(f"加载Agent成功: {agent_names}")
         await context['server'].send_message(response, context)
     except Exception as e:
@@ -90,7 +72,7 @@ async def handle_scene_start_request(msg, context):
     print(f"启动场景: {map_id}")
     response = message_pb2.SceneStartResponse()
     try:
-        await MemoryManager().initialize()
+        # await MemoryManager().initialize()
         
         await TimeSystem().aset_speed(1440)
         await TimeSystem().aset_time(year=2016,month=1,day=1)
@@ -98,7 +80,7 @@ async def handle_scene_start_request(msg, context):
         
         AgentManager().start()
         response.success = True
-        response.errormsg = ""
+        # response.errormsg = ""
         await context['server'].send_message(response, context)
     except Exception as e:
         response.success = False
@@ -144,6 +126,16 @@ async def other_tasks():
     print("Other tasks done")
 
 async def main():
+    # 1. 在这里全局执行一次初始化
+    print("正在初始化 MemoryManager...")
+    await MemoryManager().initialize()
+    print("MemoryManager 初始化完成。")
+
+    # 也可以在这里初始化 TimeSystem，如果需要的话
+    await TimeSystem().aset_time(year=2016, month=1, day=1)
+
+    print("正在启动服务器...")
+    # 2. 系统初始化完成后，再启动网络服务和其他任务
     await asyncio.gather(
         server.astart(),
         other_tasks()

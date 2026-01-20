@@ -42,6 +42,12 @@ namespace ShootingEditor2D
         // 其他逻辑可以放Update
         private void FixedUpdate()
         {
+            // 【修改点】如果正在自动移动，直接跳过玩家输入的处理
+            if (mIsAutoMoving)
+            {
+                return;
+            }
+
             var rawInput = Input.GetAxis("Horizontal");
             float horizontalDirection = 0;
             if (Mathf.Abs(rawInput) > 0.01f)
@@ -49,14 +55,10 @@ namespace ShootingEditor2D
                 horizontalDirection = Mathf.Sign(rawInput);
             }
 
-            //var horizontalMovement = Input.GetAxis("Horizontal");
             isRight = Mathf.Sign(transform.localScale.x);
 
             TurnBack(horizontalDirection);
             MoveAndJump(horizontalDirection);
-            //TurnBack(horizontalMovement);
-            //MoveAndJump(horizontalMovement);
-
         }
         private void GetInput()
         {
@@ -140,6 +142,7 @@ namespace ShootingEditor2D
 
         private void OnMoveAgent(bool moveRight, float distance)
         {
+            Debug.Log($"开始移动: moveRight={moveRight} distance={distance}");
             MoveByDistance(moveRight, distance);
         }
     }

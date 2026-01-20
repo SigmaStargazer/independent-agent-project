@@ -383,7 +383,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 737002892}
         m_TargetAssemblyTypeName: UIAgentClientTest, Assembly-CSharp
-        m_MethodName: OnClickSendText
+        m_MethodName: OnClickSendMessage
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -484,8 +484,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c74ac4c6a36df846b8e812dcf048ea5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputField: {fileID: 1817075854}
-  text: {fileID: 984287284}
+  nameInputField: {fileID: 0}
+  descInputField: {fileID: 0}
+  messageInputField: {fileID: 1817075854}
+  aiMessageText: {fileID: 984287284}
 --- !u!114 &737002893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1164,7 +1166,7 @@ GameObject:
   - component: {fileID: 1884056938}
   - component: {fileID: 1884056937}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: Panel_message
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

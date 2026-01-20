@@ -20,4 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GamePass.unity
     guid: 76b0bce93fd88ef45aa8da3198c16518
+  - enabled: 1
+    path: Assets/Scenes/AgentClientTest.unity
+    guid: 26edd78b253ad924885b623fec8a1c87
+  - enabled: 1
+    path: Assets/Scenes/AgentClientTest2.unity
+    guid: 82de551e6ac569848a0182330af4d143
   m_configObjects: {}
