@@ -1,7 +1,0 @@
-1、运行Tools/1.genproto.cmd
-2、打开Src/CSharpClient/CSharpClient.sln，
-- 更改common中的MessageDispatch.cs
-- 重新生成解决方案
-3、运行Tools/2.copyprotocol.cmd
-
-如果unity打开有问题，删除Library、Temp 和 Obj文件夹

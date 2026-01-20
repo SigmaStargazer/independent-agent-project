@@ -1,2 +1,0 @@
-"protoc-3.2.0-win32/bin/protogen" --proto_path=../Src/Lib/proto --csharp_out=../Src/Lib/Protocol/ message.proto
-"protoc-3.2.0-win32/bin/protoc" --proto_path=../Src/Lib/proto --python_out=../Src/PythonServer/network/ message.proto
