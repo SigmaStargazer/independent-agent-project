@@ -1,8 +1,10 @@
 using FrameworkDesign;
+using Newtonsoft.Json;
 using Services;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -32,6 +34,9 @@ namespace ShootingEditor2D
         private void Start()
         {
             AgentService.Instance.OnMoveAgent = this.OnMoveAgent;
+
+            //// 测试获取DevicesInfo
+            //GetDevicesInfo();
         }
 
         private void Update()
@@ -62,6 +67,10 @@ namespace ShootingEditor2D
         }
         private void GetInput()
         {
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                GetDevicesInfo();
+            }
             //if (Input.GetKeyDown(KeyCode.Space))
             //{
             //    mJumpPressed = true;
@@ -136,14 +145,67 @@ namespace ShootingEditor2D
 
             // 到达目标，刹车
             mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-
             mIsAutoMoving = false; // 恢复输入
+            // 向agent反馈
+            SendMessageToAgent("到达目的地！");
         }
 
         private void OnMoveAgent(bool moveRight, float distance)
         {
             Debug.Log($"开始移动: moveRight={moveRight} distance={distance}");
             MoveByDistance(moveRight, distance);
+        }
+
+
+        // 获取DevicesInfo
+        public (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo()
+        {
+            DeviceManager manager = GameObject.FindObjectOfType<DeviceManager>();
+            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            string devicesInfoDesc = "";
+
+            if (manager == null)
+            {
+                Debug.LogError("场景中未找到 DeviceManager！");
+                return (devicesInfo, "");
+            }
+
+            devicesInfo = manager.GetDevicesInfo(this.gameObject);
+
+            int deviceId = 1;
+            foreach (var deviceInfo in devicesInfo)
+            {
+                string deviceInfoDesc = $"\n{deviceId}. {deviceInfo["name"]}: {deviceInfo["desc"]}\n方向:{deviceInfo["direction"]} 距离:{deviceInfo["distance"]}";
+                devicesInfoDesc += deviceInfoDesc;
+                deviceId++;
+            }
+            if(devicesInfoDesc != "")
+            {
+                devicesInfoDesc = $"你的周围有：" + devicesInfoDesc;
+            }
+
+            //string result = string.Join("\n", devicesInfo.Select(d =>
+            //"设备: " + string.Join(", ", d.Select(kv => $"{kv.Key}={kv.Value}"))
+            //));
+            //string jsonStr = JsonConvert.SerializeObject(DevicesInfo, Formatting.Indented);
+            //Debug.Log($"{devicesInfoDesc}");
+
+            return (devicesInfo, devicesInfoDesc);
+        }
+
+        public void SendMessageToAgent(string msg)
+        {
+            // 获取环境信息
+            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            string devicesInfoDesc = "";
+            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
+
+            // 拼接
+            string messageToSend = $"{devicesInfoDesc}\n\n{msg}";
+
+            // 发送给小明
+            AgentService.Instance.SendUserMessage("小明", messageToSend);
+            Debug.Log($"已发送消息给小明: {messageToSend}");
         }
     }
 }
