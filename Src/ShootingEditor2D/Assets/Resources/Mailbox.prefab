@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2521278384274918195}
   - component: {fileID: 2521278384274918190}
   - component: {fileID: 2789182934508014106}
-  - component: {fileID: 2521278384274918192}
+  - component: {fileID: 4744811434528426994}
   m_Layer: 0
-  m_Name: Telephone
+  m_Name: Mailbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0, g: 0.1568212, b: 0.9528302, a: 1}
+  m_Color: {r: 0.9529412, g: 0.09412553, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -112,7 +112,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &2521278384274918192
+--- !u!114 &4744811434528426994
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -121,6 +121,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2521278384274918194}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac2bc5230e7a9fb449d9c62249647516, type: 3}
+  m_Script: {fileID: 11500000, guid: acf8cce6b7af5d34a92c9efe5f3e9e47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

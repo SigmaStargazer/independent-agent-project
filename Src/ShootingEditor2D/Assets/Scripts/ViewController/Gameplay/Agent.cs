@@ -34,9 +34,7 @@ namespace ShootingEditor2D
         private void Start()
         {
             AgentService.Instance.OnMoveAgent = this.OnMoveAgent;
-
-            //// 测试获取DevicesInfo
-            //GetDevicesInfo();
+            AgentService.Instance.OnInteract = this.Interact;
         }
 
         private void Update()
@@ -69,7 +67,7 @@ namespace ShootingEditor2D
         {
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                GetDevicesInfo();
+                this.Interact();
             }
             //if (Input.GetKeyDown(KeyCode.Space))
             //{
@@ -113,6 +111,11 @@ namespace ShootingEditor2D
             mJumpPressed = false;
         }
 
+        /// <summary>
+        /// 移动
+        /// </summary>
+        /// <param name="moveRight"></param>
+        /// <param name="distance"></param>
         public void MoveByDistance(bool moveRight, float distance)
         {
             // 停止之前的移动协程（防止多次调用冲突）
@@ -157,42 +160,66 @@ namespace ShootingEditor2D
         }
 
 
-        // 获取DevicesInfo
+        /// <summary>
+        /// 获取DevicesInfo
+        /// </summary>
+        /// <returns></returns>
         public (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo()
         {
-            DeviceManager manager = GameObject.FindObjectOfType<DeviceManager>();
-            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
             string devicesInfoDesc = "";
 
-            if (manager == null)
+            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
+
+            if (deviceManager == null)
             {
                 Debug.LogError("场景中未找到 DeviceManager！");
                 return (devicesInfo, "");
             }
 
-            devicesInfo = manager.GetDevicesInfo(this.gameObject);
+            (devicesInfo, interactableDeviceInfo) = deviceManager.GetDevicesInfo(this.gameObject);
 
-            int deviceId = 1;
-            foreach (var deviceInfo in devicesInfo)
+            if (devicesInfo.Count > 0)
             {
-                string deviceInfoDesc = $"\n{deviceId}. {deviceInfo["name"]}: {deviceInfo["desc"]}\n方向:{deviceInfo["direction"]} 距离:{deviceInfo["distance"]}";
-                devicesInfoDesc += deviceInfoDesc;
-                deviceId++;
-            }
-            if(devicesInfoDesc != "")
-            {
-                devicesInfoDesc = $"你的周围有：" + devicesInfoDesc;
+                devicesInfoDesc = "你的周围有：";
+                int deviceId = 1;
+                // 1.遍历设备信息
+                foreach (var deviceInfo in devicesInfo)
+                {
+                    string deviceInfoDesc = $"\n{deviceId}. {deviceInfo["name"]}: {deviceInfo["desc"]}\n方向:{deviceInfo["direction"]} 距离:{deviceInfo["distance"]}";
+                    devicesInfoDesc += deviceInfoDesc;
+                    deviceId++;
+                }
+
+                // 2.获取可交互设备信息
+                string interactableDevicDesc = "\n可选择交互：";
+                if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
+                {
+                    interactableDevicDesc += $"{interactableDeviceInfo["name"]}: {interactableDeviceInfo["desc"]}\n方向:{interactableDeviceInfo["direction"]} 距离:{interactableDeviceInfo["distance"]}";
+                }
+                else
+                {
+                    interactableDevicDesc += "身边无可交互对象";
+                }
+                devicesInfoDesc += interactableDevicDesc;
             }
 
-            //string result = string.Join("\n", devicesInfo.Select(d =>
-            //"设备: " + string.Join(", ", d.Select(kv => $"{kv.Key}={kv.Value}"))
-            //));
-            //string jsonStr = JsonConvert.SerializeObject(DevicesInfo, Formatting.Indented);
-            //Debug.Log($"{devicesInfoDesc}");
+            
+
+                //string result = string.Join("\n", devicesInfo.Select(d =>
+                //"设备: " + string.Join(", ", d.Select(kv => $"{kv.Key}={kv.Value}"))
+                //));
+                //string jsonStr = JsonConvert.SerializeObject(DevicesInfo, Formatting.Indented);
+                //Debug.Log($"{devicesInfoDesc}");
 
             return (devicesInfo, devicesInfoDesc);
         }
 
+        /// <summary>
+        /// 发送消息给小明
+        /// </summary>
+        /// <param name="msg"></param>
         public void SendMessageToAgent(string msg)
         {
             // 获取环境信息
@@ -201,11 +228,26 @@ namespace ShootingEditor2D
             (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
 
             // 拼接
-            string messageToSend = $"{devicesInfoDesc}\n\n{msg}";
+            string messageToSend = $"<环境>\n{devicesInfoDesc}\n<\\环境>\n{msg}";
 
             // 发送给小明
             AgentService.Instance.SendUserMessage("小明", messageToSend);
             Debug.Log($"已发送消息给小明: {messageToSend}");
+        }
+
+        /// <summary>
+        /// 交互
+        /// </summary>
+        private void Interact()
+        {
+            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            if (deviceManager == null)
+            {
+                Debug.LogError("场景中未找到 DeviceManager！");
+                return;
+            }
+            string interactResult = deviceManager.Interact(this.gameObject);
+            this.SendMessageToAgent($"[交互结果]{interactResult}");
         }
     }
 }

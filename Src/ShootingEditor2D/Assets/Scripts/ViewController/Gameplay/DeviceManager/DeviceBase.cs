@@ -8,6 +8,8 @@ namespace ShootingEditor2D
     {
         public string deviceName { get; protected set; }
         public string deviceDesc { get; protected set; }
+
+        public abstract string Interact(GameObject chara);
     }
 
 }

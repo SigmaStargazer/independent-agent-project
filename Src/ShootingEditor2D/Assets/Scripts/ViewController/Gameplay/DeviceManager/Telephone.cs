@@ -17,6 +17,11 @@ namespace ShootingEditor2D
         {
 
         }
+
+        public override string Interact(GameObject chara)
+        {
+            return "";
+        }
     }
 
 }

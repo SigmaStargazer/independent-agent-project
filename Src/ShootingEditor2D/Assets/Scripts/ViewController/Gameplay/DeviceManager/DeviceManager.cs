@@ -19,17 +19,59 @@ namespace ShootingEditor2D
 
         }
 
-        public List<Dictionary<string, object>> GetDevicesInfo(GameObject chara)
+        /// <summary>
+        /// 获取与角色接触且距离最近的设备
+        /// </summary>
+        private DeviceBase GetInteractableDevice(GameObject chara)
         {
+            if (chara == null) return null;
+
+            // 获取角色的碰撞体，用于检测接触
+            Collider2D charaCollider = chara.GetComponent<Collider2D>();
+            if (charaCollider == null) return null;
+
+            DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
+            DeviceBase targetDevice = null;
+            float minDistance = float.MaxValue;
+
+            // 找到最近且接触的设备
+            foreach (var device in devices)
+            {
+                Collider2D deviceCollider = device.GetComponent<Collider2D>();
+                // 确保设备有Trigger类型的Collider且当前与角色接触
+                if (deviceCollider != null && deviceCollider.isTrigger && Physics2D.IsTouching(charaCollider, deviceCollider))
+                {
+                    // 计算X轴距离（与GetDevicesInfo中的逻辑保持一致）
+                    float xDiff = device.transform.position.x - chara.transform.position.x;
+                    float dist = Mathf.Abs(xDiff);
+
+                    if (dist < minDistance)
+                    {
+                        minDistance = dist;
+                        targetDevice = device;
+                    }
+                }
+            }
+            return targetDevice;
+        }
+
+        /// <summary>
+        /// 获取设备信息
+        /// </summary>
+        /// <param name="chara">Agent的Gameobject</param>
+        /// <returns></returns>
+        public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject chara)
+        {
+            // 初始化返回值
             var devicesInfo = new List<Dictionary<string, object>>();
+            Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
 
             if (chara == null)
             {
-                return devicesInfo;
+                return (devicesInfo, interactableDeviceInfo);
             }
 
             float charaX = chara.transform.position.x;
-
             DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
             foreach (var device in devices)
             {
@@ -48,8 +90,37 @@ namespace ShootingEditor2D
 
                 devicesInfo.Add(deviceInfo);
             }
-            return devicesInfo;
+
+            // 获取逻辑中定义的可交互设备（最近且接触）
+            DeviceBase targetDevice = GetInteractableDevice(chara);
+            if (targetDevice != null)
+            {
+                // 如果找到了符合条件的设备，将其信息包装进字典
+                
+                interactableDeviceInfo.Add("name", targetDevice.deviceName);
+                interactableDeviceInfo.Add("desc", targetDevice.deviceDesc);
+
+                float xDiff = targetDevice.transform.position.x - charaX;
+                interactableDeviceInfo.Add("direction", xDiff < 0 ? "left" : "right");
+                interactableDeviceInfo.Add("distance", Mathf.Abs(xDiff));
+            }
+
+            return (devicesInfo, interactableDeviceInfo);
+        }
+
+        public string Interact(GameObject chara)
+        {
+            DeviceBase targetDevice = GetInteractableDevice(chara);
+
+            if (targetDevice != null)
+            {
+                return targetDevice.Interact(chara);
+            }
+            else
+            {
+                return "没有可交互设备";
+                //Debug.Log($"没有可交互设备");
+            }
         }
     }
 }
-

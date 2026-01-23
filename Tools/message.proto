@@ -120,6 +120,7 @@ message NetMessageRequest{
 	UserSendMessageRequest userSendMessageRequest = 4;
 	AgentSendMessageRequest agentSendMessageRequest = 5;
 	AgentMoveRequest agentMoveRequest = 6;
+	AgentInteractRequest agentInteractRequest = 7;
 }
 
 message NetMessageResponse{
@@ -175,4 +176,8 @@ message AgentSendMessageRequest {
 message AgentMoveRequest {
 	bool is_right = 1;
 	float distance = 2;
+}
+
+// 与设备进行交互
+message AgentInteractRequest {
 }
