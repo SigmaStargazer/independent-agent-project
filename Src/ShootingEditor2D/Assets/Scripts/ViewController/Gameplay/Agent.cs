@@ -33,7 +33,8 @@ namespace ShootingEditor2D
         }
         private void Start()
         {
-            AgentService.Instance.OnMoveAgent = this.OnMoveAgent;
+            AgentService.Instance.OnObserve = this.Observe;
+            AgentService.Instance.OnMoveAgent = this.Move;
             AgentService.Instance.OnInteract = this.Interact;
         }
 
@@ -150,15 +151,8 @@ namespace ShootingEditor2D
             mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
             mIsAutoMoving = false; // 恢复输入
             // 向agent反馈
-            SendMessageToAgent("到达目的地！");
+            SendMessageToAgent("[移动结果]到达目的地！");
         }
-
-        private void OnMoveAgent(bool moveRight, float distance)
-        {
-            Debug.Log($"开始移动: moveRight={moveRight} distance={distance}");
-            MoveByDistance(moveRight, distance);
-        }
-
 
         /// <summary>
         /// 获取DevicesInfo
@@ -236,6 +230,17 @@ namespace ShootingEditor2D
         }
 
         /// <summary>
+        /// 移动
+        /// </summary>
+        /// <param name="moveRight"></param>
+        /// <param name="distance"></param>
+        private void Move(bool moveRight, float distance)
+        {
+            Debug.Log($"开始移动: moveRight={moveRight} distance={distance}");
+            MoveByDistance(moveRight, distance);
+        }
+
+        /// <summary>
         /// 交互
         /// </summary>
         private void Interact()
@@ -249,6 +254,25 @@ namespace ShootingEditor2D
             string interactResult = deviceManager.Interact(this.gameObject);
             this.SendMessageToAgent($"[交互结果]{interactResult}");
         }
+
+        /// <summary>
+        /// 观察场景
+        /// </summary>
+        private void Observe()
+        {
+            // 获取设备信息
+            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            string devicesInfoDesc = "";
+            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
+
+            // 拼接
+            string messageToSend = $"[观察结果]<环境>\n{devicesInfoDesc}\n<\\环境>";
+
+            // 发送给小明
+            AgentService.Instance.SendUserMessage("小明", messageToSend);
+            Debug.Log($"已发送消息给小明: {messageToSend}");
+        }
+
     }
 }
 

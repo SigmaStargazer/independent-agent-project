@@ -64,6 +64,22 @@ async def communicate_to_user(agent: Annotated[str, InjectedState("name")], mess
         return f"你向用户发送消息失败: {e}"
 
 @tool
+async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """观察周围环境
+    Return:
+        str: 观察是否开始。注意：观察结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentObserveRequest()
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。")
+        return f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。"
+    except Exception as e:
+        return f"观察周围环境出错: {e}"
+
+@tool
 async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
     """向指定方向移动指定距离
     Args:

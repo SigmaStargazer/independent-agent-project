@@ -26,6 +26,7 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
+        public UnityEngine.Events.UnityAction OnObserve;
         public UnityEngine.Events.UnityAction<bool, float> OnMoveAgent;
         public UnityEngine.Events.UnityAction OnInteract;
         NetMessage pendingMessage = null;
@@ -39,6 +40,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
+            MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Subscribe<AgentInteractRequest>(this.OnAgentInteract);
         }
@@ -49,6 +51,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
+            MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Unsubscribe<AgentInteractRequest>(this.OnAgentInteract);
             AgentClient.Instance.OnConnect -= OnGameServerConnect;
@@ -266,7 +269,15 @@ namespace Services
                 this.OnGetAgentMessage(request.Agent, request.AiMessage);
             }
         }
-
+        // 观察
+        void OnAgentObserve(object sender, AgentObserveRequest request)
+        {
+            Debug.LogFormat("OnAgentMove");
+            if (this.OnObserve != null)
+            {
+                this.OnObserve();
+            }
+        }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
         {
