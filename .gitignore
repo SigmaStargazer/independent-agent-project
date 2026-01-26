@@ -83,3 +83,22 @@ __pycache__/
 
 # 忽略数据库临时文件
 *.wal
+
+
+# 白名单
+# —— Tools：第三方工具链（必须进仓库） ——
+!Tools/
+!Tools/**/
+
+# 允许 protoc / protogen 的 bin
+!Tools/**/bin/
+!Tools/**/bin/**
+
+# —— Src 下的独立工程描述文件 ——
+!Src/Lib/**/*.sln
+!Src/Lib/**/*.csproj
+!Src/Lib/**/*.csproj.user
+
+!Src/CSharpClient/**/*.sln
+!Src/CSharpClient/**/*.csproj
+!Src/CSharpClient/**/*.csproj.user
