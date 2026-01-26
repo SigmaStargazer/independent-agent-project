@@ -181,7 +181,13 @@ namespace ShootingEditor2D
                 // 1.遍历设备信息
                 foreach (var deviceInfo in devicesInfo)
                 {
-                    string deviceInfoDesc = $"\n{deviceId}. {deviceInfo["name"]}: {deviceInfo["desc"]}\n方向:{deviceInfo["direction"]} 距离:{deviceInfo["distance"]}";
+                    string speed_x_str = deviceInfo["speedDir_x"] == "none" ? $"{deviceInfo["speed_x"]}m/s" : $"方向{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
+                    string speed_y_str = deviceInfo["speedDir_y"] == "none" ? $"{deviceInfo["speed_y"]}m/s" : $"方向{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
+                    string deviceInfoDesc = $"\n{deviceId}. {deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
+                        $"方向:{deviceInfo["direction"]}\n距离:{deviceInfo["distance"]}m\n" +
+                        $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}\n" +
+                        $"状态:{deviceInfo["state"]}";
+
                     devicesInfoDesc += deviceInfoDesc;
                     deviceId++;
                 }
@@ -190,7 +196,12 @@ namespace ShootingEditor2D
                 string interactableDevicDesc = "\n可选择交互：";
                 if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
                 {
-                    interactableDevicDesc += $"{interactableDeviceInfo["name"]}: {interactableDeviceInfo["desc"]}\n方向:{interactableDeviceInfo["direction"]} 距离:{interactableDeviceInfo["distance"]}";
+                    string speed_x_str = interactableDeviceInfo["speedDir_x"] == "none" ? $"{interactableDeviceInfo["speed_x"]}m/s" : $"方向{interactableDeviceInfo["speedDir_x"]} {interactableDeviceInfo["speed_x"]}m/s";
+                    string speed_y_str = interactableDeviceInfo["speedDir_y"] == "none" ? $"{interactableDeviceInfo["speed_y"]}m/s" : $"方向{interactableDeviceInfo["speedDir_y"]} {interactableDeviceInfo["speed_y"]}m/s";
+                    interactableDevicDesc += $"{interactableDeviceInfo["name"]}: {interactableDeviceInfo["desc"]}\n" +
+                        $"方向:{interactableDeviceInfo["direction"]} 距离:{interactableDeviceInfo["distance"]}m\n" +
+                        $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}\n" +
+                        $"状态:{interactableDeviceInfo["state"]}";
                 }
                 else
                 {
@@ -225,7 +236,7 @@ namespace ShootingEditor2D
             string messageToSend = $"<环境>\n{devicesInfoDesc}\n<\\环境>\n{msg}";
 
             // 发送给小明
-            AgentService.Instance.SendUserMessage("小明", messageToSend);
+            //AgentService.Instance.SendUserMessage("小明", messageToSend);
             Debug.Log($"已发送消息给小明: {messageToSend}");
         }
 
@@ -273,6 +284,13 @@ namespace ShootingEditor2D
             Debug.Log($"已发送消息给小明: {messageToSend}");
         }
 
+        /// <summary>
+        /// 注意某个对象的状态
+        /// </summary>
+        private void Attand()
+        {
+
+        }
     }
 }
 

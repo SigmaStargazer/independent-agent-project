@@ -88,6 +88,19 @@ namespace ShootingEditor2D
                 // distance
                 deviceInfo.Add("distance", Mathf.Abs(xDiff));
 
+                Rigidbody2D rb = device.GetComponent<Rigidbody2D>();
+                Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
+                // speed_x
+                string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "none");
+                deviceInfo.Add("speedDir_x", speedDirX);
+                deviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
+                // speed_y
+                string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "none");
+                deviceInfo.Add("speedDir_y", speedDirY);
+                deviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
+                // state
+                deviceInfo.Add("state", device.GetStateName());
+
                 devicesInfo.Add(deviceInfo);
             }
 
@@ -103,6 +116,18 @@ namespace ShootingEditor2D
                 float xDiff = targetDevice.transform.position.x - charaX;
                 interactableDeviceInfo.Add("direction", xDiff < 0 ? "left" : "right");
                 interactableDeviceInfo.Add("distance", Mathf.Abs(xDiff));
+
+                Rigidbody2D rb = targetDevice.GetComponent<Rigidbody2D>();
+                Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
+
+                string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "none");
+                interactableDeviceInfo.Add("speedDir_x", speedDirX);
+                interactableDeviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
+
+                string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "none");
+                interactableDeviceInfo.Add("speedDir_y", speedDirY);
+                interactableDeviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
+                interactableDeviceInfo.Add("state", targetDevice.GetStateName());
             }
 
             return (devicesInfo, interactableDeviceInfo);

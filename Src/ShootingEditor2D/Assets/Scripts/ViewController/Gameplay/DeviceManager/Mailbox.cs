@@ -12,12 +12,6 @@ public class Mailbox : DeviceBase
         deviceDesc = "里面可能存着信件。";
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public override string Interact(GameObject chara)
     {
         return "查阅信件：\nTo 小明：\n  记得提醒用户，他的备用钥匙在花盆下面";
