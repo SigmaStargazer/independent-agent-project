@@ -165,7 +165,13 @@ namespace SkillBridge.Message
         public AgentSendMessageRequest agentSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
+        public AgentObserveRequest agentObserveRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(7)]
         public AgentMoveRequest agentMoveRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(8)]
+        public AgentInteractRequest agentInteractRequest { get; set; }
 
     }
 
@@ -311,6 +317,15 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class AgentObserveRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class AgentMoveRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -322,6 +337,15 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(2, Name = @"distance")]
         public float Distance { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentInteractRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
 
     }
 

@@ -26,7 +26,9 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
+        public UnityEngine.Events.UnityAction OnObserve;
         public UnityEngine.Events.UnityAction<bool, float> OnMoveAgent;
+        public UnityEngine.Events.UnityAction OnInteract;
         NetMessage pendingMessage = null;
         bool connected = false;
 
@@ -38,7 +40,9 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
+            MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
+            MessageDistributer.Instance.Subscribe<AgentInteractRequest>(this.OnAgentInteract);
         }
 
         public void Dispose()
@@ -47,7 +51,9 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
+            MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
+            MessageDistributer.Instance.Unsubscribe<AgentInteractRequest>(this.OnAgentInteract);
             AgentClient.Instance.OnConnect -= OnGameServerConnect;
             AgentClient.Instance.OnDisconnect -= OnGameServerDisconnect;
         }
@@ -263,7 +269,15 @@ namespace Services
                 this.OnGetAgentMessage(request.Agent, request.AiMessage);
             }
         }
-
+        // 观察
+        void OnAgentObserve(object sender, AgentObserveRequest request)
+        {
+            Debug.LogFormat("OnAgentMove");
+            if (this.OnObserve != null)
+            {
+                this.OnObserve();
+            }
+        }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
         {
@@ -271,6 +285,21 @@ namespace Services
             if (this.OnMoveAgent != null)
             {
                 this.OnMoveAgent(request.IsRight, request.Distance);
+            }
+        }
+
+        /// <summary>
+        /// 交互
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="message"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        void OnAgentInteract(object sender, AgentInteractRequest request)
+        {
+            Debug.LogFormat("OnAgentInteract");
+            if (this.OnInteract != null)
+            {
+                this.OnInteract();
             }
         }
     }

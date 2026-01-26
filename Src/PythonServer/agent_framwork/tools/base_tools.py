@@ -64,11 +64,29 @@ async def communicate_to_user(agent: Annotated[str, InjectedState("name")], mess
         return f"你向用户发送消息失败: {e}"
 
 @tool
-async def move(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
+async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """观察周围环境
+    Return:
+        str: 观察是否开始。注意：观察结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentObserveRequest()
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。")
+        return f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。"
+    except Exception as e:
+        return f"观察周围环境出错: {e}"
+
+@tool
+async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
     """向指定方向移动指定距离
     Args:
         direction(str): 方向，填left或者right
         distance(float): 距离
+    Return:
+        str: 移动是否开始。注意：移动结果将通过新的消息另行通知。
     """
     if direction not in ["left", "right"]:
         return "方向错误，请填left或者right"
@@ -80,10 +98,26 @@ async def move(agent: Annotated[str, InjectedState("name")], direction: str, dis
         request.is_right = direction == "right"
         request.distance = distance
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]向开始向{direction}移动了{distance}距离，请等待移动完成")
-        return f"[{agent}]向开始向{direction}移动了{distance}距离，请等待移动完成"
+        print(f"[{agent}]尝试向{direction}移动了{distance}距离。待移动完成后，你将收到移动完成的消息。")
+        return f"[{agent}]尝试向{direction}移动了{distance}距离。待移动完成后，你将收到移动完成的消息。"
     except Exception as e:
         return f"移动失败: {e}"
+
+@tool
+async def interact_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """与身旁的标注为\"可选择交互\"的对象进行交互
+    Return:
+        str: 交互是否开始。注意：交互结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentInteractRequest()
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]尝试与\"可选择交互\"的对象进行交互。待交互完成后，你将收到交互完成的消息。")
+        return f"[{agent}]尝试与\"可选择交互\"的对象进行交互。待交互完成后，你将收到交互完成的消息。"
+    except Exception as e:
+        return f"交互失败: {e}"
 
 @tool
 async def get_agent_list() -> list:

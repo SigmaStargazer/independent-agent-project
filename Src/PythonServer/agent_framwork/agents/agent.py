@@ -48,7 +48,7 @@ tools = [base_tools.communicate_to_agent,
          base_tools.communicate_to_user,
          base_tools.get_agent_list, 
          base_tools.get_cur_time,
-         base_tools.move,
+         base_tools.move_cmd,
          base_tools.add_alarm,
          base_tools.get_alarm_list,
          base_tools.remove_alarm]
@@ -67,9 +67,9 @@ def _filter_messages(messages, k=20):
 system_template = """你扮演的角色名叫{name}，{description}。
 向你发送信息的是系统管理员，它会不断告诉你关于周遭的情况。你需要根据情况做出相应的反应
 规则：
-1）仅当你使用了工具时，才会对外界产生实际影响。
-2）你的直接回复只作为你的心理活动，不会被任何人看到。
-因此如果你需要与用户、agent等具体某一对象进行交流，也请使用相应的工具，避免你想要传递的信息无法传达给对方。"""
+1）你的直接回复将只作为你的心理活动，不会被任何人看到，也不会对外界产生任何影响。
+2）仅当你使用了工具时，才会对外界产生实际影响。
+3）如需与任一对象进行交流，请使用communicate系列工具，避免你想要传递的信息无法传达给对方。"""
 prompt_template = ChatPromptTemplate.from_messages(
     [
         ("system", system_template),

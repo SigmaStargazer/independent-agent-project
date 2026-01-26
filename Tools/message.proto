@@ -119,7 +119,9 @@ message NetMessageRequest{
 	SceneStartRequest sceneStartRequest = 3;
 	UserSendMessageRequest userSendMessageRequest = 4;
 	AgentSendMessageRequest agentSendMessageRequest = 5;
-	AgentMoveRequest agentMoveRequest = 6;
+	AgentObserveRequest agentObserveRequest = 6;
+	AgentMoveRequest agentMoveRequest = 7;
+	AgentInteractRequest agentInteractRequest = 8;
 }
 
 message NetMessageResponse{
@@ -171,8 +173,16 @@ message AgentSendMessageRequest {
 	string ai_message = 2;
 }
 
+// 观察场景
+message AgentObserveRequest {
+}
+
 // 向指定方向移动指定距离
 message AgentMoveRequest {
 	bool is_right = 1;
 	float distance = 2;
+}
+
+// 与设备进行交互
+message AgentInteractRequest {
 }

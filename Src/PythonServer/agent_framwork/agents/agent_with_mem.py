@@ -51,15 +51,18 @@ model = ChatOpenAI(
 output_parser = StrOutputParser()
 
 tools = [base_tools.communicate_to_agent, 
-        #  base_tools.communicate_to_user,
+         base_tools.communicate_to_user,
          base_tools.get_agent_list, 
          base_tools.get_cur_time,
-         base_tools.add_alarm,
-         base_tools.get_alarm_list,
-         base_tools.remove_alarm,
          base_tools.search_fact_memories,
          base_tools.search_episode_memories,
-         base_tools.move]
+         base_tools.observe_cmd,
+         base_tools.move_cmd,
+         base_tools.interact_cmd,
+        # base_tools.add_alarm,
+        #  base_tools.get_alarm_list,
+        #  base_tools.remove_alarm
+        ]
 
 llm_with_tools = model.bind_tools(tools)
 
@@ -97,6 +100,13 @@ system_template = """{mem_summary}
 
 {mem_episode}
 </回想>
+
+<规则>
+你会不断从周围环境获取信息，你需要自主决定下一步行动，但请注意：
+1）你的直接回复将只作为你的心理活动，不会被任何人看到，也不会对外界产生任何影响。
+2）仅当你使用了工具时，才会对外界产生实际影响。
+3）如需与任一对象进行交流，请使用communicate系列工具，避免你想要传递的信息无法传达给对方。
+</规则>
 """
 
 
