@@ -10,7 +10,8 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public class Agent : ShootingEditor2DController
+    public class Agent : CharaBase
+    //public class Agent : ShootingEditor2DController
     {
         private Rigidbody2D mRigidbody2D;
         private Trigger2DCheck mGroundCheck;
@@ -25,21 +26,24 @@ namespace ShootingEditor2D
         // 【新增】是否正在进行自动移动（用于屏蔽玩家输入）
         private bool mIsAutoMoving = false;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             mRigidbody2D = GetComponent<Rigidbody2D>();
             mGroundCheck = transform.Find("GroundCheck").GetComponent<Trigger2DCheck>();
             //mGun = transform.Find("Gun").GetComponent<Gun>();
         }
         private void Start()
         {
+            Name = "小明";
             AgentService.Instance.OnObserve = this.Observe;
             AgentService.Instance.OnMoveAgent = this.Move;
             AgentService.Instance.OnInteract = this.Interact;
         }
 
-        private void Update()
+        protected override void Update()
         {
+            base.Update();
             GetInput();
         }
         // 所有物理相关的逻辑放FixedUpdate（不受实际帧数影响，防穿）
@@ -154,11 +158,27 @@ namespace ShootingEditor2D
             SendMessageToAgent("[移动结果]到达目的地！");
         }
 
+        // 获取自身状态信息
+        private string GetSelfStateInfo()
+        {
+            Rigidbody2D rb = this.GetComponent<Rigidbody2D>();
+            Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
+            string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "");
+            string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "");
+
+            string speed_x_str = speedDirX == "" ? $"{Mathf.Abs(velocity.x)}m/s" : $"方向{speedDirX} {Mathf.Abs(velocity.x)}m/s";
+            string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"方向{speedDirY} {Mathf.Abs(velocity.y)}m/s";
+            string selfStateInfo = $"状态:{this.GetStateName()}\n" + 
+                $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
+
+            return selfStateInfo;
+        }
+
         /// <summary>
         /// 获取DevicesInfo
         /// </summary>
         /// <returns></returns>
-        public (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo()
+        private (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo()
         {
             string devicesInfoDesc = "";
 
@@ -181,27 +201,17 @@ namespace ShootingEditor2D
                 // 1.遍历设备信息
                 foreach (var deviceInfo in devicesInfo)
                 {
-                    string speed_x_str = deviceInfo["speedDir_x"] == "none" ? $"{deviceInfo["speed_x"]}m/s" : $"方向{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
-                    string speed_y_str = deviceInfo["speedDir_y"] == "none" ? $"{deviceInfo["speed_y"]}m/s" : $"方向{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
-                    string deviceInfoDesc = $"\n{deviceId}. {deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
-                        $"方向:{deviceInfo["direction"]}\n距离:{deviceInfo["distance"]}m\n" +
-                        $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}\n" +
-                        $"状态:{deviceInfo["state"]}";
+                    string deviceInfoDesc = $"\n{deviceId}. {DeviceInfoToDesc(deviceInfo)}";
 
                     devicesInfoDesc += deviceInfoDesc;
                     deviceId++;
                 }
 
                 // 2.获取可交互设备信息
-                string interactableDevicDesc = "\n可选择交互：";
+                string interactableDevicDesc = "\n\n可选择交互：\n";
                 if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
                 {
-                    string speed_x_str = interactableDeviceInfo["speedDir_x"] == "none" ? $"{interactableDeviceInfo["speed_x"]}m/s" : $"方向{interactableDeviceInfo["speedDir_x"]} {interactableDeviceInfo["speed_x"]}m/s";
-                    string speed_y_str = interactableDeviceInfo["speedDir_y"] == "none" ? $"{interactableDeviceInfo["speed_y"]}m/s" : $"方向{interactableDeviceInfo["speedDir_y"]} {interactableDeviceInfo["speed_y"]}m/s";
-                    interactableDevicDesc += $"{interactableDeviceInfo["name"]}: {interactableDeviceInfo["desc"]}\n" +
-                        $"方向:{interactableDeviceInfo["direction"]} 距离:{interactableDeviceInfo["distance"]}m\n" +
-                        $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}\n" +
-                        $"状态:{interactableDeviceInfo["state"]}";
+                    interactableDevicDesc += $"{DeviceInfoToDesc(interactableDeviceInfo)}";
                 }
                 else
                 {
@@ -210,34 +220,40 @@ namespace ShootingEditor2D
                 devicesInfoDesc += interactableDevicDesc;
             }
 
-            
-
-                //string result = string.Join("\n", devicesInfo.Select(d =>
-                //"设备: " + string.Join(", ", d.Select(kv => $"{kv.Key}={kv.Value}"))
-                //));
-                //string jsonStr = JsonConvert.SerializeObject(DevicesInfo, Formatting.Indented);
-                //Debug.Log($"{devicesInfoDesc}");
-
             return (devicesInfo, devicesInfoDesc);
         }
 
+        private string DeviceInfoToDesc(Dictionary<string, object> deviceInfo)
+        {
+            string speed_x_str = deviceInfo["speedDir_x"] == "" ? $"{deviceInfo["speed_x"]}m/s" : $"方向{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
+            string speed_y_str = deviceInfo["speedDir_y"] == "" ? $"{deviceInfo["speed_y"]}m/s" : $"方向{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
+            string deviceInfoDesc = $"{deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
+                $"状态:{deviceInfo["state"]}\n" +
+                $"方向:{deviceInfo["direction"]}\n距离:{deviceInfo["distance"]}m\n" +
+                $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
+            return deviceInfoDesc;
+        }
+
         /// <summary>
-        /// 发送消息给小明
+        /// 发送消息给Agent
         /// </summary>
         /// <param name="msg"></param>
         public void SendMessageToAgent(string msg)
         {
             // 获取环境信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            string selfStateInfo = this.GetSelfStateInfo();
             string devicesInfoDesc = "";
             (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
 
             // 拼接
-            string messageToSend = $"<环境>\n{devicesInfoDesc}\n<\\环境>\n{msg}";
+            string messageToSend = $"{msg}" +
+                $"\n\n<你的状态>\n{selfStateInfo}\n<\\你的状态>" + 
+                $"\n\n<环境>\n{devicesInfoDesc}\n<\\环境>";
 
-            // 发送给小明
-            //AgentService.Instance.SendUserMessage("小明", messageToSend);
-            Debug.Log($"已发送消息给小明: {messageToSend}");
+            // 发送给Agent
+            //AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
         /// <summary>
@@ -279,9 +295,9 @@ namespace ShootingEditor2D
             // 拼接
             string messageToSend = $"[观察结果]<环境>\n{devicesInfoDesc}\n<\\环境>";
 
-            // 发送给小明
-            AgentService.Instance.SendUserMessage("小明", messageToSend);
-            Debug.Log($"已发送消息给小明: {messageToSend}");
+            // 发送给Agent
+            AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
         /// <summary>

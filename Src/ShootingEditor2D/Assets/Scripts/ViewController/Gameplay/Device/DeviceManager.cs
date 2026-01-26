@@ -1,4 +1,5 @@
 using FrameworkDesign;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -75,32 +76,7 @@ namespace ShootingEditor2D
             DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
             foreach (var device in devices)
             {
-                Dictionary<string, object> deviceInfo = new Dictionary<string, object>();
-
-                // name
-                deviceInfo.Add("name", device.deviceName);
-                // desc
-                deviceInfo.Add("desc", device.deviceDesc);
-                // dirction
-                float xDiff = device.transform.position.x - charaX;
-                string direction = xDiff < 0 ? "left" : "right";
-                deviceInfo.Add("direction", direction);
-                // distance
-                deviceInfo.Add("distance", Mathf.Abs(xDiff));
-
-                Rigidbody2D rb = device.GetComponent<Rigidbody2D>();
-                Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
-                // speed_x
-                string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "none");
-                deviceInfo.Add("speedDir_x", speedDirX);
-                deviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
-                // speed_y
-                string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "none");
-                deviceInfo.Add("speedDir_y", speedDirY);
-                deviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
-                // state
-                deviceInfo.Add("state", device.GetStateName());
-
+                Dictionary<string, object> deviceInfo = DeviceBaseToDeviceInfo(device, chara);
                 devicesInfo.Add(deviceInfo);
             }
 
@@ -109,29 +85,44 @@ namespace ShootingEditor2D
             if (targetDevice != null)
             {
                 // 如果找到了符合条件的设备，将其信息包装进字典
-                
-                interactableDeviceInfo.Add("name", targetDevice.deviceName);
-                interactableDeviceInfo.Add("desc", targetDevice.deviceDesc);
-
-                float xDiff = targetDevice.transform.position.x - charaX;
-                interactableDeviceInfo.Add("direction", xDiff < 0 ? "left" : "right");
-                interactableDeviceInfo.Add("distance", Mathf.Abs(xDiff));
-
-                Rigidbody2D rb = targetDevice.GetComponent<Rigidbody2D>();
-                Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
-
-                string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "none");
-                interactableDeviceInfo.Add("speedDir_x", speedDirX);
-                interactableDeviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
-
-                string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "none");
-                interactableDeviceInfo.Add("speedDir_y", speedDirY);
-                interactableDeviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
-                interactableDeviceInfo.Add("state", targetDevice.GetStateName());
+                interactableDeviceInfo = DeviceBaseToDeviceInfo(targetDevice, chara);
             }
 
             return (devicesInfo, interactableDeviceInfo);
         }
+
+        private Dictionary<string, object> DeviceBaseToDeviceInfo(DeviceBase device, GameObject chara)
+        {
+            float charaX = chara.transform.position.x;
+            Dictionary<string, object> deviceInfo = new Dictionary<string, object>();
+
+            // name
+            deviceInfo.Add("name", device.Name);
+            // desc
+            deviceInfo.Add("desc", device.Desc);
+            // dirction
+            float xDiff = device.transform.position.x - charaX;
+            string direction = xDiff < 0 ? "left" : "right";
+            deviceInfo.Add("direction", direction);
+            // distance
+            deviceInfo.Add("distance", Mathf.Abs(xDiff));
+
+            Rigidbody2D rb = device.GetComponent<Rigidbody2D>();
+            Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
+            // speed_x
+            string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "");
+            deviceInfo.Add("speedDir_x", speedDirX);
+            deviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
+            // speed_y
+            string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "");
+            deviceInfo.Add("speedDir_y", speedDirY);
+            deviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
+            // state
+            deviceInfo.Add("state", device.GetStateName());
+
+            return deviceInfo;
+        }
+
 
         public string Interact(GameObject chara)
         {

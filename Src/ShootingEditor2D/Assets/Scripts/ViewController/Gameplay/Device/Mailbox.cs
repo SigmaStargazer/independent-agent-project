@@ -8,8 +8,8 @@ public class Mailbox : DeviceBase
     // Start is called before the first frame update
     void Start()
     {
-        deviceName = "信箱";
-        deviceDesc = "里面可能存着信件。";
+        Name = "信箱";
+        Desc = "里面可能存着信件。";
     }
 
     public override string Interact(GameObject chara)

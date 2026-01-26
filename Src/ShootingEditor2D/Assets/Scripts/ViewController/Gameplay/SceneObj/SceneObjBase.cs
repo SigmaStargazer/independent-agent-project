@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public abstract class DeviceBase : MonoBehaviour
+    public abstract class SceneObjBase : MonoBehaviour
     {
-        public string deviceName { get; protected set; }
-        public string deviceDesc { get; protected set; }
+        public string Name { get; protected set; }
+        public string Desc { get; protected set; }
 
-        public abstract string Interact(GameObject chara);
+        //public abstract string Interact(GameObject chara);
 
         /// <summary>
         /// ×´Ì¬»ú

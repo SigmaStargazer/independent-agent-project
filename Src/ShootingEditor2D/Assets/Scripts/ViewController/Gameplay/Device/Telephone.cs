@@ -8,8 +8,8 @@ namespace ShootingEditor2D
     {
         void Start()
         {
-            deviceName = "电话";
-            deviceDesc = "一台老式有线电话。";
+            Name = "电话";
+            Desc = "一台老式有线电话。";
         }
 
         // Update is called once per frame

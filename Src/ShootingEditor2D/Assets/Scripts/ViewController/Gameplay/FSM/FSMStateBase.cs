@@ -1,17 +1,12 @@
-using ShootingEditor2D;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace ShootingEditor2D
 {
     public abstract class FSMStateBase
     {
         public abstract string Name { get; }
 
-        public virtual void OnEnter(DeviceBase device) { }
-        public virtual void OnExit(DeviceBase device) { }
-        public virtual void OnUpdate(DeviceBase device) { }
+        public virtual void OnEnter(SceneObjBase device) { }
+        public virtual void OnExit(SceneObjBase device) { }
+        public virtual void OnUpdate(SceneObjBase device) { }
     }
 
 
