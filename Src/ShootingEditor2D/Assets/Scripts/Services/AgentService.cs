@@ -29,6 +29,8 @@ namespace Services
         public UnityEngine.Events.UnityAction OnObserve;
         public UnityEngine.Events.UnityAction<bool, float> OnMoveAgent;
         public UnityEngine.Events.UnityAction OnInteract;
+        public UnityEngine.Events.UnityAction<int> OnSelect;
+        public UnityEngine.Events.UnityAction<string> OnInput;
         NetMessage pendingMessage = null;
         bool connected = false;
 
@@ -43,6 +45,8 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Subscribe<AgentInteractRequest>(this.OnAgentInteract);
+            MessageDistributer.Instance.Subscribe<AgentSelectRequest>(this.OnAgentSelect);
+            MessageDistributer.Instance.Subscribe<AgentInputRequest>(this.OnAgentInput);
         }
 
         public void Dispose()
@@ -54,6 +58,8 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Unsubscribe<AgentInteractRequest>(this.OnAgentInteract);
+            MessageDistributer.Instance.Unsubscribe<AgentSelectRequest>(this.OnAgentSelect);
+            MessageDistributer.Instance.Unsubscribe<AgentInputRequest>(this.OnAgentInput);
             AgentClient.Instance.OnConnect -= OnGameServerConnect;
             AgentClient.Instance.OnDisconnect -= OnGameServerDisconnect;
         }
@@ -288,12 +294,8 @@ namespace Services
             }
         }
 
-        /// <summary>
-        /// 交互
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="message"></param>
-        /// <exception cref="NotImplementedException"></exception>
+
+        #region 交互
         void OnAgentInteract(object sender, AgentInteractRequest request)
         {
             Debug.LogFormat("OnAgentInteract");
@@ -302,5 +304,25 @@ namespace Services
                 this.OnInteract();
             }
         }
+
+        void OnAgentSelect(object sender, AgentSelectRequest request)
+        {
+            Debug.LogFormat("OnAgentSelect:{0}", request.Selection);
+            if (this.OnSelect != null)
+            {
+                this.OnSelect(request.Selection);
+            }
+        }
+
+        void OnAgentInput(object sender, AgentInputRequest request)
+        {
+            Debug.LogFormat("OnAgentSelect:{0}", request.InputText);
+            if (this.OnInput != null)
+            {
+                this.OnInput(request.InputText);
+            }
+        }
+
+        #endregion
     }
 }

@@ -173,6 +173,12 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(8)]
         public AgentInteractRequest agentInteractRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(9)]
+        public AgentSelectRequest agentSelectRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(10)]
+        public AgentInputRequest agentInputRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -346,6 +352,31 @@ namespace SkillBridge.Message
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
             => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentSelectRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"selection")]
+        public int Selection { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentInputRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"input_text")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string InputText { get; set; } = "";
 
     }
 

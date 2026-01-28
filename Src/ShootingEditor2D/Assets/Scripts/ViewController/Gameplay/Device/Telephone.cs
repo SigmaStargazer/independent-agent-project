@@ -6,19 +6,22 @@ namespace ShootingEditor2D
 {
     public class Telephone : DeviceBase
     {
-        void Start()
-        {
-            Name = "电话";
-            Desc = "一台老式有线电话。";
-        }
+        public override string Name => "电话";
+        public override string Desc => "一台老式有线电话。";
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        public override bool IsInteractable => false;
 
         public override string Interact(GameObject chara)
+        {
+            return "";
+        }
+
+        public override string Select(GameObject chara, int selection)
+        {
+            return "";
+        }
+
+        public override string TextInput(GameObject chara, string inputText)
         {
             return "";
         }

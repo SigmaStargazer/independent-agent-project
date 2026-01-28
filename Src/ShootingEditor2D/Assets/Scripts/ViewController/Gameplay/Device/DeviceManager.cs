@@ -8,6 +8,29 @@ namespace ShootingEditor2D
 {
     public class DeviceManager : MonoSingleton<DeviceManager>
     {
+        // 使用 List 维护场景中所有的设备
+        private List<DeviceBase> mDevices = new List<DeviceBase>();
+
+        #region 注册与注销逻辑
+
+        public void Register(DeviceBase device)
+        {
+            if (device != null && !mDevices.Contains(device))
+            {
+                mDevices.Add(device);
+            }
+        }
+
+        public void UnRegister(DeviceBase device)
+        {
+            if (device != null && mDevices.Contains(device))
+            {
+                mDevices.Remove(device);
+            }
+        }
+
+        #endregion
+
         // Start is called before the first frame update
         void Start()
         {
@@ -20,6 +43,13 @@ namespace ShootingEditor2D
 
         }
 
+        void OnDestroy()
+        {
+            mDevices.Clear();
+        }
+
+        #region 检索设备信息
+
         /// <summary>
         /// 获取与角色接触且距离最近的设备
         /// </summary>
@@ -31,16 +61,16 @@ namespace ShootingEditor2D
             Collider2D charaCollider = chara.GetComponent<Collider2D>();
             if (charaCollider == null) return null;
 
-            DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
+            //DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
             DeviceBase targetDevice = null;
             float minDistance = float.MaxValue;
 
             // 找到最近且接触的设备
-            foreach (var device in devices)
+            foreach (var device in mDevices)
             {
                 Collider2D deviceCollider = device.GetComponent<Collider2D>();
                 // 确保设备有Trigger类型的Collider且当前与角色接触
-                if (deviceCollider != null && deviceCollider.isTrigger && Physics2D.IsTouching(charaCollider, deviceCollider))
+                if (device.IsInteractable && deviceCollider != null && deviceCollider.isTrigger && Physics2D.IsTouching(charaCollider, deviceCollider))
                 {
                     // 计算X轴距离（与GetDevicesInfo中的逻辑保持一致）
                     float xDiff = device.transform.position.x - chara.transform.position.x;
@@ -73,8 +103,8 @@ namespace ShootingEditor2D
             }
 
             float charaX = chara.transform.position.x;
-            DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
-            foreach (var device in devices)
+            //DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
+            foreach (var device in mDevices)
             {
                 Dictionary<string, object> deviceInfo = DeviceBaseToDeviceInfo(device, chara);
                 devicesInfo.Add(deviceInfo);
@@ -123,6 +153,9 @@ namespace ShootingEditor2D
             return deviceInfo;
         }
 
+        #endregion
+
+        #region 交互逻辑
 
         public string Interact(GameObject chara)
         {
@@ -138,5 +171,36 @@ namespace ShootingEditor2D
                 //Debug.Log($"没有可交互设备");
             }
         }
+
+        public string Select(GameObject chara, int selection)
+        {
+            DeviceBase targetDevice = GetInteractableDevice(chara);
+
+            if (targetDevice != null)
+            {
+                return targetDevice.Select(chara, selection);
+            }
+            else
+            {
+                return "没有可交互设备";
+                //Debug.Log($"没有可交互设备");
+            }
+        }
+
+        public string TextInput(GameObject chara, string inputText)
+        { 
+            DeviceBase targetDevice = GetInteractableDevice(chara);
+            if (targetDevice != null)
+            {
+                return targetDevice.TextInput(chara, inputText);
+            }
+            else
+            {
+                return "没有可交互设备";
+                //Debug.Log($"没有可交互设备");
+            }
+        }
+
+        #endregion
     }
 }

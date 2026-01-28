@@ -6,8 +6,8 @@ namespace ShootingEditor2D
 {
     public abstract class SceneObjBase : MonoBehaviour
     {
-        public string Name { get; protected set; }
-        public string Desc { get; protected set; }
+        public abstract string Name { get; }
+        public abstract string Desc { get; }
 
         //public abstract string Interact(GameObject chara);
 
@@ -22,8 +22,8 @@ namespace ShootingEditor2D
         protected virtual void Awake()
         {
             // 强制注入基础状态
-            AddState(new IdleState());
-            AddState(new MoveState());
+            RegisterState(new IdleState());
+            RegisterState(new MoveState());
 
             curState = states["Idle"];
             curState.OnEnter(this);
@@ -34,7 +34,7 @@ namespace ShootingEditor2D
             curState?.OnUpdate(this);
         }
 
-        protected void AddState(FSMStateBase state)
+        protected void RegisterState(FSMStateBase state)
         {
             states[state.Name] = state;
         }

@@ -26,6 +26,9 @@ namespace ShootingEditor2D
         // 【新增】是否正在进行自动移动（用于屏蔽玩家输入）
         private bool mIsAutoMoving = false;
 
+        public override string Name => "小明";
+        public override string Desc => "是一个帮助机器人";
+
         protected override void Awake()
         {
             base.Awake();
@@ -35,10 +38,11 @@ namespace ShootingEditor2D
         }
         private void Start()
         {
-            Name = "小明";
             AgentService.Instance.OnObserve = this.Observe;
             AgentService.Instance.OnMoveAgent = this.Move;
             AgentService.Instance.OnInteract = this.Interact;
+            AgentService.Instance.OnSelect = this.Select;
+            AgentService.Instance.OnInput = this.TextInput;
         }
 
         protected override void Update()
@@ -197,7 +201,7 @@ namespace ShootingEditor2D
             if (devicesInfo.Count > 0)
             {
                 devicesInfoDesc = "你的周围有：";
-                int deviceId = 1;
+                int deviceId = 0;
                 // 1.遍历设备信息
                 foreach (var deviceInfo in devicesInfo)
                 {
@@ -252,7 +256,7 @@ namespace ShootingEditor2D
                 $"\n\n<环境>\n{devicesInfoDesc}\n<\\环境>";
 
             // 发送给Agent
-            //AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            AgentService.Instance.SendUserMessage(this.Name, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
@@ -278,9 +282,35 @@ namespace ShootingEditor2D
                 Debug.LogError("场景中未找到 DeviceManager！");
                 return;
             }
-            string interactResult = deviceManager.Interact(this.gameObject);
-            this.SendMessageToAgent($"[交互结果]{interactResult}");
+            string result = deviceManager.Interact(this.gameObject);
+            this.SendMessageToAgent($"[交互结果]{result}");
         }
+
+        private void Select(int selection)
+        {
+            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            if (deviceManager == null)
+            {
+                Debug.LogError("场景中未找到 DeviceManager！");
+                return;
+            }
+            string result = deviceManager.Select(this.gameObject, selection);
+            this.SendMessageToAgent($"[选择结果]{result}");
+        }
+
+        private void TextInput(string inputText)
+        {
+            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            if (deviceManager == null)
+            {
+                Debug.LogError("场景中未找到 DeviceManager！");
+                return;
+            }
+            string result = deviceManager.TextInput(this.gameObject, inputText);
+            this.SendMessageToAgent($"[输入结果]{result}");
+        }
+
+        
 
         /// <summary>
         /// 观察场景

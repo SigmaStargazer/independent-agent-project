@@ -59,6 +59,8 @@ tools = [base_tools.communicate_to_agent,
          base_tools.observe_cmd,
          base_tools.move_cmd,
          base_tools.interact_cmd,
+         base_tools.select_cmd,
+         base_tools.input_cmd,
         # base_tools.add_alarm,
         #  base_tools.get_alarm_list,
         #  base_tools.remove_alarm

@@ -122,6 +122,8 @@ message NetMessageRequest{
 	AgentObserveRequest agentObserveRequest = 6;
 	AgentMoveRequest agentMoveRequest = 7;
 	AgentInteractRequest agentInteractRequest = 8;
+	AgentSelectRequest agentSelectRequest = 9;
+	AgentInputRequest agentInputRequest = 10;
 }
 
 message NetMessageResponse{
@@ -185,4 +187,12 @@ message AgentMoveRequest {
 
 // 与设备进行交互
 message AgentInteractRequest {
+}
+
+message AgentSelectRequest {
+	int32 selection = 1;
+}
+
+message AgentInputRequest {
+	string input_text = 1;
 }

@@ -85,7 +85,7 @@ namespace CSharpClient
             await receiveTask;
         }
 
-        static async Task Main(string[] args)
+        static async Task Main_5(string[] args)
         {
             await ConnectAndRun();
         }

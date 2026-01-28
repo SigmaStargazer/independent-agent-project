@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public class CharaBase : SceneObjBase, IController
+    public abstract class CharaBase : SceneObjBase, IController
     {
         public IArchitecture GetArchitecture()
         {

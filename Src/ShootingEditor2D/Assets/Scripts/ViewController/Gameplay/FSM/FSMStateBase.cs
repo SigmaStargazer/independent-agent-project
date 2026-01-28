@@ -10,12 +10,12 @@ namespace ShootingEditor2D
     }
 
 
-    public sealed class IdleState : FSMStateBase
+    public class IdleState : FSMStateBase
     {
         public override string Name => "Idle";
     }
 
-    public sealed class MoveState : FSMStateBase
+    public class MoveState : FSMStateBase
     {
         public override string Name => "Move";
     }

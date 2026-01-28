@@ -120,6 +120,46 @@ async def interact_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
         return f"交互失败: {e}"
 
 @tool
+async def select_cmd(agent: Annotated[str, InjectedState("name")], selection: int) -> str:
+    """
+    与\"可选择交互\"的对象进行交互后，若交互结果提供了选项，则使用此工具选择选项
+    Args:
+        selection(int): 选项编号
+    Return:
+        str: 选择是否开始。注意：选择结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentSelectRequest()
+        request.selection = selection
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]选择了选项{selection}。待选择完成后，你将收到选择完成的消息。")
+        return f"[{agent}]选择了选项{selection}。待选择完成后，你将收到选择完成的消息。"
+    except Exception as e:
+        return f"选择失败: {e}"
+
+@tool
+async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: str) -> str:
+    """
+    与\"可选择交互\"的对象进行交互后，若交互结果提供了输入框，则使用此工具输入文本
+    Args:
+        input_text(str): 输入文本
+    Return:
+        str: 输入是否开始。注意：输入结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentInputRequest()
+        request.input_text = input_text
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]输入了文本{input_text}。待输入完成后，你将收到输入完成的消息。")
+        return f"[{agent}]输入了文本{input_text}。待输入完成后，你将收到输入完成的消息。"
+    except Exception as e:
+        return f"输入失败: {e}"
+
+@tool
 async def get_agent_list() -> list:
     """获取所有agent的清单"""
     from agent_framwork.managers.agent_manager import AgentManager
