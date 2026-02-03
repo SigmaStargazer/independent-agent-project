@@ -4,12 +4,22 @@ from langgraph.prebuilt import InjectedState
 
 from graphiti_core.search import search_config_recipes
 
+from agent_framwork.tools.action_sequence_model.model.action import (
+    WaitAction as WaitActionModel,
+    MoveAction as MoveActionModel,
+)
+from agent_framwork.tools.action_sequence_model.model.action_sequence import ActionSequence
+
 from agent_framwork.systems.alarm_system import AlarmSystem
 from agent_framwork.systems.time_system import TimeSystem
+
+from network.servers import AgentServerNetMessage
+from network import message_pb2
 
 # tool中调用langgraph中state内参数的方式，请参考下面的 InjectedState 中的内容：
 # https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode.inject_tool_args
 
+# region Agent交流工具
 @tool
 async def communicate_to_agent(sender: Annotated[str, InjectedState("name")],recipient: str, message: str) -> str:
     """向目标agent发送一则消息
@@ -62,6 +72,51 @@ async def communicate_to_user(agent: Annotated[str, InjectedState("name")], mess
     except Exception as e:
         print(f"[{agent}]向用户发送消息失败: {message}, {e}")
         return f"你向用户发送消息失败: {e}"
+# endregion
+
+# region Agent动作工具
+
+def build_pb_action_step(step) -> message_pb2.ActionStep:
+    pb_step = message_pb2.ActionStep()
+
+    # condition 在 ActionStep
+    pb_step.condition = step.condition
+
+    if isinstance(step, WaitActionModel):
+        pb_step.wait.CopyFrom(message_pb2.WaitAction())
+
+    elif isinstance(step, MoveActionModel):
+        pb_step.move.direction = (
+            message_pb2.MoveAction.RIGHT
+            if step.direction == "right"
+            else message_pb2.MoveAction.LEFT
+        )
+
+    else:
+        raise TypeError(f"Unsupported ActionStep type: {type(step)}")
+
+    return pb_step
+
+@tool
+async def action_sequence_cmd(agent: Annotated[str, InjectedState("name")], action_sequence: ActionSequence) -> str:
+    """执行动作序列
+    Args:
+        action_sequence(ActionSequence): 动作序列
+    Return:
+        str: 动作序列是否开始确认。注意：动作序列确认结果将通过新的消息另行通知。
+    """
+    try:
+        request = message_pb2.AgentActionSequenceRequest()
+        # request.action_sequence.extend(action_sequence.action_sequence)
+        for step in action_sequence.action_sequence:
+            request.action_sequence.append(
+                build_pb_action_step(step)
+            )
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]正在确认动作序列。待确认完成后，你将收到确认完成的消息。")
+        return f"[{agent}]正在确认动作序列。待确认完成后，你将收到确认完成的消息。"
+    except Exception as e:
+        return f"动作序列校验失败: {e}"
 
 @tool
 async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
@@ -159,6 +214,8 @@ async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: st
     except Exception as e:
         return f"输入失败: {e}"
 
+# endregion
+
 @tool
 async def get_agent_list() -> list:
     """获取所有agent的清单"""
@@ -172,7 +229,7 @@ async def get_cur_time() -> str:
     now = await TimeSystem().aget_current_time()
     return now
 
-# 闹钟相关的工具
+# region 闹钟工具
 @tool
 async def add_alarm(agent: Annotated[str, InjectedState("name")],hour:int, minute:int, repeat=False, description="无描述"):
     """添加闹钟
@@ -216,11 +273,9 @@ async def remove_alarm(agent: Annotated[str, InjectedState("name")], alarm_id: i
         return f"已删除闹钟, {{\"alarm_id\": {alarm_id}}}"
     else:
         return f"闹钟id{{\"alarm_id\": {alarm_id}}}不存在！"
-
+# endregion
     
-"""
-====记忆====
-"""
+# region 记忆工具
 @tool
 async def search_fact_memories(name: Annotated[str, InjectedState('name')], 
 # group_id: Annotated[str, InjectedState('group_id')], 
@@ -354,4 +409,4 @@ limit: int = 10):
     #     print(f"情景记忆检索失败: {e}")
 
     # return mem_longtime
-
+# endregion

@@ -104,6 +104,37 @@ message NEntitySync {
 
 ////////////////////////////////////////////////////////////////
 //
+//  ActionSequence使用的类型
+//
+////////////////////////////////////////////////////////////////
+
+// ===== ActionStep（discriminator）=====
+
+message ActionStep {
+  string condition = 1;
+
+  oneof action {
+    WaitAction wait = 2;
+    MoveAction move = 3;
+  }
+}
+
+// ===== 具体 Action =====
+
+message WaitAction {
+  // 当前无额外参数
+}
+
+message MoveAction {
+  enum Direction {
+    LEFT = 0;
+    RIGHT = 1;
+  }
+  Direction direction = 1;
+}
+
+////////////////////////////////////////////////////////////////
+//
 //  Messages
 //
 ////////////////////////////////////////////////////////////////
@@ -124,6 +155,7 @@ message NetMessageRequest{
 	AgentInteractRequest agentInteractRequest = 8;
 	AgentSelectRequest agentSelectRequest = 9;
 	AgentInputRequest agentInputRequest = 10;
+	AgentActionSequenceRequest agentActionSequenceRequest = 11;
 }
 
 message NetMessageResponse{
@@ -186,6 +218,10 @@ message AgentMoveRequest {
 }
 
 // 与设备进行交互
+message AgentActionSequenceRequest {
+  repeated ActionStep action_sequence = 1;
+}
+
 message AgentInteractRequest {
 }
 

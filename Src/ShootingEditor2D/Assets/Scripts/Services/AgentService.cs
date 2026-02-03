@@ -1,6 +1,7 @@
 ﻿using Common;
 //using Models;
 using Network;
+using ProtoBuf;
 using SkillBridge.Message;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace Services
         public UnityEngine.Events.UnityAction OnInteract;
         public UnityEngine.Events.UnityAction<int> OnSelect;
         public UnityEngine.Events.UnityAction<string> OnInput;
+        public UnityEngine.Events.UnityAction<List<ActionStep>> OnActionSequence;
         NetMessage pendingMessage = null;
         bool connected = false;
 
@@ -47,6 +49,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentInteractRequest>(this.OnAgentInteract);
             MessageDistributer.Instance.Subscribe<AgentSelectRequest>(this.OnAgentSelect);
             MessageDistributer.Instance.Subscribe<AgentInputRequest>(this.OnAgentInput);
+            MessageDistributer.Instance.Subscribe<AgentActionSequenceRequest>(this.OnAgentActionSequence);
         }
 
         public void Dispose()
@@ -60,6 +63,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentInteractRequest>(this.OnAgentInteract);
             MessageDistributer.Instance.Unsubscribe<AgentSelectRequest>(this.OnAgentSelect);
             MessageDistributer.Instance.Unsubscribe<AgentInputRequest>(this.OnAgentInput);
+            MessageDistributer.Instance.Unsubscribe<AgentActionSequenceRequest>(this.OnAgentActionSequence);
             AgentClient.Instance.OnConnect -= OnGameServerConnect;
             AgentClient.Instance.OnDisconnect -= OnGameServerDisconnect;
         }
@@ -320,6 +324,15 @@ namespace Services
             if (this.OnInput != null)
             {
                 this.OnInput(request.InputText);
+            }
+        }
+
+        private void OnAgentActionSequence(object sender, AgentActionSequenceRequest request)
+        {
+            Debug.LogFormat("OnAgentActionSequence:{0}", request.ActionSequences);
+            if (this.OnActionSequence != null)
+            {
+                this.OnActionSequence(request.ActionSequences);
             }
         }
 

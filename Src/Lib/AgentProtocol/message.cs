@@ -128,6 +128,69 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class ActionStep : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"condition")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Condition { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"wait")]
+        public WaitAction Wait
+        {
+            get { return __pbn__action.Is(2) ? ((WaitAction)__pbn__action.Object) : default; }
+            set { __pbn__action = new global::ProtoBuf.DiscriminatedUnionObject(2, value); }
+        }
+        public bool ShouldSerializeWait() => __pbn__action.Is(2);
+        public void ResetWait() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__action, 2);
+
+        private global::ProtoBuf.DiscriminatedUnionObject __pbn__action;
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"move")]
+        public MoveAction Move
+        {
+            get { return __pbn__action.Is(3) ? ((MoveAction)__pbn__action.Object) : default; }
+            set { __pbn__action = new global::ProtoBuf.DiscriminatedUnionObject(3, value); }
+        }
+        public bool ShouldSerializeMove() => __pbn__action.Is(3);
+        public void ResetMove() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__action, 3);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class WaitAction : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MoveAction : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public Direction direction { get; set; }
+
+        [global::ProtoBuf.ProtoContract()]
+        public enum Direction
+        {
+            [global::ProtoBuf.ProtoEnum(Name = @"LEFT")]
+            Left = 0,
+            [global::ProtoBuf.ProtoEnum(Name = @"RIGHT")]
+            Right = 1,
+        }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class NetMessage : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -178,6 +241,9 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(10)]
         public AgentInputRequest agentInputRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(11)]
+        public AgentActionSequenceRequest agentActionSequenceRequest { get; set; }
 
     }
 
@@ -343,6 +409,18 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(2, Name = @"distance")]
         public float Distance { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentActionSequenceRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"action_sequence")]
+        public global::System.Collections.Generic.List<ActionStep> ActionSequences { get; } = new global::System.Collections.Generic.List<ActionStep>();
 
     }
 
