@@ -31,9 +31,13 @@ namespace ShootingEditor2D
         public virtual void OnMoveExit() { }
 
         /// <summary>
-        /// Action的上下文
+        /// Action
         /// </summary>
+        /// 
+        // Action的上下文
         protected ActionContext curActionCtx;
+
+        protected virtual void OnActionFinished(ActionContext ctx) { }
 
         protected virtual void Awake()
         {
@@ -60,13 +64,13 @@ namespace ShootingEditor2D
                 curActionCtx.ActionTime += Time.deltaTime;
 
                 // 触发结束条件
-                if (curActionCtx.EndCondition != null && curActionCtx.EndCondition())
+                if (curActionCtx.EndCondition?.Invoke() == true)
                 {
                     var finishedCtx = curActionCtx;
                     curActionCtx = null;
 
                     ChangeState("Idle");
-                    OnActionFinished(finishedCtx);
+                    OnActionFinished(finishedCtx);// 触发Hook
                     return;
                 }
             }
@@ -99,11 +103,6 @@ namespace ShootingEditor2D
         public string GetStateName()
         {
             return curState.Name;
-        }
-
-        protected virtual void OnActionFinished(ActionContext ctx)
-        {
-            // 默认什么都不做
         }
     }
 
