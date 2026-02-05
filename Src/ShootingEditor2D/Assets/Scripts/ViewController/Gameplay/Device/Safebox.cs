@@ -17,14 +17,15 @@ namespace ShootingEditor2D
 
         protected override void Awake()
         {
-            //base.Awake();
-
             //添加状态
             RegisterState(new OpenState());
             RegisterState(new CloseState());
-            //设置初始状态
-            curState = states["Close"];
-            curState.OnEnter(this);
+        }
+
+        protected override void Start()
+        {
+            // 默认进入Close状态
+            ChangeState("Close");
         }
 
         public override string Interact(GameObject chara)

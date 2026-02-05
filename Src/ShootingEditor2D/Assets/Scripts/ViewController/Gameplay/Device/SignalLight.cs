@@ -17,9 +17,12 @@ namespace ShootingEditor2D
             //添加状态
             RegisterState(new GreenLightState());
             RegisterState(new RedLightState());
-            //设置初始状态
-            curState = states["RedLight"];
-            curState.OnEnter(this);
+        }
+
+        protected override void Start()
+        {
+            // 默认进入Close状态
+            ChangeState("RedLight");
         }
 
         public override string Interact(GameObject chara)

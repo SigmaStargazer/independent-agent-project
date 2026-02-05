@@ -16,15 +16,22 @@ namespace ShootingEditor2D
         private Rigidbody2D mRigidbody2D;
         private Trigger2DCheck mGroundCheck;
         //private Gun mGun;
-        public float isRight;
+        //public float isRight;
 
+        // move相关
         public float moveSpeed = 5f;
+
+        private bool moveRight;
+        private float moveDistance;
+        private float moveStartX;
+        //private float moveTargetX;
+        private bool moveFinished;
 
         // 本帧是否按了跳
         private bool mJumpPressed;
 
-        // 【新增】是否正在进行自动移动（用于屏蔽玩家输入）
-        private bool mIsAutoMoving = false;
+        //// 【新增】是否正在进行自动移动（用于屏蔽玩家输入）
+        //private bool mIsAutoMoving = false;
 
         public override string Name => "小明";
         public override string Desc => "是一个帮助机器人";
@@ -36,8 +43,9 @@ namespace ShootingEditor2D
             mGroundCheck = transform.Find("GroundCheck").GetComponent<Trigger2DCheck>();
             //mGun = transform.Find("Gun").GetComponent<Gun>();
         }
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             AgentService.Instance.OnObserve = this.Observe;
             AgentService.Instance.OnMoveAgent = this.Move;
             AgentService.Instance.OnInteract = this.Interact;
@@ -52,26 +60,65 @@ namespace ShootingEditor2D
         }
         // 所有物理相关的逻辑放FixedUpdate（不受实际帧数影响，防穿）
         // 其他逻辑可以放Update
-        private void FixedUpdate()
+        protected override void FixedUpdate()
         {
-            // 【修改点】如果正在自动移动，直接跳过玩家输入的处理
-            if (mIsAutoMoving)
-            {
-                return;
-            }
+            base.FixedUpdate();
+            //// 【修改点】如果正在自动移动，直接跳过玩家输入的处理
+            //if (mIsAutoMoving)
+            //{
+            //    return;
+            //}
 
-            var rawInput = Input.GetAxis("Horizontal");
-            float horizontalDirection = 0;
-            if (Mathf.Abs(rawInput) > 0.01f)
-            {
-                horizontalDirection = Mathf.Sign(rawInput);
-            }
+            //var rawInput = Input.GetAxis("Horizontal");
+            //float horizontalDirection = 0;
+            //if (Mathf.Abs(rawInput) > 0.01f)
+            //{
+            //    horizontalDirection = Mathf.Sign(rawInput);
+            //}
 
-            isRight = Mathf.Sign(transform.localScale.x);
+            //isRight = Mathf.Sign(transform.localScale.x);
 
-            TurnBack(horizontalDirection);
-            MoveAndJump(horizontalDirection);
+            //TurnBack(horizontalDirection);
+            //MoveAndJump(horizontalDirection);
         }
+        #region FSM Hook
+        public override void OnIdleEnter()
+        {
+            mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
+        }
+        public override void OnMoveEnter()
+        {
+            moveFinished = false;
+            moveStartX = transform.position.x;
+            float dir = moveRight ? 1f : -1f;
+            //moveTargetX = moveStartX + dir * moveDistance;
+
+            // 校正朝向
+            TurnBack(dir);
+        }
+
+        public override void OnMoveFixedUpdate()
+        {
+            if (moveFinished) return;
+
+            float dir = moveRight ? 1f : -1f;
+
+            // 持续移动
+            mRigidbody2D.velocity = new Vector2(
+                dir * moveSpeed,
+                mRigidbody2D.velocity.y
+            );
+        }
+
+        public override void OnMoveExit()
+        {
+            // 刹车
+            mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
+        }
+
+        #endregion
+
+
         private void GetInput()
         {
             if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -107,60 +154,60 @@ namespace ShootingEditor2D
             }
         }
 
-        private void MoveAndJump(float horizontalDirection)
-        {
-            mRigidbody2D.velocity = new Vector2(horizontalDirection * moveSpeed, mRigidbody2D.velocity.y);
+        //private void MoveAndJump(float horizontalDirection)
+        //{
+        //    mRigidbody2D.velocity = new Vector2(horizontalDirection * moveSpeed, mRigidbody2D.velocity.y);
 
-            var grounded = mGroundCheck.Triggered;
+        //    var grounded = mGroundCheck.Triggered;
 
-            if (mJumpPressed && grounded)
-            {
-                mRigidbody2D.velocity = new Vector2(mRigidbody2D.velocity.x, 5);
-            }
-            mJumpPressed = false;
-        }
+        //    if (mJumpPressed && grounded)
+        //    {
+        //        mRigidbody2D.velocity = new Vector2(mRigidbody2D.velocity.x, 5);
+        //    }
+        //    mJumpPressed = false;
+        //}
 
         /// <summary>
         /// 移动
         /// </summary>
         /// <param name="moveRight"></param>
         /// <param name="distance"></param>
-        public void MoveByDistance(bool moveRight, float distance)
-        {
-            // 停止之前的移动协程（防止多次调用冲突）
-            StopAllCoroutines();
-            StartCoroutine(MoveDistanceCoroutine(moveRight, distance));
-        }
+        //public void MoveByDistance(bool moveRight, float distance)
+        //{
+        //    // 停止之前的移动协程（防止多次调用冲突）
+        //    StopAllCoroutines();
+        //    StartCoroutine(MoveDistanceCoroutine(moveRight, distance));
+        //}
 
-        private IEnumerator MoveDistanceCoroutine(bool moveRight, float distance)
-        {
-            mIsAutoMoving = true; // 锁定输入
+        //private IEnumerator MoveDistanceCoroutine(bool moveRight, float distance)
+        //{
+        //    mIsAutoMoving = true; // 锁定输入
 
-            float startX = transform.position.x;
-            float directionSign = moveRight ? 1f : -1f;
-            float targetX = startX + (distance * directionSign);
+        //    float startX = transform.position.x;
+        //    float directionSign = moveRight ? 1f : -1f;
+        //    float targetX = startX + (distance * directionSign);
 
-            // 确保朝向正确
-            TurnBack(directionSign);
+        //    // 确保朝向正确
+        //    TurnBack(directionSign);
 
-            // 循环直到到达目标位置
-            // 判断条件：如果是向右走，当前x小于目标x；如果是向左走，当前x大于目标x
-            while ((moveRight && transform.position.x < targetX) ||
-                   (!moveRight && transform.position.x > targetX))
-            {
-                // 保持物理移动速度
-                mRigidbody2D.velocity = new Vector2(directionSign * moveSpeed, mRigidbody2D.velocity.y);
+        //    // 循环直到到达目标位置
+        //    // 判断条件：如果是向右走，当前x小于目标x；如果是向左走，当前x大于目标x
+        //    while ((moveRight && transform.position.x < targetX) ||
+        //           (!moveRight && transform.position.x > targetX))
+        //    {
+        //        // 保持物理移动速度
+        //        mRigidbody2D.velocity = new Vector2(directionSign * moveSpeed, mRigidbody2D.velocity.y);
 
-                // 等待下一次物理帧
-                yield return new WaitForFixedUpdate();
-            }
+        //        // 等待下一次物理帧
+        //        yield return new WaitForFixedUpdate();
+        //    }
 
-            // 到达目标，刹车
-            mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-            mIsAutoMoving = false; // 恢复输入
-            // 向agent反馈
-            SendMessageToAgent("[移动结果]到达目的地！");
-        }
+        //    // 到达目标，刹车
+        //    mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
+        //    mIsAutoMoving = false; // 恢复输入
+        //    // 向agent反馈
+        //    SendMessageToAgent("[移动结果]到达目的地！");
+        //}
 
         // 获取自身状态信息
         private string GetSelfStateInfo()
@@ -265,11 +312,34 @@ namespace ShootingEditor2D
         /// </summary>
         /// <param name="moveRight"></param>
         /// <param name="distance"></param>
+        /// 
         private void Move(bool moveRight, float distance)
         {
-            Debug.Log($"开始移动: moveRight={moveRight} distance={distance}");
-            MoveByDistance(moveRight, distance);
+            this.moveRight = moveRight;
+            this.moveDistance = distance;
+
+            curActionCtx = new ActionContext
+            {
+                ActionName = "Move",
+                EndCondition = () =>
+                {
+                    float dir = moveRight ? 1f : -1f;
+                    float targetX = moveStartX + dir * moveDistance;
+
+                    return moveRight
+                        ? transform.position.x >= targetX
+                        : transform.position.x <= targetX;
+                }
+            };
+
+            ChangeState("Move");
         }
+
+        //private void Move(bool moveRight, float distance)
+        //{
+        //    Debug.Log($"开始移动: moveRight={moveRight} distance={distance}");
+        //    MoveByDistance(moveRight, distance);
+        //}
 
         /// <summary>
         /// 交互
@@ -328,14 +398,6 @@ namespace ShootingEditor2D
             // 发送给Agent
             AgentService.Instance.SendUserMessage(this.Name, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
-        }
-
-        /// <summary>
-        /// 注意某个对象的状态
-        /// </summary>
-        private void Attand()
-        {
-
         }
     }
 }

@@ -9,15 +9,31 @@ namespace ShootingEditor2D
         public abstract string Name { get; }
         public abstract string Desc { get; }
 
-        //public abstract string Interact(GameObject chara);
-
         /// <summary>
         /// 状态机
         /// </summary>
-        protected Dictionary<string, FSMStateBase> states =
-            new Dictionary<string, FSMStateBase>();
+        protected Dictionary<string, FSMStateBase> states = new Dictionary<string, FSMStateBase>();
 
         protected FSMStateBase curState;
+
+        public string StateName => curState.Name;
+
+        // Idle hooks
+        public virtual void OnIdleEnter() { }
+        public virtual void OnIdleUpdate() { }
+        public virtual void OnIdleFixedUpdate() { }
+        public virtual void OnIdleExit() { }
+
+        // Move hooks
+        public virtual void OnMoveEnter() { }
+        public virtual void OnMoveUpdate() { }
+        public virtual void OnMoveFixedUpdate() { }
+        public virtual void OnMoveExit() { }
+
+        /// <summary>
+        /// Action的上下文
+        /// </summary>
+        protected ActionContext curActionCtx;
 
         protected virtual void Awake()
         {
@@ -25,13 +41,37 @@ namespace ShootingEditor2D
             RegisterState(new IdleState());
             RegisterState(new MoveState());
 
-            curState = states["Idle"];
-            curState.OnEnter(this);
+            //curState = states["Idle"];
+            //curState.OnEnter(this);
+        }
+
+        protected virtual void Start()
+        {
+            // 默认进入Idle状态
+            ChangeState("Idle");
+            //curState = states["Idle"];
+            //curState.OnEnter(this);
         }
 
         protected virtual void Update()
         {
+            if (curActionCtx != null)
+            {
+                curActionCtx.ActionTime += Time.deltaTime;
+
+                if (curActionCtx.EndCondition != null &&
+                    curActionCtx.EndCondition())
+                {
+                    ChangeState("Idle");
+                    return;
+                }
+            }
+
             curState?.OnUpdate(this);
+        }
+        protected virtual void FixedUpdate()
+        {
+            curState?.OnFixedUpdate(this);
         }
 
         protected void RegisterState(FSMStateBase state)
