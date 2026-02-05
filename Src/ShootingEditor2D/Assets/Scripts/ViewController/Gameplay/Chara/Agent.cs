@@ -117,14 +117,14 @@ namespace ShootingEditor2D
         #endregion
 
         /// <summary>
-        /// OnActionFinished钩子逻辑：当Action结束且存在curActionCtx.Result.Message时，发送消息给llm
+        /// OnActionFinished钩子逻辑：当Action结束且存在finishedCtx.Result.Message时，发送消息给llm
         /// </summary>
-        /// <param name="ctx"></param>
-        protected override void OnActionFinished(ActionContext ctx)
+        /// <param name="finishedCtx"></param>
+        protected override void OnActionFinished(ActionContext finishedCtx)
         {
-            if (ctx?.Result?.Message != null)
+            if (finishedCtx?.Result?.Message != null)
             {
-                SendMessageToAgent(ctx.Result.Message);
+                SendMessageToAgent(finishedCtx.Result.Message);
             }
         }
 
@@ -328,11 +328,10 @@ namespace ShootingEditor2D
 
             float startX = transform.position.x;
             //this.moveDistance = distance;
-            ActionResult actionResult = new ActionResult { ActionName = "Move"};
             curActionCtx = new ActionContext
             {
                 ActionName = "Move",
-                Result = actionResult,
+                Result = new ActionResult(),
                 startPostion = new System.Numerics.Vector2(startX, transform.position.y),
                 EndCondition = () =>
                 {

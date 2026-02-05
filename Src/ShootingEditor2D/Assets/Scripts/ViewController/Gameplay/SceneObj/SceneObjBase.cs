@@ -37,7 +37,7 @@ namespace ShootingEditor2D
         // Action的上下文
         protected ActionContext curActionCtx;
 
-        protected virtual void OnActionFinished(ActionContext ctx) { }
+        protected virtual void OnActionFinished(ActionContext finishedCtx) { }
 
         protected virtual void Awake()
         {
@@ -63,7 +63,7 @@ namespace ShootingEditor2D
             {
                 curActionCtx.ActionTime += Time.deltaTime;
 
-                // 触发结束条件
+                // 触发结束条件，并清空curActionCtx
                 if (curActionCtx.EndCondition?.Invoke() == true)
                 {
                     var finishedCtx = curActionCtx;

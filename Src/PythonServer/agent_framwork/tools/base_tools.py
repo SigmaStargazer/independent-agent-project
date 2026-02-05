@@ -98,12 +98,12 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
     return pb_step
 
 @tool
-async def action_sequence_cmd(agent: Annotated[str, InjectedState("name")], action_sequence: ActionSequence) -> str:
-    """执行动作序列
+async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")], action_sequence: ActionSequence) -> str:
+    """规划一连串动作的执行顺序。后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
     Args:
         action_sequence(ActionSequence): 动作序列
     Return:
-        str: 动作序列是否开始确认。注意：动作序列确认结果将通过新的消息另行通知。
+        str: 规划动作序列是否开始校验。注意：动作序列校验结果将通过新的消息另行通知。
     """
     try:
         request = message_pb2.AgentActionSequenceRequest()
@@ -113,10 +113,15 @@ async def action_sequence_cmd(agent: Annotated[str, InjectedState("name")], acti
                 build_pb_action_step(step)
             )
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]正在确认动作序列。待确认完成后，你将收到确认完成的消息。")
-        return f"[{agent}]正在确认动作序列。待确认完成后，你将收到确认完成的消息。"
+        print(f"[{agent}]正在校验动作序列。待校验完成后，你将收到校验完成的消息。")
+        return f"[{agent}]正在校验动作序列。待校验完成后，你将收到校验完成的消息。"
     except Exception as e:
         return f"动作序列校验失败: {e}"
+
+# 确认开始执行动作序列
+@tool
+async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    pass
 
 @tool
 async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:

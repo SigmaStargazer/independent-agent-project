@@ -17,7 +17,6 @@ namespace ShootingEditor2D
 
     public class ActionResult
     {
-        public string ActionName;
         public bool Success = true;
         public string Message;   // 给 Agent 用的自然语言描述
     }
