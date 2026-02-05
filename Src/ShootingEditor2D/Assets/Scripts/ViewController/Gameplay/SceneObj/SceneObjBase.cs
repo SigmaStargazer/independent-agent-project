@@ -59,10 +59,14 @@ namespace ShootingEditor2D
             {
                 curActionCtx.ActionTime += Time.deltaTime;
 
-                if (curActionCtx.EndCondition != null &&
-                    curActionCtx.EndCondition())
+                // 触发结束条件
+                if (curActionCtx.EndCondition != null && curActionCtx.EndCondition())
                 {
+                    var finishedCtx = curActionCtx;
+                    curActionCtx = null;
+
                     ChangeState("Idle");
+                    OnActionFinished(finishedCtx);
                     return;
                 }
             }
@@ -95,6 +99,11 @@ namespace ShootingEditor2D
         public string GetStateName()
         {
             return curState.Name;
+        }
+
+        protected virtual void OnActionFinished(ActionContext ctx)
+        {
+            // 默认什么都不做
         }
     }
 

@@ -22,10 +22,11 @@ namespace ShootingEditor2D
         public float moveSpeed = 5f;
 
         private bool moveRight;
-        private float moveDistance;
-        private float moveStartX;
-        //private float moveTargetX;
         private bool moveFinished;
+        //private float moveDistance;
+        //private float moveStartX;
+        //private float moveTargetX;
+
 
         // 本帧是否按了跳
         private bool mJumpPressed;
@@ -58,8 +59,8 @@ namespace ShootingEditor2D
             base.Update();
             GetInput();
         }
-        // 所有物理相关的逻辑放FixedUpdate（不受实际帧数影响，防穿）
-        // 其他逻辑可以放Update
+
+
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
@@ -89,7 +90,7 @@ namespace ShootingEditor2D
         public override void OnMoveEnter()
         {
             moveFinished = false;
-            moveStartX = transform.position.x;
+            //moveStartX = transform.position.x;
             float dir = moveRight ? 1f : -1f;
             //moveTargetX = moveStartX + dir * moveDistance;
 
@@ -104,10 +105,7 @@ namespace ShootingEditor2D
             float dir = moveRight ? 1f : -1f;
 
             // 持续移动
-            mRigidbody2D.velocity = new Vector2(
-                dir * moveSpeed,
-                mRigidbody2D.velocity.y
-            );
+            mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
         }
 
         public override void OnMoveExit()
@@ -316,19 +314,30 @@ namespace ShootingEditor2D
         private void Move(bool moveRight, float distance)
         {
             this.moveRight = moveRight;
-            this.moveDistance = distance;
 
+            float startX = transform.position.x;
+            //this.moveDistance = distance;
+            //ActionResult actionResult = new ActionResult { ActionName = "Move"};
             curActionCtx = new ActionContext
             {
                 ActionName = "Move",
+                //Result = actionResult,
+                startPostion = new System.Numerics.Vector2(startX, transform.position.y),
                 EndCondition = () =>
                 {
                     float dir = moveRight ? 1f : -1f;
-                    float targetX = moveStartX + dir * moveDistance;
+                    float targetX = startX + dir * distance;
 
-                    return moveRight
+                    bool arrived = moveRight
                         ? transform.position.x >= targetX
                         : transform.position.x <= targetX;
+
+                    //if (arrived)
+                    //{
+                    //    curActionCtx.Result.Message = "[移动结果]到达目的地！";
+                    //}
+
+                    return arrived;
                 }
             };
 
