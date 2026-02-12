@@ -5,6 +5,7 @@ using ProtoBuf;
 using SkillBridge.Message;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,12 +28,12 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
-        public UnityEngine.Events.UnityAction OnObserve;
-        public UnityEngine.Events.UnityAction<bool, float> OnMoveAgent;
-        public UnityEngine.Events.UnityAction OnInteract;
-        public UnityEngine.Events.UnityAction<int> OnSelect;
-        public UnityEngine.Events.UnityAction<string> OnInput;
-        public UnityEngine.Events.UnityAction<List<ActionStep>> OnActionSequence;
+        public UnityEngine.Events.UnityAction<string> OnObserve;
+        public UnityEngine.Events.UnityAction<string, bool, float> OnMoveAgent;
+        public UnityEngine.Events.UnityAction<string> OnInteract;
+        public UnityEngine.Events.UnityAction<string, int> OnSelect;
+        public UnityEngine.Events.UnityAction<string, string> OnInput;
+        public UnityEngine.Events.UnityAction<string, List<ActionStep>> OnActionSequence;
         NetMessage pendingMessage = null;
         bool connected = false;
 
@@ -161,7 +162,7 @@ namespace Services
         // 发送消息
         public void SendAgentCreate(string name, string desc)
         {
-            Debug.LogFormat("AgentCreateRequest::name :{0} desc:{1}", name, desc);
+            Debug.LogFormat("AgentCreateRequest::name:{0} desc:{1}", name, desc);
             NetMessage message = new NetMessage();
             message.Request = new NetMessageRequest();
             message.Request.agentCreateRequest = new AgentCreateRequest();
@@ -183,7 +184,7 @@ namespace Services
         // 收到请求后
         void OnAgentCreate(object sender, AgentCreateResponse response)
         {
-            Debug.LogFormat("OnAgentCreate:{0} [{1}]", response.Success, response.Errormsg);
+            Debug.LogFormat("OnAgentCreate::Success:{0} [{1}]", response.Success, response.Errormsg);
             if (this.OnCreateAgent != null)
             {
                 this.OnCreateAgent(response.Success, response.Errormsg);
@@ -194,7 +195,7 @@ namespace Services
         // 发送消息
         public void SendAgentLoad()
         {
-            Debug.LogFormat("AgentLoadRequest");
+            Debug.LogFormat("AgentLoadRequest::");
             NetMessage message = new NetMessage();
             message.Request = new NetMessageRequest();
             message.Request.agentLoadRequest = new AgentLoadRequest();
@@ -214,7 +215,7 @@ namespace Services
         // 收到请求后
         void OnAgentLoad(object sender, AgentLoadResponse response)
         {
-            Debug.LogFormat("OnAgentLoad:{0} [{1}]", response.Success, response.Errormsg);
+            Debug.LogFormat("OnAgentLoad::Success:{0} [{1}]", response.Success, response.Errormsg);
             if (this.OnLoadAgent != null)
             {
                 this.OnLoadAgent(response.Success, response.AgentNames);
@@ -222,13 +223,13 @@ namespace Services
         }
 
         // 启动场景
-        public void SendSceneStart(int map_id)
+        public void SendSceneStart(int mapId)
         {
-            Debug.LogFormat("SceneStarRequest::map_id :{0}", map_id);
+            Debug.LogFormat("SceneStarRequest::mapId:{0}", mapId);
             NetMessage message = new NetMessage();
             message.Request = new NetMessageRequest();
             message.Request.sceneStartRequest = new SceneStartRequest();
-            message.Request.sceneStartRequest.MapId = map_id;
+            message.Request.sceneStartRequest.MapId = mapId;
 
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
@@ -244,20 +245,20 @@ namespace Services
         }
         void OnSceneStart(object sender, SceneStartResponse response)
         {
-            Debug.LogFormat("OnSceneStart:{0} [{1}]", response.Success, response.Errormsg);
+            Debug.LogFormat("OnSceneStart::Success:{0} [{1}]", response.Success, response.Errormsg);
             if (this.OnStartScene != null)
             {
                 this.OnStartScene(response.Success, response.Errormsg);
             }
         }
-        public void SendUserMessage(string agent, string user_message)
+        public void SendUserMessage(string agent, string userMessage)
         {
-            Debug.LogFormat("UserMessageRequest::[{0}]{1}", agent, user_message);
+            Debug.LogFormat("UserMessageRequest::agent:{0} userMessage:{1}", agent, userMessage);
             NetMessage message = new NetMessage();
             message.Request = new NetMessageRequest();
             message.Request.userSendMessageRequest = new UserSendMessageRequest();
             message.Request.userSendMessageRequest.Agent = agent;
-            message.Request.userSendMessageRequest.UserMessage = user_message;
+            message.Request.userSendMessageRequest.UserMessage = userMessage;
 
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
@@ -273,7 +274,7 @@ namespace Services
         }
         void OnAgentMessageGet(object sender, AgentSendMessageRequest request)
         {
-            Debug.LogFormat("OnAgentMessageGet:{0} [{1}]", request.Agent, request.AiMessage);
+            Debug.LogFormat("OnAgentMessageGet::Agent:{0} AiMessage:{1}", request.Agent, request.AiMessage);
             if (this.OnGetAgentMessage != null)
             {
                 this.OnGetAgentMessage(request.Agent, request.AiMessage);
@@ -282,19 +283,19 @@ namespace Services
         // 观察
         void OnAgentObserve(object sender, AgentObserveRequest request)
         {
-            Debug.LogFormat("OnAgentMove");
+            Debug.LogFormat("OnAgentObserve::Agent:{0}", request.Agent);
             if (this.OnObserve != null)
             {
-                this.OnObserve();
+                this.OnObserve(request.Agent);
             }
         }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
         {
-            Debug.LogFormat("OnAgentMove:{0} [{1}]", request.IsRight, request.Distance);
+            Debug.LogFormat("OnAgentMove::Agent:{0} IsRight:{1} Distance:{2}", request.Agent, request.IsRight, request.Distance);
             if (this.OnMoveAgent != null)
             {
-                this.OnMoveAgent(request.IsRight, request.Distance);
+                this.OnMoveAgent(request.Agent, request.IsRight, request.Distance);
             }
         }
 
@@ -302,37 +303,37 @@ namespace Services
         #region 交互
         void OnAgentInteract(object sender, AgentInteractRequest request)
         {
-            Debug.LogFormat("OnAgentInteract");
+            Debug.LogFormat("OnAgentInteract::Agent:{0}", request.Agent);
             if (this.OnInteract != null)
             {
-                this.OnInteract();
+                this.OnInteract(request.Agent);
             }
         }
 
         void OnAgentSelect(object sender, AgentSelectRequest request)
         {
-            Debug.LogFormat("OnAgentSelect:{0}", request.Selection);
+            Debug.LogFormat("OnAgentSelect::Agent:{0} Selection:{1}", request.Agent, request.Selection);
             if (this.OnSelect != null)
             {
-                this.OnSelect(request.Selection);
+                this.OnSelect(request.Agent, request.Selection);
             }
         }
 
         void OnAgentInput(object sender, AgentInputRequest request)
         {
-            Debug.LogFormat("OnAgentSelect:{0}", request.InputText);
+            Debug.LogFormat("OnAgentInput::Agent:{0} Text:{1}", request.Agent, request.InputText);
             if (this.OnInput != null)
             {
-                this.OnInput(request.InputText);
+                this.OnInput(request.Agent,request.InputText);
             }
         }
 
         private void OnAgentActionSequence(object sender, AgentActionSequenceRequest request)
         {
-            Debug.LogFormat("OnAgentActionSequence:{0}", request.ActionSequences);
+            Debug.LogFormat("OnAgentActionSequence::Agent:{0} ActionSequences:{1}", request.Agent, request.ActionSequences);
             if (this.OnActionSequence != null)
             {
-                this.OnActionSequence(request.ActionSequences);
+                this.OnActionSequence(request.Agent , request.ActionSequences);
             }
         }
 

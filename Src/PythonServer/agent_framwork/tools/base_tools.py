@@ -119,9 +119,9 @@ async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")],
         return f"动作序列校验失败: {e}"
 
 # 确认开始执行动作序列
-@tool
-async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
-    pass
+# @tool
+# async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+#     pass
 
 @tool
 async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
@@ -133,6 +133,7 @@ async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
     from network import message_pb2
     try:
         request = message_pb2.AgentObserveRequest()
+        request.agent = agent
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。")
         return f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。"
@@ -155,6 +156,7 @@ async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str,
 
     try:
         request = message_pb2.AgentMoveRequest()
+        request.agent = agent
         request.is_right = direction == "right"
         request.distance = distance
         await AgentServerNetMessage().broadcast_message(request)
@@ -173,6 +175,7 @@ async def interact_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
     from network import message_pb2
     try:
         request = message_pb2.AgentInteractRequest()
+        request.agent = agent
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}]尝试与\"可选择交互\"的对象进行交互。待交互完成后，你将收到交互完成的消息。")
         return f"[{agent}]尝试与\"可选择交互\"的对象进行交互。待交互完成后，你将收到交互完成的消息。"
@@ -192,6 +195,7 @@ async def select_cmd(agent: Annotated[str, InjectedState("name")], selection: in
     from network import message_pb2
     try:
         request = message_pb2.AgentSelectRequest()
+        request.agent = agent
         request.selection = selection
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}]选择了选项{selection}。待选择完成后，你将收到选择完成的消息。")
@@ -212,6 +216,7 @@ async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: st
     from network import message_pb2
     try:
         request = message_pb2.AgentInputRequest()
+        request.agent = agent
         request.input_text = input_text
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}]输入了文本{input_text}。待输入完成后，你将收到输入完成的消息。")

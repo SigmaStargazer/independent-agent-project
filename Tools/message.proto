@@ -209,26 +209,32 @@ message AgentSendMessageRequest {
 
 // 观察场景
 message AgentObserveRequest {
+	string agent = 1;
 }
 
 // 向指定方向移动指定距离
 message AgentMoveRequest {
-	bool is_right = 1;
-	float distance = 2;
+	string agent = 1;
+	bool is_right = 2;
+	float distance = 3;
 }
 
 // 与设备进行交互
 message AgentActionSequenceRequest {
-  repeated ActionStep action_sequence = 1;
+	string agent = 1;
+	repeated ActionStep action_sequence = 2;
 }
 
 message AgentInteractRequest {
+	string agent = 1;
 }
 
 message AgentSelectRequest {
-	int32 selection = 1;
+	string agent = 1;
+	int32 selection = 2;
 }
 
 message AgentInputRequest {
-	string input_text = 1;
+	string agent = 1;
+	string input_text = 2;
 }

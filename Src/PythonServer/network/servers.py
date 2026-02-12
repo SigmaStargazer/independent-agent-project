@@ -96,9 +96,9 @@ class AgentServerNetMessage:
                     net_msg = NetMessage()
                     net_msg.ParseFromString(body)
 
-                    # 测试
-                    print(f"Raw header: {len_bytes.hex()}  body-len={msg_len}")
-                    print(f"Raw body  : {body.hex()}")
+                    # # 测试
+                    # print(f"Raw header: {len_bytes.hex()}  body-len={msg_len}")
+                    # print(f"Raw body  : {body.hex()}")
 
                     # 3) 提取子消息
                     sub_msg, sub_name = self._extract_sub_message(net_msg)

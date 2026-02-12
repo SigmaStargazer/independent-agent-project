@@ -6,6 +6,12 @@
 **/[Ll]ogs/
 **/[Uu]ser[Ss]ettings/
 
+# ===== Unity PackageManager artifacts =====
+/Src/ShootingEditor2D/Packages/*
+!/Src/ShootingEditor2D/Packages/manifest.json
+!/Src/ShootingEditor2D/Packages/packages-lock.json
+
+
 # MemoryCaptures 文件夹可能会非常大
 # 它们也可能包含极其敏感的数据
 /[Mm]emoryCaptures/

@@ -1,0 +1,103 @@
+using FrameworkDesign;
+using Services;
+using ShootingEditor2D;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace ShootingEditor2D
+{
+    public class AgentManager : MonoSingleton<AgentManager>
+    {
+        //private List<Agent> mAgents = new List<Agent>();
+        private Dictionary<string, Agent> mAgents = new Dictionary<string, Agent>();
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            AgentService.Instance.OnObserve = this.Observe;
+            AgentService.Instance.OnMoveAgent = this.Move;
+            AgentService.Instance.OnInteract = this.Interact;
+            AgentService.Instance.OnSelect = this.Select;
+            AgentService.Instance.OnInput = this.TextInput;
+        }
+        void Update()
+        {
+
+        }
+        void OnDestroy()
+        {
+            mAgents.Clear();
+        }
+
+        #region 注册与注销逻辑
+
+        public void Register(Agent agent)
+        {
+            if (agent != null && !mAgents.ContainsKey(agent.Name))
+            {
+                mAgents.Add(agent.Name, agent);
+            }
+        }
+
+        public void UnRegister(Agent agent)
+        {
+            if (agent != null && mAgents.ContainsKey(agent.Name))
+            {
+                mAgents.Remove(agent.Name);
+            }
+        }
+
+        #endregion
+
+        #region 接收Agent指令逻辑
+        private void Observe(string agent)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                Debug.Log($"{agent}正在进行观察");
+                agentObj.Observe();
+            }
+            else
+            {
+                Debug.Log($"{agent}未找到");
+            }
+        }
+
+        private void Move(string agent, bool isRight, float distance)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.Move(isRight, distance);
+            }
+        }
+
+        private void Interact(string agent)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.Interact();
+            }
+        }
+
+        private void Select(string agent, int selection)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.Select(selection);
+            }
+        }
+
+        private void TextInput(string agent, string inputText)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.TextInput(inputText);
+            }
+        }
+        #endregion
+
+    }
+}
+

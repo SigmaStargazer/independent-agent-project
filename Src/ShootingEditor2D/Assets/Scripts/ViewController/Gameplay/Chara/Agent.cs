@@ -47,11 +47,11 @@ namespace ShootingEditor2D
         protected override void Start()
         {
             base.Start();
-            AgentService.Instance.OnObserve = this.Observe;
-            AgentService.Instance.OnMoveAgent = this.Move;
-            AgentService.Instance.OnInteract = this.Interact;
-            AgentService.Instance.OnSelect = this.Select;
-            AgentService.Instance.OnInput = this.TextInput;
+            //AgentService.Instance.OnObserve = this.Observe;
+            //AgentService.Instance.OnMoveAgent = this.Move;
+            //AgentService.Instance.OnInteract = this.Interact;
+            //AgentService.Instance.OnSelect = this.Select;
+            //AgentService.Instance.OnInput = this.TextInput;
         }
 
         protected override void Update()
@@ -81,6 +81,18 @@ namespace ShootingEditor2D
 
             //TurnBack(horizontalDirection);
             //MoveAndJump(horizontalDirection);
+        }
+
+        protected virtual void OnEnable()
+        {
+            if (AgentManager.Instance != null)
+                AgentManager.Instance.Register(this);
+        }
+
+        protected virtual void OnDisable()
+        {
+            if (AgentManager.Instance != null)
+                AgentManager.Instance.UnRegister(this);
         }
         #region FSM Hook
         public override void OnIdleEnter()
@@ -316,13 +328,14 @@ namespace ShootingEditor2D
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
+        #region Agent动作指令。当AgentManager收到服务端LLM的指令时，会调用相应Agent示例的下列方法
         /// <summary>
         /// 移动
         /// </summary>
         /// <param name="moveRight"></param>
         /// <param name="distance"></param>
         /// 
-        private void Move(bool moveRight, float distance)
+        public void Move(bool moveRight, float distance)
         {
             this.moveRight = moveRight;
 
@@ -363,7 +376,7 @@ namespace ShootingEditor2D
         /// <summary>
         /// 交互
         /// </summary>
-        private void Interact()
+        public void Interact()
         {
             DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
             if (deviceManager == null)
@@ -375,7 +388,7 @@ namespace ShootingEditor2D
             this.SendMessageToAgent($"[交互结果]{result}");
         }
 
-        private void Select(int selection)
+        public void Select(int selection)
         {
             DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
             if (deviceManager == null)
@@ -387,7 +400,7 @@ namespace ShootingEditor2D
             this.SendMessageToAgent($"[选择结果]{result}");
         }
 
-        private void TextInput(string inputText)
+        public void TextInput(string inputText)
         {
             DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
             if (deviceManager == null)
@@ -399,12 +412,12 @@ namespace ShootingEditor2D
             this.SendMessageToAgent($"[输入结果]{result}");
         }
 
-        
+
 
         /// <summary>
         /// 观察场景
         /// </summary>
-        private void Observe()
+        public void Observe()
         {
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
@@ -418,6 +431,7 @@ namespace ShootingEditor2D
             AgentService.Instance.SendUserMessage(this.Name, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
+        #endregion
     }
 }
 

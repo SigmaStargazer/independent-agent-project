@@ -11,6 +11,22 @@ namespace ShootingEditor2D
         // 使用 List 维护场景中所有的设备
         private List<DeviceBase> mDevices = new List<DeviceBase>();
 
+        // Start is called before the first frame update
+        void Start()
+        {
+
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        void OnDestroy()
+        {
+            mDevices.Clear();
+        }
         #region 注册与注销逻辑
 
         public void Register(DeviceBase device)
@@ -30,23 +46,6 @@ namespace ShootingEditor2D
         }
 
         #endregion
-
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
-        void OnDestroy()
-        {
-            mDevices.Clear();
-        }
 
         #region 检索设备信息
 

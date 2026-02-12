@@ -1,3 +1,4 @@
+import os
 import asyncio
 from datetime import datetime
 from uuid import uuid4
@@ -23,7 +24,8 @@ embedding_model_name = "text-embedding-v4"
 reranker_model_name = "gte-rerank-v2"
 
 # 数据库名
-db_name = "db/graphiti.kuzu"
+db_root = "db"
+db_name = "graphiti"
 
 class _SharedKuzuDriver(KuzuDriver):
     def __init__(self, db_instance, conn_instance):
@@ -53,6 +55,16 @@ class MemoryManager:
 
         async with self._init_lock:
             if self._initialized: return self
+
+            # 0. 清理 WAL 文件（必须在 Database() 之前）
+            wal_path = os.path.join(db_root, f"{db_name}.wal")
+            try:
+                if os.path.exists(wal_path):
+                    os.remove(wal_path)
+                    print(f"🧹 [MemorySystem] 已删除 WAL 文件: {wal_path}")
+            except Exception as e:
+                print(f"⚠️ [MemorySystem] 删除 WAL 失败: {e}")
+                raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
             
             # 1. 初始化所有依赖组件
             self._embedder = OpenAIEmbedder(
@@ -70,7 +82,8 @@ class MemoryManager:
 
             # 2. 初始化全局 DB
             print("💾 [MemorySystem] 正在挂载全局数据库...")
-            self._kuzu_db = kuzu.Database(db_name)
+            db_path = os.path.join(db_root, f"{db_name}.kuzu")
+            self._kuzu_db = kuzu.Database(db_path)
             
             # 3. 首次建索引 (内部封装，外部无感)
             # self.conn = kuzu.AsyncConnection(self._kuzu_db)
