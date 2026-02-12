@@ -56,12 +56,7 @@ namespace ShootingEditor2D
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                Debug.Log($"{agent}正在进行观察");
                 agentObj.Observe();
-            }
-            else
-            {
-                Debug.Log($"{agent}未找到");
             }
         }
 
