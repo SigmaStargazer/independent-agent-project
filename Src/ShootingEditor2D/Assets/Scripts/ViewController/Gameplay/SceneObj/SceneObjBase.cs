@@ -59,6 +59,7 @@ namespace ShootingEditor2D
 
         protected virtual void Update()
         {
+            // 判断是否有未完成的curActionCtx达到停止条件
             if (curActionCtx != null)
             {
                 curActionCtx.ActionTime += Time.deltaTime;

@@ -11,6 +11,8 @@ namespace ShootingEditor2D
         // 使用 List 维护场景中所有的设备
         private List<DeviceBase> mDevices = new List<DeviceBase>();
 
+        public static event Action<DeviceBase> OnDeviceCreated;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -33,7 +35,8 @@ namespace ShootingEditor2D
         {
             if (device != null && !mDevices.Contains(device))
             {
-                mDevices.Add(device);
+                mDevices.Add(device); // 添加到设备列表
+                OnDeviceCreated?.Invoke(device); //通过事件通知，将设备添加到设备列表中
             }
         }
 
@@ -46,6 +49,11 @@ namespace ShootingEditor2D
         }
 
         #endregion
+
+        public List<DeviceBase> GetAllDevices()
+        {
+            return mDevices;
+        }
 
         #region 检索设备信息
 

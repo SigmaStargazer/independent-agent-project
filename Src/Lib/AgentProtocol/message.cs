@@ -243,7 +243,13 @@ namespace SkillBridge.Message
         public AgentInputRequest agentInputRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(11)]
-        public AgentActionSequenceRequest agentActionSequenceRequest { get; set; }
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(12)]
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(13)]
+        public AgentCancelActionSequenceRequest agentCancelActionSequenceRequest { get; set; }
 
     }
 
@@ -421,7 +427,7 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
-    public partial class AgentActionSequenceRequest : global::ProtoBuf.IExtensible
+    public partial class AgentPlanActionSequenceRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
@@ -433,6 +439,32 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(2, Name = @"action_sequence")]
         public global::System.Collections.Generic.List<ActionStep> ActionSequences { get; } = new global::System.Collections.Generic.List<ActionStep>();
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentStartActionSequenceRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentCancelActionSequenceRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
 
     }
 

@@ -1,6 +1,7 @@
 using FrameworkDesign;
 using Services;
 using ShootingEditor2D;
+using SkillBridge.Message;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +22,12 @@ namespace ShootingEditor2D
             AgentService.Instance.OnInteract = this.Interact;
             AgentService.Instance.OnSelect = this.Select;
             AgentService.Instance.OnInput = this.TextInput;
+
+            AgentService.Instance.OnPlanActionSequence = this.PlanActionSequence;
+            AgentService.Instance.OnStartActionSequence = this.StartActionSequence;
+            AgentService.Instance.OnCancelActionSequence = this.CancelActionSequence;
         }
+
         void Update()
         {
 
@@ -93,6 +99,31 @@ namespace ShootingEditor2D
         }
         #endregion
 
+        #region ActionSequenceœ‡πÿ
+        private void PlanActionSequence(string agent, List<ActionStep> ActionSequence)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.PlanActionSequence(ActionSequence);
+            }
+        }
+
+        private void StartActionSequence(string agent)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.StartActionSequence();
+            }
+        }
+
+        private void CancelActionSequence(string agent)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.CancelActionSequence();
+            }
+        }
+        #endregion
     }
 }
 

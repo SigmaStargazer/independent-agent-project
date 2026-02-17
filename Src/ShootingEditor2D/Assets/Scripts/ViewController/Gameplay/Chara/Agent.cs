@@ -1,6 +1,7 @@
-using FrameworkDesign;
+ï»¿using FrameworkDesign;
 using Newtonsoft.Json;
 using Services;
+using SkillBridge.Message;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,12 +14,15 @@ namespace ShootingEditor2D
     public class Agent : CharaBase
     //public class Agent : ShootingEditor2DController
     {
+        public override string Name => "å°æ˜";
+        public override string Desc => "æ˜¯ä¸€ä¸ªå¸®åŠ©æœºå™¨äºº";
+
         private Rigidbody2D mRigidbody2D;
         private Trigger2DCheck mGroundCheck;
         //private Gun mGun;
         //public float isRight;
 
-        // moveÏà¹Ø
+        // moveç›¸å…³
         public float moveSpeed = 5f;
 
         private bool moveRight;
@@ -28,14 +32,15 @@ namespace ShootingEditor2D
         //private float moveTargetX;
 
 
-        // ±¾Ö¡ÊÇ·ñ°´ÁËÌø
+        // æœ¬å¸§æ˜¯å¦æŒ‰äº†è·³
         private bool mJumpPressed;
 
-        //// ¡¾ĞÂÔö¡¿ÊÇ·ñÕıÔÚ½øĞĞ×Ô¶¯ÒÆ¶¯£¨ÓÃÓÚÆÁ±ÎÍæ¼ÒÊäÈë£©
+        //// ã€æ–°å¢ã€‘æ˜¯å¦æ­£åœ¨è¿›è¡Œè‡ªåŠ¨ç§»åŠ¨ï¼ˆç”¨äºå±è”½ç©å®¶è¾“å…¥ï¼‰
         //private bool mIsAutoMoving = false;
 
-        public override string Name => "Ğ¡Ã÷";
-        public override string Desc => "ÊÇÒ»¸ö°ïÖú»úÆ÷ÈË";
+        //private ActionSequenceRuntime mCurActionSequenceRuntime = new ActionSequenceRuntime();
+        private ActionSequenceRuntime mCurActionSequenceRuntime;
+        private ActionSequenceRuntime mPlanningActionSequenceRuntime;
 
         protected override void Awake()
         {
@@ -64,7 +69,7 @@ namespace ShootingEditor2D
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
-            //// ¡¾ĞŞ¸Äµã¡¿Èç¹ûÕıÔÚ×Ô¶¯ÒÆ¶¯£¬Ö±½ÓÌø¹ıÍæ¼ÒÊäÈëµÄ´¦Àí
+            //// ã€ä¿®æ”¹ç‚¹ã€‘å¦‚æœæ­£åœ¨è‡ªåŠ¨ç§»åŠ¨ï¼Œç›´æ¥è·³è¿‡ç©å®¶è¾“å…¥çš„å¤„ç†
             //if (mIsAutoMoving)
             //{
             //    return;
@@ -87,12 +92,26 @@ namespace ShootingEditor2D
         {
             if (AgentManager.Instance != null)
                 AgentManager.Instance.Register(this);
+            // æŠŠåŠ å…¥ActionSequenceRuntime.AddSceneObjçš„æ–¹æ³•ï¼Œæ³¨å†Œåˆ°å§”æ‰˜DeviceManager.OnDeviceCreated
+            // å½“DeviceBaseåˆ›å»ºæ—¶ï¼Œè°ƒç”¨DeviceManager.Registerï¼Œè§¦å‘å§”æ‰˜OnDeviceCreated
+            DeviceManager.OnDeviceCreated += OnSceneObjCreated;
+
+            // å½“AgentåäºDeviceBaseåˆ›å»ºæ—¶ï¼Œç¡®ä¿æ‰€æœ‰SceneObjè¢«å­˜å…¥ActionSequenceRuntime.sceneObjsSnapä¸­
+            if (DeviceManager.Instance != null)
+            {
+                foreach (var device in DeviceManager.Instance.GetAllDevices())
+                {
+                    OnSceneObjCreated(device);
+                }
+            }
         }
 
         protected virtual void OnDisable()
         {
             if (AgentManager.Instance != null)
                 AgentManager.Instance.UnRegister(this);
+
+            DeviceManager.OnDeviceCreated -= OnSceneObjCreated;
         }
         #region FSM Hook
         public override void OnIdleEnter()
@@ -106,7 +125,7 @@ namespace ShootingEditor2D
             float dir = moveRight ? 1f : -1f;
             //moveTargetX = moveStartX + dir * moveDistance;
 
-            // Ğ£Õı³¯Ïò
+            // æ ¡æ­£æœå‘
             TurnBack(dir);
         }
 
@@ -116,20 +135,26 @@ namespace ShootingEditor2D
 
             float dir = moveRight ? 1f : -1f;
 
-            // ³ÖĞøÒÆ¶¯
+            // æŒç»­ç§»åŠ¨
             mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
         }
 
         public override void OnMoveExit()
         {
-            // É²³µ
+            // åˆ¹è½¦
             mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
         }
 
         #endregion
 
+        private void OnSceneObjCreated(DeviceBase obj)
+        {
+            mCurActionSequenceRuntime?.AddSceneObj(obj);
+            mPlanningActionSequenceRuntime?.AddSceneObj(obj);
+        }
+
         /// <summary>
-        /// OnActionFinished¹³×ÓÂß¼­£ºµ±Action½áÊøÇÒ´æÔÚfinishedCtx.Result.MessageÊ±£¬·¢ËÍÏûÏ¢¸øllm
+        /// OnActionFinishedé’©å­é€»è¾‘ï¼šå½“Actionç»“æŸä¸”å­˜åœ¨finishedCtx.Result.Messageæ—¶ï¼Œå‘é€æ¶ˆæ¯ç»™llm
         /// </summary>
         /// <param name="finishedCtx"></param>
         protected override void OnActionFinished(ActionContext finishedCtx)
@@ -144,7 +169,7 @@ namespace ShootingEditor2D
         {
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                this.Interact();
+                this.TestSceneObjsSnap();
             }
             //if (Input.GetKeyDown(KeyCode.Space))
             //{
@@ -189,48 +214,48 @@ namespace ShootingEditor2D
         //}
 
         /// <summary>
-        /// ÒÆ¶¯
+        /// ç§»åŠ¨
         /// </summary>
         /// <param name="moveRight"></param>
         /// <param name="distance"></param>
         //public void MoveByDistance(bool moveRight, float distance)
         //{
-        //    // Í£Ö¹Ö®Ç°µÄÒÆ¶¯Ğ­³Ì£¨·ÀÖ¹¶à´Îµ÷ÓÃ³åÍ»£©
+        //    // åœæ­¢ä¹‹å‰çš„ç§»åŠ¨åç¨‹ï¼ˆé˜²æ­¢å¤šæ¬¡è°ƒç”¨å†²çªï¼‰
         //    StopAllCoroutines();
         //    StartCoroutine(MoveDistanceCoroutine(moveRight, distance));
         //}
 
         //private IEnumerator MoveDistanceCoroutine(bool moveRight, float distance)
         //{
-        //    mIsAutoMoving = true; // Ëø¶¨ÊäÈë
+        //    mIsAutoMoving = true; // é”å®šè¾“å…¥
 
         //    float startX = transform.position.x;
         //    float directionSign = moveRight ? 1f : -1f;
         //    float targetX = startX + (distance * directionSign);
 
-        //    // È·±£³¯ÏòÕıÈ·
+        //    // ç¡®ä¿æœå‘æ­£ç¡®
         //    TurnBack(directionSign);
 
-        //    // Ñ­»·Ö±µ½µ½´ïÄ¿±êÎ»ÖÃ
-        //    // ÅĞ¶ÏÌõ¼ş£ºÈç¹ûÊÇÏòÓÒ×ß£¬µ±Ç°xĞ¡ÓÚÄ¿±êx£»Èç¹ûÊÇÏò×ó×ß£¬µ±Ç°x´óÓÚÄ¿±êx
+        //    // å¾ªç¯ç›´åˆ°åˆ°è¾¾ç›®æ ‡ä½ç½®
+        //    // åˆ¤æ–­æ¡ä»¶ï¼šå¦‚æœæ˜¯å‘å³èµ°ï¼Œå½“å‰xå°äºç›®æ ‡xï¼›å¦‚æœæ˜¯å‘å·¦èµ°ï¼Œå½“å‰xå¤§äºç›®æ ‡x
         //    while ((moveRight && transform.position.x < targetX) ||
         //           (!moveRight && transform.position.x > targetX))
         //    {
-        //        // ±£³ÖÎïÀíÒÆ¶¯ËÙ¶È
+        //        // ä¿æŒç‰©ç†ç§»åŠ¨é€Ÿåº¦
         //        mRigidbody2D.velocity = new Vector2(directionSign * moveSpeed, mRigidbody2D.velocity.y);
 
-        //        // µÈ´ıÏÂÒ»´ÎÎïÀíÖ¡
+        //        // ç­‰å¾…ä¸‹ä¸€æ¬¡ç‰©ç†å¸§
         //        yield return new WaitForFixedUpdate();
         //    }
 
-        //    // µ½´ïÄ¿±ê£¬É²³µ
+        //    // åˆ°è¾¾ç›®æ ‡ï¼Œåˆ¹è½¦
         //    mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-        //    mIsAutoMoving = false; // »Ö¸´ÊäÈë
-        //    // Ïòagent·´À¡
-        //    SendMessageToAgent("[ÒÆ¶¯½á¹û]µ½´ïÄ¿µÄµØ£¡");
+        //    mIsAutoMoving = false; // æ¢å¤è¾“å…¥
+        //    // å‘agentåé¦ˆ
+        //    SendMessageToAgent("[ç§»åŠ¨ç»“æœ]åˆ°è¾¾ç›®çš„åœ°ï¼");
         //}
 
-        // »ñÈ¡×ÔÉí×´Ì¬ĞÅÏ¢
+        // è·å–è‡ªèº«çŠ¶æ€ä¿¡æ¯
         private string GetSelfStateInfo()
         {
             Rigidbody2D rb = this.GetComponent<Rigidbody2D>();
@@ -238,16 +263,16 @@ namespace ShootingEditor2D
             string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "");
             string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "");
 
-            string speed_x_str = speedDirX == "" ? $"{Mathf.Abs(velocity.x)}m/s" : $"·½Ïò{speedDirX} {Mathf.Abs(velocity.x)}m/s";
-            string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"·½Ïò{speedDirY} {Mathf.Abs(velocity.y)}m/s";
-            string selfStateInfo = $"×´Ì¬:{this.GetStateName()}\n" + 
-                $"ºáÏòËÙ¶È:{speed_x_str}\n×İÏòËÙ¶È:{speed_y_str}";
+            string speed_x_str = speedDirX == "" ? $"{Mathf.Abs(velocity.x)}m/s" : $"æ–¹å‘{speedDirX} {Mathf.Abs(velocity.x)}m/s";
+            string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"æ–¹å‘{speedDirY} {Mathf.Abs(velocity.y)}m/s";
+            string selfStateInfo = $"çŠ¶æ€:{this.GetStateName()}\n" + 
+                $"æ¨ªå‘é€Ÿåº¦:{speed_x_str}\nçºµå‘é€Ÿåº¦:{speed_y_str}";
 
             return selfStateInfo;
         }
 
         /// <summary>
-        /// »ñÈ¡DevicesInfo
+        /// è·å–DevicesInfo
         /// </summary>
         /// <returns></returns>
         private (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo()
@@ -260,7 +285,7 @@ namespace ShootingEditor2D
 
             if (deviceManager == null)
             {
-                Debug.LogError("³¡¾°ÖĞÎ´ÕÒµ½ DeviceManager£¡");
+                Debug.LogError("åœºæ™¯ä¸­æœªæ‰¾åˆ° DeviceManagerï¼");
                 return (devicesInfo, "");
             }
 
@@ -268,9 +293,9 @@ namespace ShootingEditor2D
 
             if (devicesInfo.Count > 0)
             {
-                devicesInfoDesc = "ÄãµÄÖÜÎ§ÓĞ£º";
+                devicesInfoDesc = "ä½ çš„å‘¨å›´æœ‰ï¼š";
                 int deviceId = 0;
-                // 1.±éÀúÉè±¸ĞÅÏ¢
+                // 1.éå†è®¾å¤‡ä¿¡æ¯
                 foreach (var deviceInfo in devicesInfo)
                 {
                     string deviceInfoDesc = $"\n{deviceId}. {DeviceInfoToDesc(deviceInfo)}";
@@ -279,15 +304,15 @@ namespace ShootingEditor2D
                     deviceId++;
                 }
 
-                // 2.»ñÈ¡¿É½»»¥Éè±¸ĞÅÏ¢
-                string interactableDevicDesc = "\n\n¿ÉÑ¡Ôñ½»»¥£º\n";
+                // 2.è·å–å¯äº¤äº’è®¾å¤‡ä¿¡æ¯
+                string interactableDevicDesc = "\n\nå¯é€‰æ‹©äº¤äº’ï¼š\n";
                 if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
                 {
                     interactableDevicDesc += $"{DeviceInfoToDesc(interactableDeviceInfo)}";
                 }
                 else
                 {
-                    interactableDevicDesc += "Éí±ßÎŞ¿É½»»¥¶ÔÏó";
+                    interactableDevicDesc += "èº«è¾¹æ— å¯äº¤äº’å¯¹è±¡";
                 }
                 devicesInfoDesc += interactableDevicDesc;
             }
@@ -297,40 +322,40 @@ namespace ShootingEditor2D
 
         private string DeviceInfoToDesc(Dictionary<string, object> deviceInfo)
         {
-            string speed_x_str = deviceInfo["speedDir_x"] == "" ? $"{deviceInfo["speed_x"]}m/s" : $"·½Ïò{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
-            string speed_y_str = deviceInfo["speedDir_y"] == "" ? $"{deviceInfo["speed_y"]}m/s" : $"·½Ïò{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
+            string speed_x_str = deviceInfo["speedDir_x"] == "" ? $"{deviceInfo["speed_x"]}m/s" : $"æ–¹å‘{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
+            string speed_y_str = deviceInfo["speedDir_y"] == "" ? $"{deviceInfo["speed_y"]}m/s" : $"æ–¹å‘{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
             string deviceInfoDesc = $"{deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
-                $"×´Ì¬:{deviceInfo["state"]}\n" +
-                $"·½Ïò:{deviceInfo["direction"]}\n¾àÀë:{deviceInfo["distance"]}m\n" +
-                $"ºáÏòËÙ¶È:{speed_x_str}\n×İÏòËÙ¶È:{speed_y_str}";
+                $"çŠ¶æ€:{deviceInfo["state"]}\n" +
+                $"æ–¹å‘:{deviceInfo["direction"]}\nè·ç¦»:{deviceInfo["distance"]}m\n" +
+                $"æ¨ªå‘é€Ÿåº¦:{speed_x_str}\nçºµå‘é€Ÿåº¦:{speed_y_str}";
             return deviceInfoDesc;
         }
 
         /// <summary>
-        /// ·¢ËÍÏûÏ¢¸øAgent
+        /// å‘é€æ¶ˆæ¯ç»™Agent
         /// </summary>
         /// <param name="msg"></param>
         public void SendMessageToAgent(string msg)
         {
-            // »ñÈ¡»·¾³ĞÅÏ¢
+            // è·å–ç¯å¢ƒä¿¡æ¯
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
             string selfStateInfo = this.GetSelfStateInfo();
             string devicesInfoDesc = "";
             (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
 
-            // Æ´½Ó
+            // æ‹¼æ¥
             string messageToSend = $"{msg}" +
-                $"\n\n<ÄãµÄ×´Ì¬>\n{selfStateInfo}\n<\\ÄãµÄ×´Ì¬>" + 
-                $"\n\n<»·¾³>\n{devicesInfoDesc}\n<\\»·¾³>";
+                $"\n\n<ä½ çš„çŠ¶æ€>\n{selfStateInfo}\n<\\ä½ çš„çŠ¶æ€>" + 
+                $"\n\n<ç¯å¢ƒ>\n{devicesInfoDesc}\n<\\ç¯å¢ƒ>";
 
-            // ·¢ËÍ¸øAgent
+            // å‘é€ç»™Agent
             AgentService.Instance.SendUserMessage(this.Name, messageToSend);
-            Debug.Log($"ÒÑ·¢ËÍÏûÏ¢¸ø{this.Name}: {messageToSend}");
+            Debug.Log($"å·²å‘é€æ¶ˆæ¯ç»™{this.Name}: {messageToSend}");
         }
 
-        #region Agent¶¯×÷Ö¸Áî¡£µ±AgentManagerÊÕµ½·şÎñ¶ËLLMµÄÖ¸ÁîÊ±£¬»áµ÷ÓÃÏàÓ¦AgentÊ¾ÀıµÄÏÂÁĞ·½·¨
+        #region AgentåŠ¨ä½œæŒ‡ä»¤ã€‚å½“AgentManageræ”¶åˆ°æœåŠ¡ç«¯LLMçš„æŒ‡ä»¤æ—¶ï¼Œä¼šè°ƒç”¨ç›¸åº”Agentç¤ºä¾‹çš„ä¸‹åˆ—æ–¹æ³•
         /// <summary>
-        /// ÒÆ¶¯
+        /// ç§»åŠ¨
         /// </summary>
         /// <param name="moveRight"></param>
         /// <param name="distance"></param>
@@ -357,7 +382,7 @@ namespace ShootingEditor2D
 
                     if (arrived)
                     {
-                        curActionCtx.Result.Message = "[ÒÆ¶¯½á¹û]µ½´ïÄ¿µÄµØ£¡";
+                        curActionCtx.Result.Message = "[ç§»åŠ¨ç»“æœ]åˆ°è¾¾ç›®çš„åœ°ï¼";
                     }
 
                     return arrived;
@@ -369,23 +394,23 @@ namespace ShootingEditor2D
 
         //private void Move(bool moveRight, float distance)
         //{
-        //    Debug.Log($"¿ªÊ¼ÒÆ¶¯: moveRight={moveRight} distance={distance}");
+        //    Debug.Log($"å¼€å§‹ç§»åŠ¨: moveRight={moveRight} distance={distance}");
         //    MoveByDistance(moveRight, distance);
         //}
 
         /// <summary>
-        /// ½»»¥
+        /// äº¤äº’
         /// </summary>
         public void Interact()
         {
             DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
             if (deviceManager == null)
             {
-                Debug.LogError("³¡¾°ÖĞÎ´ÕÒµ½ DeviceManager£¡");
+                Debug.LogError("åœºæ™¯ä¸­æœªæ‰¾åˆ° DeviceManagerï¼");
                 return;
             }
             string result = deviceManager.Interact(this.gameObject);
-            this.SendMessageToAgent($"[½»»¥½á¹û]{result}");
+            this.SendMessageToAgent($"[äº¤äº’ç»“æœ]{result}");
         }
 
         public void Select(int selection)
@@ -393,11 +418,11 @@ namespace ShootingEditor2D
             DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
             if (deviceManager == null)
             {
-                Debug.LogError("³¡¾°ÖĞÎ´ÕÒµ½ DeviceManager£¡");
+                Debug.LogError("åœºæ™¯ä¸­æœªæ‰¾åˆ° DeviceManagerï¼");
                 return;
             }
             string result = deviceManager.Select(this.gameObject, selection);
-            this.SendMessageToAgent($"[Ñ¡Ôñ½á¹û]{result}");
+            this.SendMessageToAgent($"[é€‰æ‹©ç»“æœ]{result}");
         }
 
         public void TextInput(string inputText)
@@ -405,33 +430,79 @@ namespace ShootingEditor2D
             DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
             if (deviceManager == null)
             {
-                Debug.LogError("³¡¾°ÖĞÎ´ÕÒµ½ DeviceManager£¡");
+                Debug.LogError("åœºæ™¯ä¸­æœªæ‰¾åˆ° DeviceManagerï¼");
                 return;
             }
             string result = deviceManager.TextInput(this.gameObject, inputText);
-            this.SendMessageToAgent($"[ÊäÈë½á¹û]{result}");
+            this.SendMessageToAgent($"[è¾“å…¥ç»“æœ]{result}");
         }
 
 
 
         /// <summary>
-        /// ¹Û²ì³¡¾°
+        /// è§‚å¯Ÿåœºæ™¯
         /// </summary>
         public void Observe()
         {
-            // »ñÈ¡Éè±¸ĞÅÏ¢
+            // è·å–è®¾å¤‡ä¿¡æ¯
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
             string devicesInfoDesc = "";
             (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
 
-            // Æ´½Ó
-            string messageToSend = $"[¹Û²ì½á¹û]<»·¾³>\n{devicesInfoDesc}\n<\\»·¾³>";
+            // æ‹¼æ¥
+            string messageToSend = $"[è§‚å¯Ÿç»“æœ]<ç¯å¢ƒ>\n{devicesInfoDesc}\n<\\ç¯å¢ƒ>";
 
-            // ·¢ËÍ¸øAgent
+            // å‘é€ç»™Agent
             AgentService.Instance.SendUserMessage(this.Name, messageToSend);
-            Debug.Log($"ÒÑ·¢ËÍÏûÏ¢¸ø{this.Name}: {messageToSend}");
+            Debug.Log($"å·²å‘é€æ¶ˆæ¯ç»™{this.Name}: {messageToSend}");
         }
         #endregion
+
+        #region ActionSequenceç›¸å…³
+        public void PlanActionSequence(List<ActionStep> ActionSequence)
+        {
+
+        }
+
+        public void StartActionSequence()
+        {
+
+        }
+
+        public void CancelActionSequence()
+        {
+
+        }
+        #endregion
+
+        public void TestSceneObjsSnap()
+        {
+            // è·å–è®¾å¤‡ä¿¡æ¯
+            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            string devicesInfoDesc = "";
+            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo();
+
+            Debug.Log($"devicesInfoDesc: {devicesInfoDesc}");
+
+            var sceneObjsSnap = mCurActionSequenceRuntime.sceneObjsSnap;
+            foreach (var sceneObj in sceneObjsSnap)
+            {
+                if (sceneObj == null)
+                {
+                    Debug.Log($"sceneObj: {sceneObj.Name} å·²é”€æ¯ï¼");
+                    continue;
+                }
+                else if (!sceneObj.gameObject.activeInHierarchy)
+                {
+                    Debug.Log($"sceneObj: {sceneObj.Name} æœªæ¿€æ´»ï¼");
+                }
+                else
+                {
+                    Debug.Log($"sceneObj: {sceneObj.Name}");
+                }
+            }
+            //Debug.Log($"sceneObjsSnap: {mCurActionSequenceRuntime.sceneObjsSnap}");
+        }
     }
 }
 

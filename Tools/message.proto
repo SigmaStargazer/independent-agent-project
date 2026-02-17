@@ -155,7 +155,9 @@ message NetMessageRequest{
 	AgentInteractRequest agentInteractRequest = 8;
 	AgentSelectRequest agentSelectRequest = 9;
 	AgentInputRequest agentInputRequest = 10;
-	AgentActionSequenceRequest agentActionSequenceRequest = 11;
+	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 11;
+	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 12;
+	AgentCancelActionSequenceRequest agentCancelActionSequenceRequest = 13;
 }
 
 message NetMessageResponse{
@@ -220,9 +222,17 @@ message AgentMoveRequest {
 }
 
 // 与设备进行交互
-message AgentActionSequenceRequest {
+message AgentPlanActionSequenceRequest {
 	string agent = 1;
 	repeated ActionStep action_sequence = 2;
+}
+
+message AgentStartActionSequenceRequest {
+	string agent = 1;
+}
+
+message AgentCancelActionSequenceRequest {
+	string agent = 1;
 }
 
 message AgentInteractRequest {
