@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace ShootingEditor2D
@@ -16,7 +17,7 @@ namespace ShootingEditor2D
 
         protected FSMStateBase curState;
 
-        public string StateName => curState.Name;
+        public string StateName;
 
         // Idle hooks
         public virtual void OnIdleEnter() { }
@@ -35,9 +36,9 @@ namespace ShootingEditor2D
         /// </summary>
         /// 
         // Action的上下文
-        protected ActionContext curActionCtx;
+        protected ActionRuntime curActionRuntime;
 
-        protected virtual void OnActionFinished(ActionContext finishedCtx) { }
+        protected virtual void OnActionFinished(ActionRuntime finishedActionRuntime) { }
 
         protected virtual void Awake()
         {
@@ -60,18 +61,19 @@ namespace ShootingEditor2D
         protected virtual void Update()
         {
             // 判断是否有未完成的curActionCtx达到停止条件
-            if (curActionCtx != null)
+            if (curActionRuntime != null)
             {
-                curActionCtx.ActionTime += Time.deltaTime;
+                curActionRuntime.Displacement = Mathf.Abs(transform.position.x - curActionRuntime.StartPostion.x);
+                curActionRuntime.ActionTime += Time.deltaTime;
 
                 // 触发结束条件，并清空curActionCtx
-                if (curActionCtx.EndCondition?.Invoke() == true)
+                if (curActionRuntime.CompleteConditionFunc?.Invoke() == true)
                 {
-                    var finishedCtx = curActionCtx;
-                    curActionCtx = null;
+                    var finishedRuntime = curActionRuntime;
+                    curActionRuntime = null;
 
                     ChangeState("Idle");
-                    OnActionFinished(finishedCtx);// 触发Hook
+                    OnActionFinished(finishedRuntime);// 触发Hook
                     return;
                 }
             }
@@ -95,7 +97,7 @@ namespace ShootingEditor2D
                 Debug.LogError($"State {stateName} not registered");
                 return;
             }
-
+            StateName = stateName;
             curState?.OnExit(this);
             curState = newState;
             curState.OnEnter(this);
@@ -104,6 +106,13 @@ namespace ShootingEditor2D
         public string GetStateName()
         {
             return curState.Name;
+        }
+
+        public void StopAction()
+        {
+            curActionRuntime = null;
+            ChangeState("Idle");
+            return;
         }
     }
 

@@ -50,7 +50,7 @@ namespace ShootingEditor2D
 
         #endregion
 
-        public List<DeviceBase> GetAllDevices()
+        public List<DeviceBase> GetDevices()
         {
             return mDevices;
         }
@@ -94,45 +94,52 @@ namespace ShootingEditor2D
         }
 
         /// <summary>
-        /// 获取设备信息
+        /// 获取设备信息列表、可交互设备信息
         /// </summary>
-        /// <param name="chara">Agent的Gameobject</param>
+        /// <param name="agentGo">Agent的Gameobject</param>
         /// <returns></returns>
-        public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject chara)
+        public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject agentGo, List<DeviceBase> devices)
         {
             // 初始化返回值
             var devicesInfo = new List<Dictionary<string, object>>();
             Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
 
-            if (chara == null)
+            if (agentGo == null)
             {
                 return (devicesInfo, interactableDeviceInfo);
             }
 
-            float charaX = chara.transform.position.x;
+            float charaX = agentGo.transform.position.x;
             //DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
-            foreach (var device in mDevices)
+            foreach (var device in devices)
             {
-                Dictionary<string, object> deviceInfo = DeviceBaseToDeviceInfo(device, chara);
+                Dictionary<string, object> deviceInfo = DeviceBaseToDeviceInfo(device, agentGo);
                 devicesInfo.Add(deviceInfo);
             }
 
             // 获取逻辑中定义的可交互设备（最近且接触）
-            DeviceBase targetDevice = GetInteractableDevice(chara);
+            DeviceBase targetDevice = GetInteractableDevice(agentGo);
             if (targetDevice != null)
             {
                 // 如果找到了符合条件的设备，将其信息包装进字典
-                interactableDeviceInfo = DeviceBaseToDeviceInfo(targetDevice, chara);
+                interactableDeviceInfo = DeviceBaseToDeviceInfo(targetDevice, agentGo);
             }
 
             return (devicesInfo, interactableDeviceInfo);
         }
 
+        //public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject agentGo)
+        //{
+        //    return GetDevicesInfo(agentGo, mDevices);
+        //}
+
         private Dictionary<string, object> DeviceBaseToDeviceInfo(DeviceBase device, GameObject chara)
         {
             float charaX = chara.transform.position.x;
             Dictionary<string, object> deviceInfo = new Dictionary<string, object>();
-
+            // 如果设备不存在或者被禁用，则返回空字典
+            if (device == null || !device.gameObject.activeInHierarchy) 
+                return deviceInfo;
             // name
             deviceInfo.Add("name", device.Name);
             // desc

@@ -100,11 +100,11 @@ namespace ShootingEditor2D
         #endregion
 
         #region ActionSequenceœ‡πÿ
-        private void PlanActionSequence(string agent, List<ActionStep> ActionSequence)
+        private void PlanActionSequence(string agent, List<ActionStep> actionSequence)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.PlanActionSequence(ActionSequence);
+                agentObj.PlanActionSequence(actionSequence);
             }
         }
 
