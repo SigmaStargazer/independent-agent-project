@@ -168,9 +168,10 @@ namespace ShootingEditor2D
 
             // 1. 获取当前Action的EndEnv
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = "";
+            string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
+            //string devicesInfoDesc = "";
 
-            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
+            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
             finishedActionRuntime.EndEnv = devicesInfoDesc;
             // 2.执行Action结束逻辑
             // 如果执行的是ActionSequence中的Action
@@ -299,69 +300,90 @@ namespace ShootingEditor2D
         /// 获取设备信息列表DevicesInfo，以及转化为的文字描述devicesInfoDesc
         /// </summary>
         /// <returns></returns>
-        private (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo(List<DeviceBase> devices)
-        {
-            string devicesInfoDesc = "";
+        /// 
 
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
+        private string GetDevicesInfo()
+        { 
+            var mapper = new DeviceInfoMapper();
+            var renderer = new DeviceInfoRenderer();
 
-            if (deviceManager == null)
-            {
-                Debug.LogError("场景中未找到 DeviceManager！");
-                return (devicesInfo, "");
-            }
-
-            (devicesInfo, interactableDeviceInfo) = deviceManager.GetDevicesInfo(this.gameObject, devices);
-
-            if (devicesInfo.Count > 0)
-            {
-                devicesInfoDesc = "你的周围有：";
-                int deviceId = 0;
-                // 1.遍历设备信息
-                foreach (var deviceInfo in devicesInfo)
-                {
-                    string deviceInfoDesc = $"\n{deviceId}. {DeviceInfoToDesc(deviceInfo)}";
-
-                    devicesInfoDesc += deviceInfoDesc;
-                    deviceId++;
-                }
-
-                // 2.获取可交互设备信息
-                string interactableDevicDesc = "\n\n可选择交互：\n";
-                if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
-                {
-                    interactableDevicDesc += $"{DeviceInfoToDesc(interactableDeviceInfo)}";
-                }
-                else
-                {
-                    interactableDevicDesc += "身边无可交互对象";
-                }
-                devicesInfoDesc += interactableDevicDesc;
-            }
-
-            return (devicesInfo, devicesInfoDesc);
+            var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, DeviceManager.Instance.GetDevices());
+            var devicesInfoDesc = renderer.Render(devicesInfo, interactableDeviceInfo);
+            return devicesInfoDesc;
         }
 
-        private string DeviceInfoToDesc(Dictionary<string, object> deviceInfo)
+        private string GetDeviceSnapInfo(List<DeviceBase> DeviceSnap)
         {
-            string deviceInfoDesc = "";
-            if (deviceInfo != null)
-            {
-                string speed_x_str = deviceInfo["speedDir_x"] == "" ? $"{deviceInfo["speed_x"]}m/s" : $"方向{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
-                string speed_y_str = deviceInfo["speedDir_y"] == "" ? $"{deviceInfo["speed_y"]}m/s" : $"方向{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
-                deviceInfoDesc = $"{deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
-                    $"状态:{deviceInfo["state"]}\n" +
-                    $"方向:{deviceInfo["direction"]}\n距离:{deviceInfo["distance"]}m\n" +
-                    $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
-            }
-            else
-            {
-                deviceInfoDesc = "物体已消失";
-            }
-                return deviceInfoDesc;
+            var mapper = new DeviceInfoMapper();
+            var renderer = new DeviceInfoRenderer();
+
+            var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, DeviceSnap);
+            var devicesInfoDesc = renderer.Render(devicesInfo, interactableDeviceInfo);
+            return devicesInfoDesc;
         }
+        //private (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo(List<DeviceBase> devices)
+        //{
+        //    string devicesInfoDesc = "";
+
+        //    DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+        //    List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+        //    Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
+
+        //    if (deviceManager == null)
+        //    {
+        //        Debug.LogError("场景中未找到 DeviceManager！");
+        //        return (devicesInfo, "");
+        //    }
+
+        //    (devicesInfo, interactableDeviceInfo) = deviceManager.GetDevicesInfo(this.gameObject, devices);
+
+        //    if (devicesInfo.Count > 0)
+        //    {
+        //        devicesInfoDesc = "你的周围有：";
+        //        int deviceId = 0;
+        //        // 1.遍历设备信息
+        //        foreach (var deviceInfo in devicesInfo)
+        //        {
+        //            string deviceInfoDesc = $"\n{deviceId}. {DeviceInfoToDesc(deviceInfo)}";
+
+        //            devicesInfoDesc += deviceInfoDesc;
+        //            deviceId++;
+        //        }
+
+        //        // 2.获取可交互设备信息
+        //        string interactableDevicDesc = "\n\n可选择交互：\n";
+        //        if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
+        //        {
+        //            interactableDevicDesc += $"{DeviceInfoToDesc(interactableDeviceInfo)}";
+        //        }
+        //        else
+        //        {
+        //            interactableDevicDesc += "身边无可交互对象";
+        //        }
+        //        devicesInfoDesc += interactableDevicDesc;
+        //    }
+
+        //    return (devicesInfo, devicesInfoDesc);
+        //}
+
+        //private string DeviceInfoToDesc(Dictionary<string, object> deviceInfo)
+        //{
+        //    string deviceInfoDesc = "";
+        //    if (deviceInfo != null)
+        //    {
+        //        string speed_x_str = deviceInfo["speedDir_x"] == "" ? $"{deviceInfo["speed_x"]}m/s" : $"方向{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
+        //        string speed_y_str = deviceInfo["speedDir_y"] == "" ? $"{deviceInfo["speed_y"]}m/s" : $"方向{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
+        //        deviceInfoDesc = $"{deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
+        //            $"状态:{deviceInfo["state"]}\n" +
+        //            $"方向:{deviceInfo["direction"]}\n距离:{deviceInfo["distance"]}m\n" +
+        //            $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
+        //    }
+        //    else
+        //    {
+        //        deviceInfoDesc = "物体已消失";
+        //    }
+        //        return deviceInfoDesc;
+        //}
 
         /// <summary>
         /// 发送消息给Agent
@@ -372,10 +394,11 @@ namespace ShootingEditor2D
             // 获取环境信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
             string selfStateInfo = this.GetSelfStateInfo();
-            string devicesInfoDesc = "";
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            var mDevices = deviceManager.GetDevices();
-            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
+            string devicesInfoDesc = this.GetDevicesInfo();
+            //string devicesInfoDesc = "";
+            ////DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            ////var mDevices = deviceManager.GetDevices();
+            ////(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
 
             // 拼接
             string messageToSend = $"{msg}" +
@@ -503,10 +526,11 @@ namespace ShootingEditor2D
         {
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = "";
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            var mDevices = deviceManager.GetDevices();
-            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
+            string devicesInfoDesc = this.GetDevicesInfo();
+            //string devicesInfoDesc = "";
+            //DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            //var mDevices = deviceManager.GetDevices();
+            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
 
             // 拼接
             string messageToSend = $"[观察结果]<环境>\n{devicesInfoDesc}\n<\\环境>";
@@ -680,11 +704,12 @@ namespace ShootingEditor2D
 
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = "";
-            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
+            string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
+            //string devicesInfoDesc = "";
+            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
 
             // 创建Condition判断上下文
-            List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
+            List <SceneObjBase> sceneObjs = new List<SceneObjBase>();
             sceneObjs.AddRange(mCurActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
             var conditionCxt = new ConditionContext(this, sceneObjs);
 
@@ -715,12 +740,13 @@ namespace ShootingEditor2D
         {
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = "";
-            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
+            string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
+            //string devicesInfoDesc = "";
+            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
 
 
             // 创建Condition判断上下文
-            List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
+            List <SceneObjBase> sceneObjs = new List<SceneObjBase>();
             sceneObjs.AddRange(mCurActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
             var conditionCxt = new ConditionContext(this, sceneObjs);
 
@@ -789,10 +815,11 @@ namespace ShootingEditor2D
         {
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = "";
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            var mDevices = deviceManager.GetDevices();
-            (devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
+            string devicesInfoDesc = this.GetDevicesInfo();
+            //string devicesInfoDesc = "";
+            //DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
+            //var mDevices = deviceManager.GetDevices();
+            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
 
             Debug.Log($"devicesInfoDesc: {devicesInfoDesc}");
 

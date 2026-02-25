@@ -60,7 +60,7 @@ namespace ShootingEditor2D
         /// <summary>
         /// 获取与角色接触且距离最近的设备
         /// </summary>
-        private DeviceBase GetInteractableDevice(GameObject chara)
+        public DeviceBase GetInteractableDevice(GameObject chara)
         {
             if (chara == null) return null;
 
@@ -93,79 +93,79 @@ namespace ShootingEditor2D
             return targetDevice;
         }
 
-        /// <summary>
-        /// 获取设备信息列表、可交互设备信息
-        /// </summary>
-        /// <param name="agentGo">Agent的Gameobject</param>
-        /// <returns></returns>
-        public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject agentGo, List<DeviceBase> devices)
-        {
-            // 初始化返回值
-            var devicesInfo = new List<Dictionary<string, object>>();
-            Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
-
-            if (agentGo == null)
-            {
-                return (devicesInfo, interactableDeviceInfo);
-            }
-
-            float charaX = agentGo.transform.position.x;
-            //DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
-            foreach (var device in devices)
-            {
-                Dictionary<string, object> deviceInfo = DeviceBaseToDeviceInfo(device, agentGo);
-                devicesInfo.Add(deviceInfo);
-            }
-
-            // 获取逻辑中定义的可交互设备（最近且接触）
-            DeviceBase targetDevice = GetInteractableDevice(agentGo);
-            if (targetDevice != null)
-            {
-                // 如果找到了符合条件的设备，将其信息包装进字典
-                interactableDeviceInfo = DeviceBaseToDeviceInfo(targetDevice, agentGo);
-            }
-
-            return (devicesInfo, interactableDeviceInfo);
-        }
-
-        //public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject agentGo)
+        ///// <summary>
+        ///// 获取设备信息列表、可交互设备信息
+        ///// </summary>
+        ///// <param name="agentGo">Agent的Gameobject</param>
+        ///// <returns></returns>
+        //public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject agentGo, List<DeviceBase> devices)
         //{
-        //    return GetDevicesInfo(agentGo, mDevices);
+        //    // 初始化返回值
+        //    var devicesInfo = new List<Dictionary<string, object>>();
+        //    Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
+
+        //    if (agentGo == null)
+        //    {
+        //        return (devicesInfo, interactableDeviceInfo);
+        //    }
+
+        //    float charaX = agentGo.transform.position.x;
+        //    //DeviceBase[] devices = FindObjectsOfType<DeviceBase>();
+        //    foreach (var device in devices)
+        //    {
+        //        Dictionary<string, object> deviceInfo = DeviceBaseToDeviceInfo(device, agentGo);
+        //        devicesInfo.Add(deviceInfo);
+        //    }
+
+        //    // 获取逻辑中定义的可交互设备（最近且接触）
+        //    DeviceBase targetDevice = GetInteractableDevice(agentGo);
+        //    if (targetDevice != null)
+        //    {
+        //        // 如果找到了符合条件的设备，将其信息包装进字典
+        //        interactableDeviceInfo = DeviceBaseToDeviceInfo(targetDevice, agentGo);
+        //    }
+
+        //    return (devicesInfo, interactableDeviceInfo);
         //}
 
-        private Dictionary<string, object> DeviceBaseToDeviceInfo(DeviceBase device, GameObject chara)
-        {
-            float charaX = chara.transform.position.x;
-            Dictionary<string, object> deviceInfo = new Dictionary<string, object>();
-            // 如果设备不存在或者被禁用，则返回空字典
-            if (device == null || !device.gameObject.activeInHierarchy) 
-                return deviceInfo;
-            // name
-            deviceInfo.Add("name", device.Name);
-            // desc
-            deviceInfo.Add("desc", device.Desc);
-            // dirction
-            float xDiff = device.transform.position.x - charaX;
-            string direction = xDiff < 0 ? "left" : "right";
-            deviceInfo.Add("direction", direction);
-            // distance
-            deviceInfo.Add("distance", Mathf.Abs(xDiff));
+        ////public (List<Dictionary<string, object>> devicesInfo, Dictionary<string, object> interactableDeviceInfo) GetDevicesInfo(GameObject agentGo)
+        ////{
+        ////    return GetDevicesInfo(agentGo, mDevices);
+        ////}
 
-            Rigidbody2D rb = device.GetComponent<Rigidbody2D>();
-            Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
-            // speed_x
-            string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "");
-            deviceInfo.Add("speedDir_x", speedDirX);
-            deviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
-            // speed_y
-            string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "");
-            deviceInfo.Add("speedDir_y", speedDirY);
-            deviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
-            // state
-            deviceInfo.Add("state", device.GetStateName());
+        //private Dictionary<string, object> DeviceBaseToDeviceInfo(DeviceBase device, GameObject chara)
+        //{
+        //    float charaX = chara.transform.position.x;
+        //    Dictionary<string, object> deviceInfo = new Dictionary<string, object>();
+        //    // 如果设备不存在或者被禁用，则返回空字典
+        //    if (device == null || !device.gameObject.activeInHierarchy) 
+        //        return deviceInfo;
+        //    // name
+        //    deviceInfo.Add("name", device.Name);
+        //    // desc
+        //    deviceInfo.Add("desc", device.Desc);
+        //    // dirction
+        //    float xDiff = device.transform.position.x - charaX;
+        //    string direction = xDiff < 0 ? "left" : "right";
+        //    deviceInfo.Add("direction", direction);
+        //    // distance
+        //    deviceInfo.Add("distance", Mathf.Abs(xDiff));
 
-            return deviceInfo;
-        }
+        //    Rigidbody2D rb = device.GetComponent<Rigidbody2D>();
+        //    Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
+        //    // speed_x
+        //    string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "");
+        //    deviceInfo.Add("speedDir_x", speedDirX);
+        //    deviceInfo.Add("speed_x", Mathf.Abs(velocity.x));
+        //    // speed_y
+        //    string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "");
+        //    deviceInfo.Add("speedDir_y", speedDirY);
+        //    deviceInfo.Add("speed_y", Mathf.Abs(velocity.y));
+        //    // state
+        //    deviceInfo.Add("state", device.GetStateName());
+
+        //    return deviceInfo;
+        //}
 
         #endregion
 
