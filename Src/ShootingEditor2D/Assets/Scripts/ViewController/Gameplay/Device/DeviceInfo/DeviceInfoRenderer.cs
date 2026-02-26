@@ -12,19 +12,25 @@ namespace ShootingEditor2D
 
             if (devicesInfo.Count > 0)
             {
-                devicesInfoDesc = "你的周围有：";
-                int deviceId = 0;
-                // 1.遍历设备信息
-                foreach (var deviceInfo in devicesInfo)
-                {
-                    string deviceInfoDesc = $"\n{deviceId}. {this.RenderDevice(deviceInfo)}";
+                devicesInfoDesc = "# 你的周围有:";
+                //int deviceId = 0;
+                //// 1.遍历设备信息
+                //foreach (var deviceInfo in devicesInfo)
+                //{
+                //    string deviceInfoDesc = $"\n{deviceId}. {this.RenderDevice(deviceInfo)}";
 
+                //    devicesInfoDesc += deviceInfoDesc;
+                //    deviceId++;
+                //}
+                // 1.遍历设备信息
+                for (int i = 0; i < devicesInfo.Count; i++)
+                {
+                    string deviceInfoDesc = $"\n{i}. {this.RenderDevice(devicesInfo[i])}";
                     devicesInfoDesc += deviceInfoDesc;
-                    deviceId++;
                 }
 
                 // 2.获取可交互设备信息
-                string interactableDevicDesc = "\n\n可选择交互：\n";
+                string interactableDevicDesc = "\n\n# 可选择交互:\n";
                 if (interactableDeviceInfo != null)
                 {
                     interactableDevicDesc += $"{this.RenderDevice(interactableDeviceInfo)}";
@@ -39,7 +45,7 @@ namespace ShootingEditor2D
             return devicesInfoDesc;
         }
 
-        private string RenderDevice(DeviceInfoModel deviceInfo)
+        public string RenderDevice(DeviceInfoModel deviceInfo)
         {
             string deviceInfoDesc = "";
             if (deviceInfo != null)

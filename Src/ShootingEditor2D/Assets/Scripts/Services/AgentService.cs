@@ -339,7 +339,7 @@ namespace Services
             Debug.LogFormat("OnAgentPlanActionSequence::Agent:{0} ActionSequence:{1}", request.Agent, request.ActionSequences);
             if (this.OnPlanActionSequence != null)
             {
-                this.OnPlanActionSequence(request.Agent , request.ActionSequences);
+                this.OnPlanActionSequence(request.Agent, request.ActionSequences);
             }
         }
 

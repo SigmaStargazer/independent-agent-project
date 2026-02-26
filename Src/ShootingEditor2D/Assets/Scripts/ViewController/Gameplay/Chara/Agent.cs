@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.VisualScripting;
+using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 
 namespace ShootingEditor2D
@@ -164,20 +165,22 @@ namespace ShootingEditor2D
         protected override void OnActionFinished(ActionRuntime finishedActionRuntime)
         {
             if (finishedActionRuntime == null)
+            {
+                Debug.LogError($"[{this.Name}OnActionFinished出错]finishedActionRuntime is null");
                 return;
+            }
 
             // 1. 获取当前Action的EndEnv
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
             string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
             //string devicesInfoDesc = "";
-
             //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
             finishedActionRuntime.EndEnv = devicesInfoDesc;
             // 2.执行Action结束逻辑
             // 如果执行的是ActionSequence中的Action
             if (mCurActionSequenceRuntime?.State == ActionSequenceState.Executing)
             {
-                OnCurrentActionCompleted();
+                this.OnCurrentActionCompleted();
                 return;
             }
             // 如果执行的是非ActionSequence中的Action
@@ -185,7 +188,7 @@ namespace ShootingEditor2D
             {
                 if (finishedActionRuntime?.Result?.Message != null)
                 {
-                    SendMessageToAgent(finishedActionRuntime.Result.Message);
+                    this.SendMessageToAgent(finishedActionRuntime.Result.Message);
                 }
             }
         }
@@ -290,8 +293,15 @@ namespace ShootingEditor2D
 
             string speed_x_str = speedDirX == "" ? $"{Mathf.Abs(velocity.x)}m/s" : $"方向{speedDirX} {Mathf.Abs(velocity.x)}m/s";
             string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"方向{speedDirY} {Mathf.Abs(velocity.y)}m/s";
-            string selfStateInfo = $"状态:{this.GetStateName()}\n" + 
-                $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
+
+            var actionInfoRenderer = new ActionInfoRenderer();
+
+            // 拼接返回字符串
+            string selfStateInfo = $"# 状态:{this.GetStateName()}" + 
+                $"\n# 横向速度:{speed_x_str}\n# 纵向速度:{speed_y_str}" +
+                $"\n# 计划中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mPlanningActionSequenceRuntime)}" +
+                $"\n# 进行中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mCurActionSequenceRuntime)}" +
+                $"\n# 进行中的动作:\n{actionInfoRenderer.RenderActionRuntime(this.mCurActionRuntime)}";
 
             return selfStateInfo;
         }
@@ -312,12 +322,12 @@ namespace ShootingEditor2D
             return devicesInfoDesc;
         }
 
-        private string GetDeviceSnapInfo(List<DeviceBase> DeviceSnap)
+        private string GetDeviceSnapInfo(List<DeviceBase> deviceSnap)
         {
             var mapper = new DeviceInfoMapper();
             var renderer = new DeviceInfoRenderer();
 
-            var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, DeviceSnap);
+            var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, deviceSnap);
             var devicesInfoDesc = renderer.Render(devicesInfo, interactableDeviceInfo);
             return devicesInfoDesc;
         }
@@ -423,20 +433,22 @@ namespace ShootingEditor2D
 
             float startX = transform.position.x;
             //this.moveDistance = distance;
-            curActionRuntime = new ActionRuntime
+            mCurActionRuntime = new ActionRuntime
             {
                 ActionName = "Move",
+                State = ActionState.Doing,
                 Result = new ActionResult(),
                 StartPostion = new Vector2(startX, transform.position.y),
+                CompleteCondition = $"displacement >= {distance}",
                 CompleteConditionFunc = () =>
                 {
                     float dir = moveRight ? 1f : -1f;
 
-                    bool arrived = curActionRuntime.Displacement >= distance;
+                    bool arrived = mCurActionRuntime.Displacement >= distance;
 
                     if (arrived)
                     {
-                        curActionRuntime.Result.Message = "[移动结果]到达目的地！";
+                        mCurActionRuntime.Result.Message = "[移动结果]到达目的地！";
                     }
 
                     return arrived;
@@ -550,7 +562,7 @@ namespace ShootingEditor2D
                 this.SendMessageToAgent("ActionSequence为空！");// 这块尽量在服务端处理
                 return;
             }
-            Debug.Log($"[Agent] 收到动作序列规划请求，共 {actionSequence.Count} 个动作");
+            Debug.Log($"[{this.Name}] 收到动作序列规划请求，共 {actionSequence.Count} 个动作");
 
             try
             {
@@ -562,12 +574,7 @@ namespace ShootingEditor2D
                     this.mPlanningActionSequenceRuntime.Dispose();
                     this.mPlanningActionSequenceRuntime = null;
                 }
-                this.mPlanningActionSequenceRuntime = new ActionSequenceRuntime();
-                this.mPlanningActionSequenceRuntime.ActionSequence = actionSequence;
-                foreach (var device in DeviceManager.Instance.GetDevices())
-                {
-                    this.mPlanningActionSequenceRuntime.AddDevice(device);
-                }
+                this.mPlanningActionSequenceRuntime = new ActionSequenceRuntime(actionSequence, DeviceManager.Instance.GetDevices());
 
                 // 2. 生成 ConditionContext 快照
                 List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
@@ -592,17 +599,34 @@ namespace ShootingEditor2D
                 if (errorMessages.Count > 0)
                 {
                     string combinedError = string.Join("\n", errorMessages);
-                    this.SendMessageToAgent($"[ActionSequence规划结果]action_sequence校验未通过:\n{combinedError}");
+                    this.SendMessageToAgent($"[动作序列规划结果]动作序列校验未通过:\n{combinedError}");
                     return;
                 }
                 else // 4.生成确认信息
                 {
+                    string devicesInfoDesc = "";
+
+                    this.mPlanningActionSequenceRuntime.CreateActionRuntimeLog(this);
+                    var devicesSnap = this.mPlanningActionSequenceRuntime.DeviceSnap;
+                    var mapper = new DeviceInfoMapper();
+                    var renderer = new DeviceInfoRenderer();
+
+                    var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, devicesSnap);
+                    for (int i = 0; i < devicesInfo.Count; i++)
+                    {
+                        string deviceInfoDesc = $"\n{i}. {renderer.RenderDevice(devicesInfo[i])}";
+                        devicesInfoDesc += deviceInfoDesc;
+                    }
+
+                    string messageToSend = $"[动作序列规划结果]计划中的动作序列已准备就绪！" +
+                        $"建议在开始动作序列前，先对各动作的结束条件中的object[i]是否能和下列物体快照中的物体能对应上进行核对（如核对不上，可再次使用ActionSequence规划功能进行修改）：" +
+                        $"{devicesInfoDesc}";
+                    this.SendMessageToAgent(messageToSend);
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"[{this.Name}] 动作序列规划出错：{e}");
-                this.SendMessageToAgent($"[ActionSequence规划结果]出错：{e.Message}");
+                this.SendMessageToAgent($"[动作序列规划结果]出错：{e.Message}");
             }
 
         }
@@ -611,8 +635,7 @@ namespace ShootingEditor2D
         {
             if (mPlanningActionSequenceRuntime == null)
             {
-                Debug.Log($"[{this.Name}]开始ActionSequence失败: 没有计划中的ActionSequence");
-                this.SendMessageToAgent($"开始ActionSequence失败: 没有计划中的ActionSequence");
+                this.SendMessageToAgent($"[动作序列确认开始执行结果]失败: 没有计划中的动作序列");
                 return;
             }
 
@@ -636,13 +659,11 @@ namespace ShootingEditor2D
                 mCurActionSequenceRuntime.State = ActionSequenceState.Executing;
                 this.ExecuteCurAction();
                 // 4.发送消息
-                Debug.Log($"[{this.Name}]开始ActionSequence成功: {this.mCurActionSequenceRuntime.ActionSequence.Count}个Action");
-                this.SendMessageToAgent($"开始ActionSequence成功: {this.mCurActionSequenceRuntime.ActionSequence.Count}个Action");
+                this.SendMessageToAgent($"[动作序列确认开始执行结果]成功: 共计{this.mCurActionSequenceRuntime.ActionSequence.Count}个动作");
             }
             catch (Exception e)
             {
-                Debug.Log($"[{Name}]开始ActionSequence失败: {e.Message}");
-                this.SendMessageToAgent($"开始ActionSequence失败: {e.Message}");
+                this.SendMessageToAgent($"[动作序列确认开始执行结果]失败: {e.Message}");
                 return;
             }
         }
@@ -651,16 +672,17 @@ namespace ShootingEditor2D
         {
             if (mCurActionSequenceRuntime == null)
             {
-                Debug.Log($"[{this.Name}]取消ActionSequence失败: 没有执行中的ActionSequence");
-                this.SendMessageToAgent($"取消ActionSequence失败: 没有执行中的ActionSequence");
+                this.SendMessageToAgent($"[动作序列取消结果]失败: 没有执行中的ActionSequence");
                 return;
             }
 
             // 1. 停止当前的Action
             this.StopAction();
-            // 2. 清空当前的ActionSequenceRuntime
-            mCurActionSequenceRuntime.Dispose();
-            mCurActionSequenceRuntime = null;
+            //// 2. 清空当前的ActionSequenceRuntime
+            //mCurActionSequenceRuntime.Dispose();
+            //mCurActionSequenceRuntime = null;
+            // 2. 设置终止状态（不清除是为了还能调用log）
+            mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
             // 3. 发送取消信息
             Debug.Log($"[{this.Name}]取消ActionSequence成功");
             this.SendMessageToAgent($"取消ActionSequence成功");
@@ -676,14 +698,14 @@ namespace ShootingEditor2D
             // AS执行完成
             ActionStep curAction = mCurActionSequenceRuntime.GetCurActionStep();
             if (curAction != null)
-            { 
+            {
                 if (curAction.Move != null)
                 {
-                    this.ExecuteMoveAction(curAction);
+                    this.ExecuteMoveAction(mCurActionSequenceRuntime);
                 }
                 else if (curAction.Wait != null)
                 {
-                    this.ExecuteWaitAction(curAction);
+                    this.ExecuteWaitAction(mCurActionSequenceRuntime);
                 }
                 else
                 {
@@ -695,94 +717,159 @@ namespace ShootingEditor2D
                 // AS执行完成的逻辑
                 this.CompleteActionSequence();
             }
-
-
         }
-        private void ExecuteMoveAction(ActionStep curAction)
+
+
+        private void ExecuteMoveAction(ActionSequenceRuntime actionSequenceRuntime)
         {
+            var curAction = actionSequenceRuntime.GetCurActionStep();
             this.moveRight = curAction.Move.direction == MoveAction.Direction.Right;
 
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
-            //string devicesInfoDesc = "";
-            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
+            string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
 
             // 创建Condition判断上下文
             List <SceneObjBase> sceneObjs = new List<SceneObjBase>();
-            sceneObjs.AddRange(mCurActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+            sceneObjs.AddRange(actionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
             var conditionCxt = new ConditionContext(this, sceneObjs);
 
-            curActionRuntime = new ActionRuntime
-            {
-                ActionName = "Move",
-                Result = new ActionResult(),
-                StartPostion = new Vector2(transform.position.x, transform.position.y),
-                StartEnv = devicesInfoDesc,
-                CompleteCondition = curAction.Condition,
-                CompleteConditionFunc = () =>
+            // 更新curActionRuntime开始时的信息
+            this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
+            this.mCurActionRuntime.State = ActionState.Doing;
+            this.mCurActionRuntime.StartPostion = new Vector2(transform.position.x, transform.position.y);
+            this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+            this.mCurActionRuntime.CompleteConditionFunc = () =>
                 {
                     // 每帧更新动态变量
-                    conditionCxt.ActionTime = curActionRuntime.ActionTime;
-                    conditionCxt.Displacement = curActionRuntime.Displacement;
+                    conditionCxt.ActionTime = this.mCurActionRuntime.ActionTime;
+                    conditionCxt.Displacement = this.mCurActionRuntime.Displacement;
                     int index = mCurActionSequenceRuntime.CurActionIndex;
 
-                    ConditionEvalResult result = mConditionEvaluator.Evaluate(index, curAction, conditionCxt);
+                    ConditionEvalResult result = this.mConditionEvaluator.Evaluate(index, curAction, conditionCxt);
                     // 当条件为True/Error时，停止Action
                     return result.Status != ConditionEvalStatus.False;
-                }
-            };
-            mCurActionSequenceRuntime.AddActionRuntimeLog(curActionRuntime);
+                };
 
             ChangeState("Move");
         }
-        private void ExecuteWaitAction(ActionStep curAction)
+        private void ExecuteWaitAction(ActionSequenceRuntime actionSequenceRuntime)
         {
+            var curAction = actionSequenceRuntime.GetCurActionStep();
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
-            //string devicesInfoDesc = "";
-            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
-
+            string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
 
             // 创建Condition判断上下文
-            List <SceneObjBase> sceneObjs = new List<SceneObjBase>();
-            sceneObjs.AddRange(mCurActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+            List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
+            sceneObjs.AddRange(actionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
             var conditionCxt = new ConditionContext(this, sceneObjs);
 
-            curActionRuntime = new ActionRuntime
+            // 更新curActionRuntime开始时的信息
+            this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
+            this.mCurActionRuntime.State = ActionState.Doing;
+            this.mCurActionRuntime.StartPostion = new Vector2(transform.position.x, transform.position.y);
+            this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+            this.mCurActionRuntime.CompleteConditionFunc = () =>
             {
-                ActionName = "Wait",
-                Result = new ActionResult(),
-                StartPostion = new Vector2(transform.position.x, transform.position.y),
-                StartEnv = devicesInfoDesc,
-                CompleteCondition = curAction.Condition,
-                CompleteConditionFunc = () =>
-                {
-                    // 每帧更新动态变量
-                    conditionCxt.ActionTime = curActionRuntime.ActionTime;
-                    conditionCxt.Displacement = curActionRuntime.Displacement;
-                    int index = mCurActionSequenceRuntime.CurActionIndex;
+                // 每帧更新动态变量
+                conditionCxt.ActionTime = this.mCurActionRuntime.ActionTime;
+                conditionCxt.Displacement = this.mCurActionRuntime.Displacement;
+                int index = mCurActionSequenceRuntime.CurActionIndex;
 
-                    ConditionEvalResult result = mConditionEvaluator.Evaluate(index, curAction, conditionCxt);
-                    // 当条件为True/Error时，停止Action
-                    return result.Status != ConditionEvalStatus.False;
-                }
+                ConditionEvalResult result = this.mConditionEvaluator.Evaluate(index, curAction, conditionCxt);
+                // 当条件为True/Error时，停止Action
+                return result.Status != ConditionEvalStatus.False;
             };
-            mCurActionSequenceRuntime.AddActionRuntimeLog(curActionRuntime);
 
             ChangeState("Idle");
         }
+
+        //private void ExecuteMoveAction(ActionStep curAction)
+        //{
+        //    this.moveRight = curAction.Move.direction == MoveAction.Direction.Right;
+
+        //    // 获取设备信息
+        //    List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+        //    string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
+        //    //string devicesInfoDesc = "";
+        //    //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
+
+        //    // 创建Condition判断上下文
+        //    List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
+        //    sceneObjs.AddRange(mCurActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+        //    var conditionCxt = new ConditionContext(this, sceneObjs);
+
+        //    curActionRuntime = new ActionRuntime
+        //    {
+        //        ActionName = "Move",
+        //        Result = new ActionResult(),
+        //        StartPostion = new Vector2(transform.position.x, transform.position.y),
+        //        StartEnv = devicesInfoDesc,
+        //        CompleteCondition = curAction.Condition,
+        //        CompleteConditionFunc = () =>
+        //        {
+        //            // 每帧更新动态变量
+        //            conditionCxt.ActionTime = curActionRuntime.ActionTime;
+        //            conditionCxt.Displacement = curActionRuntime.Displacement;
+        //            int index = mCurActionSequenceRuntime.CurActionIndex;
+
+        //            ConditionEvalResult result = mConditionEvaluator.Evaluate(index, curAction, conditionCxt);
+        //            // 当条件为True/Error时，停止Action
+        //            return result.Status != ConditionEvalStatus.False;
+        //        }
+        //    };
+        //    mCurActionSequenceRuntime.AddActionRuntimeLog(curActionRuntime);
+
+        //    ChangeState("Move");
+        //}
+        //private void ExecuteWaitAction(ActionStep curAction)
+        //{
+        //    // 获取设备信息
+        //    List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+        //    string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
+        //    //string devicesInfoDesc = "";
+        //    //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
+
+
+        //    // 创建Condition判断上下文
+        //    List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
+        //    sceneObjs.AddRange(mCurActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+        //    var conditionCxt = new ConditionContext(this, sceneObjs);
+
+        //    curActionRuntime = new ActionRuntime
+        //    {
+        //        ActionName = "Wait",
+        //        Result = new ActionResult(),
+        //        StartPostion = new Vector2(transform.position.x, transform.position.y),
+        //        StartEnv = devicesInfoDesc,
+        //        CompleteCondition = curAction.Condition,
+        //        CompleteConditionFunc = () =>
+        //        {
+        //            // 每帧更新动态变量
+        //            conditionCxt.ActionTime = curActionRuntime.ActionTime;
+        //            conditionCxt.Displacement = curActionRuntime.Displacement;
+        //            int index = mCurActionSequenceRuntime.CurActionIndex;
+
+        //            ConditionEvalResult result = mConditionEvaluator.Evaluate(index, curAction, conditionCxt);
+        //            // 当条件为True/Error时，停止Action
+        //            return result.Status != ConditionEvalStatus.False;
+        //        }
+        //    };
+        //    mCurActionSequenceRuntime.AddActionRuntimeLog(curActionRuntime);
+
+        //    ChangeState("Idle");
+        //}
 
         private void OnCurrentActionCompleted()
         {
             if (mCurActionSequenceRuntime?.State == ActionSequenceState.Executing)
             {
                 // 发送进度消息
-                Debug.Log($"[Agent] 动作 {mCurActionSequenceRuntime.CurActionIndex} 完成");
+                Debug.Log($"[{this.Name}] 动作 {mCurActionSequenceRuntime.CurActionIndex} 完成");
                 // 移动到下一个动作
                 mCurActionSequenceRuntime.CurActionIndex++;
-                ExecuteCurAction();
+                this.ExecuteCurAction();
             }
         }
 
@@ -793,21 +880,21 @@ namespace ShootingEditor2D
             // 组装完成消息
             if (mCurActionSequenceRuntime.ActionRuntimeLog != null && mCurActionSequenceRuntime.ActionRuntimeLog.Count > 0)
             {
-                string actionSequenceLog = "# ActionSequence日志:";
-                actionSequenceLog += $"开始环境:" +
-                    $"\n{mCurActionSequenceRuntime.ActionRuntimeLog[0].StartEnv}";
-                int index = 0;
-                foreach (var actionRuntime in mCurActionSequenceRuntime.ActionRuntimeLog)
+                string actionSequenceLog = "";
+                actionSequenceLog += $"\n=== 开始环境 ===\n{mCurActionSequenceRuntime.ActionRuntimeLog[0].StartEnv}\n";
+
+                for (int i = 0; i < mCurActionSequenceRuntime.ActionRuntimeLog.Count; i++)
                 {
-                    actionSequenceLog += $"\nAction[{index}]: {actionRuntime.ActionName} 结束条件: {actionRuntime.CompleteCondition}\n" +
-                        $"\nAction[{index}]结束时环境:" +
-                        $"\n{mCurActionSequenceRuntime.ActionRuntimeLog[index].EndEnv}";
-                    index++;
+                    var actionRuntime = mCurActionSequenceRuntime.ActionRuntimeLog[i];
+                    actionSequenceLog += $"\n--- 动作[{i}]: {actionRuntime.ActionName} (结束条件: {actionRuntime.CompleteCondition}) ---\n";
+                    actionSequenceLog += $"--- 动作[{i}]结束环境 ---\n{actionRuntime.EndEnv}\n";
                 }
-            }
 
+                string messageToSend = $"[动作序列执行结果] 动作序列已执行完成！\n<动作序列日志>{actionSequenceLog}<\\动作序列日志>";
 
-            // 发送完成消息
+                // 发送完成消息
+                this.SendMessageToAgent(messageToSend);
+            } 
         }
         #endregion
 

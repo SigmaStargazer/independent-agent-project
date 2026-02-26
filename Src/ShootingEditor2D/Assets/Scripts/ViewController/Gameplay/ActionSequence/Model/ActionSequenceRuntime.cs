@@ -2,6 +2,7 @@ using SkillBridge.Message;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 
 namespace ShootingEditor2D
@@ -24,19 +25,67 @@ namespace ShootingEditor2D
         public List<DeviceBase> DeviceSnap = new List<DeviceBase>();
         public List<ActionRuntime> ActionRuntimeLog = new List<ActionRuntime>();
 
+        public ActionSequenceRuntime(List<ActionStep> actionSequence, List<DeviceBase> devices)
+        {
+            this.ActionSequence = actionSequence;
+            foreach (var device in devices)
+            {
+                DeviceSnap.Add(device);
+            }
+        }
+
         public void AddDevice(DeviceBase device)
         {
             DeviceSnap.Add(device);
         }
 
-        public void AddActionRuntimeLog(ActionRuntime actionRuntime)
+        public void CreateActionRuntimeLog(SceneObjBase myself)
         {
-            ActionRuntimeLog.Add(actionRuntime);
+            foreach (var action in ActionSequence)
+            {
+                string actionName = "";
+                if (action.Move != null)
+                {
+                    actionName = "Move";
+                }
+                else if (action.Wait != null)
+                {
+                    actionName = "Wait";
+                }
+                else
+                {
+                    actionName = "未定义的ActionStep";
+                }
+
+                //新建一个ActionRuntime
+                var actionRuntime = new ActionRuntime
+                {
+                    ActionName = actionName,
+                    CompleteCondition = action.Condition,
+                    State = ActionState.Todo,
+                    Result = new ActionResult()
+                };
+                this.ActionRuntimeLog.Add(actionRuntime);
+            }
         }
 
         /// <summary>
-        /// 判断是否还有ActionStep，然后返回ActionStep/null
+        /// 获取当前ActionStep的运行时对象
         /// </summary>
+        /// <returns></returns>
+        public ActionRuntime GetCurActionRuntime()
+        {
+            if (CurActionIndex < ActionRuntimeLog.Count)
+            {
+                return ActionRuntimeLog[CurActionIndex];
+            }
+            else
+                return null;
+        }
+
+        ///// <summary>
+        ///// 判断是否还有ActionStep，然后返回ActionStep/null
+        ///// </summary>
         public ActionStep GetCurActionStep()
         {
             if (CurActionIndex < ActionSequence.Count)

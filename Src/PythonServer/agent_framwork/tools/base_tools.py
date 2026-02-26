@@ -99,15 +99,16 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
 
 @tool
 async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")], action_sequence: ActionSequence) -> str:
-    """规划一连串动作的执行顺序。后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
+    """规划一串连续的动作。
+    后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
     Args:
         action_sequence(ActionSequence): 动作序列
     Return:
         str: 规划动作序列是否开始校验。注意：动作序列校验结果将通过新的消息另行通知。
     """
     try:
-        request = message_pb2.AgentActionSequenceRequest()
-        # request.action_sequence.extend(action_sequence.action_sequence)
+        request = message_pb2.AgentPlanActionSequenceRequest()
+        request.agent = agent
         for step in action_sequence.action_sequence:
             request.action_sequence.append(
                 build_pb_action_step(step)
@@ -119,9 +120,41 @@ async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")],
         return f"动作序列校验失败: {e}"
 
 # 确认开始执行动作序列
-# @tool
-# async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
-#     pass
+@tool
+async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """
+    确认开始执行动作序列
+    Return:
+        str: 动作序列是否开始执行。注意：动作序列执行结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentStartActionSequenceRequest()
+        request.agent = agent
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]准备执行动作序列。待开始执行后，你将收到执行完成的消息；动作序列完成后，你将收到动作序列完成的消息。")
+        return f"[{agent}]准备执行动作序列。待开始执行后，你将收到执行完成的消息；动作序列完成后，你将收到动作序列完成的消息。"
+    except Exception as e:
+        return f"准备执行动作序列失败: {e}"
+
+# 取消动作序列
+@tool
+async def cancel_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """取消动作序列
+    Return:
+        str: 动作序列是否取消。注意：动作序列取消结果将通过新的消息另行通知。
+    """
+    from network.servers import AgentServerNetMessage
+    from network import message_pb2
+    try:
+        request = message_pb2.AgentCancelActionSequenceRequest()
+        request.agent = agent
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}]准备取消动作序列。待取消完成后，你将收到取消完成的消息。")
+        return f"[{agent}]准备取消动作序列。待取消完成后，你将收到取消完成的消息。"
+    except Exception as e:
+        return f"准备取消动作序列失败: {e}"
 
 @tool
 async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:

@@ -3,19 +3,29 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
+    public enum ActionState
+    {
+        Todo,
+        Doing,
+        Done,
+        Failed,
+        Aborted
+    }
     public class ActionRuntime
     {
         public string ActionName;
-        public Func<bool> CompleteConditionFunc;
         public string CompleteCondition;
+        public Func<bool> CompleteConditionFunc;
+        public ActionState State;
+
         // 动作开始位置
         public Vector2 StartPostion;
         // 动作期间位移
         public float Displacement = 0;
         // 动作计时
         public float ActionTime = 0;
-        public string StartEnv;
-        public string EndEnv;
+        public string StartEnv = "";
+        public string EndEnv = "";
 
         public ActionResult Result;
     }

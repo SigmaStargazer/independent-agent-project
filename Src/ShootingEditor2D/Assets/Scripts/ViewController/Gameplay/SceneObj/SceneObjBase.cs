@@ -31,12 +31,8 @@ namespace ShootingEditor2D
         public virtual void OnMoveFixedUpdate() { }
         public virtual void OnMoveExit() { }
 
-        /// <summary>
-        /// Action
-        /// </summary>
-        /// 
         // Action的上下文
-        protected ActionRuntime curActionRuntime;
+        protected ActionRuntime mCurActionRuntime;
 
         protected virtual void OnActionFinished(ActionRuntime finishedActionRuntime) { }
 
@@ -61,16 +57,17 @@ namespace ShootingEditor2D
         protected virtual void Update()
         {
             // 判断是否有未完成的curActionCtx达到停止条件
-            if (curActionRuntime != null)
+            if (mCurActionRuntime != null)
             {
-                curActionRuntime.Displacement = Mathf.Abs(transform.position.x - curActionRuntime.StartPostion.x);
-                curActionRuntime.ActionTime += Time.deltaTime;
+                mCurActionRuntime.Displacement = Mathf.Abs(transform.position.x - mCurActionRuntime.StartPostion.x);
+                mCurActionRuntime.ActionTime += Time.deltaTime;
 
                 // 触发结束条件，并清空curActionCtx
-                if (curActionRuntime.CompleteConditionFunc?.Invoke() == true)
+                if (mCurActionRuntime.CompleteConditionFunc?.Invoke() == true)
                 {
-                    var finishedRuntime = curActionRuntime;
-                    curActionRuntime = null;
+                    mCurActionRuntime.State = ActionState.Done;
+                    var finishedRuntime = mCurActionRuntime;
+                    mCurActionRuntime = null;
 
                     ChangeState("Idle");
                     OnActionFinished(finishedRuntime);// 触发Hook
@@ -110,7 +107,11 @@ namespace ShootingEditor2D
 
         public void StopAction()
         {
-            curActionRuntime = null;
+            if (mCurActionRuntime != null)
+            {
+                mCurActionRuntime.State = ActionState.Aborted;
+                mCurActionRuntime = null;
+            }
             ChangeState("Idle");
             return;
         }
