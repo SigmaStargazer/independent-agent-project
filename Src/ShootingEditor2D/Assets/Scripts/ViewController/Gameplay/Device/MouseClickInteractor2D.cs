@@ -10,13 +10,12 @@ namespace ShootingEditor2D
         {
             if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log("Click");
                 Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 RaycastHit2D hit = Physics2D.Raycast(worldPos, Vector2.zero);
 
                 if (hit.collider == null)
                 {
-                    Debug.Log("Click Empty");
+                    //Debug.Log("Click Empty");
                     return;
                 }
                     
@@ -26,7 +25,7 @@ namespace ShootingEditor2D
 
                 if (!device.IsClickable)
                 {
-                    Debug.Log($"{device.Name} 不可点击！");
+                    //Debug.Log($"{device.Name} 不可点击！");
                     return;
                 }
 

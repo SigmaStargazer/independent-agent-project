@@ -101,6 +101,14 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
 async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")], action_sequence: ActionSequence) -> str:
     """规划一串连续的动作。
     后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
+    举例：
+    在信号灯变绿后，立刻向右走2米
+    action_sequence:
+        - action: wait
+          condition: objects[0].State == 'GreenLight'
+        - action: move
+          direction: right
+          condition: displacement >= 2
     Args:
         action_sequence(ActionSequence): 动作序列
     Return:

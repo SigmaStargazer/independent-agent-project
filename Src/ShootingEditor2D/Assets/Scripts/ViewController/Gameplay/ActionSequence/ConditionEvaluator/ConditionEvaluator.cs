@@ -1,4 +1,4 @@
-using DynamicExpresso;
+ï»¿using DynamicExpresso;
 using SkillBridge.Message;
 using System;
 using System.Collections;
@@ -10,14 +10,14 @@ namespace ShootingEditor2D
 {
     public enum ConditionEvalStatus
     {
-        True,     // Ìõ¼ş³ÉÁ¢
-        False,    // Ìõ¼şÎ´³ÉÁ¢£¨Õı³£Çé¿ö£©
-        Error     // ±í´ïÊ½´íÎó / ÓïÒå´íÎó / ÏµÍ³Òì³£
+        True,     // æ¡ä»¶æˆç«‹
+        False,    // æ¡ä»¶æœªæˆç«‹ï¼ˆæ­£å¸¸æƒ…å†µï¼‰
+        Error     // è¡¨è¾¾å¼é”™è¯¯ / è¯­ä¹‰é”™è¯¯ / ç³»ç»Ÿå¼‚å¸¸
     }
     public class ConditionEvalResult
     {
         public ConditionEvalStatus Status;
-        public string ErrorMessage;   // ½ö Error Ê±ÓĞĞ§
+        public string ErrorMessage;   // ä»… Error æ—¶æœ‰æ•ˆ
     }
     public class ConditionEvaluator
     {
@@ -26,12 +26,12 @@ namespace ShootingEditor2D
         public ConditionEvaluator()
         {
             mInterpreter = new Interpreter(InterpreterOptions.Default);
-            mInterpreter.Reference(typeof(Math)); // ¿ÉÀ©Õ¹
+            mInterpreter.Reference(typeof(Math)); // å¯æ‰©å±•
             mInterpreter.SetFunction("Distance", (Func<Vector2, Vector2, float>)((a, b) => a.x-b.x));
         }
 
         /// <summary>
-        /// Validate ÔÚ¶¯×÷¹æ»®½×¶Îµ÷ÓÃ
+        /// Validate åœ¨åŠ¨ä½œè§„åˆ’é˜¶æ®µè°ƒç”¨
         /// </summary>
         public List<ConditionEvalResult> ValidateAll(List<ActionStep> actionSequence, ConditionContext context)
         {
@@ -55,7 +55,7 @@ namespace ShootingEditor2D
                     catch (Exception e)
                     {
                         result.Status = ConditionEvalStatus.Error;
-                        result.ErrorMessage = $"action_sequence[{index}].conditionĞ£Ñé³ö´í: {e.Message}";
+                        result.ErrorMessage = $"action_sequence[{index}].conditionæ ¡éªŒå‡ºé”™: {e.Message}";
                     }
                 }
                 results.Add(result);
@@ -65,7 +65,7 @@ namespace ShootingEditor2D
         }
 
         /// <summary>
-        /// Evaluate ÔÚ¶¯×÷Ö´ĞĞ½×¶Îµ÷ÓÃ
+        /// Evaluate åœ¨åŠ¨ä½œæ‰§è¡Œé˜¶æ®µè°ƒç”¨
         /// </summary>
         public ConditionEvalResult Evaluate(int index, ActionStep step, ConditionContext context)
         {
@@ -73,6 +73,8 @@ namespace ShootingEditor2D
             if (step == null || string.IsNullOrEmpty(step.Condition))
                 return result;
 
+            // æŠ•å½±è§†å›¾åˆ·æ–°
+            context.RefreshViews();
             SetVariables(context);
 
             try
@@ -83,13 +85,13 @@ namespace ShootingEditor2D
             catch (Exception e)
             {
                 result.Status = ConditionEvalStatus.Error;
-                result.ErrorMessage = $"action_sequence[{index}].conditionĞ£Ñé³ö´í: {e.Message}";
+                result.ErrorMessage = $"action_sequence[{index}].conditionæ ¡éªŒå‡ºé”™: {e.Message}";
             }
             return result;
         }
 
         /// <summary>
-        /// Ã¿´Î Evaluate / Validate Ê±¸üĞÂ interpreter ±äÁ¿
+        /// æ¯æ¬¡ Evaluate / Validate æ—¶æ›´æ–° interpreter å˜é‡
         /// </summary>
         private void SetVariables(ConditionContext context)
         {

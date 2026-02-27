@@ -31,10 +31,15 @@ CONDITION_VARIABLES = {
     ),
     "displacement": ConditionVariable(
         name="displacement",
-        desc="当前动作开始至今的位移。是一个Vector2。",
-        kind=AccessKind.VECTOR2,
-        members={"x", "y"}
+        desc="当前动作开始至今的横向位移。是一个float。",
+        kind=AccessKind.SCALAR
     ),
+    # "displacement": ConditionVariable(
+    #     name="displacement",
+    #     desc="当前动作开始至今的位移。是一个Vector2。",
+    #     kind=AccessKind.VECTOR2,
+    #     members={"x", "y"}
+    # ),
     "actionTime": ConditionVariable(
         name="actionTime",
         desc="当前动作开始至今所经过的时间。是一个float。",
