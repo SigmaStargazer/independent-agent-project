@@ -241,48 +241,6 @@ namespace ShootingEditor2D
         //    mJumpPressed = false;
         //}
 
-        /// <summary>
-        /// 移动
-        /// </summary>
-        /// <param name="moveRight"></param>
-        /// <param name="distance"></param>
-        //public void MoveByDistance(bool moveRight, float distance)
-        //{
-        //    // 停止之前的移动协程（防止多次调用冲突）
-        //    StopAllCoroutines();
-        //    StartCoroutine(MoveDistanceCoroutine(moveRight, distance));
-        //}
-
-        //private IEnumerator MoveDistanceCoroutine(bool moveRight, float distance)
-        //{
-        //    mIsAutoMoving = true; // 锁定输入
-
-        //    float startX = transform.position.x;
-        //    float directionSign = moveRight ? 1f : -1f;
-        //    float targetX = startX + (distance * directionSign);
-
-        //    // 确保朝向正确
-        //    TurnBack(directionSign);
-
-        //    // 循环直到到达目标位置
-        //    // 判断条件：如果是向右走，当前x小于目标x；如果是向左走，当前x大于目标x
-        //    while ((moveRight && transform.position.x < targetX) ||
-        //           (!moveRight && transform.position.x > targetX))
-        //    {
-        //        // 保持物理移动速度
-        //        mRigidbody2D.velocity = new Vector2(directionSign * moveSpeed, mRigidbody2D.velocity.y);
-
-        //        // 等待下一次物理帧
-        //        yield return new WaitForFixedUpdate();
-        //    }
-
-        //    // 到达目标，刹车
-        //    mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-        //    mIsAutoMoving = false; // 恢复输入
-        //    // 向agent反馈
-        //    SendMessageToAgent("[移动结果]到达目的地！");
-        //}
-
         // 获取自身状态信息
         private string GetSelfStateInfo()
         {
@@ -331,69 +289,6 @@ namespace ShootingEditor2D
             var devicesInfoDesc = renderer.Render(devicesInfo, interactableDeviceInfo);
             return devicesInfoDesc;
         }
-        //private (List<Dictionary<string, object>> devicesInfo, string devicesInfoDesc) GetDevicesInfo(List<DeviceBase> devices)
-        //{
-        //    string devicesInfoDesc = "";
-
-        //    DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-        //    List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-        //    Dictionary<string, object> interactableDeviceInfo = new Dictionary<string, object>();
-
-        //    if (deviceManager == null)
-        //    {
-        //        Debug.LogError("场景中未找到 DeviceManager！");
-        //        return (devicesInfo, "");
-        //    }
-
-        //    (devicesInfo, interactableDeviceInfo) = deviceManager.GetDevicesInfo(this.gameObject, devices);
-
-        //    if (devicesInfo.Count > 0)
-        //    {
-        //        devicesInfoDesc = "你的周围有：";
-        //        int deviceId = 0;
-        //        // 1.遍历设备信息
-        //        foreach (var deviceInfo in devicesInfo)
-        //        {
-        //            string deviceInfoDesc = $"\n{deviceId}. {DeviceInfoToDesc(deviceInfo)}";
-
-        //            devicesInfoDesc += deviceInfoDesc;
-        //            deviceId++;
-        //        }
-
-        //        // 2.获取可交互设备信息
-        //        string interactableDevicDesc = "\n\n可选择交互：\n";
-        //        if (interactableDeviceInfo != null && interactableDeviceInfo.Count > 0)
-        //        {
-        //            interactableDevicDesc += $"{DeviceInfoToDesc(interactableDeviceInfo)}";
-        //        }
-        //        else
-        //        {
-        //            interactableDevicDesc += "身边无可交互对象";
-        //        }
-        //        devicesInfoDesc += interactableDevicDesc;
-        //    }
-
-        //    return (devicesInfo, devicesInfoDesc);
-        //}
-
-        //private string DeviceInfoToDesc(Dictionary<string, object> deviceInfo)
-        //{
-        //    string deviceInfoDesc = "";
-        //    if (deviceInfo != null)
-        //    {
-        //        string speed_x_str = deviceInfo["speedDir_x"] == "" ? $"{deviceInfo["speed_x"]}m/s" : $"方向{deviceInfo["speedDir_x"]} {deviceInfo["speed_x"]}m/s";
-        //        string speed_y_str = deviceInfo["speedDir_y"] == "" ? $"{deviceInfo["speed_y"]}m/s" : $"方向{deviceInfo["speedDir_y"]} {deviceInfo["speed_y"]}m/s";
-        //        deviceInfoDesc = $"{deviceInfo["name"]}: {deviceInfo["desc"]}\n" +
-        //            $"状态:{deviceInfo["state"]}\n" +
-        //            $"方向:{deviceInfo["direction"]}\n距离:{deviceInfo["distance"]}m\n" +
-        //            $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
-        //    }
-        //    else
-        //    {
-        //        deviceInfoDesc = "物体已消失";
-        //    }
-        //        return deviceInfoDesc;
-        //}
 
         /// <summary>
         /// 发送消息给Agent

@@ -30,7 +30,7 @@ namespace ShootingEditor2D
 
         public override string Interact(GameObject chara)
         {
-            switch (curState.Name)
+            switch (mCurState.Name)
             {
                 case "Open":
                     return "保险箱已打开";
@@ -46,7 +46,7 @@ namespace ShootingEditor2D
 
         public override string TextInput(GameObject chara, string inputText)
         {
-            switch (curState.Name)
+            switch (mCurState.Name)
             {
                 case "Open":
                     return "设备未提供输入框";

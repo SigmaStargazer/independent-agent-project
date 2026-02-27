@@ -13,11 +13,11 @@ namespace ShootingEditor2D
         /// <summary>
         /// ×´Ì¬»ú
         /// </summary>
-        protected Dictionary<string, FSMStateBase> states = new Dictionary<string, FSMStateBase>();
+        protected Dictionary<string, FSMStateBase> mStates = new Dictionary<string, FSMStateBase>();
 
-        protected FSMStateBase curState;
+        protected FSMStateBase mCurState;
 
-        public string StateName;
+        public string StateName { get; protected set; }
 
         // Idle hooks
         public virtual void OnIdleEnter() { }
@@ -75,34 +75,34 @@ namespace ShootingEditor2D
                 }
             }
 
-            curState?.OnUpdate(this);
+            mCurState?.OnUpdate(this);
         }
         protected virtual void FixedUpdate()
         {
-            curState?.OnFixedUpdate(this);
+            mCurState?.OnFixedUpdate(this);
         }
 
         protected void RegisterState(FSMStateBase state)
         {
-            states[state.Name] = state;
+            mStates[state.Name] = state;
         }
 
         public void ChangeState(string stateName)
         {
-            if (!states.TryGetValue(stateName, out var newState))
+            if (!mStates.TryGetValue(stateName, out var newState))
             {
                 Debug.LogError($"State {stateName} not registered");
                 return;
             }
             StateName = stateName;
-            curState?.OnExit(this);
-            curState = newState;
-            curState.OnEnter(this);
+            mCurState?.OnExit(this);
+            mCurState = newState;
+            mCurState.OnEnter(this);
         }
 
         public string GetStateName()
         {
-            return curState.Name;
+            return mCurState.Name;
         }
 
         public void StopAction()

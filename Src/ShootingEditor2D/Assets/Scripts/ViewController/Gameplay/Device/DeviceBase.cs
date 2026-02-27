@@ -4,8 +4,14 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public abstract class DeviceBase : SceneObjBase
+    public abstract class DeviceBase : SceneObjBase, IClickable
     {
+        public virtual bool IsClickable => false;
+
+        public virtual void OnClick()
+        {
+            // д╛хо©уй╣ож
+        }
         public abstract bool IsInteractable { get; }
         protected virtual void OnEnable()
         {
