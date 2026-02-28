@@ -196,9 +196,10 @@ async def chatbot(state: State):
                                      "mem_fact": state['mem_fact'],
                                      "mem_episode": state['mem_episode']})
     # 测试：打印prompt
-    print(f"【prompt】:") 
+    print(f"====prompt开始====") 
     for message in prompt.messages:
         message.pretty_print()
+    print(f"====prompt结束====") 
 
     await aperf_print(f"[{name}]模型输出开始")
     response = await llm_with_tools.ainvoke(prompt)

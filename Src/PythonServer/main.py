@@ -2,7 +2,7 @@ import sys
 import os
 import asyncio
 
-from network.servers import AgentServerNetMessage
+from network.servers import AgentServerNetMessage, TOOL_WAITERS
 from network import message_pb2
 
 from agent_framwork.managers.agent_manager import AgentManager
@@ -88,24 +88,6 @@ async def handle_scene_start_request(msg, context):
         print(f"场景启动失败: {str(e)}")
         await context['server'].send_message(response, context)
 
-# @server.on_message(message_pb2.SceneStartRequest)
-# async def handle_scene_start_request(msg, context):
-#     map_id = msg.map_id
-#     print(f"启动场景: {map_id}")
-#     response = message_pb2.SceneStartResponse()
-#     try:
-#         AgentManager().start()
-#         await TimeSystem().aset_speed(1440)
-#         await TimeSystem().astart_time(year=2016,month=1,day=1)
-#         response.success = True
-#         response.errormsg = ""
-#         await context['server'].send_message(response, context)
-#     except Exception as e:
-#         response.success = False
-#         response.errormsg = str(e)
-#         print(f"场景启动失败: {str(e)}")
-#         await context['server'].send_message(response, context)
-
 @server.on_message(message_pb2.UserSendMessageRequest)
 async def handle_user_send_msg_request(msg, context):
     agent = msg.agent
@@ -116,6 +98,28 @@ async def handle_user_send_msg_request(msg, context):
         await AgentManager().agents.get(agent).asend_message(to_agent_message)
     except Exception as e:
         print(f"发送消息失败: {str(e)}")
+
+@server.on_message(message_pb2.SendToolResultMessageRequest)
+async def handle_tool_result_request(msg, context):
+    agent = msg.agent
+    tool_name = msg.tool_name
+    request_id = msg.request_id
+    result = msg.result
+
+    fut = TOOL_WAITERS.get(request_id)
+
+    if fut is None:
+        print(f"[TOOL_WAITERS] 未找到等待中的 request_id: {request_id} (tool={tool_name})")
+        return
+
+    if fut.done():
+        print(f"[TOOL_WAITERS] request_id 已完成: {request_id}")
+        return
+
+    # 唤醒 observe_cmd / 其他工具 await
+    fut.set_result(result)
+
+    print(f"[TOOL_WAITERS] 工具回调完成: agent={agent}, tool={tool_name}, request_id={request_id}")
 
 # ======================
 # 启动服务器

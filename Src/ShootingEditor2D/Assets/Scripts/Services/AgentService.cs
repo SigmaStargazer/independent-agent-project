@@ -28,11 +28,11 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
-        public UnityEngine.Events.UnityAction<string> OnObserve;
+        public UnityEngine.Events.UnityAction<string, string> OnObserve;
         public UnityEngine.Events.UnityAction<string, bool, float> OnMoveAgent;
-        public UnityEngine.Events.UnityAction<string> OnInteract;
-        public UnityEngine.Events.UnityAction<string, int> OnSelect;
-        public UnityEngine.Events.UnityAction<string, string> OnInput;
+        public UnityEngine.Events.UnityAction<string, string> OnInteract;
+        public UnityEngine.Events.UnityAction<string, int, string> OnSelect;
+        public UnityEngine.Events.UnityAction<string, string, string> OnInput;
         public UnityEngine.Events.UnityAction<string, List<ActionStep>> OnPlanActionSequence;
         public UnityEngine.Events.UnityAction<string> OnStartActionSequence;
         public UnityEngine.Events.UnityAction<string> OnCancelActionSequence;
@@ -278,6 +278,29 @@ namespace Services
                 this.ConnectToServer();
             }
         }
+        public void SendToolResultMessage(string agent, string toolName, string requestId, string toolResultMessage)
+        {
+            Debug.LogFormat("ToolResultMessageRequest::agent:{0} toolName:{1} requestId:{2} toolResultMessage:{3}", agent, toolName, requestId, toolResultMessage);
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.sendToolResultMessageRequest = new SendToolResultMessageRequest();
+            message.Request.sendToolResultMessageRequest.Agent = agent;
+            message.Request.sendToolResultMessageRequest.ToolName = toolName;
+            message.Request.sendToolResultMessageRequest.RequestId = requestId;
+            message.Request.sendToolResultMessageRequest.Result = toolResultMessage;
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                this.pendingMessage = null;
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                this.pendingMessage = message;
+                this.ConnectToServer();
+            }
+        }
         void OnAgentMessageGet(object sender, AgentSendMessageRequest request)
         {
             Debug.LogFormat("OnAgentMessageGet::Agent:{0} AiMessage:{1}", request.Agent, request.AiMessage);
@@ -289,10 +312,10 @@ namespace Services
         // 观察
         void OnAgentObserve(object sender, AgentObserveRequest request)
         {
-            Debug.LogFormat("OnAgentObserve::Agent:{0}", request.Agent);
+            Debug.LogFormat("OnAgentObserve::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
             if (this.OnObserve != null)
             {
-                this.OnObserve(request.Agent);
+                this.OnObserve(request.Agent, request.RequestId);
             }
         }
         // 移动
@@ -309,28 +332,28 @@ namespace Services
         #region 交互
         void OnAgentInteract(object sender, AgentInteractRequest request)
         {
-            Debug.LogFormat("OnAgentInteract::Agent:{0}", request.Agent);
+            Debug.LogFormat("OnAgentInteract::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
             if (this.OnInteract != null)
             {
-                this.OnInteract(request.Agent);
+                this.OnInteract(request.Agent, request.RequestId);
             }
         }
 
         void OnAgentSelect(object sender, AgentSelectRequest request)
         {
-            Debug.LogFormat("OnAgentSelect::Agent:{0} Selection:{1}", request.Agent, request.Selection);
+            Debug.LogFormat("OnAgentSelect::Agent:{0} Selection:{1} RequestId:{2}", request.Agent, request.Selection, request.RequestId);
             if (this.OnSelect != null)
             {
-                this.OnSelect(request.Agent, request.Selection);
+                this.OnSelect(request.Agent, request.Selection, request.RequestId);
             }
         }
 
         void OnAgentInput(object sender, AgentInputRequest request)
         {
-            Debug.LogFormat("OnAgentInput::Agent:{0} Text:{1}", request.Agent, request.InputText);
+            Debug.LogFormat("OnAgentInput::Agent:{0} Text:{1} RequestId:{2}", request.Agent, request.InputText, request.RequestId);
             if (this.OnInput != null)
             {
-                this.OnInput(request.Agent,request.InputText);
+                this.OnInput(request.Agent,request.InputText, request.RequestId);
             }
         }
 

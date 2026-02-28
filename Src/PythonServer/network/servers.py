@@ -9,6 +9,9 @@ from google.protobuf.message import Message
 
 from network.message_pb2 import NetMessage 
 
+# 工具等待器：键为request_id，值为等待器
+TOOL_WAITERS: dict[str, asyncio.Future] = {}
+
 @singleton
 class AgentServerNetMessage:
     def __init__(self, port=0, port_config_file=None):

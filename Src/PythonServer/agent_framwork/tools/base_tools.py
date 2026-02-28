@@ -1,3 +1,6 @@
+import asyncio
+import uuid
+
 from langchain_core.tools import tool
 from typing_extensions import Annotated
 from langgraph.prebuilt import InjectedState
@@ -18,6 +21,8 @@ from network import message_pb2
 
 # tool中调用langgraph中state内参数的方式，请参考下面的 InjectedState 中的内容：
 # https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode.inject_tool_args
+
+TOOL_TIMEOUT = 30#RPC调用超时时间
 
 # region Agent交流工具
 @tool
@@ -102,10 +107,10 @@ async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")],
     """规划一串连续的动作。
     后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
     举例：
-    在信号灯变绿后，立刻向右走2米
+    在信号灯变绿后，立刻向右走2米。此时看到信号灯的序号为1
     action_sequence:
         - action: wait
-          condition: objects[0].State == 'GreenLight'
+          condition: objects[1].State == "GreenLight"
         - action: move
           direction: right
           condition: displacement >= 2
@@ -168,18 +173,36 @@ async def cancel_action_sequence_cmd(agent: Annotated[str, InjectedState("name")
 async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
     """观察周围环境
     Return:
-        str: 观察是否开始。注意：观察结果将通过新的消息另行通知。
+        str: 环境观察结果。
     """
-    from network.servers import AgentServerNetMessage
+    from network.servers import AgentServerNetMessage, TOOL_WAITERS
     from network import message_pb2
+
+    request_id = str(uuid.uuid4())
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
     try:
         request = message_pb2.AgentObserveRequest()
         request.agent = agent
+        request.request_id = request_id
+
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。")
-        return f"[{agent}]正在观察周围环境。待观察完成后，你将收到观察完成的消息。"
+        print(f"[{agent}] observe_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]观察超时"
     except Exception as e:
-        return f"观察周围环境出错: {e}"
+        return f"[{agent}]观察异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 
 @tool
 async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
@@ -210,18 +233,36 @@ async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str,
 async def interact_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
     """与身旁的标注为\"可选择交互\"的对象进行交互
     Return:
-        str: 交互是否开始。注意：交互结果将通过新的消息另行通知。
+        str: 交互结果
     """
-    from network.servers import AgentServerNetMessage
+    from network.servers import AgentServerNetMessage, TOOL_WAITERS
     from network import message_pb2
+
+    request_id = str(uuid.uuid4())
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
     try:
         request = message_pb2.AgentInteractRequest()
         request.agent = agent
+        request.request_id = request_id
+
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]尝试与\"可选择交互\"的对象进行交互。待交互完成后，你将收到交互完成的消息。")
-        return f"[{agent}]尝试与\"可选择交互\"的对象进行交互。待交互完成后，你将收到交互完成的消息。"
+        print(f"[{agent}] interact_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]交互超时"
     except Exception as e:
-        return f"交互失败: {e}"
+        return f"[{agent}]交互异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 
 @tool
 async def select_cmd(agent: Annotated[str, InjectedState("name")], selection: int) -> str:
@@ -230,19 +271,37 @@ async def select_cmd(agent: Annotated[str, InjectedState("name")], selection: in
     Args:
         selection(int): 选项编号
     Return:
-        str: 选择是否开始。注意：选择结果将通过新的消息另行通知。
+        str: 选择结果
     """
-    from network.servers import AgentServerNetMessage
+    from network.servers import AgentServerNetMessage, TOOL_WAITERS
     from network import message_pb2
+
+    request_id = str(uuid.uuid4())
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
     try:
         request = message_pb2.AgentSelectRequest()
         request.agent = agent
+        request.request_id = request_id
         request.selection = selection
+
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]选择了选项{selection}。待选择完成后，你将收到选择完成的消息。")
-        return f"[{agent}]选择了选项{selection}。待选择完成后，你将收到选择完成的消息。"
+        print(f"[{agent}] select_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]选择超时"
     except Exception as e:
-        return f"选择失败: {e}"
+        return f"[{agent}]选择异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 
 @tool
 async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: str) -> str:
@@ -251,20 +310,37 @@ async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: st
     Args:
         input_text(str): 输入文本
     Return:
-        str: 输入是否开始。注意：输入结果将通过新的消息另行通知。
+        str: 输入结果
     """
-    from network.servers import AgentServerNetMessage
+    from network.servers import AgentServerNetMessage, TOOL_WAITERS
     from network import message_pb2
+
+    request_id = str(uuid.uuid4())
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+    
     try:
         request = message_pb2.AgentInputRequest()
         request.agent = agent
+        request.request_id = request_id
         request.input_text = input_text
-        await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]输入了文本{input_text}。待输入完成后，你将收到输入完成的消息。")
-        return f"[{agent}]输入了文本{input_text}。待输入完成后，你将收到输入完成的消息。"
-    except Exception as e:
-        return f"输入失败: {e}"
 
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] input_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]输入超时"
+    except Exception as e:
+        return f"[{agent}]输入异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 # endregion
 
 @tool

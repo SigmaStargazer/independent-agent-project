@@ -225,30 +225,33 @@ namespace SkillBridge.Message
         public UserSendMessageRequest userSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(5)]
-        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
-        public AgentObserveRequest agentObserveRequest { get; set; }
+        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(7)]
-        public AgentMoveRequest agentMoveRequest { get; set; }
+        public AgentObserveRequest agentObserveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(8)]
-        public AgentInteractRequest agentInteractRequest { get; set; }
+        public AgentMoveRequest agentMoveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(9)]
-        public AgentSelectRequest agentSelectRequest { get; set; }
+        public AgentInteractRequest agentInteractRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(10)]
-        public AgentInputRequest agentInputRequest { get; set; }
+        public AgentSelectRequest agentSelectRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(11)]
-        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+        public AgentInputRequest agentInputRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(12)]
-        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(13)]
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(14)]
         public AgentCancelActionSequenceRequest agentCancelActionSequenceRequest { get; set; }
 
     }
@@ -378,6 +381,31 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class SendToolResultMessageRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"tool_name")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string ToolName { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(4, Name = @"result")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Result { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class AgentSendMessageRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -404,6 +432,10 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
 
     }
 
@@ -437,7 +469,11 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
-        [global::ProtoBuf.ProtoMember(2, Name = @"action_sequence")]
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"action_sequence")]
         public global::System.Collections.Generic.List<ActionStep> ActionSequences { get; } = new global::System.Collections.Generic.List<ActionStep>();
 
     }
@@ -453,6 +489,10 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -465,6 +505,10 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
 
     }
 
@@ -479,6 +523,10 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -492,7 +540,11 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
-        [global::ProtoBuf.ProtoMember(2, Name = @"selection")]
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"selection")]
         public int Selection { get; set; }
 
     }
@@ -508,7 +560,11 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
-        [global::ProtoBuf.ProtoMember(2, Name = @"input_text")]
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"input_text")]
         [global::System.ComponentModel.DefaultValue("")]
         public string InputText { get; set; } = "";
 

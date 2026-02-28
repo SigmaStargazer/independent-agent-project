@@ -149,15 +149,16 @@ message NetMessageRequest{
 	AgentLoadRequest agentLoadRequest = 2;
 	SceneStartRequest sceneStartRequest = 3;
 	UserSendMessageRequest userSendMessageRequest = 4;
-	AgentSendMessageRequest agentSendMessageRequest = 5;
-	AgentObserveRequest agentObserveRequest = 6;
-	AgentMoveRequest agentMoveRequest = 7;
-	AgentInteractRequest agentInteractRequest = 8;
-	AgentSelectRequest agentSelectRequest = 9;
-	AgentInputRequest agentInputRequest = 10;
-	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 11;
-	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 12;
-	AgentCancelActionSequenceRequest agentCancelActionSequenceRequest = 13;
+	SendToolResultMessageRequest sendToolResultMessageRequest = 5;
+	AgentSendMessageRequest agentSendMessageRequest = 6;
+	AgentObserveRequest agentObserveRequest = 7;
+	AgentMoveRequest agentMoveRequest = 8;
+	AgentInteractRequest agentInteractRequest = 9;
+	AgentSelectRequest agentSelectRequest = 10;
+	AgentInputRequest agentInputRequest = 11;
+	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 12;
+	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 13;
+	AgentCancelActionSequenceRequest agentCancelActionSequenceRequest = 14;
 }
 
 message NetMessageResponse{
@@ -203,6 +204,14 @@ message UserSendMessageRequest {
 	string user_message = 2;
 }
 
+// 统一工具回调（实现异步 Tool RPC系统）
+message SendToolResultMessageRequest {
+    string agent = 1;
+    string tool_name = 2;
+    string request_id = 3;
+    string result = 4;
+}
+
 // 智能体向用户发消息
 message AgentSendMessageRequest {
 	string agent = 1;
@@ -212,6 +221,7 @@ message AgentSendMessageRequest {
 // 观察场景
 message AgentObserveRequest {
 	string agent = 1;
+	string request_id = 2;
 }
 
 // 向指定方向移动指定距离
@@ -224,27 +234,33 @@ message AgentMoveRequest {
 // 与设备进行交互
 message AgentPlanActionSequenceRequest {
 	string agent = 1;
-	repeated ActionStep action_sequence = 2;
+	string request_id = 2;
+	repeated ActionStep action_sequence = 3;
 }
 
 message AgentStartActionSequenceRequest {
 	string agent = 1;
+	string request_id = 2;
 }
 
 message AgentCancelActionSequenceRequest {
 	string agent = 1;
+	string request_id = 2;
 }
 
 message AgentInteractRequest {
 	string agent = 1;
+	string request_id = 2;
 }
 
 message AgentSelectRequest {
 	string agent = 1;
-	int32 selection = 2;
+	string request_id = 2;
+	int32 selection = 3;
 }
 
 message AgentInputRequest {
 	string agent = 1;
-	string input_text = 2;
+	string request_id = 2;
+	string input_text = 3;
 }

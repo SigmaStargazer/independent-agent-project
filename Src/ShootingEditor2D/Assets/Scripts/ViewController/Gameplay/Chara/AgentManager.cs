@@ -58,11 +58,11 @@ namespace ShootingEditor2D
         #endregion
 
         #region Ω” ’Agent÷∏¡Ó¬ﬂº≠
-        private void Observe(string agent)
+        private void Observe(string agent, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.Observe();
+                agentObj.Observe(requestId);
             }
         }
 
@@ -74,27 +74,27 @@ namespace ShootingEditor2D
             }
         }
 
-        private void Interact(string agent)
+        private void Interact(string agent, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.Interact();
+                agentObj.Interact(requestId);
             }
         }
 
-        private void Select(string agent, int selection)
+        private void Select(string agent, int selection, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.Select(selection);
+                agentObj.Select(selection, requestId);
             }
         }
 
-        private void TextInput(string agent, string inputText)
+        private void TextInput(string agent, string inputText, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.TextInput(inputText);
+                agentObj.TextInput(inputText, requestId);
             }
         }
         #endregion

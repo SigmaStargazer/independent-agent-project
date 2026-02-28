@@ -169,23 +169,27 @@ namespace ShootingEditor2D
                 Debug.LogError($"[{this.Name}OnActionFinished出错]finishedActionRuntime is null");
                 return;
             }
-
-            // 1. 获取当前Action的EndEnv
-            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
-            //string devicesInfoDesc = "";
-            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mCurActionSequenceRuntime.DeviceSnap);
-            finishedActionRuntime.EndEnv = devicesInfoDesc;
-            // 2.执行Action结束逻辑
+            
             // 如果执行的是ActionSequence中的Action
             if (mCurActionSequenceRuntime?.State == ActionSequenceState.Executing)
             {
+                // 1. 获取当前Action的EndEnv
+                List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+                string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
+                finishedActionRuntime.EndEnv = devicesInfoDesc;
+
+                // 2.执行Action结束逻辑
                 this.OnCurrentActionCompleted();
                 return;
             }
             // 如果执行的是非ActionSequence中的Action
             else
             {
+                // 1. 获取当前Action的EndEnv
+                List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+                string devicesInfoDesc = this.GetDeviceSnapInfo(DeviceManager.Instance.GetDevices());
+                finishedActionRuntime.EndEnv = devicesInfoDesc;
+
                 if (finishedActionRuntime?.Result?.Message != null)
                 {
                     this.SendMessageToAgent(finishedActionRuntime.Result.Message);
@@ -388,40 +392,43 @@ namespace ShootingEditor2D
         /// <summary>
         /// 交互
         /// </summary>
-        public void Interact()
+        public void Interact(string requestId)
         {
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            if (deviceManager == null)
+            if (DeviceManager.Instance == null)
             {
                 Debug.LogError("场景中未找到 DeviceManager！");
                 return;
             }
-            string result = deviceManager.Interact(this.gameObject);
-            this.SendMessageToAgent($"[交互结果]{result}");
+            string result = DeviceManager.Instance.Interact(this.gameObject);
+            string messageToSend = $"[交互结果]{result}";
+            AgentService.Instance.SendToolResultMessage(this.Name, "Interact", requestId, messageToSend);
+            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
-        public void Select(int selection)
+        public void Select(int selection, string requestId)
         {
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            if (deviceManager == null)
+            if (DeviceManager.Instance == null)
             {
                 Debug.LogError("场景中未找到 DeviceManager！");
                 return;
             }
-            string result = deviceManager.Select(this.gameObject, selection);
-            this.SendMessageToAgent($"[选择结果]{result}");
+            string result = DeviceManager.Instance.Select(this.gameObject, selection);
+            string messageToSend = $"[选择结果]{result}";
+            AgentService.Instance.SendToolResultMessage(this.Name, "Select", requestId, messageToSend);
+            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
-        public void TextInput(string inputText)
+        public void TextInput(string inputText, string requestId)
         {
-            DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            if (deviceManager == null)
+            if (DeviceManager.Instance == null)
             {
                 Debug.LogError("场景中未找到 DeviceManager！");
                 return;
             }
-            string result = deviceManager.TextInput(this.gameObject, inputText);
-            this.SendMessageToAgent($"[输入结果]{result}");
+            string result = DeviceManager.Instance.TextInput(this.gameObject, inputText);
+            string messageToSend = $"[输入结果]{result}";
+            AgentService.Instance.SendToolResultMessage(this.Name, "TextInput", requestId, messageToSend);
+            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
 
@@ -429,21 +436,18 @@ namespace ShootingEditor2D
         /// <summary>
         /// 观察场景
         /// </summary>
-        public void Observe()
+        public void Observe(string requestId)
         {
             // 获取设备信息
             List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
             string devicesInfoDesc = this.GetDevicesInfo();
-            //string devicesInfoDesc = "";
-            //DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            //var mDevices = deviceManager.GetDevices();
-            //(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
 
             // 拼接
-            string messageToSend = $"[观察结果]<环境>\n{devicesInfoDesc}\n<\\环境>";
+            string messageToSend = $"[观察结果]\n<环境>\n{devicesInfoDesc}\n<\\环境>";
 
             // 发送给Agent
-            AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            // tool_name = "observe"只用于日志打印，不用于判断
+            AgentService.Instance.SendToolResultMessage(this.Name, "Observe", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
         #endregion
