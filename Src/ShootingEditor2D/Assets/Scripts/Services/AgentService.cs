@@ -33,9 +33,9 @@ namespace Services
         public UnityEngine.Events.UnityAction<string, string> OnInteract;
         public UnityEngine.Events.UnityAction<string, int, string> OnSelect;
         public UnityEngine.Events.UnityAction<string, string, string> OnInput;
-        public UnityEngine.Events.UnityAction<string, List<ActionStep>> OnPlanActionSequence;
-        public UnityEngine.Events.UnityAction<string> OnStartActionSequence;
-        public UnityEngine.Events.UnityAction<string> OnCancelActionSequence;
+        public UnityEngine.Events.UnityAction<string, List<ActionStep>, string> OnPlanActionSequence;
+        public UnityEngine.Events.UnityAction<string, string> OnStartActionSequence;
+        public UnityEngine.Events.UnityAction<string, string> OnCancelActionSequence;
         NetMessage pendingMessage = null;
         bool connected = false;
 
@@ -359,28 +359,28 @@ namespace Services
 
         private void OnAgentPlanActionSequence(object sender, AgentPlanActionSequenceRequest request)
         {
-            Debug.LogFormat("OnAgentPlanActionSequence::Agent:{0} ActionSequence:{1}", request.Agent, request.ActionSequences);
+            Debug.LogFormat("OnAgentPlanActionSequence::Agent:{0} ActionSequence:{1} RequestId:{2}", request.Agent, request.ActionSequences, request.RequestId);
             if (this.OnPlanActionSequence != null)
             {
-                this.OnPlanActionSequence(request.Agent, request.ActionSequences);
+                this.OnPlanActionSequence(request.Agent, request.ActionSequences, request.RequestId);
             }
         }
 
         private void OnAgentStartActionSequence(object sender, AgentStartActionSequenceRequest request)
         {
-            Debug.LogFormat("OnAgentStartActionSequence::Agent:{0}", request.Agent);
+            Debug.LogFormat("OnAgentStartActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
             if (this.OnStartActionSequence != null)
             {
-                this.OnStartActionSequence(request.Agent);
+                this.OnStartActionSequence(request.Agent, request.RequestId);
             }
         }
 
         private void OnAgentCancelActionSequence(object sender, AgentCancelActionSequenceRequest request)
         {
-            Debug.LogFormat("OnAgentCancelActionSequence::Agent:{0}", request.Agent);
+            Debug.LogFormat("OnAgentCancelActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
             if (this.OnCancelActionSequence != null)
             {
-                this.OnCancelActionSequence(request.Agent);
+                this.OnCancelActionSequence(request.Agent, request.RequestId);
             }
         }
 

@@ -453,12 +453,17 @@ namespace ShootingEditor2D
         #endregion
 
         #region ActionSequence相关
-        public void PlanActionSequence(List<ActionStep> actionSequence)
+        public void PlanActionSequence(List<ActionStep> actionSequence, string requestId)
         {
             if (actionSequence == null || actionSequence.Count == 0)
             {
-                Debug.Log("ActionSequence为空！");
-                this.SendMessageToAgent("ActionSequence为空！");// 这块尽量在服务端处理
+                // 这块尽量在服务端处理
+                AgentService.Instance.SendToolResultMessage(
+                    this.Name,
+                    "PlanActionSequence", 
+                    requestId, 
+                    "[动作序列规划结果]ActionSequence为空！"
+                    );
                 return;
             }
             Debug.Log($"[{this.Name}] 收到动作序列规划请求，共 {actionSequence.Count} 个动作");
@@ -498,7 +503,12 @@ namespace ShootingEditor2D
                 if (errorMessages.Count > 0)
                 {
                     string combinedError = string.Join("\n", errorMessages);
-                    this.SendMessageToAgent($"[动作序列规划结果]动作序列校验未通过:\n{combinedError}");
+                    AgentService.Instance.SendToolResultMessage(
+                         this.Name,
+                         "PlanActionSequence",
+                         requestId,
+                         $"[动作序列规划结果]动作序列校验未通过:\n{combinedError}"
+                         );
                     return;
                 }
                 else // 4.生成确认信息
@@ -520,21 +530,36 @@ namespace ShootingEditor2D
                     string messageToSend = $"[动作序列规划结果]计划中的动作序列已准备就绪！" +
                         $"建议在开始动作序列前，先对各动作的结束条件中的object[i]是否能和下列物体快照中的物体能对应上进行核对（如核对不上，可再次使用ActionSequence规划功能进行修改）：" +
                         $"{devicesInfoDesc}";
-                    this.SendMessageToAgent(messageToSend);
+                    AgentService.Instance.SendToolResultMessage(
+                         this.Name,
+                         "PlanActionSequence",
+                         requestId,
+                         messageToSend
+                         );
                 }
             }
             catch (Exception e)
             {
-                this.SendMessageToAgent($"[动作序列规划结果]出错：{e.Message}");
+                AgentService.Instance.SendToolResultMessage(
+                     this.Name,
+                     "PlanActionSequence",
+                     requestId,
+                     $"[动作序列规划结果]出错：{e.Message}"
+                     );
             }
 
         }
 
-        public void StartActionSequence()
+        public void StartActionSequence(string requestId)
         {
             if (mPlanningActionSequenceRuntime == null)
             {
-                this.SendMessageToAgent($"[动作序列确认开始执行结果]失败: 没有计划中的动作序列");
+                AgentService.Instance.SendToolResultMessage(
+                     this.Name,
+                     "StartActionSequence",
+                     requestId,
+                     $"[动作序列确认开始执行结果]失败: 没有计划中的动作序列"
+                     );
                 return;
             }
 
@@ -558,20 +583,35 @@ namespace ShootingEditor2D
                 mCurActionSequenceRuntime.State = ActionSequenceState.Executing;
                 this.ExecuteCurAction();
                 // 4.发送消息
-                this.SendMessageToAgent($"[动作序列确认开始执行结果]成功: 共计{this.mCurActionSequenceRuntime.ActionSequence.Count}个动作");
+                AgentService.Instance.SendToolResultMessage(
+                     this.Name,
+                     "StartActionSequence",
+                     requestId,
+                     $"[动作序列确认开始执行结果]成功: 共计{this.mCurActionSequenceRuntime.ActionSequence.Count}个动作"
+                     );
             }
             catch (Exception e)
             {
-                this.SendMessageToAgent($"[动作序列确认开始执行结果]失败: {e.Message}");
+                AgentService.Instance.SendToolResultMessage(
+                     this.Name,
+                     "StartActionSequence",
+                     requestId,
+                     $"[动作序列确认开始执行结果]失败: {e.Message}"
+                     );
                 return;
             }
         }
 
-        public void CancelActionSequence()
+        public void CancelActionSequence(string requestId)
         {
             if (mCurActionSequenceRuntime == null)
             {
-                this.SendMessageToAgent($"[动作序列取消结果]失败: 没有执行中的ActionSequence");
+                AgentService.Instance.SendToolResultMessage(
+                     this.Name,
+                     "CancelActionSequence",
+                     requestId,
+                     $"[动作序列取消结果]失败: 没有执行中的ActionSequence"
+                     );
                 return;
             }
 
@@ -583,8 +623,12 @@ namespace ShootingEditor2D
             // 2. 设置终止状态（不清除是为了还能调用log）
             mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
             // 3. 发送取消信息
-            Debug.Log($"[{this.Name}]取消ActionSequence成功");
-            this.SendMessageToAgent($"取消ActionSequence成功");
+            AgentService.Instance.SendToolResultMessage(
+                 this.Name,
+                 "CancelActionSequence",
+                 requestId,
+                 $"[动作序列取消结果]取消成功"
+                 );
         }
 
         private void ExecuteCurAction()
