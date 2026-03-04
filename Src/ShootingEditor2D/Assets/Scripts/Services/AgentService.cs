@@ -35,7 +35,8 @@ namespace Services
         public UnityEngine.Events.UnityAction<string, string, string> OnInput;
         public UnityEngine.Events.UnityAction<string, List<ActionStep>, string> OnPlanActionSequence;
         public UnityEngine.Events.UnityAction<string, string> OnStartActionSequence;
-        public UnityEngine.Events.UnityAction<string, string> OnCancelActionSequence;
+        public UnityEngine.Events.UnityAction<string, string> OnContinueActionSequence;
+        public UnityEngine.Events.UnityAction<string, string> OnStopActionSequence;
         NetMessage pendingMessage = null;
         bool connected = false;
 
@@ -54,7 +55,8 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentInputRequest>(this.OnAgentInput);
             MessageDistributer.Instance.Subscribe<AgentPlanActionSequenceRequest>(this.OnAgentPlanActionSequence);
             MessageDistributer.Instance.Subscribe<AgentStartActionSequenceRequest>(this.OnAgentStartActionSequence);
-            MessageDistributer.Instance.Subscribe<AgentCancelActionSequenceRequest>(this.OnAgentCancelActionSequence);
+            MessageDistributer.Instance.Subscribe<AgentContinueActionSequenceRequest>(this.OnAgentContinueActionSequence);
+            MessageDistributer.Instance.Subscribe<AgentStopActionSequenceRequest>(this.OnAgentStopActionSequence);
         }
 
         public void Dispose()
@@ -70,7 +72,8 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentInputRequest>(this.OnAgentInput);
             MessageDistributer.Instance.Unsubscribe<AgentPlanActionSequenceRequest>(this.OnAgentPlanActionSequence);
             MessageDistributer.Instance.Unsubscribe<AgentStartActionSequenceRequest>(this.OnAgentStartActionSequence);
-            MessageDistributer.Instance.Unsubscribe<AgentCancelActionSequenceRequest>(this.OnAgentCancelActionSequence);
+            MessageDistributer.Instance.Unsubscribe<AgentContinueActionSequenceRequest>(this.OnAgentContinueActionSequence);
+            MessageDistributer.Instance.Unsubscribe<AgentStopActionSequenceRequest>(this.OnAgentStopActionSequence);
             AgentClient.Instance.OnConnect -= OnGameServerConnect;
             AgentClient.Instance.OnDisconnect -= OnGameServerDisconnect;
         }
@@ -375,12 +378,21 @@ namespace Services
             }
         }
 
-        private void OnAgentCancelActionSequence(object sender, AgentCancelActionSequenceRequest request)
+        private void OnAgentContinueActionSequence(object sender, AgentContinueActionSequenceRequest request)
         {
-            Debug.LogFormat("OnAgentCancelActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
-            if (this.OnCancelActionSequence != null)
+            Debug.LogFormat("OnAgentContinueActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
+            if (this.OnContinueActionSequence != null)
             {
-                this.OnCancelActionSequence(request.Agent, request.RequestId);
+                this.OnContinueActionSequence(request.Agent, request.RequestId);
+            }
+        }
+
+        private void OnAgentStopActionSequence(object sender, AgentStopActionSequenceRequest request)
+        {
+            Debug.LogFormat("OnAgentStopActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
+            if (this.OnStopActionSequence != null)
+            {
+                this.OnStopActionSequence(request.Agent, request.RequestId);
             }
         }
 

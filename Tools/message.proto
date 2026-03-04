@@ -158,7 +158,8 @@ message NetMessageRequest{
 	AgentInputRequest agentInputRequest = 11;
 	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 12;
 	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 13;
-	AgentCancelActionSequenceRequest agentCancelActionSequenceRequest = 14;
+	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 14;
+	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 15;
 }
 
 message NetMessageResponse{
@@ -243,7 +244,12 @@ message AgentStartActionSequenceRequest {
 	string request_id = 2;
 }
 
-message AgentCancelActionSequenceRequest {
+message AgentContinueActionSequenceRequest {
+	string agent = 1;
+	string request_id = 2;
+}
+
+message AgentStopActionSequenceRequest {
 	string agent = 1;
 	string request_id = 2;
 }

@@ -28,31 +28,31 @@ namespace ShootingEditor2D
             ChangeState("Close");
         }
 
-        public override string Interact(GameObject chara)
+        public override (bool success, string result) Interact(GameObject chara)
         {
             switch (mCurState.Name)
             {
                 case "Open":
-                    return "保险箱已打开";
+                    return (true, "保险箱未关上");
                 case "Close":
                     if (pwd == null || !Regex.IsMatch(pwd, @"^\d{4}$"))
-                        return PwdNotSettedOpen();
+                        return (true, PwdNotSettedOpen());
                     else
-                        return "请输入4位数密码: ____";
+                        return (true, "请输入4位数密码: ____");
                 default:
-                    return "";
+                    return (true, "");
             }
         }
 
-        public override string TextInput(GameObject chara, string inputText)
+        public override (bool success, string result) TextInput(GameObject chara, string inputText)
         {
             switch (mCurState.Name)
             {
                 case "Open":
-                    return "设备未提供输入框";
+                    return (false, "设备未提供输入框");
                 case "Close":
                     if (pwd == null || !Regex.IsMatch(pwd, @"^\d{4}$"))
-                        return PwdNotSettedOpen();
+                        return (true, PwdNotSettedOpen());
                     else
                     {
                         if (Regex.IsMatch(inputText, @"^\d{4}$"))
@@ -60,20 +60,20 @@ namespace ShootingEditor2D
                             if (inputText == pwd)
                             {
                                 ChangeState("Open");
-                                return "打开保险箱成功";
+                                return (true, "打开保险箱成功");
                             }
                             else
                             {
-                                return "密码错误";
+                                return (false, "密码错误");
                             }
                         }
                         else
                         {
-                            return "输入不是4位数字！";
+                            return (false, "输入不是4位数字！");
                         }
                     }
                 default:
-                    return "";
+                    return (false, $"保险箱处于无法打开的状态:{this.StateName}");
             }
         }
 

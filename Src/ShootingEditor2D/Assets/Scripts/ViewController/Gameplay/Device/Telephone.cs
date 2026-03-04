@@ -11,19 +11,9 @@ namespace ShootingEditor2D
 
         public override bool IsInteractable => false;
 
-        public override string Interact(GameObject chara)
+        public override (bool success, string result) Interact(GameObject chara)
         {
-            return "";
-        }
-
-        public override string Select(GameObject chara, int selection)
-        {
-            return "";
-        }
-
-        public override string TextInput(GameObject chara, string inputText)
-        {
-            return "";
+            return (false, "该设备无法交互");
         }
     }
 

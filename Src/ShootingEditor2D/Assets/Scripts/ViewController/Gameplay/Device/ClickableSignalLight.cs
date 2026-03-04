@@ -27,11 +27,6 @@ namespace ShootingEditor2D
             ChangeState("RedLight");
         }
 
-        public override string Interact(GameObject chara)
-        {
-            return "";
-        }
-
         public class GreenLightState : FSMStateBase
         {
             public override string Name => "GreenLight";

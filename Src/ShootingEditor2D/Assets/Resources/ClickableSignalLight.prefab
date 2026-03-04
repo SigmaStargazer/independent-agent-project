@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6224344286772890450}
   - component: {fileID: 3335554499902497002}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 7699284308387195917}
   - component: {fileID: 1656773478971261785}
   - component: {fileID: 2164548856000052085}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ClickableSignalLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -220,7 +220,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4589722514511555811}
   - component: {fileID: 545065287418467859}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Square (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

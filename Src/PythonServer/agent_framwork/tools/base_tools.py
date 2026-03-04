@@ -182,12 +182,45 @@ async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]
     finally:
         TOOL_WAITERS.pop(request_id, None)
 
-# 取消动作序列
+# 继续执行动作序列
 @tool
-async def cancel_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
-    """取消动作序列
+async def continue_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """继续执行动作序列
     Return:
-        str: 动作序列取消结果
+        str: 动作序列继续执行结果
+    """
+    request_id = str(uuid.uuid4())
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentContinueActionSequenceRequest()
+        request.agent = agent
+        request.request_id = request_id
+        
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] continue_action_sequence_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]继续执行动作序列超时"
+    except Exception as e:
+        return f"[{agent}]继续执行动作序列异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+# 停止动作序列
+@tool
+async def stop_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+    """停止动作序列
+    Return:
+        str: 动作序列停止结果
     """
     request_id = str(uuid.uuid4())
     loop = asyncio.get_running_loop()
@@ -197,21 +230,21 @@ async def cancel_action_sequence_cmd(agent: Annotated[str, InjectedState("name")
     TOOL_WAITERS[request_id] = fut
     
     try:
-        request = message_pb2.AgentCancelActionSequenceRequest()
+        request = message_pb2.AgentStopActionSequenceRequest()
         request.agent = agent
         request.request_id = request_id
         
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}] cancel_action_sequence_cmd 发起请求 {request_id}")
+        print(f"[{agent}] stop_action_sequence_cmd 发起请求 {request_id}")
         # 等待客户端回调（阻塞 await）
         result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
 
         # 闭环返回模型
         return f"{result}"
     except asyncio.TimeoutError:
-        return f"[{agent}]取消动作序列超时"
+        return f"[{agent}]停止动作序列超时"
     except Exception as e:
-        return f"[{agent}]取消动作序列异常: {e}"
+        return f"[{agent}]停止动作序列异常: {e}"
     finally:
         TOOL_WAITERS.pop(request_id, None)
 

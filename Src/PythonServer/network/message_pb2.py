@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='SkillBridge.Message',
   syntax='proto3',
-  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"I\n\tNUserInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x06player\x18\x02 \x01(\x0b\x32 .SkillBridge.Message.NPlayerInfo\"R\n\x0bNPlayerInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x37\n\ncharacters\x18\x02 \x03(\x0b\x32#.SkillBridge.Message.NCharacterInfo\"\xeb\x01\n\x0eNCharacterInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03tid\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x31\n\x04type\x18\x04 \x01(\x0e\x32#.SkillBridge.Message.CHARACTER_TYPE\x12\x33\n\x05\x63lass\x18\x05 \x01(\x0e\x32$.SkillBridge.Message.CHARACTER_CLASS\x12\r\n\x05level\x18\x06 \x01(\x05\x12\r\n\x05mapId\x18\x07 \x01(\x05\x12,\n\x06\x65ntity\x18\x08 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"+\n\x08NVector3\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x87\x01\n\x07NEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\x30\n\tdirection\x18\x03 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\r\n\x05speed\x18\x04 \x01(\x05\"y\n\x0bNEntitySync\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x05\x65vent\x18\x02 \x01(\x0e\x32!.SkillBridge.Message.ENTITY_EVENT\x12,\n\x06\x65ntity\x18\x03 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"\x8b\x01\n\nActionStep\x12\x11\n\tcondition\x18\x01 \x01(\t\x12/\n\x04wait\x18\x02 \x01(\x0b\x32\x1f.SkillBridge.Message.WaitActionH\x00\x12/\n\x04move\x18\x03 \x01(\x0b\x32\x1f.SkillBridge.Message.MoveActionH\x00\x42\x08\n\x06\x61\x63tion\"\x0c\n\nWaitAction\"l\n\nMoveAction\x12<\n\tdirection\x18\x01 \x01(\x0e\x32).SkillBridge.Message.MoveAction.Direction\" \n\tDirection\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\xc7\x08\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12?\n\x10\x61gentLoadRequest\x18\x02 \x01(\x0b\x32%.SkillBridge.Message.AgentLoadRequest\x12\x41\n\x11sceneStartRequest\x18\x03 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12K\n\x16userSendMessageRequest\x18\x04 \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12W\n\x1csendToolResultMessageRequest\x18\x05 \x01(\x0b\x32\x31.SkillBridge.Message.SendToolResultMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\x06 \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\x12\x45\n\x13\x61gentObserveRequest\x18\x07 \x01(\x0b\x32(.SkillBridge.Message.AgentObserveRequest\x12?\n\x10\x61gentMoveRequest\x18\x08 \x01(\x0b\x32%.SkillBridge.Message.AgentMoveRequest\x12G\n\x14\x61gentInteractRequest\x18\t \x01(\x0b\x32).SkillBridge.Message.AgentInteractRequest\x12\x43\n\x12\x61gentSelectRequest\x18\n \x01(\x0b\x32\'.SkillBridge.Message.AgentSelectRequest\x12\x41\n\x11\x61gentInputRequest\x18\x0b \x01(\x0b\x32&.SkillBridge.Message.AgentInputRequest\x12[\n\x1e\x61gentPlanActionSequenceRequest\x18\x0c \x01(\x0b\x32\x33.SkillBridge.Message.AgentPlanActionSequenceRequest\x12]\n\x1f\x61gentStartActionSequenceRequest\x18\r \x01(\x0b\x32\x34.SkillBridge.Message.AgentStartActionSequenceRequest\x12_\n agentCancelActionSequenceRequest\x18\x0e \x01(\x0b\x32\x35.SkillBridge.Message.AgentCancelActionSequenceRequest\"\xe3\x01\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x41\n\x11\x61gentLoadResponse\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.AgentLoadResponse\x12\x43\n\x12sceneStartResponse\x18\x03 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10\x41gentLoadRequest\"K\n\x11\x41gentLoadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0b\x61gent_names\x18\x02 \x03(\t\x12\x10\n\x08\x65rrormsg\x18\x03 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"=\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\"d\n\x1cSendToolResultMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x11\n\ttool_name\x18\x02 \x01(\t\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0e\n\x06result\x18\x04 \x01(\t\"<\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t\"8\n\x13\x41gentObserveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"E\n\x10\x41gentMoveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x10\n\x08is_right\x18\x02 \x01(\x08\x12\x10\n\x08\x64istance\x18\x03 \x01(\x02\"}\n\x1e\x41gentPlanActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x38\n\x0f\x61\x63tion_sequence\x18\x03 \x03(\x0b\x32\x1f.SkillBridge.Message.ActionStep\"D\n\x1f\x41gentStartActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"E\n AgentCancelActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"9\n\x14\x41gentInteractRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"J\n\x12\x41gentSelectRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x11\n\tselection\x18\x03 \x01(\x05\"J\n\x11\x41gentInputRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ninput_text\x18\x03 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01*2\n\x0e\x43HARACTER_TYPE\x12\n\n\x06Player\x10\x00\x12\x07\n\x03NPC\x10\x01\x12\x0b\n\x07Monster\x10\x02*@\n\x0f\x43HARACTER_CLASS\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07WARRIOR\x10\x01\x12\n\n\x06WIZARD\x10\x02\x12\n\n\x06\x41RCHER\x10\x03*%\n\x0f\x43HARACTER_STATE\x12\x08\n\x04IDLE\x10\x00\x12\x08\n\x04MOVE\x10\x01*]\n\x0c\x45NTITY_EVENT\x12\x0c\n\x08\x45VT_NONE\x10\x00\x12\x0c\n\x08\x45VT_IDLE\x10\x01\x12\x10\n\x0c\x45VT_MOVE_FWD\x10\x02\x12\x11\n\rEVT_MOVE_BACK\x10\x03\x12\x0c\n\x08\x45VT_JUMP\x10\x04* \n\tDIRECTION\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
+  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"I\n\tNUserInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x06player\x18\x02 \x01(\x0b\x32 .SkillBridge.Message.NPlayerInfo\"R\n\x0bNPlayerInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x37\n\ncharacters\x18\x02 \x03(\x0b\x32#.SkillBridge.Message.NCharacterInfo\"\xeb\x01\n\x0eNCharacterInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03tid\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x31\n\x04type\x18\x04 \x01(\x0e\x32#.SkillBridge.Message.CHARACTER_TYPE\x12\x33\n\x05\x63lass\x18\x05 \x01(\x0e\x32$.SkillBridge.Message.CHARACTER_CLASS\x12\r\n\x05level\x18\x06 \x01(\x05\x12\r\n\x05mapId\x18\x07 \x01(\x05\x12,\n\x06\x65ntity\x18\x08 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"+\n\x08NVector3\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x87\x01\n\x07NEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\x30\n\tdirection\x18\x03 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\r\n\x05speed\x18\x04 \x01(\x05\"y\n\x0bNEntitySync\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x05\x65vent\x18\x02 \x01(\x0e\x32!.SkillBridge.Message.ENTITY_EVENT\x12,\n\x06\x65ntity\x18\x03 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"\x8b\x01\n\nActionStep\x12\x11\n\tcondition\x18\x01 \x01(\t\x12/\n\x04wait\x18\x02 \x01(\x0b\x32\x1f.SkillBridge.Message.WaitActionH\x00\x12/\n\x04move\x18\x03 \x01(\x0b\x32\x1f.SkillBridge.Message.MoveActionH\x00\x42\x08\n\x06\x61\x63tion\"\x0c\n\nWaitAction\"l\n\nMoveAction\x12<\n\tdirection\x18\x01 \x01(\x0e\x32).SkillBridge.Message.MoveAction.Direction\" \n\tDirection\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\xa8\t\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12?\n\x10\x61gentLoadRequest\x18\x02 \x01(\x0b\x32%.SkillBridge.Message.AgentLoadRequest\x12\x41\n\x11sceneStartRequest\x18\x03 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12K\n\x16userSendMessageRequest\x18\x04 \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12W\n\x1csendToolResultMessageRequest\x18\x05 \x01(\x0b\x32\x31.SkillBridge.Message.SendToolResultMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\x06 \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\x12\x45\n\x13\x61gentObserveRequest\x18\x07 \x01(\x0b\x32(.SkillBridge.Message.AgentObserveRequest\x12?\n\x10\x61gentMoveRequest\x18\x08 \x01(\x0b\x32%.SkillBridge.Message.AgentMoveRequest\x12G\n\x14\x61gentInteractRequest\x18\t \x01(\x0b\x32).SkillBridge.Message.AgentInteractRequest\x12\x43\n\x12\x61gentSelectRequest\x18\n \x01(\x0b\x32\'.SkillBridge.Message.AgentSelectRequest\x12\x41\n\x11\x61gentInputRequest\x18\x0b \x01(\x0b\x32&.SkillBridge.Message.AgentInputRequest\x12[\n\x1e\x61gentPlanActionSequenceRequest\x18\x0c \x01(\x0b\x32\x33.SkillBridge.Message.AgentPlanActionSequenceRequest\x12]\n\x1f\x61gentStartActionSequenceRequest\x18\r \x01(\x0b\x32\x34.SkillBridge.Message.AgentStartActionSequenceRequest\x12\x63\n\"agentContinueActionSequenceRequest\x18\x0e \x01(\x0b\x32\x37.SkillBridge.Message.AgentContinueActionSequenceRequest\x12[\n\x1e\x61gentStopActionSequenceRequest\x18\x0f \x01(\x0b\x32\x33.SkillBridge.Message.AgentStopActionSequenceRequest\"\xe3\x01\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x41\n\x11\x61gentLoadResponse\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.AgentLoadResponse\x12\x43\n\x12sceneStartResponse\x18\x03 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10\x41gentLoadRequest\"K\n\x11\x41gentLoadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0b\x61gent_names\x18\x02 \x03(\t\x12\x10\n\x08\x65rrormsg\x18\x03 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"=\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\"d\n\x1cSendToolResultMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x11\n\ttool_name\x18\x02 \x01(\t\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0e\n\x06result\x18\x04 \x01(\t\"<\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t\"8\n\x13\x41gentObserveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"E\n\x10\x41gentMoveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x10\n\x08is_right\x18\x02 \x01(\x08\x12\x10\n\x08\x64istance\x18\x03 \x01(\x02\"}\n\x1e\x41gentPlanActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x38\n\x0f\x61\x63tion_sequence\x18\x03 \x03(\x0b\x32\x1f.SkillBridge.Message.ActionStep\"D\n\x1f\x41gentStartActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"G\n\"AgentContinueActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"C\n\x1e\x41gentStopActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"9\n\x14\x41gentInteractRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"J\n\x12\x41gentSelectRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x11\n\tselection\x18\x03 \x01(\x05\"J\n\x11\x41gentInputRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ninput_text\x18\x03 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01*2\n\x0e\x43HARACTER_TYPE\x12\n\n\x06Player\x10\x00\x12\x07\n\x03NPC\x10\x01\x12\x0b\n\x07Monster\x10\x02*@\n\x0f\x43HARACTER_CLASS\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07WARRIOR\x10\x01\x12\n\n\x06WIZARD\x10\x02\x12\n\n\x06\x41RCHER\x10\x03*%\n\x0f\x43HARACTER_STATE\x12\x08\n\x04IDLE\x10\x00\x12\x08\n\x04MOVE\x10\x01*]\n\x0c\x45NTITY_EVENT\x12\x0c\n\x08\x45VT_NONE\x10\x00\x12\x0c\n\x08\x45VT_IDLE\x10\x01\x12\x10\n\x0c\x45VT_MOVE_FWD\x10\x02\x12\x11\n\rEVT_MOVE_BACK\x10\x03\x12\x0c\n\x08\x45VT_JUMP\x10\x04* \n\tDIRECTION\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -41,8 +41,8 @@ _RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3600,
-  serialized_end=3633,
+  serialized_start=3768,
+  serialized_end=3801,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT)
 
@@ -68,8 +68,8 @@ _CHARACTER_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3635,
-  serialized_end=3685,
+  serialized_start=3803,
+  serialized_end=3853,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_TYPE)
 
@@ -99,8 +99,8 @@ _CHARACTER_CLASS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3687,
-  serialized_end=3751,
+  serialized_start=3855,
+  serialized_end=3919,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_CLASS)
 
@@ -122,8 +122,8 @@ _CHARACTER_STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3753,
-  serialized_end=3790,
+  serialized_start=3921,
+  serialized_end=3958,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_STATE)
 
@@ -157,8 +157,8 @@ _ENTITY_EVENT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3792,
-  serialized_end=3885,
+  serialized_start=3960,
+  serialized_end=4053,
 )
 _sym_db.RegisterEnumDescriptor(_ENTITY_EVENT)
 
@@ -180,8 +180,8 @@ _DIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3887,
-  serialized_end=3919,
+  serialized_start=4055,
+  serialized_end=4087,
 )
 _sym_db.RegisterEnumDescriptor(_DIRECTION)
 
@@ -768,8 +768,15 @@ _NETMESSAGEREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentCancelActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentCancelActionSequenceRequest', index=13,
+      name='agentContinueActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentContinueActionSequenceRequest', index=13,
       number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='agentStopActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentStopActionSequenceRequest', index=14,
+      number=15, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -787,7 +794,7 @@ _NETMESSAGEREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1139,
-  serialized_end=2234,
+  serialized_end=2331,
 )
 
 
@@ -831,8 +838,8 @@ _NETMESSAGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2237,
-  serialized_end=2464,
+  serialized_start=2334,
+  serialized_end=2561,
 )
 
 
@@ -869,8 +876,8 @@ _AGENTCREATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2466,
-  serialized_end=2514,
+  serialized_start=2563,
+  serialized_end=2611,
 )
 
 
@@ -907,8 +914,8 @@ _AGENTCREATERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2516,
-  serialized_end=2572,
+  serialized_start=2613,
+  serialized_end=2669,
 )
 
 
@@ -931,8 +938,8 @@ _AGENTLOADREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2574,
-  serialized_end=2592,
+  serialized_start=2671,
+  serialized_end=2689,
 )
 
 
@@ -976,8 +983,8 @@ _AGENTLOADRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2594,
-  serialized_end=2669,
+  serialized_start=2691,
+  serialized_end=2766,
 )
 
 
@@ -1007,8 +1014,8 @@ _SCENESTARTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2671,
-  serialized_end=2706,
+  serialized_start=2768,
+  serialized_end=2803,
 )
 
 
@@ -1045,8 +1052,8 @@ _SCENESTARTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2708,
-  serialized_end=2763,
+  serialized_start=2805,
+  serialized_end=2860,
 )
 
 
@@ -1083,8 +1090,8 @@ _USERSENDMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2765,
-  serialized_end=2826,
+  serialized_start=2862,
+  serialized_end=2923,
 )
 
 
@@ -1135,8 +1142,8 @@ _SENDTOOLRESULTMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2828,
-  serialized_end=2928,
+  serialized_start=2925,
+  serialized_end=3025,
 )
 
 
@@ -1173,8 +1180,8 @@ _AGENTSENDMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2930,
-  serialized_end=2990,
+  serialized_start=3027,
+  serialized_end=3087,
 )
 
 
@@ -1211,8 +1218,8 @@ _AGENTOBSERVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2992,
-  serialized_end=3048,
+  serialized_start=3089,
+  serialized_end=3145,
 )
 
 
@@ -1256,8 +1263,8 @@ _AGENTMOVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3050,
-  serialized_end=3119,
+  serialized_start=3147,
+  serialized_end=3216,
 )
 
 
@@ -1301,8 +1308,8 @@ _AGENTPLANACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3121,
-  serialized_end=3246,
+  serialized_start=3218,
+  serialized_end=3343,
 )
 
 
@@ -1339,27 +1346,27 @@ _AGENTSTARTACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3248,
-  serialized_end=3316,
+  serialized_start=3345,
+  serialized_end=3413,
 )
 
 
-_AGENTCANCELACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
-  name='AgentCancelActionSequenceRequest',
-  full_name='SkillBridge.Message.AgentCancelActionSequenceRequest',
+_AGENTCONTINUEACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
+  name='AgentContinueActionSequenceRequest',
+  full_name='SkillBridge.Message.AgentContinueActionSequenceRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='agent', full_name='SkillBridge.Message.AgentCancelActionSequenceRequest.agent', index=0,
+      name='agent', full_name='SkillBridge.Message.AgentContinueActionSequenceRequest.agent', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='request_id', full_name='SkillBridge.Message.AgentCancelActionSequenceRequest.request_id', index=1,
+      name='request_id', full_name='SkillBridge.Message.AgentContinueActionSequenceRequest.request_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1377,8 +1384,46 @@ _AGENTCANCELACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3318,
-  serialized_end=3387,
+  serialized_start=3415,
+  serialized_end=3486,
+)
+
+
+_AGENTSTOPACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
+  name='AgentStopActionSequenceRequest',
+  full_name='SkillBridge.Message.AgentStopActionSequenceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='agent', full_name='SkillBridge.Message.AgentStopActionSequenceRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='request_id', full_name='SkillBridge.Message.AgentStopActionSequenceRequest.request_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3488,
+  serialized_end=3555,
 )
 
 
@@ -1415,8 +1460,8 @@ _AGENTINTERACTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3389,
-  serialized_end=3446,
+  serialized_start=3557,
+  serialized_end=3614,
 )
 
 
@@ -1460,8 +1505,8 @@ _AGENTSELECTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3448,
-  serialized_end=3522,
+  serialized_start=3616,
+  serialized_end=3690,
 )
 
 
@@ -1505,8 +1550,8 @@ _AGENTINPUTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3524,
-  serialized_end=3598,
+  serialized_start=3692,
+  serialized_end=3766,
 )
 
 _NUSERINFO.fields_by_name['player'].message_type = _NPLAYERINFO
@@ -1543,7 +1588,8 @@ _NETMESSAGEREQUEST.fields_by_name['agentSelectRequest'].message_type = _AGENTSEL
 _NETMESSAGEREQUEST.fields_by_name['agentInputRequest'].message_type = _AGENTINPUTREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentPlanActionSequenceRequest'].message_type = _AGENTPLANACTIONSEQUENCEREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentStartActionSequenceRequest'].message_type = _AGENTSTARTACTIONSEQUENCEREQUEST
-_NETMESSAGEREQUEST.fields_by_name['agentCancelActionSequenceRequest'].message_type = _AGENTCANCELACTIONSEQUENCEREQUEST
+_NETMESSAGEREQUEST.fields_by_name['agentContinueActionSequenceRequest'].message_type = _AGENTCONTINUEACTIONSEQUENCEREQUEST
+_NETMESSAGEREQUEST.fields_by_name['agentStopActionSequenceRequest'].message_type = _AGENTSTOPACTIONSEQUENCEREQUEST
 _NETMESSAGERESPONSE.fields_by_name['agentCreateResponse'].message_type = _AGENTCREATERESPONSE
 _NETMESSAGERESPONSE.fields_by_name['agentLoadResponse'].message_type = _AGENTLOADRESPONSE
 _NETMESSAGERESPONSE.fields_by_name['sceneStartResponse'].message_type = _SCENESTARTRESPONSE
@@ -1573,7 +1619,8 @@ DESCRIPTOR.message_types_by_name['AgentObserveRequest'] = _AGENTOBSERVEREQUEST
 DESCRIPTOR.message_types_by_name['AgentMoveRequest'] = _AGENTMOVEREQUEST
 DESCRIPTOR.message_types_by_name['AgentPlanActionSequenceRequest'] = _AGENTPLANACTIONSEQUENCEREQUEST
 DESCRIPTOR.message_types_by_name['AgentStartActionSequenceRequest'] = _AGENTSTARTACTIONSEQUENCEREQUEST
-DESCRIPTOR.message_types_by_name['AgentCancelActionSequenceRequest'] = _AGENTCANCELACTIONSEQUENCEREQUEST
+DESCRIPTOR.message_types_by_name['AgentContinueActionSequenceRequest'] = _AGENTCONTINUEACTIONSEQUENCEREQUEST
+DESCRIPTOR.message_types_by_name['AgentStopActionSequenceRequest'] = _AGENTSTOPACTIONSEQUENCEREQUEST
 DESCRIPTOR.message_types_by_name['AgentInteractRequest'] = _AGENTINTERACTREQUEST
 DESCRIPTOR.message_types_by_name['AgentSelectRequest'] = _AGENTSELECTREQUEST
 DESCRIPTOR.message_types_by_name['AgentInputRequest'] = _AGENTINPUTREQUEST
@@ -1759,12 +1806,19 @@ AgentStartActionSequenceRequest = _reflection.GeneratedProtocolMessageType('Agen
   ))
 _sym_db.RegisterMessage(AgentStartActionSequenceRequest)
 
-AgentCancelActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentCancelActionSequenceRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTCANCELACTIONSEQUENCEREQUEST,
+AgentContinueActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentContinueActionSequenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTCONTINUEACTIONSEQUENCEREQUEST,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentCancelActionSequenceRequest)
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentContinueActionSequenceRequest)
   ))
-_sym_db.RegisterMessage(AgentCancelActionSequenceRequest)
+_sym_db.RegisterMessage(AgentContinueActionSequenceRequest)
+
+AgentStopActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentStopActionSequenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTSTOPACTIONSEQUENCEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentStopActionSequenceRequest)
+  ))
+_sym_db.RegisterMessage(AgentStopActionSequenceRequest)
 
 AgentInteractRequest = _reflection.GeneratedProtocolMessageType('AgentInteractRequest', (_message.Message,), dict(
   DESCRIPTOR = _AGENTINTERACTREQUEST,

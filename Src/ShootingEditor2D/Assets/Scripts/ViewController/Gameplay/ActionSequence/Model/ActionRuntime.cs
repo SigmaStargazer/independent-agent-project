@@ -16,6 +16,7 @@ namespace ShootingEditor2D
         public string ActionName;
         public string CompleteCondition;
         public Func<bool> CompleteConditionFunc;
+        public Func<bool> ErrorConditionFunc;
         public ActionState State;
 
         // 动作开始位置
@@ -32,7 +33,7 @@ namespace ShootingEditor2D
 
     public class ActionResult
     {
-        public bool Success = true;
+        //public bool Success = true;
         public string Message;   // 给 Agent 用的自然语言描述
     }
 }

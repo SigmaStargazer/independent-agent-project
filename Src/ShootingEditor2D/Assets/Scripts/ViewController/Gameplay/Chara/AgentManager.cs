@@ -25,7 +25,8 @@ namespace ShootingEditor2D
 
             AgentService.Instance.OnPlanActionSequence = this.PlanActionSequence;
             AgentService.Instance.OnStartActionSequence = this.StartActionSequence;
-            AgentService.Instance.OnCancelActionSequence = this.CancelActionSequence;
+            AgentService.Instance.OnContinueActionSequence = this.ContinueActionSequence;
+            AgentService.Instance.OnStopActionSequence = this.StopActionSequence;
         }
 
         void Update()
@@ -115,12 +116,19 @@ namespace ShootingEditor2D
                 agentObj.StartActionSequence(requestId);
             }
         }
-
-        private void CancelActionSequence(string agent, string requestId)
+        private void ContinueActionSequence(string agent, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.CancelActionSequence(requestId);
+                agentObj.ContinueActionSequence(requestId);
+            }
+        }
+
+        private void StopActionSequence(string agent, string requestId)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.StopActionSequence(requestId);
             }
         }
         #endregion

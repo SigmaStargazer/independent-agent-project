@@ -27,7 +27,8 @@ namespace Network
             if (message.agentInputRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentInputRequest); }
             if (message.agentPlanActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentPlanActionSequenceRequest); }
             if (message.agentStartActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStartActionSequenceRequest); }
-            if (message.agentCancelActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentCancelActionSequenceRequest); }
+            if (message.agentContinueActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentContinueActionSequenceRequest); }
+            if (message.agentStopActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStopActionSequenceRequest); }
         }
     }
 }

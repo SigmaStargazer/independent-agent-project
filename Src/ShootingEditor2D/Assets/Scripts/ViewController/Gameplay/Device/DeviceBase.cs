@@ -24,14 +24,17 @@ namespace ShootingEditor2D
             if (DeviceManager.Instance != null)
                 DeviceManager.Instance.UnRegister(this);
         }
-        public abstract string Interact(GameObject chara);
-        public virtual string Select(GameObject chara, int selection)
+        public virtual (bool success, string result) Interact(GameObject chara)
         {
-            return "该设备未提供选项";
+            return (false, "该设备无法交互");
         }
-        public virtual string TextInput(GameObject chara, string inputText)
+        public virtual (bool success, string result) Select(GameObject chara, int selection)
         {
-            return "该设备未提供输入框";
+            return (false,"该设备未提供选项");
+        }
+        public virtual (bool success, string result) TextInput(GameObject chara, string inputText)
+        {
+            return (false, "该设备未提供输入框");
         }
     }
 }

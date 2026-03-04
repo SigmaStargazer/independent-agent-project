@@ -61,7 +61,18 @@ namespace ShootingEditor2D
             {
                 mCurActionRuntime.Displacement = Mathf.Abs(transform.position.x - mCurActionRuntime.StartPostion.x);
                 mCurActionRuntime.ActionTime += Time.deltaTime;
+                // ========= 1. 错误终止优先 =========
+                if (mCurActionRuntime.ErrorConditionFunc?.Invoke() == true)
+                {
+                    mCurActionRuntime.State = ActionState.Failed;
+                    var finishedRuntime = mCurActionRuntime;
+                    mCurActionRuntime = null;
 
+                    ChangeState("Idle");
+                    OnActionFinished(finishedRuntime);// 触发Hook
+                    return;
+                }
+                // ========= 2. 正常完成 =========
                 // 触发结束条件，并清空curActionCtx
                 if (mCurActionRuntime.CompleteConditionFunc?.Invoke() == true)
                 {
