@@ -52,6 +52,18 @@ namespace ShootingEditor2D
                 {
                     actionName = "Wait";
                 }
+                else if (action.Interact != null)
+                {
+                    actionName = "Interact";
+                }
+                else if (action.Select != null)
+                {
+                    actionName = "Select";
+                }
+                else if (action.Input != null)
+                {
+                    actionName = "TextInput";
+                }
                 else
                 {
                     actionName = "Î´¶¨ÒåµÄActionStep";

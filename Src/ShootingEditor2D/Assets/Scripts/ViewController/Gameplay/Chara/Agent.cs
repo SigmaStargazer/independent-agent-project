@@ -642,6 +642,18 @@ namespace ShootingEditor2D
                 {
                     this.ExecuteWaitAction(mCurActionSequenceRuntime);
                 }
+                else if (curAction.Interact != null)
+                {
+                    this.ExecuteInteractAction(mCurActionSequenceRuntime);
+                }
+                else if (curAction.Select != null)
+                {
+                    this.ExecuteSelectAction(mCurActionSequenceRuntime);
+                }
+                else if (curAction.Input != null)
+                {
+                    this.ExecuteInputAction(mCurActionSequenceRuntime);
+                }
                 else
                 {
                     Debug.Log($"[{this.Name}]未定义的ActionStep");
@@ -664,7 +676,7 @@ namespace ShootingEditor2D
             if ( this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+                //List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
                 string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
 
                 // 创建Condition判断上下文
@@ -700,9 +712,10 @@ namespace ShootingEditor2D
                     }
                     return false;
                 };
+                this.mCurActionRuntime.State = ActionState.Doing;
             }
-            this.mCurActionRuntime.State = ActionState.Doing;
-            ChangeState("Move");
+            if (this.mCurActionRuntime.State == ActionState.Doing)
+                ChangeState("Move");
         }
         private void ExecuteWaitAction(ActionSequenceRuntime actionSequenceRuntime)
         {
@@ -712,7 +725,7 @@ namespace ShootingEditor2D
             if ( this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+                //List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
                 string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
 
                 // 创建Condition判断上下文
@@ -748,9 +761,123 @@ namespace ShootingEditor2D
                     }
                     return false;
                 };
+                this.mCurActionRuntime.State = ActionState.Doing;
             }
-            this.mCurActionRuntime.State = ActionState.Doing;
-            ChangeState("Idle");
+            if (this.mCurActionRuntime.State == ActionState.Doing)
+                ChangeState("Idle");
+        }
+
+        private void ExecuteInteractAction(ActionSequenceRuntime actionSequenceRuntime)
+        {
+            var curAction = actionSequenceRuntime.GetCurActionStep();
+            this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
+
+            if (this.mCurActionRuntime.State == ActionState.Todo)
+            {
+                // 获取设备信息
+                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+
+                this.mCurActionRuntime.StartPostion = transform.position;
+                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+
+                this.mCurActionRuntime.State = ActionState.Doing;
+            }
+            if (this.mCurActionRuntime.State == ActionState.Doing)
+            {
+                // 执行一次
+                ChangeState("Idle");
+                (bool success, string result) = DeviceManager.Instance.Interact(this.gameObject);
+                // 获得执行结果后，直接OnActionFinished
+                if (this.mCurActionRuntime.Result == null)
+                    this.mCurActionRuntime.Result = new ActionResult();
+
+                this.mCurActionRuntime.Result.Message = result;
+
+                this.mCurActionRuntime.State = success
+                    ? ActionState.Done
+                    : ActionState.Failed;
+
+                var finishedRuntime = this.mCurActionRuntime;
+                this.mCurActionRuntime = null;
+
+                OnActionFinished(finishedRuntime);
+            }
+        }
+
+        private void ExecuteSelectAction(ActionSequenceRuntime actionSequenceRuntime)
+        {
+            var curAction = actionSequenceRuntime.GetCurActionStep();
+            this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
+
+            if (this.mCurActionRuntime.State == ActionState.Todo)
+            {
+                // 获取设备信息
+                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+
+                this.mCurActionRuntime.StartPostion = transform.position;
+                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+
+                this.mCurActionRuntime.State = ActionState.Doing;
+            }
+            if (this.mCurActionRuntime.State == ActionState.Doing)
+            {
+                // 执行一次
+                ChangeState("Idle");
+                int selection = curAction.Select.Selection;
+                (bool success, string result) = DeviceManager.Instance.Select(this.gameObject, selection);
+                // 获得执行结果后，直接OnActionFinished
+                if (this.mCurActionRuntime.Result == null)
+                    this.mCurActionRuntime.Result = new ActionResult();
+
+                this.mCurActionRuntime.Result.Message = result;
+
+                this.mCurActionRuntime.State = success
+                    ? ActionState.Done
+                    : ActionState.Failed;
+
+                var finishedRuntime = this.mCurActionRuntime;
+                this.mCurActionRuntime = null;
+
+                OnActionFinished(finishedRuntime);
+            }
+        }
+
+        private void ExecuteInputAction(ActionSequenceRuntime actionSequenceRuntime)
+        {
+            var curAction = actionSequenceRuntime.GetCurActionStep();
+            this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
+
+            if (this.mCurActionRuntime.State == ActionState.Todo)
+            {
+                // 获取设备信息
+                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+
+                this.mCurActionRuntime.StartPostion = transform.position;
+                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+
+                this.mCurActionRuntime.State = ActionState.Doing;
+            }
+            if (this.mCurActionRuntime.State == ActionState.Doing)
+            {
+                // 执行一次
+                ChangeState("Idle");
+                string inputText = curAction.Input.InputText;
+                (bool success, string result) = DeviceManager.Instance.TextInput(this.gameObject, inputText);
+                // 获得执行结果后，直接OnActionFinished
+                if (this.mCurActionRuntime.Result == null)
+                    this.mCurActionRuntime.Result = new ActionResult();
+
+                this.mCurActionRuntime.Result.Message = result;
+
+                this.mCurActionRuntime.State = success
+                    ? ActionState.Done
+                    : ActionState.Failed;
+
+                var finishedRuntime = this.mCurActionRuntime;
+                this.mCurActionRuntime = null;
+
+                OnActionFinished(finishedRuntime);
+            }
         }
 
         private void OnCurrentActionCompleted()

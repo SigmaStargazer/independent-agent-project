@@ -5,14 +5,23 @@ from ..core.types import CONDITION_VARIABLES, AccessKind, ACTION_DESC, CONDITION
 
 class BaseAction(BaseModel):
     action: str  = Field(..., description=ACTION_DESC)
-    condition: str  = Field(..., description=CONDITION_DESC)
+    # condition: str = Field(
+    #     default="",
+    #     description=CONDITION_DESC
+    # )
 
+class StateChangeAction(BaseAction):
+    condition: str = Field(..., description=CONDITION_DESC)
     @field_validator("condition")
     @classmethod
-    def validate_condition(cls, expr: str):
+    def validate_condition(cls, expr):
+
+        if not expr.strip():
+            raise ValueError("condition 不能为空")
+
         # ---------- 0. 去掉字符串字面量 ----------
         expr_no_string = STRING_LITERAL_RE.sub("''", expr)
-    
+
         # ---------- 1. 黑名单 ----------
         for pattern in FORBIDDEN_PATTERNS:
             if re.search(pattern, expr_no_string):
@@ -30,10 +39,9 @@ class BaseAction(BaseModel):
             if ident in {"true", "false", "null", "Math"}:
                 continue
 
-            # 如果是成员名，后面会校验
             if f".{ident}" in expr_no_string:
                 continue
-                
+
             raise ValueError(f"condition 使用了未注册变量: {ident}")
 
         # ---------- 4. 访问结构校验 ----------

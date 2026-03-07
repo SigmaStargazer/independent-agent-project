@@ -10,6 +10,9 @@ from graphiti_core.search import search_config_recipes
 from agent_framwork.tools.action_sequence_model.model.action import (
     WaitAction as WaitActionModel,
     MoveAction as MoveActionModel,
+    InteractAction as InteractActionModel,
+    SelectAction as SelectActionModel,
+    InputAction as InputActionModel,
 )
 from agent_framwork.tools.action_sequence_model.model.action_sequence import ActionSequence
 
@@ -84,9 +87,13 @@ async def communicate_to_user(agent: Annotated[str, InjectedState("name")], mess
 def build_pb_action_step(step) -> message_pb2.ActionStep:
     pb_step = message_pb2.ActionStep()
 
-    # condition 在 ActionStep
-    pb_step.condition = step.condition
+    # ===== condition =====
+    if hasattr(step, "condition"):
+        pb_step.condition = step.condition
+    else:
+        pb_step.condition = ""
 
+    # ===== action =====
     if isinstance(step, WaitActionModel):
         pb_step.wait.CopyFrom(message_pb2.WaitAction())
 
@@ -96,6 +103,15 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
             if step.direction == "right"
             else message_pb2.MoveAction.LEFT
         )
+
+    elif isinstance(step, InteractActionModel):
+        pb_step.interact.CopyFrom(message_pb2.InteractAction())
+
+    elif isinstance(step, SelectActionModel):
+        pb_step.select.selection = step.selection
+
+    elif isinstance(step, InputActionModel):
+        pb_step.input.input_text = step.input_text
 
     else:
         raise TypeError(f"Unsupported ActionStep type: {type(step)}")

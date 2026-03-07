@@ -1,12 +1,31 @@
 from pydantic import Field
 from typing import Literal
-from .base_action import BaseAction
+from .base_action import BaseAction, StateChangeAction
 
-class WaitAction(BaseAction):
+class WaitAction(StateChangeAction):
     action: Literal["wait"] = Field(default="wait", description="等待，直至满足条件") #要作为Annotated的判断条件，必须是Literal[
 
-class MoveAction(BaseAction):
+class MoveAction(StateChangeAction):
     action: Literal["move"] = Field(default="move", description="移动，直至满足条件")
-    direction: Literal["left", "right"] = Field(
-        ..., description="移动方向"
+    direction: Literal["left", "right"] = Field(..., description="移动方向")
+
+class InteractAction(BaseAction):
+    action: Literal["interact"] = Field(
+        default="interact", 
+        description="与设备进行交互。")
+
+class SelectAction(BaseAction):
+    action: Literal["select"] = Field(
+        default="select", 
+        description="当设备提供了选项时，选择其中一个选项。")
+    selection: int = Field(
+        ..., description="选择编号"
+    )
+
+class InputAction(BaseAction):
+    action: Literal["input"] = Field(
+        default="input", 
+        description="当设备提供了输入框时，向设备输入文本。")
+    input_text: str = Field(
+        ..., description="输入文本"
     )

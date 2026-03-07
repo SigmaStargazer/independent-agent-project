@@ -1,15 +1,15 @@
 from typing import Annotated, Union, List
 from pydantic import Field, BaseModel
-from .action import WaitAction, MoveAction
+from .action import WaitAction, MoveAction, InteractAction, SelectAction, InputAction
 
 # 基于"action"来判断ActionStep的类型
 ActionStep = Annotated[
     Union[
         WaitAction,
         MoveAction,
-        # ShootAction,
-        # UseItemAction,
-        # ...
+        InteractAction,
+        SelectAction,
+        InputAction,
     ],
     Field(discriminator="action")
 ]

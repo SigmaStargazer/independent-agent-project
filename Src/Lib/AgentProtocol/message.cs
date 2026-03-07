@@ -158,6 +158,33 @@ namespace SkillBridge.Message
         public bool ShouldSerializeMove() => __pbn__action.Is(3);
         public void ResetMove() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__action, 3);
 
+        [global::ProtoBuf.ProtoMember(4, Name = @"interact")]
+        public InteractAction Interact
+        {
+            get { return __pbn__action.Is(4) ? ((InteractAction)__pbn__action.Object) : default; }
+            set { __pbn__action = new global::ProtoBuf.DiscriminatedUnionObject(4, value); }
+        }
+        public bool ShouldSerializeInteract() => __pbn__action.Is(4);
+        public void ResetInteract() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__action, 4);
+
+        [global::ProtoBuf.ProtoMember(5, Name = @"select")]
+        public SelectAction Select
+        {
+            get { return __pbn__action.Is(5) ? ((SelectAction)__pbn__action.Object) : default; }
+            set { __pbn__action = new global::ProtoBuf.DiscriminatedUnionObject(5, value); }
+        }
+        public bool ShouldSerializeSelect() => __pbn__action.Is(5);
+        public void ResetSelect() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__action, 5);
+
+        [global::ProtoBuf.ProtoMember(6, Name = @"input")]
+        public InputAction Input
+        {
+            get { return __pbn__action.Is(6) ? ((InputAction)__pbn__action.Object) : default; }
+            set { __pbn__action = new global::ProtoBuf.DiscriminatedUnionObject(6, value); }
+        }
+        public bool ShouldSerializeInput() => __pbn__action.Is(6);
+        public void ResetInput() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__action, 6);
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -187,6 +214,40 @@ namespace SkillBridge.Message
             [global::ProtoBuf.ProtoEnum(Name = @"RIGHT")]
             Right = 1,
         }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class InteractAction : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class SelectAction : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"selection")]
+        public int Selection { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class InputAction : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"input_text")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string InputText { get; set; } = "";
 
     }
 

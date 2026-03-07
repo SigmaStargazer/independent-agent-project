@@ -60,4 +60,6 @@ Position: 物体当前位置。是一个Vector2对象。
 Velocity: 物体当前速度。是一个Vector2对象。
 State: 物体当前状态，如'Idle'、'Move'等。
 
+# 示例：displacement >= 10 && myself.state == 'Move'"""
+
 # 示例：displacement.x >= 10 && myself.state == 'Move'"""

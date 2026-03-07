@@ -43,7 +43,11 @@ namespace ShootingEditor2D
             foreach (var step in actionSequence)
             {
                 var result = new ConditionEvalResult();
-                if (!string.IsNullOrEmpty(step.Condition))
+                if (string.IsNullOrWhiteSpace(step.Condition))
+                {
+                    result.Status = ConditionEvalStatus.True;
+                }
+                else
                 {
                     SetVariables(context);
 
@@ -70,8 +74,11 @@ namespace ShootingEditor2D
         public ConditionEvalResult Evaluate(int index, ActionStep step, ConditionContext context)
         {
             var result = new ConditionEvalResult();
-            if (step == null || string.IsNullOrEmpty(step.Condition))
+            if (step == null || string.IsNullOrWhiteSpace(step.Condition))
+            {
+                result.Status = ConditionEvalStatus.True;
                 return result;
+            }
 
             // 投影视图刷新
             context.RefreshViews();

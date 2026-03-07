@@ -116,6 +116,9 @@ message ActionStep {
   oneof action {
     WaitAction wait = 2;
     MoveAction move = 3;
+    InteractAction interact = 4;
+    SelectAction select = 5;
+    InputAction input = 6;
   }
 }
 
@@ -131,6 +134,17 @@ message MoveAction {
     RIGHT = 1;
   }
   Direction direction = 1;
+}
+
+message InteractAction {
+}
+
+message SelectAction {
+  int32 selection = 1;
+}
+
+message InputAction {
+  string input_text = 1;
 }
 
 ////////////////////////////////////////////////////////////////
