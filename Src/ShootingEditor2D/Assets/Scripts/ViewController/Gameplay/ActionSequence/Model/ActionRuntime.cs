@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ShootingEditor2D
@@ -27,6 +28,9 @@ namespace ShootingEditor2D
         public float ActionTime = 0;
         public string StartEnv = "";
         public string EndEnv = "";
+
+        // 动作开始时接触的物体集合
+        public HashSet<SceneObjBase> StartTouchingObjs = new HashSet<SceneObjBase>();
 
         public ActionResult Result;
     }

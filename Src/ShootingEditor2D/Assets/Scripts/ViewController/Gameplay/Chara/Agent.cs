@@ -38,8 +38,7 @@ namespace ShootingEditor2D
         private bool mJumpPressed;
 
         // 用于检查撞击场景对象时停止
-        private bool isDeviceCollision = false;
-        private SceneObjBase collidedObj = null;
+        private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
 
         //private ActionSequenceRuntime mCurActionSequenceRuntime = new ActionSequenceRuntime();
         private ActionSequenceRuntime mCurActionSequenceRuntime;
@@ -191,8 +190,7 @@ namespace ShootingEditor2D
             var sceneObj = collision.collider.GetComponent<SceneObjBase>();
             if (sceneObj == null) return;
 
-            isDeviceCollision = true;
-            collidedObj = sceneObj;
+            mTouchingObjs.Add(sceneObj);
         }
 
         private void OnCollisionExit2D(Collision2D collision)
@@ -200,8 +198,13 @@ namespace ShootingEditor2D
             var sceneObj = collision.collider.GetComponent<SceneObjBase>();
             if (sceneObj == null) return;
 
-            isDeviceCollision = false;
-            collidedObj = null;
+            mTouchingObjs.Remove(sceneObj);
+
+            // 如果当前有Action在执行, 就把离开的SceneObj从StartTouchingObjs中移除
+            if (mCurActionRuntime != null)
+            {
+                mCurActionRuntime.StartTouchingObjs.Remove(sceneObj);
+            }
         }
 
         private void GetInput()
@@ -333,19 +336,25 @@ namespace ShootingEditor2D
             };
             this.mCurActionRuntime.ErrorConditionFunc = () =>
             {
-                if (isDeviceCollision)
+                // 碰撞判断
+                foreach (var obj in this.mTouchingObjs)
                 {
-                    if (this.mCurActionRuntime.Result == null)
-                        this.mCurActionRuntime.Result = new ActionResult();
+                    if (!this.mCurActionRuntime.StartTouchingObjs.Contains(obj))
+                    {
+                        if (this.mCurActionRuntime.Result == null)
+                            this.mCurActionRuntime.Result = new ActionResult();
 
-                    this.mCurActionRuntime.Result.Message =
-                        $"[移动中断]撞击到物体: {collidedObj?.Name ?? "Unknown SceneObj"}";
+                        this.mCurActionRuntime.Result.Message =
+                            $"[移动中断]撞击到物体: {obj?.Name ?? "Unknown SceneObj"}";
 
-                    return true;
+                        return true;
+                    }
                 }
                 return false;
             };
-
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
             ChangeState("Move");
         }
 
@@ -700,22 +709,29 @@ namespace ShootingEditor2D
                 };
                 this.mCurActionRuntime.ErrorConditionFunc = () =>
                 {
-                    if (isDeviceCollision)
+                    // 碰撞判断
+                    foreach (var obj in this.mTouchingObjs)
                     {
-                        if (this.mCurActionRuntime.Result == null)
-                            this.mCurActionRuntime.Result = new ActionResult();
+                        if (!this.mCurActionRuntime.StartTouchingObjs.Contains(obj))
+                        {
+                            if (this.mCurActionRuntime.Result == null)
+                                this.mCurActionRuntime.Result = new ActionResult();
 
-                        this.mCurActionRuntime.Result.Message =
-                            $"撞击到物体: {collidedObj?.Name ?? "Unknown SceneObj"}";
+                            this.mCurActionRuntime.Result.Message =
+                                $"撞击到物体: {obj?.Name ?? "Unknown SceneObj"}";
 
-                        return true;
+                            return true;
+                        }
                     }
                     return false;
                 };
-                this.mCurActionRuntime.State = ActionState.Doing;
             }
-            if (this.mCurActionRuntime.State == ActionState.Doing)
-                ChangeState("Move");
+            this.mCurActionRuntime.State = ActionState.Doing;
+
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
+            ChangeState("Move");
         }
         private void ExecuteWaitAction(ActionSequenceRuntime actionSequenceRuntime)
         {
@@ -749,22 +765,29 @@ namespace ShootingEditor2D
                 };
                 this.mCurActionRuntime.ErrorConditionFunc = () =>
                 {
-                    if (isDeviceCollision)
+                    // 碰撞判断
+                    foreach (var obj in this.mTouchingObjs)
                     {
-                        if (this.mCurActionRuntime.Result == null)
-                            this.mCurActionRuntime.Result = new ActionResult();
+                        if (!this.mCurActionRuntime.StartTouchingObjs.Contains(obj))
+                        {
+                            if (this.mCurActionRuntime.Result == null)
+                                this.mCurActionRuntime.Result = new ActionResult();
 
-                        this.mCurActionRuntime.Result.Message =
-                            $"撞击到物体: {collidedObj?.Name ?? "Unknown SceneObj"}";
+                            this.mCurActionRuntime.Result.Message =
+                                $"撞击到物体: {obj?.Name ?? "Unknown SceneObj"}";
 
-                        return true;
+                            return true;
+                        }
                     }
                     return false;
                 };
-                this.mCurActionRuntime.State = ActionState.Doing;
             }
-            if (this.mCurActionRuntime.State == ActionState.Doing)
-                ChangeState("Idle");
+            this.mCurActionRuntime.State = ActionState.Doing;
+
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
+            ChangeState("Idle");
         }
 
         private void ExecuteInteractAction(ActionSequenceRuntime actionSequenceRuntime)
@@ -779,29 +802,29 @@ namespace ShootingEditor2D
 
                 this.mCurActionRuntime.StartPostion = transform.position;
                 this.mCurActionRuntime.StartEnv = devicesInfoDesc;
-
-                this.mCurActionRuntime.State = ActionState.Doing;
             }
-            if (this.mCurActionRuntime.State == ActionState.Doing)
-            {
-                // 执行一次
-                ChangeState("Idle");
-                (bool success, string result) = DeviceManager.Instance.Interact(this.gameObject);
-                // 获得执行结果后，直接OnActionFinished
-                if (this.mCurActionRuntime.Result == null)
-                    this.mCurActionRuntime.Result = new ActionResult();
+            this.mCurActionRuntime.State = ActionState.Doing;
 
-                this.mCurActionRuntime.Result.Message = result;
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
+            // 执行一次
+            ChangeState("Idle");
+            (bool success, string result) = DeviceManager.Instance.Interact(this.gameObject);
+            // 获得执行结果后，直接OnActionFinished
+            if (this.mCurActionRuntime.Result == null)
+                this.mCurActionRuntime.Result = new ActionResult();
 
-                this.mCurActionRuntime.State = success
-                    ? ActionState.Done
-                    : ActionState.Failed;
+            this.mCurActionRuntime.Result.Message = result;
 
-                var finishedRuntime = this.mCurActionRuntime;
-                this.mCurActionRuntime = null;
+            this.mCurActionRuntime.State = success
+                ? ActionState.Done
+                : ActionState.Failed;
 
-                OnActionFinished(finishedRuntime);
-            }
+            var finishedRuntime = this.mCurActionRuntime;
+            this.mCurActionRuntime = null;
+
+            OnActionFinished(finishedRuntime);
         }
 
         private void ExecuteSelectAction(ActionSequenceRuntime actionSequenceRuntime)
@@ -817,29 +840,31 @@ namespace ShootingEditor2D
                 this.mCurActionRuntime.StartPostion = transform.position;
                 this.mCurActionRuntime.StartEnv = devicesInfoDesc;
 
-                this.mCurActionRuntime.State = ActionState.Doing;
+                
             }
-            if (this.mCurActionRuntime.State == ActionState.Doing)
-            {
-                // 执行一次
-                ChangeState("Idle");
-                int selection = curAction.Select.Selection;
-                (bool success, string result) = DeviceManager.Instance.Select(this.gameObject, selection);
-                // 获得执行结果后，直接OnActionFinished
-                if (this.mCurActionRuntime.Result == null)
-                    this.mCurActionRuntime.Result = new ActionResult();
+            this.mCurActionRuntime.State = ActionState.Doing;
 
-                this.mCurActionRuntime.Result.Message = result;
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
+            // 执行一次
+            ChangeState("Idle");
+            int selection = curAction.Select.Selection;
+            (bool success, string result) = DeviceManager.Instance.Select(this.gameObject, selection);
+            // 获得执行结果后，直接OnActionFinished
+            if (this.mCurActionRuntime.Result == null)
+                this.mCurActionRuntime.Result = new ActionResult();
 
-                this.mCurActionRuntime.State = success
-                    ? ActionState.Done
-                    : ActionState.Failed;
+            this.mCurActionRuntime.Result.Message = result;
 
-                var finishedRuntime = this.mCurActionRuntime;
-                this.mCurActionRuntime = null;
+            this.mCurActionRuntime.State = success
+                ? ActionState.Done
+                : ActionState.Failed;
 
-                OnActionFinished(finishedRuntime);
-            }
+            var finishedRuntime = this.mCurActionRuntime;
+            this.mCurActionRuntime = null;
+
+            OnActionFinished(finishedRuntime);
         }
 
         private void ExecuteInputAction(ActionSequenceRuntime actionSequenceRuntime)
@@ -854,30 +879,30 @@ namespace ShootingEditor2D
 
                 this.mCurActionRuntime.StartPostion = transform.position;
                 this.mCurActionRuntime.StartEnv = devicesInfoDesc;
-
-                this.mCurActionRuntime.State = ActionState.Doing;
             }
-            if (this.mCurActionRuntime.State == ActionState.Doing)
-            {
-                // 执行一次
-                ChangeState("Idle");
-                string inputText = curAction.Input.InputText;
-                (bool success, string result) = DeviceManager.Instance.TextInput(this.gameObject, inputText);
-                // 获得执行结果后，直接OnActionFinished
-                if (this.mCurActionRuntime.Result == null)
-                    this.mCurActionRuntime.Result = new ActionResult();
+            this.mCurActionRuntime.State = ActionState.Doing;
 
-                this.mCurActionRuntime.Result.Message = result;
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
+            // 执行一次
+            ChangeState("Idle");
+            string inputText = curAction.Input.InputText;
+            (bool success, string result) = DeviceManager.Instance.TextInput(this.gameObject, inputText);
+            // 获得执行结果后，直接OnActionFinished
+            if (this.mCurActionRuntime.Result == null)
+                this.mCurActionRuntime.Result = new ActionResult();
 
-                this.mCurActionRuntime.State = success
-                    ? ActionState.Done
-                    : ActionState.Failed;
+            this.mCurActionRuntime.Result.Message = result;
 
-                var finishedRuntime = this.mCurActionRuntime;
-                this.mCurActionRuntime = null;
+            this.mCurActionRuntime.State = success
+                ? ActionState.Done
+                : ActionState.Failed;
 
-                OnActionFinished(finishedRuntime);
-            }
+            var finishedRuntime = this.mCurActionRuntime;
+            this.mCurActionRuntime = null;
+
+            OnActionFinished(finishedRuntime);
         }
 
         private void OnCurrentActionCompleted()
