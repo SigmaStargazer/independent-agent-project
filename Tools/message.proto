@@ -134,6 +134,7 @@ message MoveAction {
     RIGHT = 1;
   }
   Direction direction = 1;
+  repeated int32 allowed_contact_obj_ids = 2;
 }
 
 message InteractAction {

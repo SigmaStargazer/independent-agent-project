@@ -696,6 +696,18 @@ namespace ShootingEditor2D
                 // 更新curActionRuntime开始时的信息
                 this.mCurActionRuntime.StartPostion = new Vector2(transform.position.x, transform.position.y);
                 this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+
+                // 移动时允许接触的物体
+                var allowedIds = curAction.Move.AllowedContactObjIds;
+                if (allowedIds != null)
+                {
+                    foreach (var id in allowedIds)
+                    {
+                        this.mCurActionRuntime.AllowedContactObjs
+                            .Add(actionSequenceRuntime.DeviceSnap[id]);
+                    }
+                }
+
                 this.mCurActionRuntime.CompleteConditionFunc = () =>
                 {
                     // 每帧更新动态变量
@@ -712,7 +724,7 @@ namespace ShootingEditor2D
                     // 碰撞判断
                     foreach (var obj in this.mTouchingObjs)
                     {
-                        if (!this.mCurActionRuntime.StartTouchingObjs.Contains(obj))
+                        if (!this.mCurActionRuntime.StartTouchingObjs.Contains(obj) && !this.mCurActionRuntime.AllowedContactObjs.Contains(obj))
                         {
                             if (this.mCurActionRuntime.Result == null)
                                 this.mCurActionRuntime.Result = new ActionResult();

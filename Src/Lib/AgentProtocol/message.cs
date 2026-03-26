@@ -206,6 +206,9 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(1)]
         public Direction direction { get; set; }
 
+        [global::ProtoBuf.ProtoMember(2, Name = @"allowed_contact_obj_ids", IsPacked = true)]
+        public int[] AllowedContactObjIds { get; set; }
+
         [global::ProtoBuf.ProtoContract()]
         public enum Direction
         {

@@ -31,6 +31,8 @@ namespace ShootingEditor2D
 
         // 动作开始时接触的物体集合
         public HashSet<SceneObjBase> StartTouchingObjs = new HashSet<SceneObjBase>();
+        // 预计动作过程中允许接触的物体集合
+        public HashSet<SceneObjBase> AllowedContactObjs = new HashSet<SceneObjBase>();
 
         public ActionResult Result;
     }

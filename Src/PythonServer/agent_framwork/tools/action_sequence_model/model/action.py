@@ -1,5 +1,5 @@
 from pydantic import Field
-from typing import Literal
+from typing import Literal, List
 from .base_action import BaseAction, StateChangeAction
 
 class WaitAction(StateChangeAction):
@@ -8,6 +8,10 @@ class WaitAction(StateChangeAction):
 class MoveAction(StateChangeAction):
     action: Literal["move"] = Field(default="move", description="移动，直至满足条件")
     direction: Literal["left", "right"] = Field(..., description="移动方向")
+    allowed_contact_obj_ids: List[int] = Field(
+        ...,
+        description="移动过程中允许接触的物体序号列表，如推箱子时填写箱子的物体序号。当撞上到列表以外的物体时，会中断动作序列。若无则填空列表[]。"
+    )
 
 class InteractAction(BaseAction):
     action: Literal["interact"] = Field(

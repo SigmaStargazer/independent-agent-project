@@ -85,6 +85,10 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
             if step.direction == "right"
             else message_pb2.MoveAction.LEFT
         )
+        if step.allowed_contact_obj_ids:
+            pb_step.move.allowed_contact_obj_ids.extend(
+                step.allowed_contact_obj_ids
+            )
 
     elif isinstance(step, InteractActionModel):
         pb_step.interact.CopyFrom(message_pb2.InteractAction())
