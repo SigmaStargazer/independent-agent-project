@@ -34,6 +34,10 @@ namespace ShootingEditor2D
         // 预计动作过程中允许接触的物体集合
         public HashSet<SceneObjBase> AllowedContactObjs = new HashSet<SceneObjBase>();
 
+        // 用于卡住检测
+        public float LastCheckPosX; // 上一次检查的 X 坐标
+        public float StuckTime = 0f; // 持续卡住的时间
+
         public ActionResult Result;
     }
 
