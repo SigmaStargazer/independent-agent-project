@@ -2,6 +2,8 @@ import os
 import asyncio
 from datetime import datetime
 from uuid import uuid4
+import gc # 引入垃圾回收
+import copy
 
 from graphiti_core import Graphiti
 from graphiti_core.driver.kuzu_driver import KuzuDriver # kuzu配置
@@ -27,6 +29,8 @@ reranker_model_name = "gte-rerank-v2"
 db_root = "db"
 db_name = "graphiti"
 
+QUEUE_SIZE = int(os.getenv("MEMORY_QUEUE_SIZE", 1000))
+
 class _SharedKuzuDriver(KuzuDriver):
     def __init__(self, db_instance, conn_instance):
         # 1. 屏蔽父类初始化，防止重复打开文件
@@ -48,6 +52,10 @@ class MemoryManager:
         self.conn = None
         self.graphiti = None # graphiti
         self._embedder = None
+
+        # 🆕 新增：异步队列与 Worker 控制 
+        self._memory_queue = asyncio.Queue(maxsize=QUEUE_SIZE)
+        self._worker_task = None
 
     async def initialize(self):
         if self._initialized: return self
@@ -118,8 +126,39 @@ class MemoryManager:
             print("✅ [MemorySystem] 数据库完全就绪")
             
             self._initialized = True
+
+            if self._worker_task is None or self._worker_task.done():
+                self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker") 
+                print("✅ [MemorySystem] 记忆存储 Worker 已启动") 
         return self
 
+    async def _memory_worker(self):
+        """
+        记忆存储 Worker
+        """
+        print("[MemWorker] started")
+        while True:
+            try:
+                name, memory, curtime = await self._memory_queue.get()
+                try:
+                    await self._save_memory(
+                        name=name,
+                        memory=memory,
+                        curtime=curtime,
+                        wait_result=False
+                    )
+                except Exception as e:
+                    print("[MemWorker] save failed:",e)
+                finally:
+                    self._memory_queue.task_done()
+            except asyncio.CancelledError:
+                print("[MemWorker] cancelled")
+                break
+            except Exception as e:
+                print("[MemWorker] unexpected error:",e)
+                # 防止 crash loop
+                await asyncio.sleep(1)
+                continue
 
     async def init_agent_summary(self, name: str, summary: str, create_time: datetime):
         """
@@ -145,7 +184,11 @@ class MemoryManager:
         await my_entity.save(self.graphiti.driver)
 
         # (临时)将summary给add_episode，生成初始图谱
-        result = await self._save_memory(name=name, memory=summary, curtime=create_time, wait_result=True)
+        try:
+            result = await self._save_memory(name=name, memory=summary, curtime=create_time, wait_result=True)
+        except Exception as e:
+            print(f"初始化agent简介失败: {e}")
+            return
         # 删除summary所对应episode节点，只保留其生成的实体关系
         episode = result.episode
         await episode.delete(self.graphiti.driver)
@@ -179,7 +222,7 @@ class MemoryManager:
         group_id = name.encode('utf-8').hex()
         try:
             if wait_result:
-                result = await MemoryManager().graphiti.add_episode(
+                result = await self.graphiti.add_episode(
                     name=f"{name}_mem_{curtime}",
                     episode_body=memory,
                     source=EpisodeType.text,
@@ -189,7 +232,7 @@ class MemoryManager:
                 )
                 return result
             else:
-                await MemoryManager().graphiti.add_episode(
+                await self.graphiti.add_episode(
                     name=f"{name}_mem_{curtime}",
                     episode_body=memory,
                     source=EpisodeType.text,
@@ -199,8 +242,10 @@ class MemoryManager:
                 )
         except Exception as e:
             print(f"存储记忆失败: {e}")
+            if wait_result:
+                raise
 
-    async def save_memory(self, name: str, memory: str, curtime: datetime,):
+    async def save_memory(self, name: str, memory: str, curtime: datetime):
         """
         存储记忆
         Args:
@@ -208,7 +253,18 @@ class MemoryManager:
             memory(str): 记忆
             curtime(datetime): 记忆产生时间
         """
-        await self._save_memory(name=name, memory=memory, curtime=curtime, wait_result=False)
+        if not self._initialized:
+            print("[MemoryManager] not initialized")
+            return
+        try:
+            await asyncio.wait_for(
+                self._memory_queue.put((name,memory,curtime)),
+                timeout=2
+            )
+        except asyncio.TimeoutError:
+            print("[MemoryManager] queue full timeout:",name)
+        except Exception as e:
+            print("[MemoryManager] enqueue failed:",e)
 
     async def search_fact_memory(self, name: str, query: str, limit: int = 1):
         """
@@ -225,7 +281,7 @@ class MemoryManager:
         # memory_manager = MemoryManager()
         # # await memory_manager.initialize()  # 确保初始化完成
         group_id = name.encode('utf-8').hex()
-        search_config = search_config_recipes.COMBINED_HYBRID_SEARCH_RRF
+        search_config = copy.deepcopy(search_config_recipes.COMBINED_HYBRID_SEARCH_RRF)
         search_config.limit = limit+1
         memories = await self.graphiti._search(query, 
             config=search_config, 
@@ -253,25 +309,6 @@ class MemoryManager:
                 fact += f"事实失效时间: {invalid_at_time_str}\n"
         if fact:
             mem_fact  += "# 事实\n" + fact + "\n"
-        # mem_fact = ""
-
-        # group_id = name.encode('utf-8').hex()
-        # memories = await self.graphiti.search(
-        #     query, 
-        #     # COMBINED 检索能一次性获取事实（edges）、实体（nodes）和主题（communities）。
-        #     # RRF速度快
-        #     # config=search_config_recipes.COMBINED_HYBRID_SEARCH_RRF, 
-        #     num_results = limit,
-        #     group_ids=[group_id]
-        # )
-
-        # for memory in memories:
-        #     mem_fact += f"- {memory.fact}\n"
-        #     if hasattr(memory, 'valid_at') and memory.valid_at:
-        #         mem_fact += f'事实产生时间: {memory.valid_at}\n'
-        #     if hasattr(memory, 'invalid_at') and memory.invalid_at:
-        #         mem_fact += f'事实失效时间: {memory.invalid_at}\n'
-        # print(f'{mem_fact}')
         return mem_fact
 
     async def search_episode_memory(self, 
@@ -309,7 +346,11 @@ class MemoryManager:
             for edge in memories.edges:
                 if hasattr(edge, 'episodes') and edge.episodes:
                     episodes_uuid_list += edge.episodes
-            condition += f"n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
+            # 如果 query 存在，但没有匹配到 episode
+            # 直接返回空，避免返回所有 memory
+            if not episodes_uuid_list:
+                return ""
+            condition += f"n.uuid in {episodes_uuid_list}"
             mem_desc += f"有关\"{query}\""
         # 2. 根据start_time筛选
         if start_time:
@@ -352,69 +393,28 @@ class MemoryManager:
         if mem_episode:
             mem_episode = "# 情景\n" + mem_episode
 
-
-        # time_key = "valid_at" # 表里的时间key
-
-        # mem_episode = ""
-
-        # group_id = name.encode('utf-8').hex()
-        # episodes_uuid_list = []
-        # memories = await self.graphiti._search(
-        #     query, 
-        #     config=search_config_recipes.EDGE_HYBRID_SEARCH_RRF, 
-        #     group_ids=[group_id]
-        # )
-        # for memory in memories.edges:
-        #     if hasattr(memory, 'episodes') and memory.episodes:
-        #         episodes_uuid_list += memory.episodes
-
-        # # 构造参数字典
-        # params = {}
-        # condition = ""
-        # if episodes_uuid_list:
-        #     condition = "WHERE n.uuid IN $uuids"
-        #     params["uuids"] = episodes_uuid_list
-        # params["limit"] = int(limit) 
-        # cypher = f"""
-        #     MATCH (n:Episodic) {condition}
-        #     RETURN n
-        #     ORDER BY n.{time_key} ASC
-        #     LIMIT $limit
-        # """
-        
-        # # condition = f"WHERE n.uuid in {episodes_uuid_list}" if episodes_uuid_list else ""
-        # # cypher = f"""
-        # #     MATCH (n: Episodic) {condition}
-        # #     RETURN n
-        # #     ORDER BY n.{time_key} ASC
-        # #     LIMIT {limit};
-        # #     """ 
-        # # print(cypher)
-        # # 检索episodes的实际内容
-        # try:
-        #     # response = await memory_manager.conn.execute(cypher)
-        #     response = await self.conn.execute(cypher, parameters=params)
-        #     for row in response.rows_as_dict():
-        #         memory = row['n']
-        #         mem_episode += f"情景: \"{memory['content']}\"\n"
-        #         # if 'valid_at' in memory:
-        #         #     valid_at_time_str = memory[time_key].strftime('%Y-%m-%d %H:%M:%S')
-        #         #     mem_episode += f"发生时间: {valid_at_time_str}\n"
-        #         mem_episode += "---\n"
-        # except RuntimeError as e: # 一般为刚刚建立库，检索失败
-        #     print(f"情景记忆检索失败: {e}")
-        # print(f'{mem_episode}')
-
         return mem_episode
 
     async def close(self):
         """显式关闭资源，释放 Kuzu 文件锁"""
-        import gc # 引入垃圾回收
 
         if not self._initialized:
             return
+        print("🛑 [1/4] 正在清除记忆任务队列worker")
+        if self._worker_task:
+            try:
+                await asyncio.wait_for(self._memory_queue.join(),timeout=30.0)
+            except asyncio.TimeoutError:
+                print("[MemorySystem] queue drain timeout")
 
-        print("🛑 [1/3] 正在关闭连接池...")
+            self._worker_task.cancel()
+            try:
+                await self._worker_task
+            except asyncio.CancelledError:
+                pass
+            self._worker_task = None
+
+        print("🛑 [2/4] 正在关闭连接池...")
         try:
             # 1. 显式关闭 AsyncConnection (这会停止后台线程池)
             if self.conn:
@@ -430,7 +430,7 @@ class MemoryManager:
                 self._kuzu_driver = None
             
             self.graphiti = None
-            self._db = None 
+            self._kuzu_db = None 
 
             # 3. 【核心绝招】强制垃圾回收
             # Python 的 GC 是懒惰的，必须手动踢一脚
@@ -438,8 +438,8 @@ class MemoryManager:
             gc.collect()
             
             self._initialized = False
-            print("✅ [2/3] Python 对象引用已清理")
-            print("✅ [3/3] 垃圾回收完成，数据库锁应已释放")
+            print("✅ [3/4] Python 对象引用已清理")
+            print("✅ [4/4] 垃圾回收完成，数据库锁应已释放")
             
         except Exception as e:
             print(f"⚠️ 关闭资源时出错: {e}")
