@@ -46,7 +46,7 @@ async def handle_agent_create_request(msg, context):
     print(f"创建Agent: {name}: {desc}")
     response = context['server'].message_types['AgentCreateResponse']()
     try:
-        AgentManager().create_agent(name=name, description=desc)
+        AgentManager().acreate_agent(name=name, description=desc)
         response.success = True
         response.errormsg = ""
         await context['server'].send_message(response, context)

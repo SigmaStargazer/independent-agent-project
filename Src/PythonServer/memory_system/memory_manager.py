@@ -221,6 +221,14 @@ class MemoryManager:
     async def _save_memory(self, name: str, memory: str, curtime: datetime, wait_result: bool = False):
         group_id = name.encode('utf-8').hex()
         try:
+            # 限制记忆长度，避免报错
+            MAX_CHARS_PER_EPISODE = 3500
+            if len(memory) > MAX_CHARS_PER_EPISODE:
+                print(
+                    f"[MemoryManager][{name}] memory too large "
+                    f"({len(memory)} chars), truncating to {MAX_CHARS_PER_EPISODE}"
+                )
+                memory = memory[:MAX_CHARS_PER_EPISODE]
             if wait_result:
                 result = await self.graphiti.add_episode(
                     name=f"{name}_mem_{curtime}",
@@ -230,6 +238,7 @@ class MemoryManager:
                     reference_time=curtime,
                     group_id=group_id
                 )
+                print(f"[MemoryManager][{name}]存储记忆成功")
                 return result
             else:
                 await self.graphiti.add_episode(
@@ -240,8 +249,9 @@ class MemoryManager:
                     reference_time=curtime,
                     group_id=group_id
                 )
+                print(f"[MemoryManager][{name}]异步存储记忆任务启动")
         except Exception as e:
-            print(f"存储记忆失败: {e}")
+            print(f"[MemoryManager][{name}]存储记忆失败: {e}")
             if wait_result:
                 raise
 

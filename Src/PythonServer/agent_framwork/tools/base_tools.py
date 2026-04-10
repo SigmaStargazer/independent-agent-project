@@ -431,7 +431,7 @@ async def search_fact_memories(name: Annotated[str, InjectedState('name')],
 # group_id: Annotated[str, InjectedState('group_id')], 
 query: str):
     """
-    寻找事实记忆
+    回忆自己脑海中有关事实的记忆
     Args:
         query(str): 回忆的线索。可以是事物名称、事实描述等，
     Return:
@@ -449,7 +449,7 @@ start_time: str = "",
 end_time: str = "",
 limit: int = 10):
     """
-    寻找情景记忆。可根据情景的大致描述、情景发生的时间段等信息进行寻找。
+    回忆自己脑海中有关某段情景的记忆。可根据情景的大致描述、情景发生的时间段等信息进行寻找。
     * query、start_time、end_time均非必填，但需至少一项不为空，作为线索检索记忆。
     * start_time和end_time的格式举例：1970-01-01T00:00:00Z
     Args:

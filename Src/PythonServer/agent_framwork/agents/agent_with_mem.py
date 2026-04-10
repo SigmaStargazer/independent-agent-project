@@ -1,10 +1,11 @@
 # from ast import Str
 import asyncio
+import uuid
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnablePassthrough
 
 from typing import Annotated, Literal
@@ -50,25 +51,32 @@ model = ChatOpenAI(
     )
 output_parser = StrOutputParser()
 
-tools = [base_tools.communicate_to_agent, 
-         base_tools.communicate_to_user,
-         base_tools.get_agent_list, 
-         base_tools.get_cur_time,
+# # 生产工具列表
+# tools = [base_tools.communicate_to_agent, 
+#          base_tools.communicate_to_user,
+#         #  base_tools.get_agent_list, 
+#          base_tools.get_cur_time,
+#          base_tools.search_fact_memories,
+#          base_tools.search_episode_memories,
+#          base_tools.observe_cmd,
+#          base_tools.move_cmd,
+#          base_tools.interact_cmd,
+#          base_tools.select_cmd,
+#          base_tools.input_cmd,
+#          base_tools.plan_action_sequence_cmd,
+#          base_tools.start_action_sequence_cmd,
+#          base_tools.continue_action_sequence_cmd,
+#          base_tools.stop_action_sequence_cmd,
+#         # base_tools.add_alarm,
+#         #  base_tools.get_alarm_list,
+#         #  base_tools.remove_alarm
+#         ]
+
+# 测试工具列表
+tools = [base_tools.get_cur_time,
          base_tools.search_fact_memories,
-         base_tools.search_episode_memories,
-         base_tools.observe_cmd,
-         base_tools.move_cmd,
-         base_tools.interact_cmd,
-         base_tools.select_cmd,
-         base_tools.input_cmd,
-         base_tools.plan_action_sequence_cmd,
-         base_tools.start_action_sequence_cmd,
-         base_tools.continue_action_sequence_cmd,
-         base_tools.stop_action_sequence_cmd,
-        # base_tools.add_alarm,
-        #  base_tools.get_alarm_list,
-        #  base_tools.remove_alarm
-        ]
+         base_tools.search_episode_memories
+         ]
 
 llm_with_tools = model.bind_tools(tools)
 
@@ -268,7 +276,7 @@ async def save_memory(state: State):
     await aperf_print(f"[{name}]存储记忆开始")
     curtime = await TimeSystem().aget_current_time()
     await MemoryManager().save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
-    await aperf_print(f"[{name}]存储记忆完成")
+    await aperf_print(f"[{name}]存储记忆任务启动，后台进行中")
 
     return {"mem_to_save": ""}
 
@@ -337,40 +345,47 @@ class Agent:
     
     async def aprocess_message(self):
         try:
-            full_messages = ""
-            while True:
-                # 尝试一次性取出所有当前队列中的消息
-                try:
-                    while True:
-                        message = self.queue.get_nowait()
-                        if full_messages:
-                            full_messages += "\n"
-                        full_messages += message
-                        self.queue.task_done()
-                except asyncio.QueueEmpty:
-                    # 如果有消息就处理
-                    if full_messages:
-                        print(f"[{self.name}]Processing message: {full_messages}")
-                        ## 重试
-                        # for i in range(3):
-                        # while True:
-                        try:
-                            response = await self.graph.ainvoke({"messages": [("user", full_messages)], 
-                                                                "name": self.name, 
-                                                                # "group_id": self.group_id
-                                                                }, 
-                                                                self.config)
-                            output = response["messages"][-1].content
-                            print(f"[{self.name}]Response: {output}")
-                            full_messages = ""
-                            # break
-                        except Exception as e:
-                            print(f"[{self.name}]Error occurred: {e}")
-                            await asyncio.sleep(1)
-                                # if i < 2:
-                                #     time.sleep(2)  # 等待2秒再重试
-                    else:
-                        await asyncio.sleep(0.1)
+            while True: # 第一层：保持消费者永久运行
+                
+                # 1. 【完美阻塞】静默等待，无消息时不消耗任何 CPU，消息一到瞬间唤醒
+                full_messages = await self.queue.get()
+                self.queue.task_done()
+
+                # 2. 【合并积压】如果唤醒时队列里瞬间涌入了多条，一次性排空合并
+                while not self.queue.empty():
+                    next_message = self.queue.get_nowait()
+                    full_messages += "\n" + next_message
+                    self.queue.task_done()
+
+                print(f"[{self.name}]Processing message: {full_messages}")
+                
+                # 3. 【固定 ID】兜底策略，确保底层不会因为任何意外重复插入
+                msg_id = str(uuid.uuid4())
+                human_msg = HumanMessage(content=full_messages, id=msg_id)
+                
+                # 初始输入状态
+                input_state = {
+                    "messages": [human_msg], 
+                    "name": self.name
+                }
+                
+                # 4. 第二层：API 调用的错误重试循环
+                while True:
+                    try:
+                        response = await self.graph.ainvoke(input_state, self.config)
+                        output = response["messages"][-1].content
+                        print(f"[{self.name}]Response: {output}")
+                        break # 成功则跳出重试，回到最外层等待新消息
+                        
+                    except Exception as e:
+                        print(f"[{self.name}]Error occurred: {e}")
+                        
+                        # ⭐ 核心：触发 LangGraph 的 Checkpoint 恢复机制
+                        # 将输入置为 None，下次循环 ainvoke 时会直接从中断的 LLM 节点继续跑
+                        input_state = None 
+                        
+                        await asyncio.sleep(2) # 遇到网络错误，歇2秒再试
+                        
         except asyncio.CancelledError:
             print(f"[{self.name}]Processing task has been cancelled.")
 

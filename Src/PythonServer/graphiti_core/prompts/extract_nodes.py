@@ -98,7 +98,7 @@ def extract_message(context: dict[str, Any]) -> list[Message]:
 
 Instructions:
 
-You are given a conversation context and a CURRENT MESSAGE. Your task is to extract **entity nodes** mentioned **explicitly or implicitly** in the CURRENT MESSAGE.
+You are given a conversation context and a CURRENT MESSAGE. Your task is to extract **SPECIFIC entity nodes** mentioned **explicitly** in the CURRENT MESSAGE.
 Pronoun references such as he/she/they or this/that/those should be disambiguated to the names of the 
 reference entities. Only extract distinct entities from the CURRENT MESSAGE. Don't extract pronouns like you, he/she/they, we/us as entities.
 
@@ -106,29 +106,35 @@ reference entities. Only extract distinct entities from the CURRENT MESSAGE. Don
    - If the speaker is mentioned again in the message, treat both mentions as a **single entity**.
 
 2. **Entity Identification**:
-   - Extract all significant entities, concepts, or actors that are **explicitly or implicitly** mentioned in the CURRENT MESSAGE.
+   - Extract explicitly named entities such as:
+        - named persons
+        - named organizations
+        - named products
+        - named technologies
+        - specific named job positions or roles that refer to a concrete position,such as a job posting or organizational role.
+        Do NOT extract generic professions.
    - **Exclude** entities mentioned only in the PREVIOUS MESSAGES (they are for context only).
 
 3. **Entity Classification**:
    - Use the descriptions in ENTITY TYPES to classify each extracted entity.
    - Assign the appropriate `entity_type_id` for each one.
 
-4. **Exclusions**:
-   - Do NOT extract entities representing relationships or actions.
-   - Do NOT extract dates, times, or other temporal information—these will be handled separately.
+4. **INSTANCE UNIQUENESS RULE (CRITICAL)**:
+   - An entity must uniquely identify a specific real-world instance.
+   - If the name could refer to many possible entities (like a general category, academic field, technology domain, or system category), it is NOT a valid entity.
+   - HEURISTIC TEST: If you cannot answer "Which one exactly?" about the entity, do NOT extract it.
 
-5. **Formatting**:
-   - Be **explicit and unambiguous** in naming entities (e.g., use full names when available).
+5. **STRICT EXCLUSIONS**:
+   - INVALID examples (DO NOT extract): "公司", "团队", "项目", "系统", "岗位", "人工智能", "智能代理技术", "工程师", "自动化决策系统".
+   - VALID examples (DO extract): "OpenAI", "ChatGPT", "LangChain", "Tokyo University", "DecisionFlow AI".
 
 6. **Self-Reference Normalization (CRITICAL)**:
    - If the text mentions the first-person speaker (e.g., "I", "me", "my", "myself", "我", "本人", "自分"), regardless of the language, 
    - You MUST extract it as the entity named **"I"**.
-   - This ensures all references to the self are mapped to a single entity node.
 
 7. **Alias Handling**:
    - If the text mentions a proper name (e.g., "小明") that is explicitly stated to be the name of the first-person speaker (e.g., "我是小明"), 
    - Treat this name as an **alias for "I"** and do NOT create a separate entity node for it.
-   - Instead, extract it as the "I" entity to avoid duplicate nodes.
 
 {context['custom_prompt']}
 """
@@ -240,14 +246,15 @@ def extract_text(context: dict[str, Any]) -> list[Message]:
 {context['episode_content']}
 </TEXT>
 
-Given the above text, extract entities from the TEXT that are explicitly or implicitly mentioned.
+Given the above text, extract entities from the TEXT that are explicitly mentioned.
 For each entity extracted, also determine its entity type based on the provided ENTITY TYPES and their descriptions.
 Indicate the classified entity type by providing its entity_type_id.
 
 {context['custom_prompt']}
 
 Guidelines:
-1. Extract significant entities, concepts, or actors mentioned in the conversation.
+1. Extract only specific named entities that represent real-world objects, organizations, roles, technologies, or locations.
+Do NOT extract concepts, categories, environments, expectations, or descriptive phrases.
 2. Avoid creating nodes for relationships or actions.
 3. Avoid creating nodes for temporal information like dates, times or years (these will be added to edges later).
 4. Be as explicit as possible in your node names, using full names and avoiding abbreviations.
@@ -281,8 +288,8 @@ def reflexion(context: dict[str, Any]) -> list[Message]:
 {context['extracted_entities']}
 </EXTRACTED ENTITIES>
 
-Given the above previous messages, current message, and list of extracted entities; determine if any entities haven't been
-extracted.
+Given the above previous messages, current message, and list of extracted entities; determine if any specific, real-world instances haven't been extracted.
+If no valid specific entities were missed, return an empty list. Do NOT invent entities to increase coverage.
 """
     return [
         Message(role='system', content=sys_prompt),
@@ -379,6 +386,40 @@ def extract_summary(context: dict[str, Any]) -> list[Message]:
         2. Only use the provided MESSAGES and ENTITY to set attribute values.
         3. The summary attribute represents a summary of the ENTITY, and should be updated with new information about the Entity from the MESSAGES. 
             Summaries must be no longer than 250 words.
+        4. SUBJECT-OBJECT ISOLATION (CRITICAL): 
+           Ensure you do NOT attribute the speaker's ("I") feelings, background, job-seeking status, or goals to inanimate objects, generic concepts, or technologies. 
+           For example, if the user says "I am a graduate looking for an AI role", do NOT summarize "AI" as "A graduate looking for a role". The entity must ONLY be summarized based on facts objectively describing the entity itself, not the person interacting with it.
+
+        SPECIAL RULE FOR ENTITY "I":
+        If the entity name is "I", treat the summary as a long-term identity profile rather than an event log.
+        Do not include recent actions, movements, or task execution details.
+        Instead, describe stable characteristics such as:
+
+        - role
+        - capabilities
+        - personality
+        - values
+        - motivations
+        - goals
+        - limitations
+        - development (how the entity has evolved over time)
+        - origin or core purpose (why the entity exists or what its initial mission was)
+
+        ALLOW ABSTRACTION:
+        If repeated behaviors, decisions, or patterns are observed in the messages,
+        you may generalize them into stable abilities, preferences, or traits.
+        Convert specific actions into general capabilities.
+        Only generalize when the pattern appears multiple times or is clearly consistent.
+        Do not invent abilities that are not supported by the messages.
+
+        TRACK DEVELOPMENT:
+        You may describe how the entity's abilities, goals, or behavior have changed over time
+        if such progression is supported by the messages.
+        Focus on patterns of growth, learning, or adaptation.
+        Do not list specific events.
+        Instead, summarize the direction of change.
+
+        The entity name is: {context['node']['name']}
 
         <ENTITY>
         {context['node']}

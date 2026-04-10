@@ -18,7 +18,7 @@ class AgentManager:
         self.agents: Dict[str, Agent] = {}
         self.processing_tasks = {}
 
-    async def create_agent(self, name:str, summary:str, create_time:datetime) -> str:
+    async def acreate_agent(self, name:str, summary:str, create_time:datetime) -> str:
         """
         创建agent，存入self.agents。并将简介存入graphiti中
         Args:
@@ -65,7 +65,7 @@ RETURN n"""
     #     agent = Agent(name=name, description=description)
     #     self.agents[agent.name] = agent
 
-    async def load_agent(self) -> list[str]:
+    async def aload_agent(self) -> list[str]:
         """
         从graphiti加载agent到self.agents
         Return:

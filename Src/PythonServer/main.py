@@ -35,7 +35,7 @@ async def handle_agent_create_request(msg, context):
     
     response = message_pb2.AgentCreateResponse()
     try:
-        result = await AgentManager().create_agent(
+        result = await AgentManager().acreate_agent(
             name=name, 
             summary=desc,
             create_time=cur_time
@@ -54,7 +54,7 @@ async def handle_agent_load_request(msg, context):
     # await MemoryManager().initialize()
     response = message_pb2.AgentLoadResponse()
     try:
-        agent_names = await AgentManager().load_agent()
+        agent_names = await AgentManager().aload_agent()
         response.agent_names.extend(agent_names) # agent_names 的list
         response.success = True
         # response.errormsg = ""
