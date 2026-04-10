@@ -16,6 +16,9 @@ from graphiti_core.llm_client.config import LLMConfig
 from graphiti_core.embedder.openai import OpenAIEmbedder, OpenAIEmbedderConfig
 from graphiti_core.cross_encoder.openai_reranker_client import OpenAIRerankerClient
 
+from memory_system.safe_batch_embedder import SafeBatchOpenAIEmbedder
+from memory_system.safe_batch_reranker import SafeBatchOpenAIReranker
+
 from agent_framwork.base.singleton import singleton
 import kuzu
 
@@ -52,6 +55,7 @@ class MemoryManager:
         self.conn = None
         self.graphiti = None # graphiti
         self._embedder = None
+        self._reranker = None
 
         # 🆕 新增：异步队列与 Worker 控制 
         self._memory_queue = asyncio.Queue(maxsize=QUEUE_SIZE)
@@ -75,17 +79,22 @@ class MemoryManager:
                 raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
             
             # 1. 初始化所有依赖组件
-            self._embedder = OpenAIEmbedder(
+            self._embedder = SafeBatchOpenAIEmbedder(
                 config=OpenAIEmbedderConfig(
-                    api_key=model_api_key, embedding_model=embedding_model_name,
+                    api_key=model_api_key, 
+                    embedding_model=embedding_model_name,
                     base_url=model_api_base
-                )
+                ),
+                max_batch_size=10
             )
-            self._reranker = OpenAIRerankerClient(
+
+            self._reranker = SafeBatchOpenAIReranker(
                 config=LLMConfig(
-                    api_key=model_api_key, model=reranker_model_name,
+                    api_key=model_api_key, 
+                    model=reranker_model_name,
                     base_url=model_api_base
-                )
+                ),
+                max_batch_size=10
             )
 
             # 2. 初始化全局 DB
@@ -222,7 +231,7 @@ class MemoryManager:
         group_id = name.encode('utf-8').hex()
         try:
             # 限制记忆长度，避免报错
-            MAX_CHARS_PER_EPISODE = 3500
+            MAX_CHARS_PER_EPISODE = 8000
             if len(memory) > MAX_CHARS_PER_EPISODE:
                 print(
                     f"[MemoryManager][{name}] memory too large "
