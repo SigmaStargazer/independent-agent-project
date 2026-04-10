@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 import gc # 引入垃圾回收
 import copy
+import shutil
 
 from graphiti_core import Graphiti
 from graphiti_core.driver.kuzu_driver import KuzuDriver # kuzu配置
@@ -57,9 +58,14 @@ class MemoryManager:
         self._embedder = None
         self._reranker = None
 
-        # 🆕 新增：异步队列与 Worker 控制 
+        # 异步队列与 Worker 控制 
         self._memory_queue = asyncio.Queue(maxsize=QUEUE_SIZE)
         self._worker_task = None
+
+        # 记忆备份相关
+        self._backup_root = "backups"
+        self._max_backup_slots = int(os.getenv("MAX_BACKUP_SLOTS", 10))
+        self._backup_lock = asyncio.Lock()
 
     async def initialize(self):
         if self._initialized: return self
@@ -413,6 +419,76 @@ class MemoryManager:
             mem_episode = "# 情景\n" + mem_episode
 
         return mem_episode
+
+    async def backup_memory(self, slot_id: int):
+        """
+        记忆存档（热备份）
+            - 支持运行时备份
+            - 覆盖已有 slot
+            - 自动复制 wal
+        Args:
+            slot_id(int): 存档序号
+        """
+        async with self._backup_lock:
+            if not self._initialized:
+                raise RuntimeError("未执行initialized")
+            if slot_id < 0 or slot_id >= self._max_backup_slots:
+                raise ValueError(f"slot_id应在[0, {self._max_backup_slots-1}]范围内")
+            print(f"[MemoryManager][记忆备份开始] slot={slot_id}")
+
+            os.makedirs(self._backup_root, exist_ok=True)
+            slot_path = os.path.join(self._backup_root, f"slot_{slot_id}")
+            # 如果备份目录存在，则需要覆盖
+            if os.path.exists(slot_path):
+                print(f"[MemoryManager][记忆备份中][覆盖已有备份] slot={slot_id}")
+                shutil.rmtree(slot_path)
+            os.makedirs(slot_path)
+            # 复制数据库文件和WAL文件
+            db_file = os.path.join(db_root,f"{db_name}.kuzu")
+            wal_file = os.path.join(db_root,f"{db_name}.wal")
+            try:
+                shutil.copy2(db_file,os.path.join(slot_path,f"{db_name}.kuzu"))
+                if os.path.exists(wal_file):
+                    shutil.copy2(wal_file,os.path.join(slot_path,f"{db_name}.wal"))
+                print(f"[MemoryManager][记忆备份完成] slot={slot_id}")
+            except Exception as e:
+                print(f"[MemoryManager][记忆备份失败] slot={slot_id}: {e}")
+                raise
+
+    async def restore_memory(self, slot_id: int):
+        """
+        记忆读档
+            - 必须在 Agent 停止后调用
+        Args:
+            slot_id(int): 存档序号
+        """
+        async with self._backup_lock:
+            print(f"[MemoryManager] 开始读档 slot={slot_id}")
+            slot_path = os.path.join(self._backup_root,f"slot_{slot_id}")
+            # 如果备份目录不存在，则报错
+            if not os.path.exists(slot_path):
+                raise RuntimeError(f"slot {slot_id} 不存在")
+
+            await self.close()
+
+            db_file = os.path.join(db_root,f"{db_name}.kuzu")
+            wal_file = os.path.join(db_root,f"{db_name}.wal")
+
+            try:
+                # 删除当前的数据库文件和WAL文件
+                if os.path.exists(db_file):
+                    os.remove(db_file)
+                if os.path.exists(wal_file):
+                    os.remove(wal_file)
+                # 复制备份的数据库文件和WAL文件
+                shutil.copy2(os.path.join(slot_path,f"{db_name}.kuzu"),db_file)
+                backup_wal = os.path.join(slot_path,f"{db_name}.wal")
+                if os.path.exists(backup_wal):
+                    shutil.copy2(backup_wal,wal_file)
+            except Exception as e:
+                print(f"[MemoryManager][记忆读档失败] slot={slot_id}: {e}")
+                raise
+            print(f"[MemoryManager] 读档完成 slot={slot_id}")
 
     async def close(self):
         """显式关闭资源，释放 Kuzu 文件锁"""

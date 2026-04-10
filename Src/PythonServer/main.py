@@ -121,6 +121,40 @@ async def handle_tool_result_request(msg, context):
 
     print(f"[TOOL_WAITERS] 工具回调完成: agent={agent}, tool={tool_name}, request_id={request_id}")
 
+@server.on_message(message_pb2.MemoryBackupRequest)
+async def handle_memory_backup_request(msg, context):
+    slot_id = msg.slot_id
+    response = message_pb2.MemoryBackupResponse()
+    try:
+        await MemoryManager().backup_memory(slot_id=slot_id)
+        response.success = True
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+    await context['server'].send_message(response,context)
+
+@server.on_message(message_pb2.MemoryRestoreRequest)
+async def handle_memory_restore_request(msg, context):
+    slot_id = msg.slot_id
+    response = message_pb2.MemoryRestoreResponse()
+    try:
+        print("停止 Agent...")
+        AgentManager().finish()
+        print("读档...")
+        await MemoryManager().restore_memory(slot_id=slot_id)
+        print("重新初始化 MemoryManager...")
+        await MemoryManager().initialize()
+        print("重新加载 Agent...")
+        await AgentManager().aload_agent()
+        print("重新启动 Agent...")
+        AgentManager().start()
+        response.success = True
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print("读档失败:", e)
+    await context['server'].send_message(response,context)
+
 # ======================
 # 启动服务器
 # ======================
