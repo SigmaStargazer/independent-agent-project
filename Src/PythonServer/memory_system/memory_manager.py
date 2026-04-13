@@ -74,15 +74,15 @@ class MemoryManager:
         async with self._init_lock:
             if self._initialized: return self
 
-            # 0. 清理 WAL 文件（必须在 Database() 之前）
-            wal_path = os.path.join(db_root, f"{db_name}.wal")
-            try:
-                if os.path.exists(wal_path):
-                    os.remove(wal_path)
-                    print(f"🧹 [MemorySystem] 已删除 WAL 文件: {wal_path}")
-            except Exception as e:
-                print(f"⚠️ [MemorySystem] 删除 WAL 失败: {e}")
-                raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
+            # # 0. 清理 WAL 文件（必须在 Database() 之前）
+            # wal_path = os.path.join(db_root, f"{db_name}.wal")
+            # try:
+            #     if os.path.exists(wal_path):
+            #         os.remove(wal_path)
+            #         print(f"🧹 [MemorySystem] 已删除 WAL 文件: {wal_path}")
+            # except Exception as e:
+            #     print(f"⚠️ [MemorySystem] 删除 WAL 失败: {e}")
+            #     raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
             
             # 1. 初始化所有依赖组件
             self._embedder = SafeBatchOpenAIEmbedder(
@@ -103,10 +103,31 @@ class MemoryManager:
                 max_batch_size=10
             )
 
-            # 2. 初始化全局 DB
+            # 2. 安全打开数据库
             print("💾 [MemorySystem] 正在挂载全局数据库...")
             db_path = os.path.join(db_root, f"{db_name}.kuzu")
-            self._kuzu_db = kuzu.Database(db_path)
+            wal_path = os.path.join(db_root, f"{db_name}.wal")
+            opened = False
+            try:
+                self._kuzu_db = kuzu.Database(db_path)
+                opened = True
+            except Exception as e:
+                print("⚠️ [MemorySystem] 数据库打开失败，尝试清理 WAL:", e)
+                if os.path.exists(wal_path):
+                    try:
+                        os.remove(wal_path)
+                        print(f"🧹 [MemorySystem] 已删除 WAL 文件: {wal_path}")
+                    except Exception as e:
+                        print(f"⚠️ [MemorySystem] 删除 WAL 失败: {e}")
+                        raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
+            # 再尝试一次打开
+            if not opened:
+                try:
+                    self._kuzu_db = kuzu.Database(db_path)
+                    print("✅ [MemorySystem] 数据库已通过 clean start 打开")
+                except Exception as retry_err:
+                    print("❌ [MemorySystem] clean start 仍失败:", retry_err)
+                    raise retry_err
             
             # 3. 首次建索引 (内部封装，外部无感)
             # self.conn = kuzu.AsyncConnection(self._kuzu_db)
@@ -420,14 +441,47 @@ class MemoryManager:
 
         return mem_episode
 
+    async def wait_memory_flush(
+        self,
+        timeout: float | None = None
+    ) -> bool:
+        """
+        等待所有 memory 写入完成
+
+        Returns:
+            True  -> 所有写入完成
+            False -> 超时
+        """
+
+        if not self._initialized: return True
+        try:
+            if timeout is not None:
+                await asyncio.wait_for(self._memory_queue.join(),timeout=timeout)
+            else:
+                await self._memory_queue.join()
+            return True
+        except asyncio.TimeoutError:
+            print("[MemoryManager] wait_memory_flush timeout")
+            return False
+
     async def backup_memory(self, slot_id: int):
         """
         记忆存档（热备份）
             - 支持运行时备份
             - 覆盖已有 slot
             - 自动复制 wal
+
+        建议使用方式：
+        flushed = await wait_memory_flush(timeout=2.0)
+        if not flushed:
+            print(
+                "[MemoryManager] flush timeout, "
+                "proceeding with backup anyway"
+            )
+        await backup_memory(slot_id)
+
         Args:
-            slot_id(int): 存档序号
+            slot_id(int): 存档序号。取值范围为[0, MAX_BACKUP_SLOTS-1]
         """
         async with self._backup_lock:
             if not self._initialized:
@@ -459,6 +513,14 @@ class MemoryManager:
         """
         记忆读档
             - 必须在 Agent 停止后调用
+
+        建议使用方式：
+        AgentManager().finish()
+        await MemoryManager().restore_memory(slot_id=slot_id)
+        await MemoryManager().initialize()
+        await AgentManager().aload_agent()
+        AgentManager().start()
+
         Args:
             slot_id(int): 存档序号
         """
@@ -489,6 +551,86 @@ class MemoryManager:
                 print(f"[MemoryManager][记忆读档失败] slot={slot_id}: {e}")
                 raise
             print(f"[MemoryManager] 读档完成 slot={slot_id}")
+
+    async def list_used_slots(self) -> list[int]:
+        """
+        获取当前已占用的 slot_id 列表
+        Return:
+            List[int]
+        """
+        os.makedirs(self._backup_root, exist_ok=True)
+        used_slots = []
+        for name in os.listdir(self._backup_root):
+            if not name.startswith("slot_"):
+                continue
+            try:
+                slot_id = int(name.split("_")[1])
+            except Exception:
+                continue
+
+            if 0 <= slot_id < self._max_backup_slots:
+                slot_path = os.path.join(self._backup_root, name)
+                # 必须包含数据库文件才算有效
+                db_file = os.path.join(slot_path,f"{db_name}.kuzu")
+                if os.path.exists(db_file):
+                    used_slots.append(slot_id)
+        used_slots.sort()
+        return used_slots
+
+    async def delete_backup_slot(self, slot_id: int):
+        """
+        删除指定slot的备份
+
+        Args:
+            slot_id(int)
+        """
+        async with self._backup_lock:
+            if slot_id < 0 or slot_id >= self._max_backup_slots:
+                raise ValueError(f"slot_id应在[0, {self._max_backup_slots-1}]范围内")
+            slot_path = os.path.join(self._backup_root,f"slot_{slot_id}")
+
+            if not os.path.exists(slot_path):
+                print(f"[MemoryManager] slot {slot_id} 不存在")
+                return
+
+            print(f"[MemoryManager] 删除备份 slot={slot_id}")
+
+            try:
+                shutil.rmtree(slot_path)
+                print(f"[MemoryManager] 删除成功 slot={slot_id}")
+            except Exception as e:
+                print(f"[MemoryManager] 删除失败 slot={slot_id}: {e}")
+                raise
+
+    async def delete_current_memory(self):
+        """
+        删除当前正在使用的记忆（清空数据库）
+
+        安全流程：
+            1. 停止 worker
+            2. 关闭连接
+            3. 删除 db + wal
+            4. 重置状态
+        """
+        async with self._backup_lock:
+            print("[MemoryManager] 删除当前记忆开始")
+            await self.close()
+            db_file = os.path.join(db_root,f"{db_name}.kuzu")
+            wal_file = os.path.join(db_root,f"{db_name}.wal")
+
+            try:
+                if os.path.exists(db_file):
+                    os.remove(db_file)
+                    print("[MemoryManager] 已删除数据库文件")
+                if os.path.exists(wal_file):
+                    os.remove(wal_file)
+                    print("[MemoryManager] 已删除 WAL 文件")
+
+            except Exception as e:
+                print("[MemoryManager] 删除当前记忆失败:",e)
+                raise
+
+            print("[MemoryManager] 当前记忆已清空")
 
     async def close(self):
         """显式关闭资源，释放 Kuzu 文件锁"""
