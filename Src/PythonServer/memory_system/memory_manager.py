@@ -63,7 +63,7 @@ class MemoryManager:
         self._worker_task = None
 
         # 记忆备份相关
-        self._backup_root = "backups"
+        self._backup_root = "db/backups"
         self._max_backup_slots = int(os.getenv("MAX_BACKUP_SLOTS", 10))
         self._backup_lock = asyncio.Lock()
 
@@ -136,9 +136,7 @@ class MemoryManager:
             # 4. 【核心修正4】加载 FTS 扩展 (绝对不能删，否则无法建索引)
             try:
                 # 第一次运行需要联网下载，之后本地加载
-                await self.conn.execute("INSTALL FTS")
-                await self.conn.execute("LOAD EXTENSION FTS")
-                print("✅ [MemorySystem] FTS 扩展加载/验证成功")
+                await self._ensure_fts_loaded()
             except Exception as e:
                 print(f"❌ FTS 加载失败: {e}")
                 raise e
@@ -167,6 +165,23 @@ class MemoryManager:
                 self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker") 
                 print("✅ [MemorySystem] 记忆存储 Worker 已启动") 
         return self
+
+    async def _ensure_fts_loaded(self):
+        """
+        幂等加载 FTS 扩展
+        """
+        try:
+            result = await self.conn.execute("CALL SHOW_LOADED_EXTENSIONS() RETURN *")
+            loaded = {row["extension_name"].upper() for row in result.rows_as_dict()}
+            if "FTS" not in loaded:
+                await self.conn.execute("INSTALL FTS")
+                await self.conn.execute("LOAD EXTENSION FTS")
+                print("✅ [MemorySystem] FTS 扩展已加载")
+            else:
+                print("ℹ️ [MemorySystem] FTS 已存在，跳过加载")
+        except Exception as e:
+            print("❌ FTS 检查/加载失败:", e)
+            raise
 
     async def _memory_worker(self):
         """
@@ -464,49 +479,108 @@ class MemoryManager:
             print("[MemoryManager] wait_memory_flush timeout")
             return False
 
-    async def backup_memory(self, slot_id: int):
+    # async def backup_memory(self, slot_id: int):
+    #     """
+    #     记忆存档（热备份）
+    #         - 支持运行时备份
+    #         - 覆盖已有 slot
+    #         - 自动复制 wal
+
+    #     建议使用方式：
+    #     flushed = await wait_memory_flush(timeout=2.0)
+    #     if not flushed:
+    #         print(
+    #             "[MemoryManager] flush timeout, "
+    #             "proceeding with backup anyway"
+    #         )
+    #     await backup_memory(slot_id)
+
+    #     Args:
+    #         slot_id(int): 存档序号。取值范围为[0, MAX_BACKUP_SLOTS-1]
+    #     """
+    #     async with self._backup_lock:
+    #         if not self._initialized:
+    #             raise RuntimeError("未执行initialized")
+    #         if slot_id < 0 or slot_id >= self._max_backup_slots:
+    #             raise ValueError(f"slot_id应在[0, {self._max_backup_slots-1}]范围内")
+    #         print(f"[MemoryManager][记忆备份开始] slot={slot_id}")
+
+    #         os.makedirs(self._backup_root, exist_ok=True)
+    #         slot_path = os.path.join(self._backup_root, f"slot_{slot_id}")
+    #         # 如果备份目录存在，则需要覆盖
+    #         if os.path.exists(slot_path):
+    #             print(f"[MemoryManager][记忆备份中][覆盖已有备份] slot={slot_id}")
+    #             shutil.rmtree(slot_path)
+    #         os.makedirs(slot_path)
+    #         # 复制数据库文件和WAL文件
+    #         db_file = os.path.join(db_root,f"{db_name}.kuzu")
+    #         wal_file = os.path.join(db_root,f"{db_name}.wal")
+    #         try:
+    #             shutil.copy2(db_file,os.path.join(slot_path,f"{db_name}.kuzu"))
+    #             if os.path.exists(wal_file):
+    #                 shutil.copy2(wal_file,os.path.join(slot_path,f"{db_name}.wal"))
+    #             print(f"[MemoryManager][记忆备份完成] slot={slot_id}")
+    #         except Exception as e:
+    #             print(f"[MemoryManager][记忆备份失败] slot={slot_id}: {e}")
+    #             raise
+
+    async def backup_memory(self, slot_id: int, flush_timeout: float = 2.0):
         """
         记忆存档（热备份）
-            - 支持运行时备份
-            - 覆盖已有 slot
-            - 自动复制 wal
 
-        建议使用方式：
-        flushed = await wait_memory_flush(timeout=2.0)
-        if not flushed:
-            print(
-                "[MemoryManager] flush timeout, "
-                "proceeding with backup anyway"
-            )
-        await backup_memory(slot_id)
+        特性：
+            1) 无论是否 initialized，都可以执行
+            2) 自动尝试 flush（尽力而为）
+            3) 不阻塞 Agent 正常运行
+            4) 复制 db + wal，保证一致性恢复
 
         Args:
             slot_id(int): 存档序号。取值范围为[0, MAX_BACKUP_SLOTS-1]
+            flush_timeout(float): flush 等待时间（秒）
         """
         async with self._backup_lock:
-            if not self._initialized:
-                raise RuntimeError("未执行initialized")
             if slot_id < 0 or slot_id >= self._max_backup_slots:
                 raise ValueError(f"slot_id应在[0, {self._max_backup_slots-1}]范围内")
             print(f"[MemoryManager][记忆备份开始] slot={slot_id}")
+            # --------------------------------------------------
+            # 1) 如果系统正在运行，尝试 flush
+            # --------------------------------------------------
+            if self._initialized:
+                try:
+                    print(f"[MemoryManager] flush记忆队列中(timeout={flush_timeout}s)")
+                    flushed = await self.wait_memory_flush(timeout=flush_timeout)
+                    if not flushed:
+                        print("[MemoryManager] flush超时，备份将包含未刷新的WAL")
+                except Exception as e:
+                    print(f"[MemoryManager] flush失败，备份将继续: {e}")
+            else:
+                print("[MemoryManager] 未初始化，备份将继续")
+            # --------------------------------------------------
+            # 2) 准备 slot
+            # --------------------------------------------------
+            db_file = os.path.join(db_root,f"{db_name}.kuzu")
+            wal_file = os.path.join(db_root,f"{db_name}.wal")
+            if not os.path.exists(db_file):
+                raise RuntimeError(f"无法执行存档：当前没有可保存的数据（数据库尚未创建）")
 
             os.makedirs(self._backup_root, exist_ok=True)
             slot_path = os.path.join(self._backup_root, f"slot_{slot_id}")
-            # 如果备份目录存在，则需要覆盖
+
             if os.path.exists(slot_path):
-                print(f"[MemoryManager][记忆备份中][覆盖已有备份] slot={slot_id}")
+                print("[MemoryManager][覆盖已有备份]", f"slot={slot_id}")
                 shutil.rmtree(slot_path)
             os.makedirs(slot_path)
-            # 复制数据库文件和WAL文件
-            db_file = os.path.join(db_root,f"{db_name}.kuzu")
-            wal_file = os.path.join(db_root,f"{db_name}.wal")
+            # --------------------------------------------------
+            # 3) 复制 db + wal
+            # --------------------------------------------------
             try:
-                shutil.copy2(db_file,os.path.join(slot_path,f"{db_name}.kuzu"))
+                if os.path.exists(db_file):
+                    shutil.copy2(db_file, os.path.join(slot_path, f"{db_name}.kuzu"))
                 if os.path.exists(wal_file):
-                    shutil.copy2(wal_file,os.path.join(slot_path,f"{db_name}.wal"))
-                print(f"[MemoryManager][记忆备份完成] slot={slot_id}")
+                    shutil.copy2(wal_file, os.path.join(slot_path, f"{db_name}.wal"))
+                print("[MemoryManager][记忆备份完成]", f"slot={slot_id}")
             except Exception as e:
-                print(f"[MemoryManager][记忆备份失败] slot={slot_id}: {e}")
+                print("[MemoryManager][记忆备份失败]", f"slot={slot_id}:", e)
                 raise
 
     async def restore_memory(self, slot_id: int):
@@ -577,7 +651,7 @@ class MemoryManager:
         used_slots.sort()
         return used_slots
 
-    async def delete_backup_slot(self, slot_id: int):
+    async def delete_backup_memory(self, slot_id: int):
         """
         删除指定slot的备份
 
@@ -605,6 +679,7 @@ class MemoryManager:
     async def delete_current_memory(self):
         """
         删除当前正在使用的记忆（清空数据库）
+        （该方法执行无需初始化MemoryManager）
 
         安全流程：
             1. 停止 worker
@@ -614,7 +689,9 @@ class MemoryManager:
         """
         async with self._backup_lock:
             print("[MemoryManager] 删除当前记忆开始")
+            # 1. 停止记忆系统
             await self.close()
+            # 2. 删除数据库文件和WAL文件
             db_file = os.path.join(db_root,f"{db_name}.kuzu")
             wal_file = os.path.join(db_root,f"{db_name}.wal")
 
@@ -622,6 +699,8 @@ class MemoryManager:
                 if os.path.exists(db_file):
                     os.remove(db_file)
                     print("[MemoryManager] 已删除数据库文件")
+                else:
+                    print(f"[MemoryManager] 当前无数据库文件")
                 if os.path.exists(wal_file):
                     os.remove(wal_file)
                     print("[MemoryManager] 已删除 WAL 文件")
@@ -630,7 +709,9 @@ class MemoryManager:
                 print("[MemoryManager] 删除当前记忆失败:",e)
                 raise
 
-            print("[MemoryManager] 当前记忆已清空")
+            print("[MemoryManager] 删除当前记忆完成")
+
+        return True
 
     async def close(self):
         """显式关闭资源，释放 Kuzu 文件锁"""
