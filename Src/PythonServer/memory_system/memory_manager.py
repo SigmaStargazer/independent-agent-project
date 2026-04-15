@@ -23,11 +23,26 @@ from memory_system.safe_batch_reranker import SafeBatchOpenAIReranker
 from agent_framwork.base.singleton import singleton
 import kuzu
 
-model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
-model_name = "qwen-max"
-embedding_model_name = "text-embedding-v4"
-reranker_model_name = "gte-rerank-v2"
+from dotenv import load_dotenv
+load_dotenv()
+
+# model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+# model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
+# model_name = "qwen-max"
+# embedding_model_name = "text-embedding-v4"
+# reranker_model_name = "gte-rerank-v2"
+
+mem_model_api_base = os.getenv("MEMORY_API_BASE")
+mem_model_api_key = os.getenv("MEMORY_API_KEY")
+mem_model_name = os.getenv("MEMORY_MODEL")
+
+embedding_model_base = os.getenv("EMBEDDING_API_BASE")
+embedding_model_key = os.getenv("EMBEDDING_API_KEY")
+embedding_model_name = os.getenv("EMBEDDING_MODEL")
+
+reranker_model_base = os.getenv("RERANKER_API_BASE")
+reranker_model_key = os.getenv("RERANKER_API_KEY")
+reranker_model_name = os.getenv("RERANKER_MODEL")
 
 # 数据库名
 db_root = "db"
@@ -46,8 +61,8 @@ class _SharedKuzuDriver(KuzuDriver):
 class MemoryManager:
     def __init__(self):
         self._llm_config = LLMConfig(
-                api_key=model_api_key, model=model_name,
-                small_model=model_name, base_url=model_api_base
+                api_key=mem_model_api_key, model=mem_model_name,
+                small_model=mem_model_name, base_url=mem_model_api_base
             )
         self._initialized = False
         self._init_lock = None
@@ -87,18 +102,18 @@ class MemoryManager:
             # 1. 初始化所有依赖组件
             self._embedder = SafeBatchOpenAIEmbedder(
                 config=OpenAIEmbedderConfig(
-                    api_key=model_api_key, 
+                    api_key=embedding_model_key, 
                     embedding_model=embedding_model_name,
-                    base_url=model_api_base
+                    base_url=embedding_model_base
                 ),
                 max_batch_size=10
             )
 
             self._reranker = SafeBatchOpenAIReranker(
                 config=LLMConfig(
-                    api_key=model_api_key, 
+                    api_key=reranker_model_key, 
                     model=reranker_model_name,
-                    base_url=model_api_base
+                    base_url=reranker_model_base
                 ),
                 max_batch_size=10
             )
@@ -107,6 +122,7 @@ class MemoryManager:
             print("💾 [MemorySystem] 正在挂载全局数据库...")
             db_path = os.path.join(db_root, f"{db_name}.kuzu")
             wal_path = os.path.join(db_root, f"{db_name}.wal")
+            db_exists = os.path.exists(db_path)
             opened = False
             try:
                 self._kuzu_db = kuzu.Database(db_path)
@@ -132,8 +148,19 @@ class MemoryManager:
             # 3. 首次建索引 (内部封装，外部无感)
             # self.conn = kuzu.AsyncConnection(self._kuzu_db)
             self.conn = kuzu.AsyncConnection(self._kuzu_db, max_concurrent_queries=1)
+
+            # 4. 判断 schema 是否存在
+            schema_initialized = False
+            if db_exists:
+                try:
+                    result = await self.conn.execute("CALL show_tables()")
+                    tables = await result.fetchall()
+                    schema_initialized = len(tables) > 0
+                except Exception:
+                    schema_initialized = False
+            is_new_db = not schema_initialized         
             
-            # 4. 【核心修正4】加载 FTS 扩展 (绝对不能删，否则无法建索引)
+            # 5. 加载 FTS 扩展 
             try:
                 # 第一次运行需要联网下载，之后本地加载
                 await self._ensure_fts_loaded()
@@ -141,7 +168,7 @@ class MemoryManager:
                 print(f"❌ FTS 加载失败: {e}")
                 raise e
 
-            # 5. 组装 Graphiti
+            # 6. 组装 Graphiti
             self._kuzu_driver = _SharedKuzuDriver(self._kuzu_db, self.conn)
             print("🏗️ [MemorySystem] 正在检查/创建表结构 (Schema)...")
             try:
@@ -155,12 +182,15 @@ class MemoryManager:
                 embedder=self._embedder,
                 cross_encoder=self._reranker
             )
-            print("⏳ [MemorySystem] 检查数据库索引...")
-            await self.graphiti.build_indices_and_constraints()
-            print("✅ [MemorySystem] 数据库完全就绪")
+            # 7. 只在首次初始化时创建索引
+            if is_new_db:
+                print("⏳ [MemorySystem] 首次初始化索引...")
+                await self.graphiti.build_indices_and_constraints()
+            else:
+                print("ℹ️ [MemorySystem] 使用已有数据库，跳过索引创建")
             
             self._initialized = True
-
+            # 8. 启动记忆存储 Worker
             if self._worker_task is None or self._worker_task.done():
                 self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker") 
                 print("✅ [MemorySystem] 记忆存储 Worker 已启动") 
@@ -172,9 +202,21 @@ class MemoryManager:
         """
         try:
             result = await self.conn.execute("CALL SHOW_LOADED_EXTENSIONS() RETURN *")
-            loaded = {row["extension_name"].upper() for row in result.rows_as_dict()}
+            rows = result.rows_as_dict()
+            loaded = set()
+            for row in rows:
+                # 兼容所有列名
+                for v in row.values():
+                    if isinstance(v, str):
+                        loaded.add(v.upper())
+
             if "FTS" not in loaded:
-                await self.conn.execute("INSTALL FTS")
+                print("[MemorySystem] installing FTS...")
+                try:
+                    await self.conn.execute("INSTALL FTS")
+                except Exception as e:
+                    # 已安装时可能报错
+                    print("[MemorySystem] INSTALL FTS warning:", e)
                 await self.conn.execute("LOAD EXTENSION FTS")
                 print("✅ [MemorySystem] FTS 扩展已加载")
             else:
@@ -553,6 +595,11 @@ class MemoryManager:
                         print("[MemoryManager] flush超时，备份将包含未刷新的WAL")
                 except Exception as e:
                     print(f"[MemoryManager] flush失败，备份将继续: {e}")
+                try:
+                    print(f"[MemoryManager] checkpoint开始")
+                    await self.conn.execute("CHECKPOINT")
+                except Exception as e:
+                    print(f"[MemoryManager] checkpoint失败，备份将继续: {e}")
             else:
                 print("[MemoryManager] 未初始化，备份将继续")
             # --------------------------------------------------

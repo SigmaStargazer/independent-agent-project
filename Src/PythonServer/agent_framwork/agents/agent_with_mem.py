@@ -1,6 +1,7 @@
 # from ast import Str
 import asyncio
 import uuid
+import os
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
@@ -27,6 +28,9 @@ from agent_framwork.systems.time_system import TimeSystem
 
 from tools.perf_tool import aperf_print
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # # 千问
 # model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 # model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
@@ -37,10 +41,9 @@ from tools.perf_tool import aperf_print
 # model_api_key = "sk-0cYUM2FsdWqmyJeth1He0FXlCVlcxScjNb3YPYHjl78vyEgY"
 # model_name = "kimi-k2-0711-preview"
 
-# 智谱
-model_api_base = "https://open.bigmodel.cn/api/paas/v4"
-model_api_key = "61383e606d871c028870a8f251a77f08.JH0An7yUOzhd8cIi"
-model_name = "glm-4.7"
+model_api_base = os.getenv("AGENT_API_BASE")
+model_api_key = os.getenv("AGENT_API_KEY")
+model_name = os.getenv("AGENT_MODEL")
 
 model = ChatOpenAI(
         model_name = model_name,

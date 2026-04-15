@@ -52,7 +52,7 @@ async def test_3_backup():
     # 对话：小红是公司的hr
     await AgentManager().agents['小明'].asend_message("小红是公司的hr")
     # 等待对话完成，并且wait_memory_flush结果为True
-    await asyncio.sleep(300)
+    await asyncio.sleep(180)
     while True:
         flushed = await MemoryManager().wait_memory_flush(timeout=2.0)
         if flushed:
@@ -71,7 +71,7 @@ async def test_4_backup_2():
     # 对话：小红是公司的agent工程师
     await AgentManager().agents['小明'].asend_message("小红是公司的agent工程师")
     # 等待对话完成，并且wait_memory_flush结果为True
-    await asyncio.sleep(300)
+    await asyncio.sleep(180)
     while True:
         flushed = await MemoryManager().wait_memory_flush(timeout=2.0)
         if flushed:
@@ -99,12 +99,13 @@ async def test_7_restore_1():
     """
     - 获取slot_id = 0，询问小红是谁
     """
-    # slot_id = 0
-    # await MemoryManager().restore_memory(slot_id=slot_id)
-    # print(f"已恢复记忆:: slot_id: {slot_id }")
+    slot_id = 0
+    await MemoryManager().restore_memory(slot_id=slot_id)
+    print(f"已恢复记忆:: slot_id: {slot_id }")
     await MemoryManager().initialize()
     await TimeSystem().aset_time(year=2016,month=1,day=1)
     agent_names = await AgentManager().aload_agent()
+    AgentManager().start()
     print(f"加载Agent成功: {agent_names}")
     await AgentManager().agents['小明'].asend_message("小红是谁")
     await asyncio.sleep(300)
@@ -114,10 +115,14 @@ async def test_8_restore_2():
     """
     - 获取slot_id = 1，询问小红是谁
     """
-    # slot_id = 1
-    # await MemoryManager().restore_memory(slot_id=slot_id)
-    # print(f"已恢复记忆:: slot_id: {slot_id }")
-    await init_load()
+    slot_id = 1
+    await MemoryManager().restore_memory(slot_id=slot_id)
+    print(f"已恢复记忆:: slot_id: {slot_id }")
+    await MemoryManager().initialize()
+    await TimeSystem().aset_time(year=2016,month=1,day=1)
+    agent_names = await AgentManager().aload_agent()
+    AgentManager().start()
+    print(f"加载Agent成功: {agent_names}")
     await AgentManager().agents['小明'].asend_message("小红是谁")
     await asyncio.sleep(300)
     AgentManager().finish()
@@ -131,4 +136,4 @@ async def test_9_memory_delete():
     print(f"当前使用的slot_id: {used_slots}")
 
 if __name__ == "__main__":
-    asyncio.run(test_3_backup())
+    asyncio.run(test_9_memory_delete())
