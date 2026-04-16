@@ -2,6 +2,7 @@
 import asyncio
 import uuid
 import os
+import time
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
@@ -18,7 +19,9 @@ from langgraph.prebuilt import ToolNode
 
 # from contextlib import ExitStack
 from langgraph.checkpoint.memory import MemorySaver
+
 from memory_system.memory_manager import MemoryManager
+from agent_framwork.base.timed_message import TimedMessage
 
 # from graphiti_core.nodes import EpisodeType
 # from graphiti_core.search import search_config_recipes
@@ -328,39 +331,108 @@ class Agent:
         # self.group_id = name.encode('utf-8').hex()
         # 需要将group_id转成中文，可使用：bytes.fromhex(group_id).decode('utf-8')
 
-        self.memory = MemorySaver()
-        self.config = {"configurable": {"thread_id": self.name}}
+        # 每个智能体都有自己的消息队列
+        self.message_queue = asyncio.Queue()  
+        # 反馈消息队列。移动、动作序列等需要先结束对话再等到结果的工具，应把反馈信息通过asend_feedback返回
+        self.feedback_queue = asyncio.Queue() 
 
-        self.queue = asyncio.Queue()  # 每个智能体都有自己的消息队列
+        self.memory = MemorySaver()
+        self.config = {
+            "configurable": {
+                "thread_id": self.name,
+                "message_queue": self.message_queue,
+                "feedback_queue": self.feedback_queue
+            }
+        }
 
         self.graph = graph_builder.compile(checkpointer=self.memory)
         print(f"[{self.name}]Agent is created.")
 
     async def asend_message(self, message: str):
-        now = await TimeSystem().aget_current_time(to_str = True)
-        if now == "未启动":
-            print(f"[{self.name}]Get message: {message}")
-            await self.queue.put(message)
+        real_time = time.time()
+        virtual_time = await TimeSystem().aget_current_time(to_str = True)
+        if virtual_time == "未启动":
+            text = message
         else:
-            message_with_time = f"[{now}]"+message
-            print(f"[{self.name}]Get message: {message_with_time}")
-            await self.queue.put(message_with_time)
+            text = f"[{virtual_time}]"+message
+        print(f"[{self.name}]Get message: {text}")
+        await self.message_queue.put(TimedMessage(timestamp=real_time, content=text))
+
+    async def asend_feedback(self, feedback: str):
+        real_time = time.time()
+        virtual_time = await TimeSystem().aget_current_time(to_str = True)
+        if virtual_time == "未启动":
+            text = feedback
+        else:
+            text = f"[{virtual_time}]"+feedback
+        print(f"[{self.name}]Get feedback: {text}")
+        await self.feedback_queue.put(TimedMessage(timestamp=real_time, content=text))
+    
+    async def _drain_items(self,
+        include_message_queue: bool,
+        include_feedback_queue: bool
+    ) -> list[TimedMessage]:
+        items = []
+        if include_message_queue:
+            while not self.message_queue.empty():
+                try:
+                    msg = self.message_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+                items.append(msg)
+                self.message_queue.task_done()
+        if include_feedback_queue:
+            while not self.feedback_queue.empty():
+                try:
+                    fb = self.feedback_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+                items.append(fb)
+                self.feedback_queue.task_done()
+        return items
     
     async def aprocess_message(self):
         try:
             while True: # 第一层：保持消费者永久运行
                 
-                # 1. 【完美阻塞】静默等待，无消息时不消耗任何 CPU，消息一到瞬间唤醒
-                full_messages = await self.queue.get()
-                self.queue.task_done()
+                # 1. 阻塞直到至少有 message
+                # 同时等待两个队列
+                msg_task = asyncio.create_task(self.message_queue.get())
+                fb_task = asyncio.create_task(self.feedback_queue.get())
 
-                # 2. 【合并积压】如果唤醒时队列里瞬间涌入了多条，一次性排空合并
-                while not self.queue.empty():
-                    next_message = self.queue.get_nowait()
-                    full_messages += "\n" + next_message
-                    self.queue.task_done()
+                done, pending = await asyncio.wait([msg_task, fb_task], return_when=asyncio.FIRST_COMPLETED)
+                for task in pending:
+                    task.cancel()
+                items = []
+                # 哪个先完成就取哪个
+                if msg_task in done:
+                    first_item = msg_task.result()
+                    self.message_queue.task_done()
+                else:
+                    first_item = fb_task.result()
+                    self.feedback_queue.task_done()
+                for task in pending:
+                    try:
+                        await task
+                    except asyncio.CancelledError:
+                        pass
+                items.append(first_item)
+                # 2. 获取所有消息
+                remaining_items = await self._drain_items(
+                    include_message_queue=True,
+                    include_feedback_queue=True
+                )
+                items.extend(remaining_items)
+                items.sort()
+                full_messages = "\n".join(item.content for item in items)
 
-                print(f"[{self.name}]Processing message: {full_messages}")
+                # # 2. 【合并积压】如果唤醒时队列里瞬间涌入了多条，一次性排空合并
+                # while not self.message_queue.empty():
+                #     next_message = self.message_queue.get_nowait()
+                #     full_messages += "\n" + next_message
+                #     self.message_queue.task_done()
+
+                # print(f"[{self.name}]Processing message: {full_messages}")
                 
                 # 3. 【固定 ID】兜底策略，确保底层不会因为任何意外重复插入
                 msg_id = str(uuid.uuid4())

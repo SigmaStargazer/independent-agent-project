@@ -154,7 +154,16 @@ async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")],
 @tool
 async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
     """
-    确认开始执行动作序列
+    确认开始执行动作序列。
+    重要行为规则：
+    - 动作序列是长时任务（long-running task）。
+    - 执行结果不会在本轮对话中返回。
+    - 执行完成后，系统会主动发送通知消息。
+
+    当你启动动作序列后：
+    - 不要反复调用 observe 等待完成。
+    - 应结束本轮对话，等待执行结果通知。
+
     Return:
         str: 动作序列执行结果
     """
@@ -188,6 +197,15 @@ async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]
 @tool
 async def continue_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
     """继续执行动作序列
+    重要行为规则：
+    - 动作序列是长时任务（long-running task）。
+    - 执行结果不会在本轮对话中返回。
+    - 执行完成后，系统会主动发送通知消息。
+
+    当你启动动作序列后：
+    - 不要反复调用 observe 等待完成。
+    - 应结束本轮对话，等待执行结果通知。
+
     Return:
         str: 动作序列继续执行结果
     """
@@ -250,9 +268,48 @@ async def stop_action_sequence_cmd(agent: Annotated[str, InjectedState("name")])
     finally:
         TOOL_WAITERS.pop(request_id, None)
 
+async def drain_feedback_queue(feedback_queue: asyncio.Queue) -> str:
+    """
+    取出 feedback_queue 内全部内容，并按时间排序
+    """
+    items = []
+    while not feedback_queue.empty():
+        msg = feedback_queue.get_nowait()
+        items.append(msg)
+        feedback_queue.task_done()
+    if not items:
+        return ""
+    items.sort()
+    return "\n".join(item.content for item in items)
+
 @tool
-async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
-    """观察周围环境
+async def observe_cmd(agent: Annotated[str, InjectedState("name")],
+feedback_queue: Annotated[asyncio.Queue, InjectedState("feedback_queue")]
+) -> str:
+    """观察周围环境。
+    用途：
+    - 获取当前环境信息
+    - 获取系统发送的反馈消息（例如动作完成通知）
+
+    重要行为规则：
+
+    1) observe 不是用于等待长时任务完成。
+    2) 当你刚刚启动移动或动作序列时：
+    - 默认应结束本轮对话
+    - 等待系统通知
+    - 而不是持续调用 observe
+
+    3) 避免频繁调用 observe：
+    - 如果环境没有明显变化
+    - 或没有收到新的反馈消息
+    - 不要连续多次调用 observe
+
+    建议策略：
+
+    - 在不确定环境状态时调用 observe
+    - 在收到任务完成通知后再调用 observe
+    - 不要将 observe 作为“等待机制”
+
     Return:
         str: 环境观察结果。
     """
@@ -272,7 +329,10 @@ async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
         print(f"[{agent}] observe_cmd 发起请求 {request_id}")
         # 等待客户端回调（阻塞 await）
         result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
-
+        # 获取目前获取的工具反馈结果
+        feedback_text = await drain_feedback_queue(feedback_queue)
+        if feedback_text:
+            result += "\n" + feedback_text
         # 闭环返回模型
         return f"{result}"
     except asyncio.TimeoutError:
@@ -285,6 +345,15 @@ async def observe_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
 @tool
 async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
     """向指定方向移动指定距离
+    重要行为规则：
+    - 移动是异步执行的。
+    - 移动结果不会在本轮对话中返回。
+    - 移动完成后，系统会主动发送通知消息。
+
+    当你执行移动后：
+    - 不要持续调用 observe 等待移动完成。
+    - 应结束本轮对话，等待移动完成通知。
+    
     Args:
         direction(str): 方向，填left或者right
         distance(float): 距离
