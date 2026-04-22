@@ -57,32 +57,32 @@ model = ChatOpenAI(
     )
 output_parser = StrOutputParser()
 
-# # 生产工具列表
-# tools = [base_tools.communicate_to_agent, 
-#          base_tools.communicate_to_user,
-#         #  base_tools.get_agent_list, 
-#          base_tools.get_cur_time,
-#          base_tools.search_fact_memories,
-#          base_tools.search_episode_memories,
-#          base_tools.observe_cmd,
-#          base_tools.move_cmd,
-#          base_tools.interact_cmd,
-#          base_tools.select_cmd,
-#          base_tools.input_cmd,
-#          base_tools.plan_action_sequence_cmd,
-#          base_tools.start_action_sequence_cmd,
-#          base_tools.continue_action_sequence_cmd,
-#          base_tools.stop_action_sequence_cmd,
-#         # base_tools.add_alarm,
-#         #  base_tools.get_alarm_list,
-#         #  base_tools.remove_alarm
-#         ]
-
-# 测试工具列表
-tools = [base_tools.get_cur_time,
+# 生产工具列表
+tools = [base_tools.communicate_to_agent, 
+         base_tools.communicate_to_user,
+        #  base_tools.get_agent_list, 
+         base_tools.get_cur_time,
          base_tools.search_fact_memories,
-         base_tools.search_episode_memories
-         ]
+         base_tools.search_episode_memories,
+         base_tools.observe_cmd,
+         base_tools.move_cmd,
+         base_tools.interact_cmd,
+         base_tools.select_cmd,
+         base_tools.input_cmd,
+         base_tools.plan_action_sequence_cmd,
+         base_tools.start_action_sequence_cmd,
+         base_tools.continue_action_sequence_cmd,
+         base_tools.stop_action_sequence_cmd,
+        # base_tools.add_alarm,
+        #  base_tools.get_alarm_list,
+        #  base_tools.remove_alarm
+        ]
+
+# # 测试工具列表
+# tools = [base_tools.get_cur_time,
+#          base_tools.search_fact_memories,
+#          base_tools.search_episode_memories
+#          ]
 
 llm_with_tools = model.bind_tools(tools)
 

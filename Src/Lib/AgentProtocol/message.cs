@@ -321,6 +321,12 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(15)]
         public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(16)]
+        public MemoryBackupRequest memoryBackupRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(17)]
+        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -651,6 +657,30 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(3, Name = @"input_text")]
         [global::System.ComponentModel.DefaultValue("")]
         public string InputText { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryBackupRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
+        public int SlotId { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryRestoreRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
+        public int SlotId { get; set; }
 
     }
 

@@ -1762,8 +1762,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nameInputField: {fileID: 571542968}
   descInputField: {fileID: 2089016932}
-  messageInputField: {fileID: 1256188990}
-  aiMessageText: {fileID: 1918233731}
 --- !u!1 &1437413785
 GameObject:
   m_ObjectHideFlags: 0
@@ -2040,19 +2038,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1870939235}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1394184692}
-        m_TargetAssemblyTypeName: UIAgentClientTest, Assembly-CSharp
-        m_MethodName: OnClickSendMessage
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1870939235
 MonoBehaviour:
   m_ObjectHideFlags: 0

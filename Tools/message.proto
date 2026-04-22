@@ -175,6 +175,8 @@ message NetMessageRequest{
 	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 13;
 	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 14;
 	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 15;
+	MemoryBackupRequest memoryBackupRequest = 16;
+	MemoryRestoreRequest memoryRestoreRequest = 17;
 }
 
 message NetMessageResponse{
@@ -285,3 +287,17 @@ message AgentInputRequest {
 	string request_id = 2;
 	string input_text = 3;
 }
+
+////////////////////////////////////////////////////////////////
+//
+//  存档
+//
+////////////////////////////////////////////////////////////////
+message MemoryBackupRequest {
+	int32 slot_id = 1;
+}
+
+message MemoryRestoreRequest {
+	int32 slot_id = 1;
+}
+

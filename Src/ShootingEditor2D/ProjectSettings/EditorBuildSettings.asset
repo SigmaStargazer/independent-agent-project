@@ -25,5 +25,5 @@ EditorBuildSettings:
     guid: 26edd78b253ad924885b623fec8a1c87
   - enabled: 1
     path: Assets/Scenes/AgentClientTest2.unity
-    guid: 82de551e6ac569848a0182330af4d143
+    guid: fd99d9ae98d201448b861796d0599583
   m_configObjects: {}

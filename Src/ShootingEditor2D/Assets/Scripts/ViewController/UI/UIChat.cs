@@ -1,3 +1,4 @@
+using Services;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,43 +6,111 @@ namespace ShootingEditor2D
 {
     public class UIChat : MonoBehaviour
     {
-        public GameObject root;
-        public InputField inputField;
-        public Text historyText;
+        public GameObject PanalSend;
+        public InputField messageInputField;
+        public Text historyMessageText;
+        public ScrollRect historyScrollRect;
         private PlayerController player;
+        private Agent agent;
 
         private void Awake()
         {
             player = FindObjectOfType<PlayerController>();
-            root.SetActive(false);
+            agent = FindObjectOfType<Agent>();
+            PanalSend.SetActive(false);
+        }
+        void Start()
+        {
+            AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+        }
+
+        void Update()
+        {
+            if (Input.GetButtonDown("ToggleChat"))
+            {
+                this.ToggleChat();
+                return;
+            }
+        }
+
+        private void ToggleChat()
+        {
+            if (!PanalSend.activeSelf)
+            {
+                this.Open();
+            }
+            else
+            {
+                this.OnClickSendButton();
+            }
         }
 
         public void Open()
         {
-            root.SetActive(true);
-            inputField.text = "";
-            inputField.ActivateInputField();
+            if (player != null)
+                this.player.ToggleChatMode();
+            PanalSend.SetActive(true);
+            messageInputField.text = "";
+            messageInputField.ActivateInputField();
         }
 
         public void Close()
         {
-            root.SetActive(false);
+            PanalSend.SetActive(false);
+            if (player != null)
+                this.player.ToggleMoveMode();
         }
 
-        public void OnSendButtonClicked()
+        public void OnClickSendButton()
         {
-            string text = inputField.text;
-            if (string.IsNullOrEmpty(text))
-                return;
-            AppendMessage("玩家: " + text);
-            player.SendChatMessage(text);
-            inputField.text = "";
-            inputField.ActivateInputField();
+            string playerName = "";
+            string text = messageInputField.text;
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                if (player != null)
+                    playerName = player.Name;
+                else
+                    playerName = "系统管理员";
+                string messageText = $"{playerName}: {text}";
+                AppendMessage(messageText);
+                agent.SendMessageToAgent(messageText);
+                messageInputField.text = "";
+                messageInputField.ActivateInputField();
+            }
+            this.Close();
+        }
+        private void OnGetAgentMessage(string agent, string ai_message)
+        {
+            this.AppendMessage($"{agent}: {ai_message}");
         }
 
-        public void AppendMessage(string msg)
+        private void AppendMessage(string msg)
         {
-            historyText.text += "\n" + msg;
+            bool shouldScroll = IsScrolledToBottom();
+
+            if (!string.IsNullOrEmpty(historyMessageText.text))
+                historyMessageText.text += "\n";
+            historyMessageText.text += msg;
+            // 将历史消息的滚动条滚动到最底部
+            if (shouldScroll)
+                StartCoroutine(ScrollToBottomNextFrame());
+        }
+
+        private System.Collections.IEnumerator ScrollToBottomNextFrame()
+        {
+            yield return null; // 等待一帧，让 Layout 更新完成
+            Canvas.ForceUpdateCanvases();
+            historyScrollRect.verticalNormalizedPosition = 0f;
+        }
+
+        /// <summary>
+        /// 判断是否需要滚动
+        /// </summary>
+        /// <returns></returns>
+        private bool IsScrolledToBottom()
+        {
+            return historyScrollRect.verticalNormalizedPosition <= 0.001f;
         }
     }
 }

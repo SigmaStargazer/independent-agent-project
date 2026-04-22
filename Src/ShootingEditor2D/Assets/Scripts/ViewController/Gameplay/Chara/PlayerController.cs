@@ -15,6 +15,8 @@ namespace ShootingEditor2D
         public float moveSpeed = 5f;
         private bool moveRight;
 
+        //private UIChat mUIChat;
+
         // ===== 输入模式 =====
 
         private enum PlayerMode
@@ -27,18 +29,18 @@ namespace ShootingEditor2D
 
         // ===== UI =====
 
-        private UIChat mUIChat;
+        
         protected override void Awake()
         {
             base.Awake();
             mRigidbody2D = GetComponent<Rigidbody2D>();
-            mUIChat = FindObjectOfType<UIChat>();
+            //mUIChat = FindObjectOfType <UIChat>();
         }
 
         protected override void Update()
         {
             base.Update();
-            HandleInput();
+            GetInput();
         }
 
         protected override void FixedUpdate()
@@ -46,15 +48,15 @@ namespace ShootingEditor2D
             base.FixedUpdate();
         }
 
-        private void HandleInput()
+        private void GetInput()
         {
-            // ===== 打开 / 关闭聊天 =====
+            //// ===== 打开 / 关闭聊天 =====
 
-            if (Input.GetKeyDown(KeyCode.Return))
-            {
-                ToggleChat();
-                return;
-            }
+            //if (Input.GetButtonDown("ToggleChat"))
+            //{
+            //    ToggleChat();
+            //    return;
+            //}
 
             // ===== 聊天模式禁止操作 =====
 
@@ -65,16 +67,7 @@ namespace ShootingEditor2D
 
             // ===== 移动 =====
 
-            float horizontal = 0;
-            if (Input.GetKey(KeyCode.A))
-            {
-                horizontal = -1;
-            }
-            else if (Input.GetKey(KeyCode.D))
-            {
-                horizontal = 1;
-            }
-
+            float horizontal = Input.GetAxisRaw("Horizontal");
             if (horizontal != 0)
             {
                 moveRight = horizontal > 0;
@@ -87,26 +80,42 @@ namespace ShootingEditor2D
 
             // ===== 交互 =====
 
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetButtonDown("Interact"))
             {
                 InteractNearestDevice();
             }
         }
 
-        private void ToggleChat()
+        //private void ToggleChat()
+        //{
+        //    if (mMode == PlayerMode.Free)
+        //    {
+        //        mMode = PlayerMode.Chatting;
+                
+        //        mUIChat.Open();
+        //        return;
+        //    }
+
+        //    if (mMode == PlayerMode.Chatting)
+        //    {
+        //        mMode = PlayerMode.Free;
+        //        return;
+        //    }
+        //}
+
+        public void ToggleChatMode()
         {
             if (mMode == PlayerMode.Free)
             {
                 mMode = PlayerMode.Chatting;
-                StopAction();
-                mUIChat.Open();
-                return;
             }
+        }
 
+        public void ToggleMoveMode()
+        {
             if (mMode == PlayerMode.Chatting)
             {
                 mMode = PlayerMode.Free;
-                mUIChat.Close();
             }
         }
 

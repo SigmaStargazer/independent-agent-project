@@ -15,13 +15,13 @@ namespace ShootingEditor2D
     {
         public InputField nameInputField;
         public InputField descInputField;
-        public InputField messageInputField;
-        public Text aiMessageText;
+        //public InputField messageInputField;
+        //public Text aiMessageText;
         // Start is called before the first frame update
         void Start()
         {
             AgentService.Instance.OnLoadAgent = this.OnLoadAgent;
-            AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+            //AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
             AgentService.Instance.OnStartScene = this.OnStartScene;
         }
 
@@ -79,36 +79,36 @@ namespace ShootingEditor2D
             SceneManager.LoadScene("AgentClientTest2");
         }
 
-        public void OnClickSendMessage()
-        {
-            //// 创建Agent
-            //AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
-            //AgentService.Instance.SendAgentCreate("小红", "是用户的秘书");
-            //AgentService.Instance.SendSceneStart(1);
+        //public void OnClickSendMessage()
+        //{
+        //    //// 创建Agent
+        //    //AgentService.Instance.SendAgentCreate("小明", "是一个帮助机器人");
+        //    //AgentService.Instance.SendAgentCreate("小红", "是用户的秘书");
+        //    //AgentService.Instance.SendSceneStart(1);
 
-            // 发送消息
-            if (messageInputField != null && !string.IsNullOrEmpty(messageInputField.text))
-            {
-                // 获取输入框的内容
-                string userMessage = messageInputField.text;
+        //    // 发送消息
+        //    if (messageInputField != null && !string.IsNullOrEmpty(messageInputField.text))
+        //    {
+        //        // 获取输入框的内容
+        //        string userMessage = messageInputField.text;
 
-                // 发送给小明
-                AgentService.Instance.SendUserMessage("小明", userMessage);
+        //        // 发送给小明
+        //        AgentService.Instance.SendUserMessage("小明", userMessage);
 
-                // 清空输入框
-                messageInputField.text = "";
+        //        // 清空输入框
+        //        messageInputField.text = "";
 
-                Debug.Log($"已发送消息给小明: {userMessage}");
-            }
-            else
-            {
-                Debug.LogWarning("输入框未绑定或内容为空！");
-            }
-        }
-        private void OnGetAgentMessage(string agent, string ai_message)
-        {
-            aiMessageText.text = $"{agent}: {ai_message}";
-        }
+        //        Debug.Log($"已发送消息给小明: {userMessage}");
+        //    }
+        //    else
+        //    {
+        //        Debug.LogWarning("输入框未绑定或内容为空！");
+        //    }
+        //}
+        //private void OnGetAgentMessage(string agent, string ai_message)
+        //{
+        //    aiMessageText.text = $"{agent}: {ai_message}";
+        //}
 
 
     }

@@ -322,9 +322,11 @@ class MemoryManager:
                     f"({len(memory)} chars), truncating to {MAX_CHARS_PER_EPISODE}"
                 )
                 memory = memory[:MAX_CHARS_PER_EPISODE]
+
+            episode_id = uuid4()
             if wait_result:
                 result = await self.graphiti.add_episode(
-                    name=f"{name}_mem_{curtime}",
+                    name=f"{name}_mem_{curtime}_{episode_id}",
                     episode_body=memory,
                     source=EpisodeType.text,
                     source_description=f"{name}_mem_{curtime}", 
@@ -335,7 +337,7 @@ class MemoryManager:
                 return result
             else:
                 await self.graphiti.add_episode(
-                    name=f"{name}_mem_{curtime}",
+                    name=f"{name}_mem_{curtime}_{episode_id}",
                     episode_body=memory,
                     source=EpisodeType.text,
                     source_description=f"{name}_mem_{curtime}", 
