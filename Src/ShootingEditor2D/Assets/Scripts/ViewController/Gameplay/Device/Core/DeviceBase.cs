@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public abstract class DeviceBase : SceneObjBase, IClickable
+    public abstract class DeviceBase : SceneObjBase, IInteractable,IClickable
     {
         public virtual bool IsClickable => false;
 
@@ -15,14 +15,14 @@ namespace ShootingEditor2D
         public abstract bool IsInteractable { get; }
         protected virtual void OnEnable()
         {
-            if (DeviceManager.Instance != null)
-                DeviceManager.Instance.Register(this);
+            if (SceneObjManager.Instance != null)
+                SceneObjManager.Instance.Register(this);
         }
 
         protected virtual void OnDisable()
         {
-            if (DeviceManager.Instance != null)
-                DeviceManager.Instance.UnRegister(this);
+            if (SceneObjManager.Instance != null)
+                SceneObjManager.Instance.UnRegister(this);
         }
         public virtual (bool success, string result) Interact(GameObject chara)
         {

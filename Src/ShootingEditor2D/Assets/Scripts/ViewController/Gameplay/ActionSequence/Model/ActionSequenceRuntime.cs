@@ -22,21 +22,21 @@ namespace ShootingEditor2D
         public ActionSequenceState State = ActionSequenceState.Idle;
         public List<ActionStep> ActionSequence;
         public int CurActionIndex = 0;
-        public List<DeviceBase> DeviceSnap = new List<DeviceBase>();
+        public List<SceneObjBase> SceneObjSnap = new List<SceneObjBase>();
         public List<ActionRuntime> ActionRuntimeLog = new List<ActionRuntime>();
 
-        public ActionSequenceRuntime(List<ActionStep> actionSequence, List<DeviceBase> devices)
+        public ActionSequenceRuntime(List<ActionStep> actionSequence, List<SceneObjBase> sceneObjs)
         {
             this.ActionSequence = actionSequence;
-            foreach (var device in devices)
+            foreach (var sceneObj in sceneObjs)
             {
-                DeviceSnap.Add(device);
+                SceneObjSnap.Add(sceneObj);
             }
         }
 
-        public void AddDevice(DeviceBase device)
+        public void AddSceneObj(SceneObjBase sceneObj)
         {
-            DeviceSnap.Add(device);
+            SceneObjSnap.Add(sceneObj);
         }
 
         public void CreateActionRuntimeLog(SceneObjBase myself)
@@ -127,10 +127,10 @@ namespace ShootingEditor2D
             }
 
             // ===== 释放设备快照 =====
-            if (DeviceSnap != null)
+            if (SceneObjSnap != null)
             {
-                DeviceSnap.Clear();
-                DeviceSnap = null;
+                SceneObjSnap.Clear();
+                SceneObjSnap = null;
             }
 
             // ===== 释放动作序列 =====

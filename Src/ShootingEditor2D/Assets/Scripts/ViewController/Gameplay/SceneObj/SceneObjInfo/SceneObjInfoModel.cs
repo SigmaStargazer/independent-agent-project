@@ -1,6 +1,6 @@
 namespace ShootingEditor2D
 {
-    public class DeviceInfoModel
+    public class SceneObjInfoModel
     {
         public string Name;
         public string Desc;

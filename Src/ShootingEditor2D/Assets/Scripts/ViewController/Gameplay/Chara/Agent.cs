@@ -33,10 +33,6 @@ namespace ShootingEditor2D
         //private float moveStartX;
         //private float moveTargetX;
 
-
-        // 本帧是否按了跳
-        private bool mJumpPressed;
-
         // 用于检查撞击场景对象时停止
         private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
 
@@ -62,7 +58,6 @@ namespace ShootingEditor2D
         protected override void Update()
         {
             base.Update();
-            GetInput();
         }
 
 
@@ -71,30 +66,32 @@ namespace ShootingEditor2D
             base.FixedUpdate();
         }
 
-        protected virtual void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             if (AgentManager.Instance != null)
                 AgentManager.Instance.Register(this);
-            // 把加入ActionSequenceRuntime.AddSceneObj的方法，注册到委托DeviceManager.OnDeviceCreated
-            // 当DeviceBase创建时，调用DeviceManager.Register，触发委托OnDeviceCreated
-            DeviceManager.OnDeviceCreated += OnDeviceCreated;
+            // 把加入ActionSequenceRuntime.AddSceneObj的方法，注册到委托SceneObjManager.OnSceneObjCreated
+            // 当SceneObjBase创建时，调用SceneObjManager.Register，触发委托OnSceneObjCreated
+            SceneObjManager.OnSceneObjCreated += OnSceneObjCreated;
 
-            // 当Agent后于DeviceBase创建时，确保所有SceneObj被存入ActionSequenceRuntime.sceneObjsSnap中
-            if (DeviceManager.Instance != null)
+            // 当Agent后于SceneObjBase创建时，确保所有SceneObj被存入ActionSequenceRuntime.sceneObjsSnap中
+            if (SceneObjManager.Instance != null)
             {
-                foreach (var device in DeviceManager.Instance.GetDevices())
+                foreach (var sceneObj in SceneObjManager.Instance.GetSceneObjs())
                 {
-                    OnDeviceCreated(device);
+                    OnSceneObjCreated(sceneObj);
                 }
             }
         }
 
-        protected virtual void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
             if (AgentManager.Instance != null)
                 AgentManager.Instance.UnRegister(this);
 
-            DeviceManager.OnDeviceCreated -= OnDeviceCreated;
+            SceneObjManager.OnSceneObjCreated -= OnSceneObjCreated;
         }
         #region FSM Hook
         public override void OnIdleEnter()
@@ -130,10 +127,10 @@ namespace ShootingEditor2D
 
         #endregion
 
-        private void OnDeviceCreated(DeviceBase obj)
+        private void OnSceneObjCreated(SceneObjBase obj)
         {
-            mCurActionSequenceRuntime?.AddDevice(obj);
-            mPlanningActionSequenceRuntime?.AddDevice(obj);
+            mCurActionSequenceRuntime?.AddSceneObj(obj);
+            mPlanningActionSequenceRuntime?.AddSceneObj(obj);
         }
 
         /// <summary>
@@ -152,9 +149,9 @@ namespace ShootingEditor2D
             if (mCurActionSequenceRuntime?.State == ActionSequenceState.Executing)
             {
                 // 1. 获取当前Action的EndEnv
-                List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-                string devicesInfoDesc = this.GetDeviceSnapInfo(mCurActionSequenceRuntime.DeviceSnap);
-                finishedActionRuntime.EndEnv = devicesInfoDesc;
+                List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(mCurActionSequenceRuntime.SceneObjSnap);
+                finishedActionRuntime.EndEnv = sceneObjsInfoDesc;
 
                 // 2.执行Action结束逻辑
                 if (finishedActionRuntime.State == ActionState.Done)
@@ -174,9 +171,9 @@ namespace ShootingEditor2D
             else
             {
                 // 1. 获取当前Action的EndEnv
-                List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-                string devicesInfoDesc = this.GetDeviceSnapInfo(DeviceManager.Instance.GetDevices());
-                finishedActionRuntime.EndEnv = devicesInfoDesc;
+                List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(SceneObjManager.Instance.GetSceneObjs());
+                finishedActionRuntime.EndEnv = sceneObjsInfoDesc;
 
                 if (finishedActionRuntime?.Result?.Message != null)
                 {
@@ -204,14 +201,6 @@ namespace ShootingEditor2D
             if (mCurActionRuntime != null)
             {
                 mCurActionRuntime.StartTouchingObjs.Remove(sceneObj);
-            }
-        }
-
-        private void GetInput()
-        {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                this.TestSceneObjsSnap();
             }
         }
 
@@ -250,29 +239,29 @@ namespace ShootingEditor2D
         }
 
         /// <summary>
-        /// 获取设备信息列表DevicesInfo，以及转化为的文字描述devicesInfoDesc
+        /// 获取设备信息列表DevicesInfo，以及转化为的文字描述sceneObjsInfoDesc
         /// </summary>
         /// <returns></returns>
         /// 
 
-        private string GetDevicesInfo()
+        private string GetSceneObjsInfo()
         { 
-            var mapper = new DeviceInfoMapper();
-            var renderer = new DeviceInfoRenderer();
+            var mapper = new SceneObjInfoMapper();
+            var renderer = new SceneObjInfoRenderer();
 
-            var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, DeviceManager.Instance.GetDevices());
-            var devicesInfoDesc = renderer.Render(devicesInfo, interactableDeviceInfo);
-            return devicesInfoDesc;
+            var (sceneObjsInfo, interactableObjInfo) = mapper.GetSceneObjsInfo(this.gameObject, SceneObjManager.Instance.GetSceneObjs());
+            var sceneObjsInfoDesc = renderer.Render(sceneObjsInfo, interactableObjInfo);
+            return sceneObjsInfoDesc;
         }
 
-        private string GetDeviceSnapInfo(List<DeviceBase> deviceSnap)
+        private string GetSceneObjSnapInfo(List<SceneObjBase> sceneObjSnap)
         {
-            var mapper = new DeviceInfoMapper();
-            var renderer = new DeviceInfoRenderer();
+            var mapper = new SceneObjInfoMapper();
+            var renderer = new SceneObjInfoRenderer();
 
-            var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, deviceSnap);
-            var devicesInfoDesc = renderer.Render(devicesInfo, interactableDeviceInfo);
-            return devicesInfoDesc;
+            var (sceneObjsInfo, interactableObjInfo) = mapper.GetSceneObjsInfo(this.gameObject, sceneObjSnap);
+            var sceneObjsInfoDesc = renderer.Render(sceneObjsInfo, interactableObjInfo);
+            return sceneObjsInfoDesc;
         }
 
         /// <summary>
@@ -282,21 +271,18 @@ namespace ShootingEditor2D
         public void SendMessageToAgent(string msg)
         {
             // 获取环境信息
-            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
+            List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
             string selfStateInfo = this.GetSelfStateInfo();
-            string devicesInfoDesc = this.GetDevicesInfo();
-            //string devicesInfoDesc = "";
-            ////DeviceManager deviceManager = GameObject.FindObjectOfType<DeviceManager>();
-            ////var mDevices = deviceManager.GetDevices();
-            ////(devicesInfo, devicesInfoDesc) = this.GetDevicesInfo(mDevices);
+            string sceneObjsInfoDesc = this.GetSceneObjsInfo();
 
             // 拼接
             string messageToSend = $"{msg}" +
                 $"\n\n<你的状态>\n{selfStateInfo}\n<\\你的状态>" + 
-                $"\n\n<环境>\n{devicesInfoDesc}\n<\\环境>";
+                $"\n\n<环境>\n{sceneObjsInfoDesc}\n<\\环境>";
 
             // 发送给Agent
-            AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            //AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            // 测试用
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
@@ -363,12 +349,12 @@ namespace ShootingEditor2D
         /// </summary>
         public void Interact(string requestId)
         {
-            if (DeviceManager.Instance == null)
+            if (SceneObjManager.Instance == null)
             {
-                Debug.LogError("场景中未找到 DeviceManager！");
+                Debug.LogError("场景中未找到 SceneObjManager！");
                 return;
             }
-            (bool success, string result) = DeviceManager.Instance.Interact(this.gameObject);
+            (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
             string messageToSend = $"[交互结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "Interact", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
@@ -376,12 +362,12 @@ namespace ShootingEditor2D
 
         public void Select(int selection, string requestId)
         {
-            if (DeviceManager.Instance == null)
+            if (SceneObjManager.Instance == null)
             {
-                Debug.LogError("场景中未找到 DeviceManager！");
+                Debug.LogError("场景中未找到 SceneObjManager！");
                 return;
             }
-            (bool success, string result) = DeviceManager.Instance.Select(this.gameObject, selection);
+            (bool success, string result) = SceneObjManager.Instance.Select(this.gameObject, selection);
             string messageToSend = $"[选择结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "Select", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
@@ -389,12 +375,12 @@ namespace ShootingEditor2D
 
         public void TextInput(string inputText, string requestId)
         {
-            if (DeviceManager.Instance == null)
+            if (SceneObjManager.Instance == null)
             {
-                Debug.LogError("场景中未找到 DeviceManager！");
+                Debug.LogError("场景中未找到 SceneObjManager！");
                 return;
             }
-            (bool success, string result) = DeviceManager.Instance.TextInput(this.gameObject, inputText);
+            (bool success, string result) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
             string messageToSend = $"[输入结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "TextInput", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
@@ -408,11 +394,11 @@ namespace ShootingEditor2D
         public void Observe(string requestId)
         {
             // 获取设备信息
-            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = this.GetDevicesInfo();
+            List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
+            string sceneObjsInfoDesc = this.GetSceneObjsInfo();
 
             // 拼接
-            string messageToSend = $"[观察结果]\n<环境>\n{devicesInfoDesc}\n<\\环境>";
+            string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n<\\环境>";
 
             // 发送给Agent
             // tool_name = "observe"只用于日志打印，不用于判断
@@ -447,11 +433,11 @@ namespace ShootingEditor2D
                     this.mPlanningActionSequenceRuntime.Dispose();
                     this.mPlanningActionSequenceRuntime = null;
                 }
-                this.mPlanningActionSequenceRuntime = new ActionSequenceRuntime(actionSequence, DeviceManager.Instance.GetDevices());
+                this.mPlanningActionSequenceRuntime = new ActionSequenceRuntime(actionSequence, SceneObjManager.Instance.GetSceneObjs());
 
                 // 2. 生成 ConditionContext 快照
                 List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
-                sceneObjs.AddRange(mPlanningActionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+                sceneObjs.AddRange(mPlanningActionSequenceRuntime.SceneObjSnap);// 以后再追加其他chara
                 var conditionCxt = new ConditionContext(this, sceneObjs);
                 // actionTime / displacement 在Plan阶段都为0
                 conditionCxt.ActionTime = 0f;
@@ -482,23 +468,23 @@ namespace ShootingEditor2D
                 }
                 else // 4.生成确认信息
                 {
-                    string devicesInfoDesc = "";
+                    string sceneObjsInfoDesc = "";
 
                     this.mPlanningActionSequenceRuntime.CreateActionRuntimeLog(this);
-                    var devicesSnap = this.mPlanningActionSequenceRuntime.DeviceSnap;
-                    var mapper = new DeviceInfoMapper();
-                    var renderer = new DeviceInfoRenderer();
+                    var sceneObjsSnap = this.mPlanningActionSequenceRuntime.SceneObjSnap;
+                    var mapper = new SceneObjInfoMapper();
+                    var renderer = new SceneObjInfoRenderer();
 
-                    var (devicesInfo, interactableDeviceInfo) = mapper.GetDevicesInfo(this.gameObject, devicesSnap);
-                    for (int i = 0; i < devicesInfo.Count; i++)
+                    var (sceneObjsInfo, interactableObjInfo) = mapper.GetSceneObjsInfo(this.gameObject, sceneObjsSnap);
+                    for (int i = 0; i < sceneObjsInfo.Count; i++)
                     {
-                        string deviceInfoDesc = $"\n{i}. {renderer.RenderDevice(devicesInfo[i])}";
-                        devicesInfoDesc += deviceInfoDesc;
+                        string sceneObjInfoDesc = $"\n{i}. {renderer.RenderSceneObj(sceneObjsInfo[i])}";
+                        sceneObjsInfoDesc += sceneObjInfoDesc;
                     }
 
                     string messageToSend = $"[动作序列规划结果]计划中的动作序列已准备就绪！" +
                         $"建议在开始动作序列前，先对各动作的结束条件中的object[i]是否能和下列物体快照中的物体能对应上进行核对（如核对不上，可再次使用ActionSequence规划功能进行修改）：" +
-                        $"{devicesInfoDesc}";
+                        $"{sceneObjsInfoDesc}";
                     AgentService.Instance.SendToolResultMessage(
                          this.Name,
                          "PlanActionSequence",
@@ -685,17 +671,17 @@ namespace ShootingEditor2D
             if ( this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                //List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+                //List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(actionSequenceRuntime.SceneObjSnap);
 
                 // 创建Condition判断上下文
                 List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
-                sceneObjs.AddRange(actionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+                sceneObjs.AddRange(actionSequenceRuntime.SceneObjSnap);// 以后再追加其他chara
                 var conditionCxt = new ConditionContext(this, sceneObjs);
 
                 // 更新curActionRuntime开始时的信息
                 this.mCurActionRuntime.StartPostion = new Vector2(transform.position.x, transform.position.y);
-                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+                this.mCurActionRuntime.StartEnv = sceneObjsInfoDesc;
 
                 // 移动时允许接触的物体
                 var allowedIds = curAction.Move.AllowedContactObjIds;
@@ -704,7 +690,7 @@ namespace ShootingEditor2D
                     foreach (var id in allowedIds)
                     {
                         this.mCurActionRuntime.AllowedContactObjs
-                            .Add(actionSequenceRuntime.DeviceSnap[id]);
+                            .Add(actionSequenceRuntime.SceneObjSnap[id]);
                     }
                 }
 
@@ -753,17 +739,17 @@ namespace ShootingEditor2D
             if ( this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                //List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+                //List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(actionSequenceRuntime.SceneObjSnap);
 
                 // 创建Condition判断上下文
                 List<SceneObjBase> sceneObjs = new List<SceneObjBase>();
-                sceneObjs.AddRange(actionSequenceRuntime.DeviceSnap);// 以后再追加其他chara
+                sceneObjs.AddRange(actionSequenceRuntime.SceneObjSnap);// 以后再追加其他chara
                 var conditionCxt = new ConditionContext(this, sceneObjs);
 
                 // 更新curActionRuntime开始时的信息
                 this.mCurActionRuntime.StartPostion = new Vector2(transform.position.x, transform.position.y);
-                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+                this.mCurActionRuntime.StartEnv = sceneObjsInfoDesc;
                 this.mCurActionRuntime.CompleteConditionFunc = () =>
                 {
                     // 每帧更新动态变量
@@ -810,10 +796,10 @@ namespace ShootingEditor2D
             if (this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(actionSequenceRuntime.SceneObjSnap);
 
                 this.mCurActionRuntime.StartPostion = transform.position;
-                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+                this.mCurActionRuntime.StartEnv = sceneObjsInfoDesc;
             }
             this.mCurActionRuntime.State = ActionState.Doing;
 
@@ -822,7 +808,7 @@ namespace ShootingEditor2D
                 this.mCurActionRuntime.StartTouchingObjs.Add(obj);
             // 执行一次
             ChangeState("Idle");
-            (bool success, string result) = DeviceManager.Instance.Interact(this.gameObject);
+            (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
                 this.mCurActionRuntime.Result = new ActionResult();
@@ -847,10 +833,10 @@ namespace ShootingEditor2D
             if (this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(actionSequenceRuntime.SceneObjSnap);
 
                 this.mCurActionRuntime.StartPostion = transform.position;
-                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+                this.mCurActionRuntime.StartEnv = sceneObjsInfoDesc;
 
                 
             }
@@ -862,7 +848,7 @@ namespace ShootingEditor2D
             // 执行一次
             ChangeState("Idle");
             int selection = curAction.Select.Selection;
-            (bool success, string result) = DeviceManager.Instance.Select(this.gameObject, selection);
+            (bool success, string result) = SceneObjManager.Instance.Select(this.gameObject, selection);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
                 this.mCurActionRuntime.Result = new ActionResult();
@@ -887,10 +873,10 @@ namespace ShootingEditor2D
             if (this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
-                string devicesInfoDesc = this.GetDeviceSnapInfo(actionSequenceRuntime.DeviceSnap);
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(actionSequenceRuntime.SceneObjSnap);
 
                 this.mCurActionRuntime.StartPostion = transform.position;
-                this.mCurActionRuntime.StartEnv = devicesInfoDesc;
+                this.mCurActionRuntime.StartEnv = sceneObjsInfoDesc;
             }
             this.mCurActionRuntime.State = ActionState.Doing;
 
@@ -900,7 +886,7 @@ namespace ShootingEditor2D
             // 执行一次
             ChangeState("Idle");
             string inputText = curAction.Input.InputText;
-            (bool success, string result) = DeviceManager.Instance.TextInput(this.gameObject, inputText);
+            (bool success, string result) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
                 this.mCurActionRuntime.Result = new ActionResult();
@@ -953,34 +939,6 @@ namespace ShootingEditor2D
             } 
         }
         #endregion
-
-        public void TestSceneObjsSnap()
-        {
-            // 获取设备信息
-            List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
-            string devicesInfoDesc = this.GetDevicesInfo();
-
-            Debug.Log($"devicesInfoDesc: {devicesInfoDesc}");
-
-            var sceneObjsSnap = mCurActionSequenceRuntime.DeviceSnap;
-            foreach (var sceneObj in sceneObjsSnap)
-            {
-                if (sceneObj == null)
-                {
-                    Debug.Log($"sceneObj: {sceneObj.Name} 已销毁！");
-                    continue;
-                }
-                else if (!sceneObj.gameObject.activeInHierarchy)
-                {
-                    Debug.Log($"sceneObj: {sceneObj.Name} 未激活！");
-                }
-                else
-                {
-                    Debug.Log($"sceneObj: {sceneObj.Name}");
-                }
-            }
-            //Debug.Log($"sceneObjsSnap: {mCurActionSequenceRuntime.sceneObjsSnap}");
-        }
     }
 }
 

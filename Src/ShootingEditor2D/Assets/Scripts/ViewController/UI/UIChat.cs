@@ -33,7 +33,7 @@ namespace ShootingEditor2D
             }
         }
 
-        private void ToggleChat()
+        public void ToggleChat()
         {
             if (!PanalSend.activeSelf)
             {

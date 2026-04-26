@@ -169,11 +169,11 @@ namespace ShootingEditor2D
 
         private void InteractNearestDevice()
         {
-            if (DeviceManager.Instance == null)
+            if (SceneObjManager.Instance == null)
                 return;
 
             (bool success, string result) =
-                DeviceManager.Instance.Interact(this.gameObject);
+                SceneObjManager.Instance.Interact(this.gameObject);
 
             Debug.Log(result);
         }
