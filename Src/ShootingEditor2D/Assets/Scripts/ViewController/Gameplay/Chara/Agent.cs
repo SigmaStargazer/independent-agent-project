@@ -78,7 +78,7 @@ namespace ShootingEditor2D
             // 当Agent后于SceneObjBase创建时，确保所有SceneObj被存入ActionSequenceRuntime.sceneObjsSnap中
             if (SceneObjManager.Instance != null)
             {
-                foreach (var sceneObj in SceneObjManager.Instance.GetSceneObjs())
+                foreach (var sceneObj in SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject))
                 {
                     OnSceneObjCreated(sceneObj);
                 }
@@ -172,7 +172,7 @@ namespace ShootingEditor2D
             {
                 // 1. 获取当前Action的EndEnv
                 List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
-                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(SceneObjManager.Instance.GetSceneObjs());
+                string sceneObjsInfoDesc = this.GetSceneObjSnapInfo(SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject));
                 finishedActionRuntime.EndEnv = sceneObjsInfoDesc;
 
                 if (finishedActionRuntime?.Result?.Message != null)
@@ -204,16 +204,16 @@ namespace ShootingEditor2D
             }
         }
 
-        private void TurnBack(float horizontalDirection)
-        {
-            if (horizontalDirection < 0 && transform.localScale.x > 0
-                || horizontalDirection > 0 && transform.localScale.x < 0)
-            {
-                var localScale = transform.localScale;
-                localScale.x = -localScale.x;
-                transform.localScale = localScale;
-            }
-        }
+        //private void TurnBack(float horizontalDirection)
+        //{
+        //    if (horizontalDirection < 0 && transform.localScale.x > 0
+        //        || horizontalDirection > 0 && transform.localScale.x < 0)
+        //    {
+        //        var localScale = transform.localScale;
+        //        localScale.x = -localScale.x;
+        //        transform.localScale = localScale;
+        //    }
+        //}
 
         // 获取自身状态信息
         private string GetSelfStateInfo()
@@ -244,12 +244,12 @@ namespace ShootingEditor2D
         /// <returns></returns>
         /// 
 
-        private string GetSceneObjsInfo()
+        private string GetEnvSceneObjsInfo()
         { 
             var mapper = new SceneObjInfoMapper();
             var renderer = new SceneObjInfoRenderer();
 
-            var (sceneObjsInfo, interactableObjInfo) = mapper.GetSceneObjsInfo(this.gameObject, SceneObjManager.Instance.GetSceneObjs());
+            var (sceneObjsInfo, interactableObjInfo) = mapper.GetSceneObjsInfo(this.gameObject, SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject));
             var sceneObjsInfoDesc = renderer.Render(sceneObjsInfo, interactableObjInfo);
             return sceneObjsInfoDesc;
         }
@@ -273,7 +273,7 @@ namespace ShootingEditor2D
             // 获取环境信息
             List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
             string selfStateInfo = this.GetSelfStateInfo();
-            string sceneObjsInfoDesc = this.GetSceneObjsInfo();
+            string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
 
             // 拼接
             string messageToSend = $"{msg}" +
@@ -395,7 +395,7 @@ namespace ShootingEditor2D
         {
             // 获取设备信息
             List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
-            string sceneObjsInfoDesc = this.GetSceneObjsInfo();
+            string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
 
             // 拼接
             string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n<\\环境>";
@@ -433,7 +433,7 @@ namespace ShootingEditor2D
                     this.mPlanningActionSequenceRuntime.Dispose();
                     this.mPlanningActionSequenceRuntime = null;
                 }
-                this.mPlanningActionSequenceRuntime = new ActionSequenceRuntime(actionSequence, SceneObjManager.Instance.GetSceneObjs());
+                this.mPlanningActionSequenceRuntime = new ActionSequenceRuntime(actionSequence, SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject));
 
                 // 2. 生成 ConditionContext 快照
                 List<SceneObjBase> sceneObjs = new List<SceneObjBase>();

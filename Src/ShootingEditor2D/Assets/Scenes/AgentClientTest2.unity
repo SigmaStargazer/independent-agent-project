@@ -504,9 +504,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ShootingEditor2D.UIAgentGame, Assembly-CSharp
-        m_MethodName: OnClickSendMessage
+      - m_Target: {fileID: 737002895}
+        m_TargetAssemblyTypeName: ShootingEditor2D.UIChat, Assembly-CSharp
+        m_MethodName: ToggleChat
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

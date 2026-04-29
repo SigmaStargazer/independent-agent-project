@@ -52,12 +52,14 @@ namespace ShootingEditor2D
             string sceneObjInfoDesc = "";
             if (sceneObjInfo != null)
             {
-                string speed_x_str = sceneObjInfo.SpeedX <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirX} {sceneObjInfo.SpeedX}m/s";
-                string speed_y_str = sceneObjInfo.SpeedY <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirY} {sceneObjInfo.SpeedDirY}m/s";
+                string speedXStr = sceneObjInfo.SpeedX <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirX} {sceneObjInfo.SpeedX}m/s";
+                string speedYStr = sceneObjInfo.SpeedY <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirY} {sceneObjInfo.SpeedDirY}m/s";
+                string faceDirectionStr = !string.IsNullOrEmpty(sceneObjInfo.FaceDirection) ? faceDirectionStr = $"面朝方向:{sceneObjInfo.FaceDirection}\n" : "";
                 sceneObjInfoDesc = $"{sceneObjInfo.Name}: {sceneObjInfo.Desc}\n" +
                     $"状态:{sceneObjInfo.State}\n" +
-                    $"方向:{sceneObjInfo.Direction}\n距离:{sceneObjInfo.Distance}m\n" +
-                    $"横向速度:{speed_x_str}\n纵向速度:{speed_y_str}";
+                    $"方位:{sceneObjInfo.Direction}方向 {sceneObjInfo.Distance}m\n" +
+                    $"{faceDirectionStr}" +
+                    $"横向速度:{speedXStr}\n纵向速度:{speedYStr}";
             }
             else
             {

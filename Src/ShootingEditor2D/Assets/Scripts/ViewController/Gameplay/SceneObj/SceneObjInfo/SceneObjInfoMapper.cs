@@ -72,6 +72,12 @@ namespace ShootingEditor2D
             // state
             sceneObjInfo.State = sceneObj.GetStateName();
 
+            // SceneObj为CharaBase时，增加面朝方向
+            if (sceneObj is CharaBase chara)
+            {
+                sceneObjInfo.FaceDirection = chara.isRight ? "right" : "left";
+            }
+
             return sceneObjInfo;
         }
     }

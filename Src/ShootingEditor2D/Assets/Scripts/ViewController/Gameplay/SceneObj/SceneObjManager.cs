@@ -2,6 +2,7 @@ using FrameworkDesign;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ShootingEditor2D
@@ -50,9 +51,24 @@ namespace ShootingEditor2D
 
         #endregion
 
-        public List<SceneObjBase> GetSceneObjs()
+        //public List<SceneObjBase> GetSceneObjs()
+        //{
+        //    return mSceneObjs;
+        //}
+
+        /// <summary>
+        /// 获取去掉指定物体的场景物体列表
+        /// </summary>
+        /// <param name="excludeTarget"></param>
+        /// <returns></returns>
+        public List<SceneObjBase> GetSceneObjsExcluding(GameObject excludeTarget)
         {
-            return mSceneObjs;
+            if (excludeTarget == null)
+                return new List<SceneObjBase>(mSceneObjs);
+
+            return mSceneObjs
+                .Where(obj => obj.gameObject != excludeTarget)
+                .ToList();
         }
 
         #region 检索设备信息
@@ -79,7 +95,6 @@ namespace ShootingEditor2D
                 {
                     IInteractable interactable = sceneObj as IInteractable;
                     Collider2D objCollider = sceneObj.GetComponent<Collider2D>();
-                    // 确保设备有Trigger类型的Collider且当前与角色接触
                     // 测试
                     //var colliderDist = new ColliderDistance2D();
                     //if (sceneObj.gameObject != chara)

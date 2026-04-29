@@ -150,18 +150,16 @@ namespace ShootingEditor2D
                 new Vector2(0, mRigidbody2D.velocity.y);
         }
 
-        private void TurnBack(float dir)
-        {
-            if (dir < 0 && transform.localScale.x > 0
-                || dir > 0 && transform.localScale.x < 0)
-            {
-                var scale = transform.localScale;
-
-                scale.x = -scale.x;
-
-                transform.localScale = scale;
-            }
-        }
+        //private void TurnBack(float horizontalDirection)
+        //{
+        //    if (horizontalDirection < 0 && transform.localScale.x > 0
+        //        || horizontalDirection > 0 && transform.localScale.x < 0)
+        //    {
+        //        var scale = transform.localScale;
+        //        scale.x = -scale.x;
+        //        transform.localScale = scale;
+        //    }
+        //}
 
         // =========================
         // 交互最近设备

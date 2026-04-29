@@ -6,6 +6,8 @@ namespace ShootingEditor2D
         public string Desc;
         public string State;
 
+        public string FaceDirection;
+
         public string Direction;
         public float Distance;
 

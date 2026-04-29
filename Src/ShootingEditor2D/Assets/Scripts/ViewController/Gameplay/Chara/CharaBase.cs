@@ -8,11 +8,22 @@ namespace ShootingEditor2D
 {
     public abstract class CharaBase : SceneObjBase, IInteractable, IController
     {
+        // 面朝方向
+        public bool isRight => transform.localScale.x > 0;
         public IArchitecture GetArchitecture()
         {
             return ShootingEditor2D.Instance;
         }
-
+        protected void TurnBack(float horizontalDirection)
+        {
+            if (horizontalDirection < 0 && transform.localScale.x > 0
+                || horizontalDirection > 0 && transform.localScale.x < 0)
+            {
+                var localScale = transform.localScale;
+                localScale.x = -localScale.x;
+                transform.localScale = localScale;
+            }
+        }
         public bool IsInteractable => true;
         protected virtual void OnEnable()
         {
@@ -41,13 +52,4 @@ namespace ShootingEditor2D
             return (false, "该对象无法交互");
         }
     }
-
-    //public abstract class CharaBase : SceneObjBase, IController
-    //{
-    //    public IArchitecture GetArchitecture()
-    //    {
-    //        return ShootingEditor2D.Instance;
-    //    }
-    //}
-
 }
