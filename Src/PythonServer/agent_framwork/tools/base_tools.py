@@ -1,6 +1,10 @@
 import asyncio
 import uuid
+from typing import Annotated, List
+from pydantic import Field
+from agent_framwork.tools.action_sequence_model.model.action_sequence import ActionStep
 
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from typing_extensions import Annotated
 from langgraph.prebuilt import InjectedState
@@ -14,7 +18,7 @@ from agent_framwork.tools.action_sequence_model.model.action import (
     SelectAction as SelectActionModel,
     InputAction as InputActionModel,
 )
-from agent_framwork.tools.action_sequence_model.model.action_sequence import ActionSequence
+# from agent_framwork.tools.action_sequence_model.model.action_sequence import ActionSequence
 
 from agent_framwork.systems.alarm_system import AlarmSystem
 from agent_framwork.systems.time_system import TimeSystem
@@ -105,22 +109,73 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
     return pb_step
 
 @tool
-async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")], action_sequence: ActionSequence) -> str:
+async def plan_action_sequence_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    action_sequence: Annotated[
+        List[ActionStep],
+        Field(min_length=1, description="按顺序执行的动作序列。每个动作将在满足condition后结束。")
+    ]
+    ) -> str:
     """规划一串连续的动作。
     后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
     举例：
-    在信号灯变绿后，立刻向右走2米。此时看到信号灯的序号为1
-    action_sequence:
-        - action: wait
-          condition: objects[1].State == "GreenLight"
-        - action: move
-          direction: right
-          condition: displacement >= 2
+    1) (假如信号灯的序号为1)在信号灯变绿后，立刻向右走2米。
+    action_sequence = [
+        {
+            "action": "wait",
+            "condition": "objects[1].State == 'GreenLight'"
+        },
+        {
+            "action": "move",
+            "direction": "right",
+            "condition": "displacement >= 2",
+            "allowed_contact_obj_ids": []
+        }
+        ]
+    2) (假如按钮的序号为2)走到按钮旁边，按下按钮。
+    action_sequence = [
+        {
+            "action": "move",
+            "direction": "right",
+            "condition": "canInteract == true && nearestInteractableIndex == 2",
+        },
+        {
+            "action": "interact",
+        }
+    ]
+    3) 
+    a: (假设商人的序号为3；商人的方位为右侧2米处；商人朝向为左侧)走到商人身后，进行剽窃
+    解析：由于商人方位在右侧，商人朝向为左侧，因此商人是面对你自己的。要走到他身后，需要向右移动超过2米，才能绕到商人身后。
+    action_sequence = [
+        {
+            "action": "move",
+            "direction": "right",
+            "condition": "displacement >= 2 && canInteract == true && nearestInteractableIndex == 3",
+        },
+        {
+            "action": "interact",
+        }
+    ]
+    b: (假设商人的序号为3；商人的方位为右侧2米处；商人朝向为右侧)走到商人身后，进行剽窃
+    解析：由于商人方位在右侧，商人朝向为右侧，因此商人背对你自己的。要走到他身后，只需向他移动直至可以交互即可。
+    action_sequence = [
+        {
+            "action": "move",
+            "direction": "right",
+            "condition": "canInteract == true && nearestInteractableIndex == 3",
+        },
+        {
+            "action": "interact",
+        }
+    ]
+
     Args:
-        action_sequence(ActionSequence): 动作序列
+        action_sequence(List[ActionStep]): 动作序列
     Return:
         str: 规划动作序列结果
     """
+    # seq = ActionSequence(action_sequence=action_sequence)
+
     request_id = str(uuid.uuid4())
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
@@ -132,7 +187,7 @@ async def plan_action_sequence_cmd(agent: Annotated[str, InjectedState("name")],
         request = message_pb2.AgentPlanActionSequenceRequest()
         request.agent = agent
         request.request_id = request_id
-        for step in action_sequence.action_sequence:
+        for step in action_sequence:
             request.action_sequence.append(
                 build_pb_action_step(step)
             )
@@ -283,9 +338,11 @@ async def drain_feedback_queue(feedback_queue: asyncio.Queue) -> str:
     return "\n".join(item.content for item in items)
 
 @tool
-async def observe_cmd(agent: Annotated[str, InjectedState("name")],
-feedback_queue: Annotated[asyncio.Queue, InjectedState("feedback_queue")]
-) -> str:
+async def observe_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    config: RunnableConfig
+    # feedback_queue: Annotated[asyncio.Queue, InjectedState("feedback_queue")]
+    ) -> str:
     """观察周围环境。
     用途：
     - 获取当前环境信息
@@ -313,6 +370,8 @@ feedback_queue: Annotated[asyncio.Queue, InjectedState("feedback_queue")]
     Return:
         str: 环境观察结果。
     """
+    feedback_queue = config["configurable"]["feedback_queue"] 
+
     request_id = str(uuid.uuid4())
     loop = asyncio.get_running_loop()
     fut = loop.create_future()

@@ -106,6 +106,8 @@ namespace ShootingEditor2D
             mInterpreter.SetVariable("objects", context.Objects);
             mInterpreter.SetVariable("displacement", context.Displacement);
             mInterpreter.SetVariable("actionTime", context.ActionTime);
+            mInterpreter.SetVariable("canInteract", context.CanInteract);
+            mInterpreter.SetVariable("nearestInteractableIndex", context.NearestInteractableIndex);
         }
     }
 }

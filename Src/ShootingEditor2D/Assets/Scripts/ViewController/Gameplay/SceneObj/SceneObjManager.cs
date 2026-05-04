@@ -94,7 +94,7 @@ namespace ShootingEditor2D
                 if (sceneObj is IInteractable)
                 {
                     IInteractable interactable = sceneObj as IInteractable;
-                    Collider2D objCollider = sceneObj.GetComponent<Collider2D>();
+                    //Collider2D objCollider = sceneObj.GetComponent<Collider2D>();
                     // 测试
                     //var colliderDist = new ColliderDistance2D();
                     //if (sceneObj.gameObject != chara)
@@ -105,11 +105,12 @@ namespace ShootingEditor2D
                     //    $"objCollider != null: {objCollider != null}\n" +
                     //    $"objCollider.isTrigger: {objCollider.isTrigger}\n" +
                     //    $"charaCollider.Distance(objCollider).isOverlapped: {colliderDist}");
-                    if (sceneObj.gameObject != chara && interactable.IsInteractable && objCollider != null && charaCollider.Distance(objCollider).isOverlapped)
+                    if (sceneObj.gameObject != chara 
+                        && interactable.IsInteractable 
+                        && sceneObj.IsCharacterInAnyZone(chara))
                     {
                         // 计算X轴距离（与GetDevicesInfo中的逻辑保持一致）
-                        float xDiff = sceneObj.transform.position.x - chara.transform.position.x;
-                        float dist = Mathf.Abs(xDiff);
+                        float dist = sceneObj.GetNearestZoneDistance(chara);
 
                         if (dist < minDistance)
                         {
@@ -121,7 +122,6 @@ namespace ShootingEditor2D
             }
             return target;
         }
-
         #endregion
 
         #region 交互逻辑

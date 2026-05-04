@@ -281,7 +281,7 @@ namespace ShootingEditor2D
                 $"\n\n<环境>\n{sceneObjsInfoDesc}\n<\\环境>";
 
             // 发送给Agent
-            //AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            AgentService.Instance.SendUserMessage(this.Name, messageToSend);
             // 测试用
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }

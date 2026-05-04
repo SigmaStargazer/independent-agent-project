@@ -45,6 +45,16 @@ CONDITION_VARIABLES = {
         desc="当前动作开始至今所经过的时间。是一个float。",
         kind=AccessKind.SCALAR
     ),
+    "nearestInteractableIndex": ConditionVariable(
+        name="nearestInteractableIndex",
+        desc="距离自己最近的可交互物体在objects中的序号。是一个int，若无可交互物体则为-1。",
+        kind=AccessKind.SCALAR
+    ),
+    "canInteract": ConditionVariable(
+        name="canInteract",
+        desc="周围是否有可交互物体。是一个bool。",
+        kind=AccessKind.SCALAR
+    ),
 }
 
 # 2. 变量描述管理

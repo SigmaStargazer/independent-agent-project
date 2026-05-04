@@ -36,22 +36,24 @@ namespace ShootingEditor2D
 
         protected virtual void OnActionFinished(ActionRuntime finishedActionRuntime) { }
 
+        // 交互区域列表（在 Inspector 里拖拽，或 Awake 自动收集）
+        [Header("交互区域（留空则使用自身Collider）")]
+        [SerializeField] private List<InteractionZone> mInteractionZones = new List<InteractionZone>();
+
         protected virtual void Awake()
         {
             // 强制注入基础状态
             RegisterState(new IdleState());
             RegisterState(new MoveState());
-
-            //curState = states["Idle"];
-            //curState.OnEnter(this);
+            // 自动收集所有子对象上的 InteractionZone
+            if (mInteractionZones.Count == 0)
+                mInteractionZones.AddRange(GetComponentsInChildren<InteractionZone>());
         }
 
         protected virtual void Start()
         {
             // 默认进入Idle状态
             ChangeState("Idle");
-            //curState = states["Idle"];
-            //curState.OnEnter(this);
         }
 
         protected virtual void Update()
@@ -126,6 +128,54 @@ namespace ShootingEditor2D
             ChangeState("Idle");
             return;
         }
+
+        #region 交互区域判断
+        /// <summary>
+        /// 输入角色的GameObject，输出该角色是否在任意交互区域内
+        /// <param name="chara">角色的GameObject。用于判断该</param>
+        /// <returns>bool，该角色是否在任意交互区域内</returns>
+        /// </summary>
+        public bool IsCharacterInAnyZone(GameObject chara)
+        {
+            if (mInteractionZones.Count == 0)
+            {
+                // 降级：使用自身 Collider
+                var selfCol = GetComponent<Collider2D>();
+                var charaCol = chara?.GetComponent<Collider2D>();
+                if (selfCol == null || charaCol == null) return false;
+                return charaCol.Distance(selfCol).isOverlapped;
+            }
+            foreach (var zone in mInteractionZones)
+                if (zone.ContainsCharacter(chara)) return true;
+            return false;
+        }
+        public float GetNearestZoneDistance(GameObject chara)
+        {
+            if (mInteractionZones.Count == 0)
+            {
+                var selfCol = GetComponent<Collider2D>();
+                var charaCol = chara?.GetComponent<Collider2D>();
+                if (selfCol == null || charaCol == null) return float.MaxValue;
+                return Vector2.Distance(selfCol.bounds.center, charaCol.bounds.center);
+            }
+
+            float min = float.MaxValue;
+            foreach (var zone in mInteractionZones)
+                min = Mathf.Min(min, zone.DistanceTo(chara));
+            return min;
+        }
+        /// <summary>
+        /// 获取角色所在的具体区域标签（用于区分语义，如正面/背面）
+        /// <param name="chara">角色的GameObject。用于获取角色与该重合的交互区域标签</param>
+        /// <returns>string，角色所在具体区域标签</returns>
+        /// </summary>
+        public string GetActiveZoneTag(GameObject chara)
+        {
+            foreach (var zone in mInteractionZones)
+                if (zone.ContainsCharacter(chara)) return zone.ZoneTag;
+            return null;
+        }
+        #endregion 交互区域判断
     }
 
 }

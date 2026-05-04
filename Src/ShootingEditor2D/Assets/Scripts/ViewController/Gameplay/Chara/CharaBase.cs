@@ -37,19 +37,17 @@ namespace ShootingEditor2D
                 SceneObjManager.Instance.UnRegister(this);
         }
 
-        public (bool success, string result) Interact(GameObject chara)
+        public virtual (bool success, string result) Interact(GameObject chara)
         {
             return (false, "该对象无法交互");
         }
-
-        public (bool success, string result) Select(GameObject chara, int selection)
+        public virtual (bool success, string result) Select(GameObject chara, int selection)
         {
-            return (false, "该对象无法交互");
+            return (false, "该对象未提供选项");
         }
-
-        public (bool success, string result) TextInput(GameObject chara, string inputText)
+        public virtual (bool success, string result) TextInput(GameObject chara, string inputText)
         {
-            return (false, "该对象无法交互");
+            return (false, "该对象未提供输入框");
         }
     }
 }

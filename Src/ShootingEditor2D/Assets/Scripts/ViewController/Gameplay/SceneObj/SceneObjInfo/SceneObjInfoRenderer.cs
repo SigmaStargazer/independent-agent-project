@@ -54,7 +54,7 @@ namespace ShootingEditor2D
             {
                 string speedXStr = sceneObjInfo.SpeedX <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirX} {sceneObjInfo.SpeedX}m/s";
                 string speedYStr = sceneObjInfo.SpeedY <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirY} {sceneObjInfo.SpeedDirY}m/s";
-                string faceDirectionStr = !string.IsNullOrEmpty(sceneObjInfo.FaceDirection) ? faceDirectionStr = $"面朝方向:{sceneObjInfo.FaceDirection}\n" : "";
+                string faceDirectionStr = !string.IsNullOrEmpty(sceneObjInfo.FaceDirection) ? faceDirectionStr = $"朝向:{sceneObjInfo.FaceDirection}\n" : "";
                 sceneObjInfoDesc = $"{sceneObjInfo.Name}: {sceneObjInfo.Desc}\n" +
                     $"状态:{sceneObjInfo.State}\n" +
                     $"方位:{sceneObjInfo.Direction}方向 {sceneObjInfo.Distance}m\n" +

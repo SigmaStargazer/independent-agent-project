@@ -15,10 +15,12 @@ namespace ShootingEditor2D
         // 表达式视图
         public SceneObjExprView Myself { get; private set; }
         public List<SceneObjExprView> Objects { get; private set; }
+        public int NearestInteractableIndex { get; private set; }
 
         // 动态变量
         public float Displacement { get; set; }
         public float ActionTime { get; set; }
+        public bool CanInteract { get; set; }
 
         public ConditionContext(SceneObjBase myself, List<SceneObjBase> objects)
         {
@@ -40,6 +42,11 @@ namespace ShootingEditor2D
         {
             Myself = ExprViewFactory.From(MyselfSrc);
             Objects = ObjectsSrc.Select(ExprViewFactory.From).ToList();
+
+            // 刷新交互状态
+            var nearest = SceneObjManager.Instance?.GetNearestInteractableObj(MyselfSrc.gameObject);
+            CanInteract = nearest != null;
+            NearestInteractableIndex = nearest != null ? ObjectsSrc.IndexOf(nearest) : -1;
         }
     }
 }
