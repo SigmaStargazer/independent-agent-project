@@ -10,6 +10,8 @@ namespace Network
             if (message.agentCreateResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentCreateResponse); }
             if (message.agentLoadResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentLoadResponse); }
             if (message.sceneStartResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStartResponse); }
+            if (message.memoryBackupResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryBackupResponse); }
+            if (message.memoryRestoreResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryRestoreResponse);}
         }
 
         public void Dispatch(T sender, SkillBridge.Message.NetMessageRequest message)

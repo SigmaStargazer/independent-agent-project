@@ -27,6 +27,8 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, string> OnCreateAgent;
         public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
+        public UnityEngine.Events.UnityAction<bool, string> OnBackupMemory;
+        public UnityEngine.Events.UnityAction<bool, string> OnRestoreMemory;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
         public UnityEngine.Events.UnityAction<string, string> OnObserve;
         public UnityEngine.Events.UnityAction<string, bool, float> OnMoveAgent;
@@ -47,6 +49,8 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentCreateResponse>(this.OnAgentCreate);// 记得写订阅消息和注销
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
+            MessageDistributer.Instance.Subscribe<MemoryBackupResponse>(this.OnMemoryBackup);
+            MessageDistributer.Instance.Subscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -64,6 +68,8 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentCreateResponse>(this.OnAgentCreate);
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
+            MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
+            MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -260,6 +266,73 @@ namespace Services
                 this.OnStartScene(response.Success, response.Errormsg);
             }
         }
+
+        #region 记忆备份与恢复
+
+        public void SendMemoryBackup(int slotId)
+        { 
+            Debug.LogFormat("MemoryBackupRequest::slotId:{0}", slotId);
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.memoryBackupRequest = new MemoryBackupRequest();
+            message.Request.memoryBackupRequest.SlotId = slotId;
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                this.pendingMessage = null;
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                this.pendingMessage = message;
+                this.ConnectToServer();
+            }
+        }
+
+        void OnMemoryBackup(object sender, MemoryBackupResponse response)
+        {
+            Debug.LogFormat("OnMemoryBackup::Success:{0} [{1}]", response.Success, response.Errormsg);
+            if (this.OnBackupMemory != null)
+            {
+                this.OnBackupMemory(response.Success, response.Errormsg);
+            }
+        }
+
+
+        public void SendMemoryRestore(int slotId)
+        {
+            Debug.LogFormat("MemoryRestoreRequest::slotId:{0}", slotId);
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.memoryRestoreRequest = new MemoryRestoreRequest();
+            message.Request.memoryRestoreRequest.SlotId = slotId;
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                this.pendingMessage = null;
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                this.pendingMessage = message;
+                this.ConnectToServer();
+            }
+        }
+
+        void OnMemoryRestore(object sender, MemoryRestoreResponse response)
+        {
+            Debug.LogFormat("OnMemoryRestore::Success:{0} [{1}]", response.Success, response.Errormsg);
+            if (this.OnRestoreMemory != null)
+            {
+                this.OnRestoreMemory(response.Success, response.Errormsg);
+            }
+        }
+
+        #endregion 记忆备份与恢复
+
+
         public void SendUserMessage(string agent, string userMessage)
         {
             Debug.LogFormat("UserMessageRequest::agent:{0} userMessage:{1}", agent, userMessage);

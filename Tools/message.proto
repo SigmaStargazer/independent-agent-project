@@ -183,6 +183,8 @@ message NetMessageResponse{
 	AgentCreateResponse agentCreateResponse = 1;
 	AgentLoadResponse agentLoadResponse = 2;
 	SceneStartResponse sceneStartResponse = 3;
+	MemoryBackupResponse memoryBackupResponse = 4;
+	MemoryRestoreResponse memoryRestoreResponse =5;
 }
 
 // 创建Agent
@@ -297,7 +299,17 @@ message MemoryBackupRequest {
 	int32 slot_id = 1;
 }
 
+message MemoryBackupResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
 message MemoryRestoreRequest {
 	int32 slot_id = 1;
+}
+
+message MemoryRestoreResponse {
+	bool success = 1;
+	string errormsg = 2;
 }
 

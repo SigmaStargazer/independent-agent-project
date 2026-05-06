@@ -345,6 +345,12 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(3)]
         public SceneStartResponse sceneStartResponse { get; set; }
 
+        [global::ProtoBuf.ProtoMember(4)]
+        public MemoryBackupResponse memoryBackupResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(5)]
+        public MemoryRestoreResponse memoryRestoreResponse { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -673,6 +679,22 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryBackupResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class MemoryRestoreRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -681,6 +703,22 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
         public int SlotId { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryRestoreResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
 
     }
 

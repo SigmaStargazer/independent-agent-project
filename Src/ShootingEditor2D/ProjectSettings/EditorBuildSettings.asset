@@ -6,24 +6,33 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/GameStart.unity
+    path: Assets/Scenes/OldScenes/GameStart.unity
     guid: a850ebfde323e3448bd374b575cab3c0
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/OldScenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Scenes/LevelPlayer.unity
+    path: Assets/Scenes/OldScenes/LevelPlayer.unity
     guid: e350cfb4f94170b499cf15b510c3cc81
   - enabled: 1
-    path: Assets/Scenes/GameOver.unity
+    path: Assets/Scenes/OldScenes/GameOver.unity
     guid: b46a297ba5f19984c91c5f7bfdf78bb6
   - enabled: 1
-    path: Assets/Scenes/GamePass.unity
+    path: Assets/Scenes/OldScenes/GamePass.unity
     guid: 76b0bce93fd88ef45aa8da3198c16518
   - enabled: 1
-    path: Assets/Scenes/AgentClientTest.unity
+    path: Assets/Scenes/TestScenes/AgentClientTest.unity
     guid: 26edd78b253ad924885b623fec8a1c87
   - enabled: 1
-    path: Assets/Scenes/AgentClientTest2.unity
+    path: Assets/Scenes/TestScenes/AgentClientTest2.unity
     guid: fd99d9ae98d201448b861796d0599583
+  - enabled: 1
+    path: Assets/Scenes/Title.unity
+    guid: 61837e29bc1f0a04495bd971f1e90b07
+  - enabled: 1
+    path: Assets/Scenes/Level1.unity
+    guid: 8d6cbf93709ba19418fa5269884d2e6f
+  - enabled: 1
+    path: Assets/Scenes/Level2.unity
+    guid: fe145a064a4cc954eb082c55cd6c9f46
   m_configObjects: {}

@@ -56,9 +56,9 @@ namespace ShootingEditor2D
             AgentService.Instance.SendAgentLoad();
         }
 
-        void OnLoadAgent(bool Success, List<string> agentNames)
+        void OnLoadAgent(bool success, List<string> agentNames)
         {
-            if (Success)
+            if (success)
             {
                 Debug.Log($"已加载的Agent: {string.Join(", ", agentNames)}");
                 AgentService.Instance.SendSceneStart(1); // 加载场景
@@ -74,7 +74,7 @@ namespace ShootingEditor2D
             AgentService.Instance.SendSceneStart(1);
         }
 
-        void OnStartScene(bool result, string reason)
+        void OnStartScene(bool success, string reason)
         {
             SceneManager.LoadScene("AgentClientTest2");
         }
