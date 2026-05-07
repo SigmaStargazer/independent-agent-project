@@ -29,6 +29,7 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
         public UnityEngine.Events.UnityAction<bool, string> OnBackupMemory;
         public UnityEngine.Events.UnityAction<bool, string> OnRestoreMemory;
+        public UnityEngine.Events.UnityAction<bool, string> OnDeleteCurrentMemory;
         public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
         public UnityEngine.Events.UnityAction<string, string> OnObserve;
         public UnityEngine.Events.UnityAction<string, bool, float> OnMoveAgent;
@@ -51,6 +52,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Subscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
+            MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -70,6 +72,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
+            MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -207,7 +210,6 @@ namespace Services
         }
 
         // 加载Agent
-        // 发送消息
         public void SendAgentLoad()
         {
             Debug.LogFormat("AgentLoadRequest::");
@@ -327,6 +329,35 @@ namespace Services
             if (this.OnRestoreMemory != null)
             {
                 this.OnRestoreMemory(response.Success, response.Errormsg);
+            }
+        }
+
+        public void SendMemoryDeleteCurrent()
+        {
+            Debug.LogFormat("MemoryDeleteRequest::");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.memoryDeleteCurrentRequest = new MemoryDeleteCurrentRequest();
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                this.pendingMessage = null;
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                this.pendingMessage = message;
+                this.ConnectToServer();
+            }
+        }
+
+        void OnMemoryDeleteCurrent(object sender, MemoryDeleteCurrentResponse response)
+        {
+            Debug.LogFormat("OnMemoryDeleteCurrent::Success:{0} [{1}]", response.Success, response.Errormsg);
+            if (this.OnDeleteCurrentMemory != null)
+            {
+                this.OnDeleteCurrentMemory(response.Success, response.Errormsg);
             }
         }
 

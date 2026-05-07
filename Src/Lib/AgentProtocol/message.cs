@@ -327,6 +327,9 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(17)]
         public MemoryRestoreRequest memoryRestoreRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(18)]
+        public MemoryDeleteCurrentRequest memoryDeleteCurrentRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -350,6 +353,9 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(5)]
         public MemoryRestoreResponse memoryRestoreResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(6)]
+        public MemoryDeleteCurrentResponse memoryDeleteCurrentResponse { get; set; }
 
     }
 
@@ -708,6 +714,31 @@ namespace SkillBridge.Message
 
     [global::ProtoBuf.ProtoContract()]
     public partial class MemoryRestoreResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryDeleteCurrentRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryDeleteCurrentResponse : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)

@@ -9,6 +9,8 @@ namespace ShootingEditor2D
     public class UITitle : MonoBehaviour
     {
         public string firstLevelName = "Level1";
+        public string agentName = "小明";
+        public string agentDesc = "是一个帮助机器人";
         void Start()
         {
             //AgentService.Instance.OnLoadAgent = this.OnLoadAgent;
@@ -20,29 +22,14 @@ namespace ShootingEditor2D
 
         }
 
-        #region NewGame
         public void OnClickNewGame()
         {
-            // 1. 初始化存档
-            SaveManager.Instance.Init(this.firstLevelName);
-            // 2. 加载初始场景
-            SceneManager.LoadScene(this.firstLevelName);
+            GameFlowManager.Instance.StartNewGame(firstLevelName, agentName, agentDesc);
         }
-
-        public void OnNewGame()
-        {
-
-        }
-        #endregion NewGame
 
         public void OnClickContinueGame()
         {
-            // 1. 加载存档
-            SaveData saveData = SaveManager.Instance.Load();
-            // 2. 加载存档的场景名
-            var levelName = saveData.LevelName;
-            SceneManager.LoadScene(levelName);
-
+            GameFlowManager.Instance.ContinueGame();
         }
     }
 }

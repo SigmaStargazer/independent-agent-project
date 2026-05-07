@@ -177,6 +177,8 @@ message NetMessageRequest{
 	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 15;
 	MemoryBackupRequest memoryBackupRequest = 16;
 	MemoryRestoreRequest memoryRestoreRequest = 17;
+	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 18;
+	
 }
 
 message NetMessageResponse{
@@ -184,7 +186,8 @@ message NetMessageResponse{
 	AgentLoadResponse agentLoadResponse = 2;
 	SceneStartResponse sceneStartResponse = 3;
 	MemoryBackupResponse memoryBackupResponse = 4;
-	MemoryRestoreResponse memoryRestoreResponse =5;
+	MemoryRestoreResponse memoryRestoreResponse = 5;
+	MemoryDeleteCurrentResponse memoryDeleteCurrentResponse = 6;
 }
 
 // 创建Agent
@@ -309,6 +312,14 @@ message MemoryRestoreRequest {
 }
 
 message MemoryRestoreResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+message MemoryDeleteCurrentRequest {
+}
+
+message MemoryDeleteCurrentResponse {
 	bool success = 1;
 	string errormsg = 2;
 }

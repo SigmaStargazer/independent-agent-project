@@ -156,6 +156,19 @@ async def handle_memory_restore_request(msg, context):
         print(f"读档失败: {str(e)}")
     await context['server'].send_message(response,context)
 
+@server.on_message(message_pb2.MemoryDeleteCurrentRequest)
+async def handle_memory_delete_request(msg, context):
+    response = message_pb2.MemoryDeleteCurrentResponse()
+    try:
+        result = await MemoryManager().delete_current_memory()
+        response.success = True
+        print("删除当前记忆成功")
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"删除当前记忆失败: {str(e)}")
+    await context['server'].send_message(response,context)
+
 # ======================
 # 启动服务器
 # ======================

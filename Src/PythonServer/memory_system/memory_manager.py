@@ -739,7 +739,7 @@ class MemoryManager:
         async with self._backup_lock:
             print("[MemoryManager] 删除当前记忆开始")
             # 1. 停止记忆系统
-            await self.close()
+            result = await self.close()
             # 2. 删除数据库文件和WAL文件
             db_file = os.path.join(db_root,f"{db_name}.kuzu")
             wal_file = os.path.join(db_root,f"{db_name}.wal")
@@ -758,6 +758,8 @@ class MemoryManager:
                 print("[MemoryManager] 删除当前记忆失败:",e)
                 raise
 
+            # 3. 重新初始化
+            result = await self.initialize()
             print("[MemoryManager] 删除当前记忆完成")
 
         return True

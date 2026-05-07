@@ -12,6 +12,7 @@ namespace Network
             if (message.sceneStartResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStartResponse); }
             if (message.memoryBackupResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryBackupResponse); }
             if (message.memoryRestoreResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryRestoreResponse);}
+            if (message.memoryDeleteCurrentResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryDeleteCurrentResponse);}
         }
 
         public void Dispatch(T sender, SkillBridge.Message.NetMessageRequest message)
@@ -33,6 +34,7 @@ namespace Network
             if (message.agentStopActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStopActionSequenceRequest); }
             if (message.memoryBackupRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryBackupRequest); }
             if (message.memoryRestoreRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryRestoreRequest); }
+            if (message.memoryDeleteCurrentRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryDeleteCurrentRequest); }
         }
     }
 }
