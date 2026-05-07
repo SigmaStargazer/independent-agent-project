@@ -5,6 +5,7 @@ from uuid import uuid4
 import gc # 引入垃圾回收
 import copy
 import shutil
+from pathlib import Path
 
 from graphiti_core import Graphiti
 from graphiti_core.driver.kuzu_driver import KuzuDriver # kuzu配置
@@ -46,6 +47,7 @@ reranker_model_name = os.getenv("RERANKER_MODEL")
 
 # 数据库名
 db_root = "db"
+db_backup_root = "db/backups"
 db_name = "graphiti"
 
 QUEUE_SIZE = int(os.getenv("MEMORY_QUEUE_SIZE", 1000))
@@ -78,7 +80,6 @@ class MemoryManager:
         self._worker_task = None
 
         # 记忆备份相关
-        self._backup_root = "db/backups"
         self._max_backup_slots = int(os.getenv("MAX_BACKUP_SLOTS", 10))
         self._backup_lock = asyncio.Lock()
 
@@ -573,10 +574,10 @@ class MemoryManager:
         记忆存档（热备份）
 
         特性：
-            1) 无论是否 initialized，都可以执行
-            2) 自动尝试 flush（尽力而为）
-            3) 不阻塞 Agent 正常运行
-            4) 复制 db + wal，保证一致性恢复
+            1) 无需关闭数据库
+            2) 支持运行时热备份
+            3) 使用 Kuzu 官方 EXPORT DATABASE
+            4) 避免 Windows 文件锁问题
 
         Args:
             slot_id(int): 存档序号。取值范围为[0, MAX_BACKUP_SLOTS-1]
@@ -594,43 +595,52 @@ class MemoryManager:
                     print(f"[MemoryManager] flush记忆队列中(timeout={flush_timeout}s)")
                     flushed = await self.wait_memory_flush(timeout=flush_timeout)
                     if not flushed:
-                        print("[MemoryManager] flush超时，备份将包含未刷新的WAL")
+                        print("[MemoryManager] flush超时，备份可能不包含最新记忆")
                 except Exception as e:
                     print(f"[MemoryManager] flush失败，备份将继续: {e}")
-                try:
-                    print(f"[MemoryManager] checkpoint开始")
-                    await self.conn.execute("CHECKPOINT")
-                except Exception as e:
-                    print(f"[MemoryManager] checkpoint失败，备份将继续: {e}")
+                # try:
+                #     print(f"[MemoryManager] checkpoint开始")
+                #     await self.conn.execute("CHECKPOINT")
+                # except Exception as e:
+                #     print(f"[MemoryManager] checkpoint失败，备份将继续: {e}")
             else:
                 print("[MemoryManager] 未初始化，备份将继续")
             # --------------------------------------------------
             # 2) 准备 slot
             # --------------------------------------------------
-            db_file = os.path.join(db_root,f"{db_name}.kuzu")
-            wal_file = os.path.join(db_root,f"{db_name}.wal")
-            if not os.path.exists(db_file):
-                raise RuntimeError(f"无法执行存档：当前没有可保存的数据（数据库尚未创建）")
+            # db_file = os.path.join(db_root,f"{db_name}.kuzu")
+            # wal_file = os.path.join(db_root,f"{db_name}.wal")
+            # if not os.path.exists(db_file):
+            #     raise RuntimeError(f"无法执行存档：当前没有可保存的数据（数据库尚未创建）")
 
-            os.makedirs(self._backup_root, exist_ok=True)
-            slot_path = os.path.join(self._backup_root, f"slot_{slot_id}")
+            os.makedirs(db_backup_root, exist_ok=True)
+            slot_path = f"{db_backup_root}/slot_{slot_id}"
 
             if os.path.exists(slot_path):
                 print("[MemoryManager][覆盖已有备份]", f"slot={slot_id}")
                 shutil.rmtree(slot_path)
-            os.makedirs(slot_path)
+            # os.makedirs(slot_path)
             # --------------------------------------------------
             # 3) 复制 db + wal
             # --------------------------------------------------
             try:
-                if os.path.exists(db_file):
-                    shutil.copy2(db_file, os.path.join(slot_path, f"{db_name}.kuzu"))
-                if os.path.exists(wal_file):
-                    shutil.copy2(wal_file, os.path.join(slot_path, f"{db_name}.wal"))
+                # if os.path.exists(db_file):
+                #     shutil.copy2(db_file, os.path.join(slot_path, f"{db_name}.kuzu"))
+                # if os.path.exists(wal_file):
+                #     shutil.copy2(wal_file, os.path.join(slot_path, f"{db_name}.wal"))
+                print(f"[MemoryManager] EXPORT DATABASE -> {slot_path}")
+                backup_conn = kuzu.Connection(self._kuzu_db)
+                backup_conn.execute(f"EXPORT DATABASE '{slot_path}'")
                 print("[MemoryManager][记忆备份完成]", f"slot={slot_id}")
             except Exception as e:
                 print("[MemoryManager][记忆备份失败]", f"slot={slot_id}:", e)
                 raise
+            finally:
+                try:
+                    if backup_conn and hasattr(backup_conn, "close"):
+                        backup_conn.close()
+                except:
+                    pass
 
     async def restore_memory(self, slot_id: int):
         """
@@ -649,31 +659,60 @@ class MemoryManager:
         """
         async with self._backup_lock:
             print(f"[MemoryManager] 开始读档 slot={slot_id}")
-            slot_path = os.path.join(self._backup_root,f"slot_{slot_id}")
+            slot_path = f"{db_backup_root}/slot_{slot_id}"
             # 如果备份目录不存在，则报错
             if not os.path.exists(slot_path):
                 raise RuntimeError(f"slot {slot_id} 不存在")
+
+            # --------------------------------------------------
+            # 1) 关闭当前数据库
+            # --------------------------------------------------
 
             await self.close()
 
             db_file = os.path.join(db_root,f"{db_name}.kuzu")
             wal_file = os.path.join(db_root,f"{db_name}.wal")
-
+            # --------------------------------------------------
+            # 2) 删除当前数据库
+            # --------------------------------------------------
             try:
-                # 删除当前的数据库文件和WAL文件
                 if os.path.exists(db_file):
                     os.remove(db_file)
                 if os.path.exists(wal_file):
                     os.remove(wal_file)
-                # 复制备份的数据库文件和WAL文件
-                shutil.copy2(os.path.join(slot_path,f"{db_name}.kuzu"),db_file)
-                backup_wal = os.path.join(slot_path,f"{db_name}.wal")
-                if os.path.exists(backup_wal):
-                    shutil.copy2(backup_wal,wal_file)
+                # # --------------------------------------------------
+                # # 3) 创建空数据库
+                # # --------------------------------------------------
+                # shutil.copy2(os.path.join(slot_path,f"{db_name}.kuzu"),db_file)
+                # backup_wal = os.path.join(slot_path,f"{db_name}.wal")
+                # if os.path.exists(backup_wal):
+                #     shutil.copy2(backup_wal,wal_file)
+            except Exception as e:
+                print(f"[MemoryManager] 删除旧数据库失败: {e}")
+                raise
+            # --------------------------------------------------
+            # 3) 导入备份数据库
+            # --------------------------------------------------
+            try:
+                self._kuzu_db = kuzu.Database(db_file)
+                restore_conn = kuzu.Connection(self._kuzu_db)
+                print(f"[MemoryManager] IMPORT DATABASE <- {slot_path}")
+                restore_conn.execute(f"IMPORT DATABASE '{slot_path}'")
+                print(f"[MemoryManager] 读档完成 slot={slot_id}")
             except Exception as e:
                 print(f"[MemoryManager][记忆读档失败] slot={slot_id}: {e}")
                 raise
-            print(f"[MemoryManager] 读档完成 slot={slot_id}")
+            finally:
+                try:
+                    if restore_conn and hasattr(restore_conn, "close"):
+                        restore_conn.close()
+                except:
+                    pass
+                self._kuzu_db = None
+            # --------------------------------------------------
+            # 4) 重新初始化系统
+            # --------------------------------------------------
+            await self.initialize()
 
     async def list_used_slots(self) -> list[int]:
         """
