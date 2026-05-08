@@ -27,12 +27,6 @@ import kuzu
 from dotenv import load_dotenv
 load_dotenv()
 
-# model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-# model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
-# model_name = "qwen-max"
-# embedding_model_name = "text-embedding-v4"
-# reranker_model_name = "gte-rerank-v2"
-
 mem_model_api_base = os.getenv("MEMORY_API_BASE")
 mem_model_api_key = os.getenv("MEMORY_API_KEY")
 mem_model_name = os.getenv("MEMORY_MODEL")
@@ -91,6 +85,22 @@ class MemoryManager:
         self._active_ops = 0
         self._active_cond = asyncio.Condition()
 
+    async def _begin_memory_op(self):
+        async with self._active_cond:
+            while self._freeze:
+                await self._active_cond.wait()
+            self._active_ops += 1
+
+    async def _end_memory_op(self):
+        async with self._active_cond:
+            self._active_ops -= 1
+            if self._active_ops == 0:
+                self._active_cond.notify_all()
+
+    async def _begin_memory_op_internal(self):
+        async with self._active_cond:
+            self._active_ops += 1
+
     @asynccontextmanager
     async def memory_access(self):
         """
@@ -98,17 +108,11 @@ class MemoryManager:
         - backup期间会阻塞
         - 已进入的操作允许执行完
         """
-        async with self._active_cond:
-            while self._freeze:
-                await self._active_cond.wait()
-            self._active_ops += 1
+        await self._begin_memory_op()
         try:
             yield
         finally:
-            async with self._active_cond:
-                self._active_ops -= 1
-                if self._active_ops == 0:
-                    self._active_cond.notify_all()
+            await self._end_memory_op()
 
     async def initialize(self):
         if self._initialized: return self
@@ -261,16 +265,25 @@ class MemoryManager:
         while True:
             try:
                 name, memory, curtime = await self._memory_queue.get()
+                # 提前占 active_ops
+                await self._begin_memory_op_internal()
                 try:
-                    await self._save_memory(
-                        name=name,
-                        memory=memory,
-                        curtime=curtime,
-                        wait_result=False
+                    await asyncio.wait_for(
+                        self._save_memory(
+                            name=name,
+                            memory=memory,
+                            curtime=curtime,
+                            wait_result=False,
+                            already_locked=True
+                        ),
+                        timeout=120
                     )
+                except asyncio.TimeoutError:
+                    print("[MemWorker] save timeout:", name)
                 except Exception as e:
                     print("[MemWorker] save failed:",e)
                 finally:
+                    await self._end_memory_op()
                     self._memory_queue.task_done()
             except asyncio.CancelledError:
                 print("[MemWorker] cancelled")
@@ -340,45 +353,79 @@ class MemoryManager:
 
             return summary
 
-    async def _save_memory(self, name: str, memory: str, curtime: datetime, wait_result: bool = False):
-        async with self.memory_access():
-            group_id = name.encode('utf-8').hex()
-            try:
-                # 限制记忆长度，避免报错
-                MAX_CHARS_PER_EPISODE = 8000
-                if len(memory) > MAX_CHARS_PER_EPISODE:
-                    print(
-                        f"[MemoryManager][{name}] memory too large "
-                        f"({len(memory)} chars), truncating to {MAX_CHARS_PER_EPISODE}"
-                    )
-                    memory = memory[:MAX_CHARS_PER_EPISODE]
+    async def _save_memory(
+        self, 
+        name: str, 
+        memory: str, 
+        curtime: datetime, 
+        wait_result: bool = False,
+        already_locked: bool = False
+        ):
+        if not already_locked:
+            async with self.memory_access():
+                return await self._save_memory_impl(
+                    name,
+                    memory,
+                    curtime,
+                    wait_result
+                )
+        else:
+            return await self._save_memory_impl(
+                name,
+                memory,
+                curtime,
+                wait_result
+            )
 
-                episode_id = uuid4()
-                if wait_result:
-                    result = await self.graphiti.add_episode(
-                        name=f"{name}_mem_{curtime}_{episode_id}",
-                        episode_body=memory,
-                        source=EpisodeType.text,
-                        source_description=f"{name}_mem_{curtime}", 
-                        reference_time=curtime,
-                        group_id=group_id
-                    )
-                    print(f"[MemoryManager][{name}]存储记忆成功")
-                    return result
-                else:
-                    await self.graphiti.add_episode(
-                        name=f"{name}_mem_{curtime}_{episode_id}",
-                        episode_body=memory,
-                        source=EpisodeType.text,
-                        source_description=f"{name}_mem_{curtime}", 
-                        reference_time=curtime,
-                        group_id=group_id
-                    )
-                    print(f"[MemoryManager][{name}]异步存储记忆任务启动")
-            except Exception as e:
-                print(f"[MemoryManager][{name}]存储记忆失败: {e}")
-                if wait_result:
-                    raise
+    async def _save_memory_impl(
+        self, 
+        name: str, 
+        memory: str, 
+        curtime: datetime, 
+        wait_result: bool = False
+        ):
+        group_id = name.encode('utf-8').hex()
+        try:
+            # 限制记忆长度，避免报错
+            MAX_CHARS_PER_EPISODE = 8000
+            if len(memory) > MAX_CHARS_PER_EPISODE:
+                print(
+                    f"[MemoryManager][{name}] memory too large "
+                    f"({len(memory)} chars), truncating to {MAX_CHARS_PER_EPISODE}"
+                )
+                memory = memory[:MAX_CHARS_PER_EPISODE]
+
+            episode_id = uuid4()
+            if wait_result:
+                result = await self.graphiti.add_episode(
+                    name=f"{name}_mem_{curtime}_{episode_id}",
+                    episode_body=memory,
+                    source=EpisodeType.text,
+                    source_description=f"{name}_mem_{curtime}", 
+                    reference_time=curtime,
+                    group_id=group_id
+                )
+                print(f"[MemoryManager][{name}]存储记忆成功")
+                return result
+            else:
+                await self.graphiti.add_episode(
+                    name=f"{name}_mem_{curtime}_{episode_id}",
+                    episode_body=memory,
+                    source=EpisodeType.text,
+                    source_description=f"{name}_mem_{curtime}", 
+                    reference_time=curtime,
+                    group_id=group_id
+                )
+                print(f"[MemoryManager][{name}]异步存储记忆任务启动")
+        except Exception as e:
+            print(f"[MemoryManager][{name}]存储记忆失败: {e}")
+            if wait_result:
+                raise
+
+    async def _wait_if_frozen(self):
+        async with self._active_cond:
+            while self._freeze:
+                await self._active_cond.wait()
 
     async def save_memory(self, name: str, memory: str, curtime: datetime):
         """
@@ -391,6 +438,8 @@ class MemoryManager:
         if not self._initialized:
             print("[MemoryManager] not initialized")
             return
+        # backup期间禁止入队
+        await self._wait_if_frozen()
         try:
             await asyncio.wait_for(
                 self._memory_queue.put((name,memory,curtime)),
@@ -569,11 +618,17 @@ class MemoryManager:
             if slot_id < 0 or slot_id >= self._max_backup_slots:
                 raise ValueError(f"slot_id应在[0, {self._max_backup_slots-1}]范围内")
             print(f"[MemoryManager][记忆备份开始] slot={slot_id}")
+            was_initialized = self._initialized # 记录数据库开始时是否启动，决定改方法结束后是否要启动
             try:
-                # --------------------------------------------------
-                # 1) 如果系统正在运行，尝试 flush
-                # --------------------------------------------------
                 if self._initialized:
+                    # =========================================
+                    # 1) freeze memory access
+                    # =========================================
+                    async with self._active_cond:
+                        self._freeze = True
+                    # --------------------------------------------------
+                    # 2) 如果系统正在运行，尝试 flush
+                    # --------------------------------------------------
                     try:
                         print(f"[MemoryManager] flush记忆队列中(timeout={flush_timeout}s)")
                         flushed = await self.wait_memory_flush(timeout=flush_timeout)
@@ -581,22 +636,30 @@ class MemoryManager:
                             print("[MemoryManager] flush超时，备份将包含未刷新的WAL")
                     except Exception as e:
                         print(f"[MemoryManager] flush失败，备份将继续: {e}")
+                    # =========================================
+                    # 3)等待所有 active op 退出
+                    # =========================================
+                    async with self._active_cond:
+                        while self._active_ops > 0:
+                            await self._active_cond.wait()
+                    # =========================================
+                    # 4) checkpoint
+                    # =========================================
                     try:
                         print(f"[MemoryManager] checkpoint开始")
                         await self.conn.execute("CHECKPOINT")
+                        # 强制清理 Python 引用
+                        gc.collect()
                     except Exception as e:
                         print(f"[MemoryManager] checkpoint失败，备份将继续: {e}")
+                    # =========================================
+                    # 5) 完全关闭数据库
+                    # =========================================
+                    result =await self._close()
                 else:
                     print("[MemoryManager] 未初始化，备份将继续")
-                # =========================================
-                # freeze memory access
-                # =========================================
-                async with self._active_cond:
-                    self._freeze = True
-                    while self._active_ops > 0:
-                        await self._active_cond.wait()
                 # --------------------------------------------------
-                # 2) 准备 slot
+                # 6) 准备 slot
                 # --------------------------------------------------
                 db_file = os.path.join(db_root,f"{db_name}.kuzu")
                 wal_file = os.path.join(db_root,f"{db_name}.wal")
@@ -611,7 +674,7 @@ class MemoryManager:
                     shutil.rmtree(slot_path)
                 os.makedirs(slot_path)
                 # --------------------------------------------------
-                # 3) 复制 db + wal
+                # 7) 复制 db + wal
                 # --------------------------------------------------
                 try:
                     if os.path.exists(db_file):
@@ -622,15 +685,21 @@ class MemoryManager:
                 except Exception as e:
                     print("[MemoryManager][记忆备份失败]", f"slot={slot_id}:", e)
                     raise
-                # --------------------------------------------------
-                # 4) 如果未初始化，则再初始化
-                # --------------------------------------------------
-                if not self._initialized:
-                    await self.initialize()
+                # # --------------------------------------------------
+                # # 8) 如果未初始化，则再初始化
+                # # --------------------------------------------------
+                # if not self._initialized:
+                #     await self.initialize()
             finally:
                 async with self._active_cond:
                     self._freeze = False
                     self._active_cond.notify_all()
+                if was_initialized and not self._initialized:
+                    try:
+                        await self.initialize()
+                    except Exception as e:
+                        print("[MemoryManager] backup后自动恢复失败:", e)
+                        raise
 
     async def restore_memory(self, slot_id: int):
         """
@@ -770,6 +839,18 @@ class MemoryManager:
 
         if not self._initialized:
             return
+        try:
+            async with self._active_cond:
+                self._freeze = True
+                while self._active_ops > 0:
+                    await self._active_cond.wait()
+            result = await self._close()
+        finally:
+            async with self._active_cond:
+                self._freeze = False
+                self._active_cond.notify_all()
+
+    async def _close(self):
         print("🛑 [1/4] 正在清除记忆任务队列worker")
         if self._worker_task:
             try:
