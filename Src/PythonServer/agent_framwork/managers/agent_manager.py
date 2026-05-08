@@ -98,11 +98,25 @@ RETURN n"""
         print("[Agent Manager]: 已启动所有Agent")
         print("-" * 80)
 
-    def finish(self):
+    # def finish(self):
+    #     """
+    #     结束所有agent的process_message协程
+    #     """
+    #     for name, processing_task in self.processing_tasks.items():
+    #         processing_task = processing_task.cancel()
+    #     print("-" * 80)
+    #     print("[Agent Manager]: 已停止所有Agent")
+
+    async def afinish(self):
         """
         结束所有agent的process_message协程
         """
-        for name, processing_task in self.processing_tasks.items():
-            processing_task = processing_task.cancel()
-        print("-" * 80)
-        print("[Agent Manager]: 已停止所有Agent")
+        for task in self.processing_tasks.values():
+            task.cancel()
+
+        await asyncio.gather(
+            *self.processing_tasks.values(),
+            return_exceptions=True
+        )
+
+        self.processing_tasks.clear()

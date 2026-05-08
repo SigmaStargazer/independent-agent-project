@@ -17,7 +17,7 @@ async def test():
     await asyncio.sleep(100)
     await AgentManager().agents['小明'].asend_message("对于你的岗位，你有哪些期待？")
     await asyncio.sleep(500)
-    AgentManager().finish()
+    result = await AgentManager().afinish()
 
 if __name__ == "__main__":
     asyncio.run(test())

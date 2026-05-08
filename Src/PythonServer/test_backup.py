@@ -109,7 +109,7 @@ async def test_7_restore_1():
     print(f"加载Agent成功: {agent_names}")
     await AgentManager().agents['小明'].asend_message("小红是谁")
     await asyncio.sleep(300)
-    AgentManager().finish()
+    result = await AgentManager().afinish()
 
 async def test_8_restore_2():
     """
@@ -125,7 +125,7 @@ async def test_8_restore_2():
     print(f"加载Agent成功: {agent_names}")
     await AgentManager().agents['小明'].asend_message("小红是谁")
     await asyncio.sleep(300)
-    AgentManager().finish()
+    result = await AgentManager().afinish()
 
 async def test_9_memory_delete():
     """
