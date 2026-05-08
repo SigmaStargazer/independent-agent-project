@@ -108,3 +108,6 @@ __pycache__/
 !Src/CSharpClient/**/*.sln
 !Src/CSharpClient/**/*.csproj
 !Src/CSharpClient/**/*.csproj.user
+
+# 其他数据
+*.csv

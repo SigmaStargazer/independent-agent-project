@@ -174,7 +174,8 @@ class MemoryManager:
             print("🏗️ [MemorySystem] 正在检查/创建表结构 (Schema)...")
             try:
                 # 这一步会执行 CREATE NODE TABLE IF NOT EXISTS ...
-                self._kuzu_driver.setup_schema() 
+                if is_new_db:
+                    self._kuzu_driver.setup_schema() 
             except Exception as e:
                 print(f"⚠️ Schema setup warning (可忽略): {e}")
             self.graphiti = Graphiti(
@@ -615,11 +616,11 @@ class MemoryManager:
 
             os.makedirs(db_backup_root, exist_ok=True)
             slot_path = f"{db_backup_root}/slot_{slot_id}"
+            temp_slot_path = slot_path + "_tmp"
 
-            if os.path.exists(slot_path):
-                print("[MemoryManager][覆盖已有备份]", f"slot={slot_id}")
-                shutil.rmtree(slot_path)
-            # os.makedirs(slot_path)
+            # 删除旧临时目录
+            if os.path.exists(temp_slot_path):
+                shutil.rmtree(temp_slot_path)
             # --------------------------------------------------
             # 3) 复制 db + wal
             # --------------------------------------------------
@@ -628,12 +629,21 @@ class MemoryManager:
                 #     shutil.copy2(db_file, os.path.join(slot_path, f"{db_name}.kuzu"))
                 # if os.path.exists(wal_file):
                 #     shutil.copy2(wal_file, os.path.join(slot_path, f"{db_name}.wal"))
-                print(f"[MemoryManager] EXPORT DATABASE -> {slot_path}")
+                print(f"[MemoryManager] EXPORT DATABASE -> {temp_slot_path}")
                 backup_conn = kuzu.Connection(self._kuzu_db)
-                backup_conn.execute(f"EXPORT DATABASE '{slot_path}'")
+                # backup_conn.execute(f"EXPORT DATABASE '{temp_slot_path}'")
+                backup_conn.execute(f"EXPORT DATABASE '{temp_slot_path}' (format='csv', header=true)")
+                # 删除旧正式备份
+                if os.path.exists(slot_path):
+                    shutil.rmtree(slot_path)
+                # 原子替换
+                os.rename(temp_slot_path, slot_path)
                 print("[MemoryManager][记忆备份完成]", f"slot={slot_id}")
             except Exception as e:
                 print("[MemoryManager][记忆备份失败]", f"slot={slot_id}:", e)
+                # 导出失败时清理 temp
+                if os.path.exists(temp_slot_path):
+                    shutil.rmtree(temp_slot_path)
                 raise
             finally:
                 try:
@@ -650,7 +660,7 @@ class MemoryManager:
         建议使用方式：
         AgentManager().finish()
         await MemoryManager().restore_memory(slot_id=slot_id)
-        await MemoryManager().initialize()
+        (已包含await MemoryManager().initialize()，无需重复初始化)
         await AgentManager().aload_agent()
         AgentManager().start()
 
@@ -680,24 +690,46 @@ class MemoryManager:
                     os.remove(db_file)
                 if os.path.exists(wal_file):
                     os.remove(wal_file)
-                # # --------------------------------------------------
-                # # 3) 创建空数据库
-                # # --------------------------------------------------
-                # shutil.copy2(os.path.join(slot_path,f"{db_name}.kuzu"),db_file)
-                # backup_wal = os.path.join(slot_path,f"{db_name}.wal")
-                # if os.path.exists(backup_wal):
-                #     shutil.copy2(backup_wal,wal_file)
             except Exception as e:
                 print(f"[MemoryManager] 删除旧数据库失败: {e}")
                 raise
+
             # --------------------------------------------------
-            # 3) 导入备份数据库
+            # 3) 重建数据库
             # --------------------------------------------------
             try:
                 self._kuzu_db = kuzu.Database(db_file)
                 restore_conn = kuzu.Connection(self._kuzu_db)
-                print(f"[MemoryManager] IMPORT DATABASE <- {slot_path}")
-                restore_conn.execute(f"IMPORT DATABASE '{slot_path}'")
+                # print(f"[MemoryManager] IMPORT DATABASE <- {slot_path}")
+                # restore_conn.execute(f"IMPORT DATABASE '{slot_path}' (drop_existing_table = true)")
+                # --------------------------------------------------
+                # 3.1 加载 FTS
+                # --------------------------------------------------
+                print("[MemoryManager] LOAD FTS EXTENSION")
+                try:
+                    restore_conn.execute("INSTALL FTS")
+                except Exception:
+                    pass
+                restore_conn.execute("LOAD EXTENSION FTS")
+                # --------------------------------------------------
+                # 3.2 执行 .cypher
+                # --------------------------------------------------
+                for cypher_file in ["schema.cypher", "copy.cypher"]:
+                    cypher_path = os.path.join(slot_path, cypher_file)
+                    print(f"[MemoryManager] 执行 schema: {cypher_path}")
+                    with open(cypher_path, "r", encoding="utf-8") as f:
+                        cypher_sql = f.read()
+                    # --------------------------------------------------
+                    # copy.cypher:
+                    # 把 parquet 相对路径改成绝对路径
+                    # --------------------------------------------------
+                    if cypher_file == "copy.cypher":
+                        normalized_slot_path = slot_path.replace("\\", "/")
+                        cypher_sql = cypher_sql.replace(
+                            'FROM "',
+                            f'FROM "{normalized_slot_path}/'
+                        )
+                    restore_conn.execute(cypher_sql)
                 print(f"[MemoryManager] 读档完成 slot={slot_id}")
             except Exception as e:
                 print(f"[MemoryManager][记忆读档失败] slot={slot_id}: {e}")
@@ -708,11 +740,31 @@ class MemoryManager:
                         restore_conn.close()
                 except:
                     pass
+                del restore_conn
+                gc.collect()
                 self._kuzu_db = None
             # --------------------------------------------------
             # 4) 重新初始化系统
             # --------------------------------------------------
             await self.initialize()
+            # # --------------------------------------------------
+            # # 5) 重建 index
+            # # --------------------------------------------------
+            # index_path = os.path.join(slot_path, "index.cypher")
+            # if os.path.exists(index_path):
+            #     print("[MemoryManager] 重建索引")
+            #     with open(index_path, "r", encoding="utf-8") as f:
+            #         index_sql = f.read()
+            #     statements = [
+            #         stmt.strip()
+            #         for stmt in index_sql.split(";")
+            #         if stmt.strip()
+            #     ]
+            #     for stmt in statements:
+            #         try:
+            #             await self.conn.execute(stmt)
+            #         except Exception as e:
+            #             print("[MemoryManager] index rebuild warning:", e)
 
     async def list_used_slots(self) -> list[int]:
         """
@@ -733,8 +785,8 @@ class MemoryManager:
             if 0 <= slot_id < self._max_backup_slots:
                 slot_path = os.path.join(self._backup_root, name)
                 # 必须包含数据库文件才算有效
-                db_file = os.path.join(slot_path,f"{db_name}.kuzu")
-                if os.path.exists(db_file):
+                schema_file = os.path.join(slot_path, "schema.cypher")
+                if os.path.exists(schema_file):
                     used_slots.append(slot_id)
         used_slots.sort()
         return used_slots
