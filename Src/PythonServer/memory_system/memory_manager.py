@@ -851,6 +851,7 @@ class MemoryManager:
                 self._active_cond.notify_all()
 
     async def _close(self):
+        self._initialized = False
         print("🛑 [1/4] 正在清除记忆任务队列worker")
         if self._worker_task:
             try:
@@ -887,8 +888,6 @@ class MemoryManager:
             # Python 的 GC 是懒惰的，必须手动踢一脚
             # 只有 Database 对象被 GC 销毁，文件锁才会释放
             gc.collect()
-            
-            self._initialized = False
             print("✅ [3/4] Python 对象引用已清理")
             print("✅ [4/4] 垃圾回收完成，数据库锁应已释放")
             
