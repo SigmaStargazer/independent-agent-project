@@ -9,12 +9,12 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public class StartSceneStep : IFlowStep
+    public class LoadSceneStep : IFlowStep
     {
         public string DisplayName => "º”‘ÿ≥°æ∞";
 
         private readonly string levalName;
-        public StartSceneStep(string levelName)
+        public LoadSceneStep(string levelName)
         {
             this.levalName = levelName;
         }

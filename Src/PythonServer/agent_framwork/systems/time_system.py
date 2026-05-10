@@ -52,6 +52,13 @@ class TimeSystem:
                 self.real_start_time = asyncio.get_event_loop().time()
 
     async def apause_time(self):
+        """
+        暂停时间系统。
+        - 如果系统未启动，则不进行任何操作。
+        - 如果系统正在运行，则暂停时间系统。
+        - 暂停时间系统后，时间系统不会继续运行，直到调用aresume_time方法。
+        - 暂停时间系统后，时间系统不会继续运行，直到调用aresume_time方法。
+        """
         async with self._lock:
             if not self.running:
                 return
@@ -64,6 +71,13 @@ class TimeSystem:
             self.running = False
 
     async def aresume_time(self):
+        """
+        恢复时间系统。
+        - 如果系统未启动，则不进行任何操作。
+        - 如果系统正在运行，则恢复时间系统。
+        - 恢复时间系统后，时间系统会继续运行，直到调用apause_time方法。
+        - 恢复时间系统后，时间系统会继续运行，直到调用apause_time方法。
+        """
         async with self._lock:
             if self.running:
                 return

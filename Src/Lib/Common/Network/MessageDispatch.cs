@@ -10,6 +10,7 @@ namespace Network
             if (message.agentCreateResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentCreateResponse); }
             if (message.agentLoadResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentLoadResponse); }
             if (message.sceneStartResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStartResponse); }
+            if (message.sceneStopResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStopResponse); }
             if (message.memoryBackupResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryBackupResponse); }
             if (message.memoryRestoreResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryRestoreResponse);}
             if (message.memoryDeleteCurrentResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryDeleteCurrentResponse);}
@@ -20,6 +21,7 @@ namespace Network
             if (message.agentCreateRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentCreateRequest); }
             if (message.agentLoadRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentLoadRequest); }
             if (message.sceneStartRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStartRequest); }
+            if (message.sceneStopRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStopRequest); }
             if (message.userSendMessageRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.userSendMessageRequest); }
             if (message.sendToolResultMessageRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sendToolResultMessageRequest); }
             if (message.agentSendMessageRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentSendMessageRequest); }

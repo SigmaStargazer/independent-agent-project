@@ -103,5 +103,21 @@ namespace Services
             AgentService.Instance.SendSceneStart(mapId);
             return tcs.Task;
         }
+
+        public static UniTask StopSceneAsync()
+        {
+            var tcs = new UniTaskCompletionSource();
+            void Handler(bool success, string reason)
+            {
+                AgentService.Instance.OnStopScene -= Handler;
+                if (success)
+                    tcs.TrySetResult();
+                else
+                    tcs.TrySetException(new Exception(reason));
+            }
+            AgentService.Instance.OnStopScene += Handler;
+            AgentService.Instance.SendSceneStop();
+            return tcs.Task;
+        }
     }
 }

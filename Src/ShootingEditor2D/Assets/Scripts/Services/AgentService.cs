@@ -27,6 +27,7 @@ namespace Services
         public UnityEngine.Events.UnityAction<bool, string> OnCreateAgent;
         public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
         public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
+        public UnityEngine.Events.UnityAction<bool, string> OnStopScene;
         public UnityEngine.Events.UnityAction<bool, string> OnBackupMemory;
         public UnityEngine.Events.UnityAction<bool, string> OnRestoreMemory;
         public UnityEngine.Events.UnityAction<bool, string> OnDeleteCurrentMemory;
@@ -50,6 +51,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentCreateResponse>(this.OnAgentCreate);// 记得写订阅消息和注销
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
+            MessageDistributer.Instance.Subscribe<SceneStopResponse>(this.OnSceneStop);
             MessageDistributer.Instance.Subscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Subscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
@@ -70,6 +72,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentCreateResponse>(this.OnAgentCreate);
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
+            MessageDistributer.Instance.Unsubscribe<SceneStopResponse>(this.OnSceneStop);
             MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
@@ -266,6 +269,35 @@ namespace Services
             if (this.OnStartScene != null)
             {
                 this.OnStartScene(response.Success, response.Errormsg);
+            }
+        }
+
+        public void SendSceneStop()
+        {
+            Debug.LogFormat("SceneStopRequest::");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.sceneStopRequest = new SceneStopRequest();
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                this.pendingMessage = null;
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                this.pendingMessage = message;
+                this.ConnectToServer();
+            }
+        }
+
+        void OnSceneStop(object sender, SceneStopResponse response)
+        {
+            Debug.LogFormat("OnSceneStop::Success:{0} [{1}]", response.Success, response.Errormsg);
+            if (this.OnStopScene != null)
+            {
+                this.OnStopScene(response.Success, response.Errormsg);
             }
         }
 

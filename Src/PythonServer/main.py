@@ -76,7 +76,7 @@ async def handle_scene_start_request(msg, context):
         
         await TimeSystem().aset_speed(1440)
         await TimeSystem().aset_time(year=2016,month=1,day=1)
-        await TimeSystem().astart_time()    # 先不启动
+        await TimeSystem().astart_time()
         
         AgentManager().start()
         response.success = True
@@ -86,6 +86,23 @@ async def handle_scene_start_request(msg, context):
         response.success = False
         response.errormsg = str(e)
         print(f"场景启动失败: {str(e)}")
+        await context['server'].send_message(response, context)
+
+@server.on_message(message_pb2.SceneStopRequest)
+async def handle_scene_stop_request(msg, context):
+    print("停止场景")
+    response = message_pb2.SceneStopResponse()
+    try:
+        print("停止时间")
+        await TimeSystem().apause_time()
+        print("停止 Agent...")
+        await AgentManager().afinish()
+        response.success = True
+        await context['server'].send_message(response, context)
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"场景停止失败: {str(e)}")
         await context['server'].send_message(response, context)
 
 @server.on_message(message_pb2.UserSendMessageRequest)
@@ -139,16 +156,18 @@ async def handle_memory_restore_request(msg, context):
     slot_id = msg.slot_id
     response = message_pb2.MemoryRestoreResponse()
     try:
+        print("停止时间")
+        await TimeSystem().apause_time()
         print("停止 Agent...")
         result = await AgentManager().afinish()
         print("读档...")
         result = await MemoryManager().restore_memory(slot_id=slot_id)
-        print("重新初始化 MemoryManager...")
-        result = await MemoryManager().initialize()
-        print("重新加载 Agent...")
-        agent_names = await AgentManager().aload_agent()
-        print("重新启动 Agent...")
-        AgentManager().start()
+        # print("重新初始化 MemoryManager...")
+        # result = await MemoryManager().initialize()
+        # print("重新加载 Agent...")
+        # agent_names = await AgentManager().aload_agent()
+        # print("重新启动 Agent...")
+        # AgentManager().start()
         response.success = True
     except Exception as e:
         response.success = False

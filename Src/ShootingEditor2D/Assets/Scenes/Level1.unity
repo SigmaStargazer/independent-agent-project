@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e328146a09bd5534fae26952ef4bb5e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  global: 1
+  dontDestroyOnLoad: 0
 --- !u!1 &104936606
 GameObject:
   m_ObjectHideFlags: 0
@@ -372,7 +372,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7097919c5af35da43b20d1dd578c210f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  global: 1
+  dontDestroyOnLoad: 0
 --- !u!224 &737002891 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6550868890557986720, guid: f6ea01587ba7baa4b87f19934b0f7be4, type: 3}
@@ -915,7 +915,7 @@ Transform:
   - {fileID: 775952847}
   - {fileID: 1411662914}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1521226077
 MonoBehaviour:
@@ -991,51 +991,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8395247614814757865, guid: ff751231d4e23d646a1132674872e250, type: 3}
   m_PrefabInstance: {fileID: 1629337315}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1939289935
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1939289937}
-  - component: {fileID: 1939289936}
-  m_Layer: 0
-  m_Name: AgentClient
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1939289936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1939289935}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: baf7544c41bc7274bb3feb59c815264e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  global: 1
---- !u!4 &1939289937
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1939289935}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 769.015, y: 553.06195, z: -9.776394}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &56321526336089953
 PrefabInstance:
   m_ObjectHideFlags: 0

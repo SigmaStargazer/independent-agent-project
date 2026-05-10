@@ -24,7 +24,9 @@ namespace ShootingEditor2D
 
                 new LoadAgentStep(),
 
-                new StartSceneStep(this.TargetScene),
+                new StartAgentStep(1),
+
+                new LoadSceneStep(this.TargetScene),
             };
         }
     }

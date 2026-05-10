@@ -163,21 +163,22 @@ message NetMessageRequest{
 	AgentCreateRequest agentCreateRequest = 1;
 	AgentLoadRequest agentLoadRequest = 2;
 	SceneStartRequest sceneStartRequest = 3;
-	UserSendMessageRequest userSendMessageRequest = 4;
-	SendToolResultMessageRequest sendToolResultMessageRequest = 5;
-	AgentSendMessageRequest agentSendMessageRequest = 6;
-	AgentObserveRequest agentObserveRequest = 7;
-	AgentMoveRequest agentMoveRequest = 8;
-	AgentInteractRequest agentInteractRequest = 9;
-	AgentSelectRequest agentSelectRequest = 10;
-	AgentInputRequest agentInputRequest = 11;
-	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 12;
-	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 13;
-	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 14;
-	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 15;
-	MemoryBackupRequest memoryBackupRequest = 16;
-	MemoryRestoreRequest memoryRestoreRequest = 17;
-	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 18;
+	SceneStopRequest sceneStopRequest = 4;
+	UserSendMessageRequest userSendMessageRequest = 5;
+	SendToolResultMessageRequest sendToolResultMessageRequest = 6;
+	AgentSendMessageRequest agentSendMessageRequest = 7;
+	AgentObserveRequest agentObserveRequest = 8;
+	AgentMoveRequest agentMoveRequest = 9;
+	AgentInteractRequest agentInteractRequest = 10;
+	AgentSelectRequest agentSelectRequest = 11;
+	AgentInputRequest agentInputRequest = 12;
+	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 13;
+	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 14;
+	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 15;
+	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 16;
+	MemoryBackupRequest memoryBackupRequest = 17;
+	MemoryRestoreRequest memoryRestoreRequest = 18;
+	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 19;
 	
 }
 
@@ -185,9 +186,10 @@ message NetMessageResponse{
 	AgentCreateResponse agentCreateResponse = 1;
 	AgentLoadResponse agentLoadResponse = 2;
 	SceneStartResponse sceneStartResponse = 3;
-	MemoryBackupResponse memoryBackupResponse = 4;
-	MemoryRestoreResponse memoryRestoreResponse = 5;
-	MemoryDeleteCurrentResponse memoryDeleteCurrentResponse = 6;
+	SceneStopResponse sceneStopResponse = 4;
+	MemoryBackupResponse memoryBackupResponse = 5;
+	MemoryRestoreResponse memoryRestoreResponse = 6;
+	MemoryDeleteCurrentResponse memoryDeleteCurrentResponse = 7;
 }
 
 // 创建Agent
@@ -221,11 +223,31 @@ message SceneStartResponse {
 	string errormsg = 2;
 }
 
+// 停止场景
+message SceneStopRequest {
+}
+
+message SceneStopResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+////////////////////////////////////////////////////////////////
+//
 // 用户向智能体发消息
+//
+////////////////////////////////////////////////////////////////
+
 message UserSendMessageRequest {
 	string agent = 1;
 	string user_message = 2;
 }
+
+////////////////////////////////////////////////////////////////
+//
+//  智能体工具
+//
+////////////////////////////////////////////////////////////////
 
 // 统一工具回调（实现异步 Tool RPC系统）
 message SendToolResultMessageRequest {

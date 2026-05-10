@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,30 +31,6 @@ namespace ShootingEditor2D
             }
 
         }
-
-        private void OnClickMenuBtn()
-        {
-            this.PanelMenu.SetActive(!this.PanelMenu.activeSelf);
-        }
-
-        public void OnClickRetry()
-        {
-            // 1. 读档
-            // 2. 直接重新开始关卡
-            SceneManager.LoadScene(this.SceneName);
-        }
-
-        public void OnClickReturnToTitle()
-        {
-            // 无需存档，直接回到标题
-            SceneManager.LoadScene(this.titleSceneName);
-        }
-
-        public void OnClickContinue()
-        {
-            this.PanelMenu.SetActive(false);
-        }
-
         /// <summary>
         /// (测试)保存存档
         /// </summary>
@@ -62,6 +39,25 @@ namespace ShootingEditor2D
             SaveManager.Instance.Save(this.SceneName);
             Debug.Log($"保存成功");
         }
+        private void OnClickMenuBtn()
+        {
+            this.PanelMenu.SetActive(!this.PanelMenu.activeSelf);
+        }
+        public void OnClickRetry()
+        {
+            GameFlowManager.Instance.ContinueGame().Forget(Debug.LogException);
+        }
+        public void OnClickReturnToTitle()
+        {
+            GameFlowManager.Instance.ReturnToTitle(this.titleSceneName).Forget(Debug.LogException);
+        }
+
+        public void OnClickContinue()
+        {
+            this.PanelMenu.SetActive(false);
+        }
+
+
     }
 }
 

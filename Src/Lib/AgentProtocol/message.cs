@@ -286,48 +286,51 @@ namespace SkillBridge.Message
         public SceneStartRequest sceneStartRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(4)]
-        public UserSendMessageRequest userSendMessageRequest { get; set; }
+        public SceneStopRequest sceneStopRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(5)]
-        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
+        public UserSendMessageRequest userSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
-        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(7)]
-        public AgentObserveRequest agentObserveRequest { get; set; }
+        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(8)]
-        public AgentMoveRequest agentMoveRequest { get; set; }
+        public AgentObserveRequest agentObserveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(9)]
-        public AgentInteractRequest agentInteractRequest { get; set; }
+        public AgentMoveRequest agentMoveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(10)]
-        public AgentSelectRequest agentSelectRequest { get; set; }
+        public AgentInteractRequest agentInteractRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(11)]
-        public AgentInputRequest agentInputRequest { get; set; }
+        public AgentSelectRequest agentSelectRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(12)]
-        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+        public AgentInputRequest agentInputRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(13)]
-        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(14)]
-        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(15)]
-        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
+        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(16)]
-        public MemoryBackupRequest memoryBackupRequest { get; set; }
+        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(17)]
-        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+        public MemoryBackupRequest memoryBackupRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(18)]
+        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(19)]
         public MemoryDeleteCurrentRequest memoryDeleteCurrentRequest { get; set; }
 
     }
@@ -349,12 +352,15 @@ namespace SkillBridge.Message
         public SceneStartResponse sceneStartResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(4)]
-        public MemoryBackupResponse memoryBackupResponse { get; set; }
+        public SceneStopResponse sceneStopResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(5)]
-        public MemoryRestoreResponse memoryRestoreResponse { get; set; }
+        public MemoryBackupResponse memoryBackupResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
+        public MemoryRestoreResponse memoryRestoreResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(7)]
         public MemoryDeleteCurrentResponse memoryDeleteCurrentResponse { get; set; }
 
     }
@@ -434,6 +440,31 @@ namespace SkillBridge.Message
 
     [global::ProtoBuf.ProtoContract()]
     public partial class SceneStartResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class SceneStopRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class SceneStopResponse : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
