@@ -4,30 +4,45 @@ namespace FrameworkDesign
 {
     public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     {
-        public bool global = true;
-        static T instance;
+        private static T instance;
         public static T Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = (T)FindObjectOfType<T>();
+                    instance = FindObjectOfType<T>();
+                    if (instance == null)
+                    {
+                        Debug.LogError($"[MonoSingleton] {typeof(T).Name} not found.");
+                    }
                 }
                 return instance;
             }
-
         }
 
-        void Start()
-        {
-            if (global) DontDestroyOnLoad(this.gameObject);
-            this.OnStart();
-        }
+        [SerializeField]
+        private bool dontDestroyOnLoad = true;
 
-        protected virtual void OnStart()
+        protected virtual void Awake()
         {
+            // 已存在实例
+            if (instance != null && instance != this)
+            {
+                Debug.LogWarning(
+                    $"Duplicate singleton: {typeof(T).Name} on {gameObject.name}"
+                );
 
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = this as T;
+
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
         }
     }
 }

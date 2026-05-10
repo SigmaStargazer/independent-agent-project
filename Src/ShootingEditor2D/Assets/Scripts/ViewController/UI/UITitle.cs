@@ -1,6 +1,8 @@
+using Cysharp.Threading.Tasks;
 using Services;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -24,12 +26,12 @@ namespace ShootingEditor2D
 
         public void OnClickNewGame()
         {
-            GameFlowManager.Instance.StartNewGame(firstLevelName, agentName, agentDesc);
+            GameFlowManager.Instance.StartNewGame(firstLevelName, agentName, agentDesc).Forget(Debug.LogException);
         }
 
         public void OnClickContinueGame()
         {
-            GameFlowManager.Instance.ContinueGame();
+            GameFlowManager.Instance.ContinueGame().Forget(Debug.LogException);
         }
     }
 }
