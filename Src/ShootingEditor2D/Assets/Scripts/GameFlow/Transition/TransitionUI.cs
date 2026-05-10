@@ -13,18 +13,18 @@ namespace GameFlow
         [Header("Loading")]
         [SerializeField] private CanvasGroup loadingCanvasGroup;
         [SerializeField] private Slider progressBar;
-        [SerializeField] private TMP_Text progressText;
+        [SerializeField] private Text progressText;
 
         [Header("Error")]
         [SerializeField] private GameObject errorPanel;
-        [SerializeField] private TMP_Text errorText;
+        [SerializeField] private Text errorText;
 
         [Header("Fade")]
         [SerializeField] private float fadeDuration = 0.3f;
 
-        protected void Awake()
+        protected override void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            base.Awake();
 
             loadingCanvasGroup.alpha = 0;
             loadingCanvasGroup.blocksRaycasts = false;

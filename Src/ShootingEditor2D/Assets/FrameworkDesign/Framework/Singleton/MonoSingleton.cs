@@ -22,7 +22,7 @@ namespace FrameworkDesign
         }
 
         [SerializeField]
-        private bool dontDestroyOnLoad = true;
+        private bool dontDestroyOnLoad = false;
 
         protected virtual void Awake()
         {
