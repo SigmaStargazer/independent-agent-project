@@ -13,6 +13,13 @@ namespace ShootingEditor2D
         public string firstLevelName = "Level1";
         public string agentName = "小明";
         public string agentDesc = "是一个帮助机器人";
+
+        public GameObject warningPanel;
+
+        void Awake()
+        {
+            warningPanel.SetActive(false);
+        }
         void Start()
         {
             //AgentService.Instance.OnLoadAgent = this.OnLoadAgent;
