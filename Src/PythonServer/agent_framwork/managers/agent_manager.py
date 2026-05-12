@@ -4,7 +4,7 @@ from typing import Dict
 
 from agent_framwork.base.singleton import singleton
 # from agent_framwork.agents.agent import Agent
-from agent_framwork.agents.agent_with_mem import Agent
+from agent_framwork.agents.agent_interuptible import Agent
 
 from memory_system.memory_manager import MemoryManager
 
@@ -16,7 +16,6 @@ class AgentManager:
     """
     def __init__(self):
         self.agents: Dict[str, Agent] = {}
-        self.processing_tasks = {}
 
     async def acreate_agent(self, name:str, summary:str, create_time:datetime) -> str:
         """
@@ -91,18 +90,23 @@ RETURN n"""
 
     def start(self):
         """
-        开始所有agent的process_message协程
+        启动所有Agent
         """
-        for name, agent in self.agents.items():
-            self.processing_tasks[name] = asyncio.create_task(agent.aprocess_message())  # 创建任务后不再取消
+        for agent in self.agents.values():
+            agent.start()
         print("[Agent Manager]: 已启动所有Agent")
         print("-" * 80)
 
-    def finish(self):
+    async def afinish(self):
         """
         结束所有agent的process_message协程
         """
-        for name, processing_task in self.processing_tasks.items():
-            processing_task = processing_task.cancel()
+        tasks = []
+
+        for agent in self.agents.values():
+            tasks.append(agent.ainterrupt("系统关闭"))
+
+        await asyncio.gather(*tasks, return_exceptions=True)
+
         print("-" * 80)
         print("[Agent Manager]: 已停止所有Agent")

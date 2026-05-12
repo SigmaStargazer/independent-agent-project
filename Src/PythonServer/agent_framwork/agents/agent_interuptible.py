@@ -346,7 +346,31 @@ class Agent:
         }
 
         self.graph = graph_builder.compile(checkpointer=self.memory)
+
+        # ========== runtime control ==========
+        self._interrupt_event = asyncio.Event()
+        self._process_task: asyncio.Task | None = None
+        self._invoke_task: asyncio.Task | None = None
+        self._running = False
+        self._focus_mode = False
+
+        # 是否存在未完成checkpoint
+        self._has_unfinished_checkpoint = False
+        self._interrupt_memory_saved = False
+
         print(f"[{self.name}]Agent is created.")
+
+    def start(self):
+        if self._running:
+            return
+        self._interrupt_event.clear()
+        self._process_task = asyncio.create_task(self.aprocess_message())
+        self._running = True
+        self._interrupt_memory_saved = False
+
+        print(f"[{self.name}] processing started")
+        if self._has_unfinished_checkpoint:
+            print(f"[{self.name}] resume pending checkpoint")
 
     async def asend_message(self, message: str):
         real_time = time.time()
@@ -392,66 +416,119 @@ class Agent:
         return items
     
     async def aprocess_message(self):
+        self._running = True
         try:
-            while True: # 第一层：保持消费者永久运行
-                
-                # 1. 阻塞直到至少有 message
-                # 同时等待两个队列
-                msg_task = asyncio.create_task(self.message_queue.get())
-                fb_task = asyncio.create_task(self.feedback_queue.get())
-
-                done, pending = await asyncio.wait([msg_task, fb_task], return_when=asyncio.FIRST_COMPLETED)
-                for task in pending:
-                    task.cancel()
-                items = []
-                # 哪个先完成就取哪个
-                if msg_task in done:
-                    first_item = msg_task.result()
-                    self.message_queue.task_done()
+            while not self._interrupt_event.is_set():
+                # =====================================
+                # 0. 优先恢复 checkpoint
+                # =====================================
+                if self._has_unfinished_checkpoint:
+                    input_state = None
+                    print(f"[{self.name}] resume from checkpoint")
                 else:
-                    first_item = fb_task.result()
-                    self.feedback_queue.task_done()
-                for task in pending:
-                    try:
-                        await task
-                    except asyncio.CancelledError:
-                        pass
-                items.append(first_item)
-                # 2. 获取所有消息
-                remaining_items = await self._drain_items(
-                    include_message_queue=True,
-                    include_feedback_queue=True
-                )
-                items.extend(remaining_items)
-                items.sort()
-                full_messages = "\n".join(item.content for item in items)
+                    # =====================================
+                    # 1. 阻塞直到至少有 message
+                    # 同时等待两个队列
+                    # =====================================
+                    msg_task = asyncio.create_task(self.message_queue.get())
+                    fb_task = asyncio.create_task(self.feedback_queue.get())
 
-                # # 2. 【合并积压】如果唤醒时队列里瞬间涌入了多条，一次性排空合并
-                # while not self.message_queue.empty():
-                #     next_message = self.message_queue.get_nowait()
-                #     full_messages += "\n" + next_message
-                #     self.message_queue.task_done()
+                    interrupt_task = asyncio.create_task(self._interrupt_event.wait())
 
-                # print(f"[{self.name}]Processing message: {full_messages}")
-                
-                # 3. 【固定 ID】兜底策略，确保底层不会因为任何意外重复插入
-                msg_id = str(uuid.uuid4())
-                human_msg = HumanMessage(content=full_messages, id=msg_id)
-                
-                # 初始输入状态
-                input_state = {
-                    "messages": [human_msg], 
-                    "name": self.name
-                }
-                
-                # 4. 第二层：API 调用的错误重试循环
-                while True:
+                    done, pending = await asyncio.wait(
+                        [msg_task, fb_task, interrupt_task], 
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
+                    # cleanup pending
+                    for task in pending:
+                        task.cancel()
+                    for task in pending:
+                        try:
+                            await task
+                        except asyncio.CancelledError:
+                            pass
+
+                    # interrupted while waiting
+                    if interrupt_task in done:
+                        # # 把已经取出的消息放回 queue
+                        # for task in [msg_task, fb_task]:
+                        #     if task in done:
+                        #         try:
+                        #             item = task.result()
+                        #             if task is msg_task:
+                        #                 await self.message_queue.put(item)
+                        #             else:
+                        #                 await self.feedback_queue.put(item)
+                        #         except Exception:
+                        #             pass
+                        # for task in pending:
+                        #     task.cancel()
+                        break
+
+                    # =========================
+                    # 2. collect messages
+                    # =========================
+                    items = []
+                    # 哪个先完成就取哪个
+                    if msg_task in done:
+                        first_item = msg_task.result()
+                        self.message_queue.task_done()
+                    else:
+                        first_item = fb_task.result()
+                        self.feedback_queue.task_done()
+                    # for task in pending:
+                    #     try:
+                    #         await task
+                    #     except asyncio.CancelledError:
+                    #         pass
+                    items.append(first_item)
+                    # 2. 获取所有消息
+                    remaining_items = await self._drain_items(
+                        include_message_queue=True,
+                        include_feedback_queue=True
+                    )
+                    items.extend(remaining_items)
+                    items.sort()
+                    full_messages = "\n".join(item.content for item in items)
+                    
+                    # =====================================
+                    # 3. 初始化 input_state
+                    # =====================================
+                    msg_id = str(uuid.uuid4())
+                    human_msg = HumanMessage(content=full_messages, id=msg_id)
+                    
+                    # 初始输入状态
+                    input_state = {
+                        "messages": [human_msg], 
+                        "name": self.name
+                    }
+                    # 当前 checkpoint 正在处理中
+                    # self._has_unfinished_checkpoint = True
+
+                # =========================
+                # 4. invoke loop
+                # =========================               
+                while not self._interrupt_event.is_set():
                     try:
-                        response = await self.graph.ainvoke(input_state, self.config)
+                        self._invoke_task = asyncio.create_task(
+                            self.graph.ainvoke(input_state,self.config)
+                        )
+                        # ainvoke 已正式开始
+                        self._has_unfinished_checkpoint = True
+                        response = await self._invoke_task
                         output = response["messages"][-1].content
                         print(f"[{self.name}]Response: {output}")
+                        # SUCCESS
+                        self._has_unfinished_checkpoint = False
                         break # 成功则跳出重试，回到最外层等待新消息
-                        
+                    except asyncio.CancelledError:
+                        # interrupt cancel
+                        if self._interrupt_event.is_set():
+                            if not self._interrupt_memory_saved:
+                                await self._save_interrupt_memory("被外部中断")
+                                self._interrupt_memory_saved = True
+                            break
+                        raise
                     except Exception as e:
                         print(f"[{self.name}]Error occurred: {e}")
                         
@@ -460,14 +537,90 @@ class Agent:
                         input_state = None 
                         
                         await asyncio.sleep(2) # 遇到网络错误，歇2秒再试
+                    finally:
+                        self._invoke_task = None
                         
-        except asyncio.CancelledError:
-            print(f"[{self.name}]Processing task has been cancelled.")
+        finally:
+            self._running = False
+            self._invoke_task = None
+            self._process_task = None
+            self._interrupt_event.clear()
+            print(f"[{self.name}] process stopped")
 
     async def clear_langgraph_memory(self):
         """删除 LangGraph MemorySaver 中的对话状态"""
         # 创建新的 MemorySaver 实例替换旧的
         self.memory = MemorySaver()
-        # 重新编译 graph 以应用新的 checkpointer
+        # 重新编译 graph
         self.graph = graph_builder.compile(checkpointer=self.memory)
+        # checkpoint 已不存在
+        self._has_unfinished_checkpoint = False
+
         print(f"[{self.name}] LangGraph 对话记忆已清空")
+
+    async def ainterrupt(self, reason: str = "被打断"):
+        """
+        优雅中断当前 Agent
+
+        - 停止 ainvoke
+        - 保存 mem_to_save
+        - 保留 queue
+        - 保留 checkpoint
+        - 保留 messages
+        """
+
+        if not self._running:
+            return
+
+        print(f"[{self.name}] interrupt requested")
+
+        self._interrupt_event.set()
+
+        # cancel invoke
+        if self._invoke_task:
+            try:
+                self._invoke_task.cancel()
+            except Exception:
+                pass
+
+        # wait process exit
+        if self._process_task:
+            await asyncio.gather(self._process_task, return_exceptions=True)
+
+        self._running = False
+        print(f"[{self.name}] interrupted")
+
+    async def _save_interrupt_memory(self, reason: str):
+        try:
+            snapshot = await self.graph.aget_state(self.config)
+            if not snapshot:
+                return
+            values = snapshot.values
+
+            mem_to_save = values.get("mem_to_save","")
+            if not mem_to_save:
+                return
+
+            cur_time = await TimeSystem().aget_current_time(to_str=True)
+
+            mem_to_save += (f"\n[{cur_time}]"f"[系统] 当前思考被中断：{reason}")
+
+            curtime = await TimeSystem().aget_current_time()
+
+            await MemoryManager().save_memory(
+                name=self.name,
+                memory=mem_to_save,
+                curtime=curtime
+            )
+
+            # 防止恢复后重复保存
+            await self.graph.aupdate_state(
+                self.config,
+                {"mem_to_save": ""},
+                as_node="save_memory"
+            )
+
+            print(f"[{self.name}] interrupt memory saved")
+
+        except Exception as e:
+            print(f"[{self.name}] "f"save interrupt memory error: {e}")
