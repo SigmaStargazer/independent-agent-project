@@ -59,20 +59,20 @@ output_parser = StrOutputParser()
 
 # 生产工具列表
 tools = [base_tools.communicate_to_agent, 
-         base_tools.communicate_to_user,
+        base_tools.communicate_to_user,
         #  base_tools.get_agent_list, 
-         base_tools.get_cur_time,
-         base_tools.search_fact_memories,
-         base_tools.search_episode_memories,
-         base_tools.observe_cmd,
-         base_tools.move_cmd,
-         base_tools.interact_cmd,
-         base_tools.select_cmd,
-         base_tools.input_cmd,
-         base_tools.plan_action_sequence_cmd,
-         base_tools.start_action_sequence_cmd,
-         base_tools.continue_action_sequence_cmd,
-         base_tools.stop_action_sequence_cmd,
+        base_tools.get_cur_time,
+        base_tools.search_fact_memories,
+        base_tools.search_episode_memories,
+        base_tools.observe_cmd,
+        base_tools.move_cmd,
+        base_tools.interact_cmd,
+        base_tools.select_cmd,
+        base_tools.input_cmd,
+        base_tools.plan_action_sequence_cmd,
+        base_tools.start_action_sequence_cmd,
+        base_tools.continue_action_sequence_cmd,
+        base_tools.stop_action_sequence_cmd,
         # base_tools.add_alarm,
         #  base_tools.get_alarm_list,
         #  base_tools.remove_alarm
@@ -281,7 +281,7 @@ async def save_memory(state: State):
     
     await aperf_print(f"[{name}]存储记忆开始")
     curtime = await TimeSystem().aget_current_time()
-    await MemoryManager().save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
+    await memory_manager.save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
     await aperf_print(f"[{name}]存储记忆任务启动，后台进行中")
 
     return {"mem_to_save": ""}
@@ -355,12 +355,12 @@ class Agent:
         self._focus_mode = False
 
         # 是否存在未完成checkpoint
-        self._has_unfinished_checkpoint = False
+        # self._has_unfinished_checkpoint = False
         self._interrupt_memory_saved = False
 
         print(f"[{self.name}]Agent is created.")
 
-    def start(self):
+    async def astart(self):
         if self._running:
             return
         self._interrupt_event.clear()
@@ -369,7 +369,9 @@ class Agent:
         self._interrupt_memory_saved = False
 
         print(f"[{self.name}] processing started")
-        if self._has_unfinished_checkpoint:
+        snapshot = await self.graph.aget_state(self.config)
+        has_checkpoint = (snapshot is not None and snapshot.next)
+        if has_checkpoint:
             print(f"[{self.name}] resume pending checkpoint")
 
     async def asend_message(self, message: str):
@@ -422,7 +424,9 @@ class Agent:
                 # =====================================
                 # 0. 优先恢复 checkpoint
                 # =====================================
-                if self._has_unfinished_checkpoint:
+                snapshot = await self.graph.aget_state(self.config)
+                has_checkpoint = (snapshot is not None and snapshot.next)
+                if has_checkpoint:
                     input_state = None
                     print(f"[{self.name}] resume from checkpoint")
                 else:
@@ -442,11 +446,7 @@ class Agent:
                     # cleanup pending
                     for task in pending:
                         task.cancel()
-                    for task in pending:
-                        try:
-                            await task
-                        except asyncio.CancelledError:
-                            pass
+                    await asyncio.gather(*pending, return_exceptions=True)
 
                     # interrupted while waiting
                     if interrupt_task in done:
@@ -514,12 +514,12 @@ class Agent:
                             self.graph.ainvoke(input_state,self.config)
                         )
                         # ainvoke 已正式开始
-                        self._has_unfinished_checkpoint = True
+                        # self._has_unfinished_checkpoint = True
                         response = await self._invoke_task
                         output = response["messages"][-1].content
                         print(f"[{self.name}]Response: {output}")
                         # SUCCESS
-                        self._has_unfinished_checkpoint = False
+                        # self._has_unfinished_checkpoint = False
                         break # 成功则跳出重试，回到最外层等待新消息
                     except asyncio.CancelledError:
                         # interrupt cancel
@@ -554,7 +554,7 @@ class Agent:
         # 重新编译 graph
         self.graph = graph_builder.compile(checkpointer=self.memory)
         # checkpoint 已不存在
-        self._has_unfinished_checkpoint = False
+        self._interrupt_memory_saved = False
 
         print(f"[{self.name}] LangGraph 对话记忆已清空")
 
@@ -607,7 +607,7 @@ class Agent:
 
             curtime = await TimeSystem().aget_current_time()
 
-            await MemoryManager().save_memory(
+            await memory_manager.save_memory(
                 name=self.name,
                 memory=mem_to_save,
                 curtime=curtime

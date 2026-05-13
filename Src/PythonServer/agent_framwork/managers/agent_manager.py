@@ -93,7 +93,7 @@ RETURN n"""
         启动所有Agent
         """
         for agent in self.agents.values():
-            agent.start()
+            agent.astart()
         print("[Agent Manager]: 已启动所有Agent")
         print("-" * 80)
 
