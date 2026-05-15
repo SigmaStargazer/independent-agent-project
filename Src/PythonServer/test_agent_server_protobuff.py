@@ -62,7 +62,7 @@ async def handle_start_scene_request(msg, context):
     print(f"启动场景: {map_id}")
     response = context['server'].message_types['StartSceneResponse']()
     try:
-        AgentManager().astart()
+        await AgentManager().astart()
         await TimeSystem().aset_speed(1440)
         await TimeSystem().astart_time(year=2016,month=1,day=1)
         response.success = True

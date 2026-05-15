@@ -27,14 +27,14 @@ async def init_create():
 
     result = await AgentManager().acreate_agent(name="小明", summary="是一个帮助机器人", create_time=datetime.now())
     agent_names = await AgentManager().aload_agent()
-    AgentManager().astart()
+    await AgentManager().astart()
 
 async def init_load():
     await MemoryManager().initialize()
     await TimeSystem().aset_time(year=2016, month=1, day=1)
 
     agent_names = await AgentManager().aload_agent()
-    AgentManager().astart()
+    await AgentManager().astart()
 
 async def test_1_memory_delete():
     await MemoryManager().delete_current_memory()
@@ -105,7 +105,7 @@ async def test_7_restore_1():
     await MemoryManager().initialize()
     await TimeSystem().aset_time(year=2016,month=1,day=1)
     agent_names = await AgentManager().aload_agent()
-    AgentManager().astart()
+    await AgentManager().astart()
     print(f"加载Agent成功: {agent_names}")
     await AgentManager().agents['小明'].asend_message("小红是谁")
     await asyncio.sleep(300)
@@ -121,7 +121,7 @@ async def test_8_restore_2():
     await MemoryManager().initialize()
     await TimeSystem().aset_time(year=2016,month=1,day=1)
     agent_names = await AgentManager().aload_agent()
-    AgentManager().astart()
+    await AgentManager().astart()
     print(f"加载Agent成功: {agent_names}")
     await AgentManager().agents['小明'].asend_message("小红是谁")
     await asyncio.sleep(300)

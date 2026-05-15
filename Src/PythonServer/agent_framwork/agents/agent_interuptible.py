@@ -355,6 +355,7 @@ class Agent:
         self._process_task: asyncio.Task | None = None
         self._invoke_task: asyncio.Task | None = None
         self._focus_mode = False
+        self._runtime_lock = asyncio.Lock()
 
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
@@ -363,41 +364,43 @@ class Agent:
         print(f"[{self.name}]Agent is created.")
 
     async def astart(self):
-        if self._running:
-            return
-        self._interrupt_event = asyncio.Event()
-        self._process_task = asyncio.create_task(self.aprocess_message())
-        self._running = True
-        self._interrupt_memory_saved = False
+        async with self._runtime_lock:
+            if self._running:
+                return
+            self._interrupt_event = asyncio.Event()
+            self._process_task = asyncio.create_task(self.aprocess_message())
+            self._running = True
+            self._interrupt_memory_saved = False
 
-        print(f"[{self.name}] processing started")
-        snapshot = await self.graph.aget_state(self.config)
-        has_checkpoint = (
-            snapshot is not None 
-            and snapshot.next
-        )
-        if has_checkpoint:
-            print(f"[{self.name}] resume pending checkpoint")
+            print(f"[{self.name}] processing started")
+            snapshot = await self.graph.aget_state(self.config)
+            has_checkpoint = (
+                snapshot is not None 
+                and snapshot.next
+            )
+            if has_checkpoint:
+                print(f"[{self.name}] resume pending checkpoint")
 
     async def asend_message(self, message: str):
+        await self._send_message(message, is_feedback=False)
+
+    async def asend_feedback(self, feedback: str):
+        await self._send_message(feedback, is_feedback=True)
+
+    async def _send_message(self, message: str, is_feedback: bool = False):
         real_time = time.time()
         virtual_time = await TimeSystem().aget_current_time(to_str = True)
         if virtual_time == "未启动":
             text = message
         else:
             text = f"[{virtual_time}]"+message
-        print(f"[{self.name}]Get message: {text}")
-        await self.message_queue.put(TimedMessage(timestamp=real_time, content=text))
 
-    async def asend_feedback(self, feedback: str):
-        real_time = time.time()
-        virtual_time = await TimeSystem().aget_current_time(to_str = True)
-        if virtual_time == "未启动":
-            text = feedback
+        if is_feedback:
+            print(f"[{self.name}]Get feedback: {text}")
+            await self.feedback_queue.put(TimedMessage(timestamp=real_time, content=text))
         else:
-            text = f"[{virtual_time}]"+feedback
-        print(f"[{self.name}]Get feedback: {text}")
-        await self.feedback_queue.put(TimedMessage(timestamp=real_time, content=text))
+            print(f"[{self.name}]Get message: {text}")
+            await self.message_queue.put(TimedMessage(timestamp=real_time, content=text))
     
     async def _drain_items(self,
         include_message_queue: bool,
@@ -577,97 +580,98 @@ class Agent:
         Args:
             reason: 中断原因
         """
-        if not self._running:
-            return
-        print(f"[{self.name}] interrupt requested")
+        async with self._runtime_lock:
+            if not self._running:
+                return
+            print(f"[{self.name}] interrupt requested")
 
-        # =========================
-        # 1. 中断运行
-        # =========================
-        self._interrupt_event.set()
-        # cancel invoke
-        if self._invoke_task:
-            try:
-                self._invoke_task.cancel()
-            except Exception:
-                pass
-        # wait process exit
-        if self._process_task:
-            try:
-                await asyncio.wait_for(
-                    asyncio.gather(
-                        self._process_task,
-                        return_exceptions=True
-                    ),
-                    timeout=5
-                )
-            except asyncio.TimeoutError:
-                print(f"[{self.name}] force interrupt timeout")
-        # =========================
-        # 2. 读取旧 state
-        # =========================
-        snapshot = await self.graph.aget_state(self.config)
-        old_values = snapshot.values if snapshot else {}
-        # =========================
-        # 3. 保存 interrupt memory
-        # =========================
-        if not self._interrupt_memory_saved:
-            await self._save_interrupt_memory(reason)
-            self._interrupt_memory_saved = True
-        # =========================
-        # 4. 清理 unfinished tool call
-        # =========================
-        messages = list(old_values.get("messages", []))
+            # =========================
+            # 1. 中断运行
+            # =========================
+            self._interrupt_event.set()
+            # cancel invoke
+            if self._invoke_task:
+                try:
+                    self._invoke_task.cancel()
+                except Exception:
+                    pass
+            # wait process exit
+            if self._process_task:
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(
+                            self._process_task,
+                            return_exceptions=True
+                        ),
+                        timeout=5
+                    )
+                except asyncio.TimeoutError:
+                    print(f"[{self.name}] force interrupt timeout")
+            # =========================
+            # 2. 读取旧 state
+            # =========================
+            snapshot = await self.graph.aget_state(self.config)
+            old_values = snapshot.values if snapshot else {}
+            # =========================
+            # 3. 保存 interrupt memory
+            # =========================
+            if not self._interrupt_memory_saved:
+                await self._save_interrupt_memory(reason)
+                self._interrupt_memory_saved = True
+            # =========================
+            # 4. 清理 unfinished tool call
+            # =========================
+            messages = list(old_values.get("messages", []))
 
-        if messages:
-            # 找最后一个 AI tool call message
-            last_ai_index = None
-            for i in range(len(messages) - 1, -1, -1):
-                msg = messages[i]
-                if isinstance(msg, AIMessage) and msg.tool_calls:
-                    last_ai_index = i
-                    break
-            if last_ai_index is not None:
-                ai_msg = messages[last_ai_index]
-                # 收集后续所有 ToolMessage 的 tool_call_id
-                completed_tool_call_ids = set()
-                for msg in messages[last_ai_index + 1:]:
-                    tool_call_id = getattr(msg, "tool_call_id", None)
-                    if tool_call_id:
-                        completed_tool_call_ids.add(tool_call_id)
-                # 检查是否所有 tool_call 都已完成
-                unfinished = False
-                for tc in ai_msg.tool_calls:
-                    if tc["id"] not in completed_tool_call_ids:
-                        unfinished = True
+            if messages:
+                # 找最后一个 AI tool call message
+                last_ai_index = None
+                for i in range(len(messages) - 1, -1, -1):
+                    msg = messages[i]
+                    if isinstance(msg, AIMessage) and msg.tool_calls:
+                        last_ai_index = i
                         break
-                # 只有 unfinished 才删除
-                if unfinished:
-                    print(f"[{self.name}] remove unfinished tool call message")
-                    messages = messages[:last_ai_index]
-        old_values["messages"] = messages
-        # =========================
-        # 5. fork 新 lineage
-        # =========================
-        self.session_id = str(uuid.uuid4())
-        self.config = {
-            "configurable": {
-                "thread_id": f"{self.name}:{self.session_id}",
-                "message_queue": self.message_queue,
-                "feedback_queue": self.feedback_queue
+                if last_ai_index is not None:
+                    ai_msg = messages[last_ai_index]
+                    # 收集后续所有 ToolMessage 的 tool_call_id
+                    completed_tool_call_ids = set()
+                    for msg in messages[last_ai_index + 1:]:
+                        tool_call_id = getattr(msg, "tool_call_id", None)
+                        if tool_call_id:
+                            completed_tool_call_ids.add(tool_call_id)
+                    # 检查是否所有 tool_call 都已完成
+                    unfinished = False
+                    for tc in ai_msg.tool_calls:
+                        if tc["id"] not in completed_tool_call_ids:
+                            unfinished = True
+                            break
+                    # 只有 unfinished 才删除
+                    if unfinished:
+                        print(f"[{self.name}] remove unfinished tool call message")
+                        messages = messages[:last_ai_index]
+            old_values["messages"] = messages
+            # =========================
+            # 5. fork 新 lineage
+            # =========================
+            self.session_id = str(uuid.uuid4())
+            self.config = {
+                "configurable": {
+                    "thread_id": f"{self.name}:{self.session_id}",
+                    "message_queue": self.message_queue,
+                    "feedback_queue": self.feedback_queue
+                }
             }
-        }
-        # =========================
-        # 6. 写入 clean state
-        # =========================
-        await self.graph.aupdate_state(
-            self.config,
-            old_values,
-            as_node="interrupt_fork"
-        )
+            # =========================
+            # 6. 写入 clean state
+            # =========================
+            await self.graph.aupdate_state(
+                self.config,
+                old_values,
+                as_node="interrupt_fork"
+            )
 
-        self._running = False
-        print(f"[{self.name}] interrupted")
+            self._running = False
+            print(f"[{self.name}] interrupted")
 
     async def _save_interrupt_memory(self, reason: str):
         try:

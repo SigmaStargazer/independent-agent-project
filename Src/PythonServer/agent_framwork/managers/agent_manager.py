@@ -97,6 +97,15 @@ RETURN n"""
         print("[Agent Manager]: 已启动所有Agent")
         print("-" * 80)
 
+    async def ainterrupt(self, reason: str):
+        """
+        中断所有Agent
+        """
+        for agent in self.agents.values():
+            await agent.ainterrupt(reason)
+        print("[Agent Manager]: 已打断所有Agent")
+        print("-" * 80)
+
     async def afinish(self):
         """
         结束所有agent的process_message协程
