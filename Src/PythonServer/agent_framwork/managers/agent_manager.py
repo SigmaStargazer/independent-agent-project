@@ -88,12 +88,12 @@ RETURN n"""
         # print(f"加载Agent: {agent_names}")
         return agent_names
 
-    def start(self):
+    async def astart(self):
         """
         启动所有Agent
         """
         for agent in self.agents.values():
-            agent.astart()
+            await agent.astart()
         print("[Agent Manager]: 已启动所有Agent")
         print("-" * 80)
 

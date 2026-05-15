@@ -92,7 +92,8 @@ def _filter_messages(messages, k=20):
         """
         用于删减上下文长度
         """
-        return messages[-k:]
+        messages = messages[-k:]
+        return messages
 
 # 提示词模板
 # system_template = """你扮演的角色名叫{name}，{description}。
@@ -348,15 +349,16 @@ class Agent:
         self.graph = graph_builder.compile(checkpointer=self.memory)
 
         # ========== runtime control ==========
+        self._running = False
         self._interrupt_event = asyncio.Event()
         self._process_task: asyncio.Task | None = None
         self._invoke_task: asyncio.Task | None = None
-        self._running = False
         self._focus_mode = False
 
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
         self._interrupt_memory_saved = False
+        self._resume_checkpoint_after_restart = True
 
         print(f"[{self.name}]Agent is created.")
 
@@ -370,7 +372,11 @@ class Agent:
 
         print(f"[{self.name}] processing started")
         snapshot = await self.graph.aget_state(self.config)
-        has_checkpoint = (snapshot is not None and snapshot.next)
+        has_checkpoint = (
+            self._resume_checkpoint_after_restart
+            and snapshot is not None 
+            and snapshot.next
+        )
         if has_checkpoint:
             print(f"[{self.name}] resume pending checkpoint")
 
@@ -425,9 +431,13 @@ class Agent:
                 # 0. 优先恢复 checkpoint
                 # =====================================
                 snapshot = await self.graph.aget_state(self.config)
-                has_checkpoint = (snapshot is not None and snapshot.next)
+                has_checkpoint = (
+                    self._resume_checkpoint_after_restart
+                    and snapshot is not None 
+                    and snapshot.next
+                )
                 if has_checkpoint:
-                    input_state = None
+                    input_state = None # self.graph.ainvoke(None,self.config)时，会从checkpoint继续跑，避免重复执行 tool
                     print(f"[{self.name}] resume from checkpoint")
                 else:
                     # =====================================
@@ -521,14 +531,14 @@ class Agent:
                         # SUCCESS
                         # self._has_unfinished_checkpoint = False
                         break # 成功则跳出重试，回到最外层等待新消息
-                    except asyncio.CancelledError:
+                    except asyncio.CancelledError:# self._invoke_task = asyncio.create_task时，报CancelledError
                         # interrupt cancel
-                        if self._interrupt_event.is_set():
+                        if self._interrupt_event.is_set():# 进入打断流程时，break，不抛出异常
                             if not self._interrupt_memory_saved:
                                 await self._save_interrupt_memory("被外部中断")
-                                self._interrupt_memory_saved = True
+                                self._interrupt_memory_saved = True# 防止重复触发 save_interrupt_memory。后续需要astart才能恢复False
                             break
-                        raise
+                        raise# 错误时，抛出异常
                     except Exception as e:
                         print(f"[{self.name}]Error occurred: {e}")
                         
@@ -558,7 +568,11 @@ class Agent:
 
         print(f"[{self.name}] LangGraph 对话记忆已清空")
 
-    async def ainterrupt(self, reason: str = "被打断"):
+    async def ainterrupt(
+        self, 
+        reason: str = "被打断",
+        resume_checkpoint: bool = False
+        ):
         """
         优雅中断当前 Agent
 
@@ -567,28 +581,57 @@ class Agent:
         - 保留 queue
         - 保留 checkpoint
         - 保留 messages
-        """
 
+        Args:
+            reason: 中断原因
+            resume_checkpoint: 是否恢复 checkpoint
+                True: restart 后继续未完成 ainvoke。（用于网络错误恢复）
+                False: restart 后丢弃 unfinished checkpoint。（用于场景切换 / 用户插嘴）
+        """
         if not self._running:
             return
-
         print(f"[{self.name}] interrupt requested")
-
+        self._resume_checkpoint_after_restart = resume_checkpoint
         self._interrupt_event.set()
-
         # cancel invoke
         if self._invoke_task:
             try:
                 self._invoke_task.cancel()
             except Exception:
                 pass
-
         # wait process exit
         if self._process_task:
             await asyncio.gather(self._process_task, return_exceptions=True)
+        # interrupt 后不恢复 checkpoint
+        # if not resume_checkpoint:
+        #     await self._clear_unfinished_checkpoint()
 
         self._running = False
         print(f"[{self.name}] interrupted")
+
+    # async def _clear_unfinished_checkpoint(self):
+    #     """
+    #     清除 unfinished checkpoint，
+    #     但保留 messages / state
+    #     """
+    #     try:
+    #         snapshot = await self.graph.aget_state(self.config)
+    #         if not snapshot:
+    #             return
+    #         if not snapshot.next:
+    #             return
+    #         values = snapshot.values
+    #         # 关键：
+    #         # 用当前 values 覆盖 state，
+    #         # 并指定 next=None
+    #         await self.graph.aupdate_state(
+    #             self.config,
+    #             values,
+    #             as_node="__interrupt_clear__"
+    #         )
+    #         print(f"[{self.name}] unfinished checkpoint cleared")
+    #     except Exception as e:
+    #         print(f"[{self.name}] clear checkpoint error: {e}")
 
     async def _save_interrupt_memory(self, reason: str):
         try:
@@ -602,9 +645,7 @@ class Agent:
                 return
 
             cur_time = await TimeSystem().aget_current_time(to_str=True)
-
             mem_to_save += (f"\n[{cur_time}]"f"[系统] 当前思考被中断：{reason}")
-
             curtime = await TimeSystem().aget_current_time()
 
             await memory_manager.save_memory(

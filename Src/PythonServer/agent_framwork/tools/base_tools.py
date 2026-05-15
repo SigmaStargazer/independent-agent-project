@@ -5,7 +5,7 @@ from pydantic import Field
 from agent_framwork.tools.action_sequence_model.model.action_sequence import ActionStep
 
 from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import tool
+from langchain_core.tools import tool, InjectedToolCallId
 from typing_extensions import Annotated
 from langgraph.prebuilt import InjectedState
 
@@ -111,6 +111,7 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
 @tool
 async def plan_action_sequence_cmd(
     agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
     action_sequence: Annotated[
         List[ActionStep],
         Field(min_length=1, description="按顺序执行的动作序列。每个动作将在满足condition后结束。")
@@ -176,7 +177,7 @@ async def plan_action_sequence_cmd(
     """
     # seq = ActionSequence(action_sequence=action_sequence)
 
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
@@ -207,7 +208,10 @@ async def plan_action_sequence_cmd(
         TOOL_WAITERS.pop(request_id, None)
 # 确认开始执行动作序列
 @tool
-async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+async def start_action_sequence_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    ) -> str:
     """
     确认开始执行动作序列。
     重要行为规则：
@@ -222,7 +226,7 @@ async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]
     Return:
         str: 动作序列执行结果
     """
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
@@ -250,7 +254,10 @@ async def start_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]
 
 # 继续执行动作序列
 @tool
-async def continue_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+async def continue_action_sequence_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    ) -> str:
     """继续执行动作序列
     重要行为规则：
     - 动作序列是长时任务（long-running task）。
@@ -264,7 +271,7 @@ async def continue_action_sequence_cmd(agent: Annotated[str, InjectedState("name
     Return:
         str: 动作序列继续执行结果
     """
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
@@ -292,12 +299,15 @@ async def continue_action_sequence_cmd(agent: Annotated[str, InjectedState("name
 
 # 停止动作序列
 @tool
-async def stop_action_sequence_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+async def stop_action_sequence_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    ) -> str:
     """停止动作序列
     Return:
         str: 动作序列停止结果
     """
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
@@ -340,6 +350,7 @@ async def drain_feedback_queue(feedback_queue: asyncio.Queue) -> str:
 @tool
 async def observe_cmd(
     agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
     config: RunnableConfig
     # feedback_queue: Annotated[asyncio.Queue, InjectedState("feedback_queue")]
     ) -> str:
@@ -372,7 +383,7 @@ async def observe_cmd(
     """
     feedback_queue = config["configurable"]["feedback_queue"] 
 
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
@@ -402,7 +413,11 @@ async def observe_cmd(
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
-async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str, distance: float) -> str:
+async def move_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    direction: str, distance: float
+    ) -> str:
     """向指定方向移动指定距离
     重要行为规则：
     - 移动是异步执行的。
@@ -436,12 +451,15 @@ async def move_cmd(agent: Annotated[str, InjectedState("name")], direction: str,
         return f"移动失败: {e}"
 
 @tool
-async def interact_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
+async def interact_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId]
+    ) -> str:
     """与身旁的标注为\"可选择交互\"的对象进行交互
     Return:
         str: 交互结果
     """
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
@@ -468,7 +486,10 @@ async def interact_cmd(agent: Annotated[str, InjectedState("name")]) -> str:
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
-async def select_cmd(agent: Annotated[str, InjectedState("name")], selection: int) -> str:
+async def select_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    selection: int) -> str:
     """
     与\"可选择交互\"的对象进行交互后，若交互结果提供了选项，则使用此工具选择选项
     Args:
@@ -504,7 +525,10 @@ async def select_cmd(agent: Annotated[str, InjectedState("name")], selection: in
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
-async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: str) -> str:
+async def input_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    input_text: str) -> str:
     """
     与\"可选择交互\"的对象进行交互后，若交互结果提供了输入框，则使用此工具输入文本
     Args:
@@ -512,7 +536,7 @@ async def input_cmd(agent: Annotated[str, InjectedState("name")], input_text: st
     Return:
         str: 输入结果
     """
-    request_id = str(uuid.uuid4())
+    request_id = tool_call_id
     loop = asyncio.get_running_loop()
     fut = loop.create_future()
 
