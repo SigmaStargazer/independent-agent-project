@@ -358,7 +358,6 @@ class Agent:
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
         self._interrupt_memory_saved = False
-        self._resume_checkpoint_after_restart = True
 
         print(f"[{self.name}]Agent is created.")
 
@@ -373,8 +372,7 @@ class Agent:
         print(f"[{self.name}] processing started")
         snapshot = await self.graph.aget_state(self.config)
         has_checkpoint = (
-            self._resume_checkpoint_after_restart
-            and snapshot is not None 
+            snapshot is not None 
             and snapshot.next
         )
         if has_checkpoint:
@@ -432,8 +430,7 @@ class Agent:
                 # =====================================
                 snapshot = await self.graph.aget_state(self.config)
                 has_checkpoint = (
-                    self._resume_checkpoint_after_restart
-                    and snapshot is not None 
+                    snapshot is not None 
                     and snapshot.next
                 )
                 if has_checkpoint:
@@ -571,7 +568,7 @@ class Agent:
     async def ainterrupt(
         self, 
         reason: str = "被打断",
-        resume_checkpoint: bool = False
+        # resume_checkpoint: bool = True
         ):
         """
         优雅中断当前 Agent
@@ -584,14 +581,10 @@ class Agent:
 
         Args:
             reason: 中断原因
-            resume_checkpoint: 是否恢复 checkpoint
-                True: restart 后继续未完成 ainvoke。（用于网络错误恢复）
-                False: restart 后丢弃 unfinished checkpoint。（用于场景切换 / 用户插嘴）
         """
         if not self._running:
             return
         print(f"[{self.name}] interrupt requested")
-        self._resume_checkpoint_after_restart = resume_checkpoint
         self._interrupt_event.set()
         # cancel invoke
         if self._invoke_task:
@@ -604,34 +597,34 @@ class Agent:
             await asyncio.gather(self._process_task, return_exceptions=True)
         # interrupt 后不恢复 checkpoint
         # if not resume_checkpoint:
-        #     await self._clear_unfinished_checkpoint()
+        await self._clear_unfinished_checkpoint()
 
         self._running = False
         print(f"[{self.name}] interrupted")
 
-    # async def _clear_unfinished_checkpoint(self):
-    #     """
-    #     清除 unfinished checkpoint，
-    #     但保留 messages / state
-    #     """
-    #     try:
-    #         snapshot = await self.graph.aget_state(self.config)
-    #         if not snapshot:
-    #             return
-    #         if not snapshot.next:
-    #             return
-    #         values = snapshot.values
-    #         # 关键：
-    #         # 用当前 values 覆盖 state，
-    #         # 并指定 next=None
-    #         await self.graph.aupdate_state(
-    #             self.config,
-    #             values,
-    #             as_node="__interrupt_clear__"
-    #         )
-    #         print(f"[{self.name}] unfinished checkpoint cleared")
-    #     except Exception as e:
-    #         print(f"[{self.name}] clear checkpoint error: {e}")
+    async def _clear_unfinished_checkpoint(self):
+        """
+        清除 unfinished checkpoint，
+        但保留 messages / state
+        """
+        try:
+            snapshot = await self.graph.aget_state(self.config)
+            if not snapshot:
+                return
+            if not snapshot.next:
+                return
+            values = snapshot.values
+            # 关键：
+            # 用当前 values 覆盖 state，
+            # 并指定 next=None
+            await self.graph.aupdate_state(
+                self.config,
+                values,
+                as_node="__interrupt_clear__"
+            )
+            print(f"[{self.name}] unfinished checkpoint cleared")
+        except Exception as e:
+            print(f"[{self.name}] clear checkpoint error: {e}")
 
     async def _save_interrupt_memory(self, reason: str):
         try:
