@@ -365,7 +365,7 @@ class Agent:
 
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
-        self._interrupt_memory_saved = False
+        # self._interrupt_memory_saved = False
 
         # 记录message的时间，message风暴时自动进入专注模式
         self._message_interval = []
@@ -374,15 +374,21 @@ class Agent:
 
     def _initialize_resume_state(self,
         old_values: dict,
-        messages: list
+        messages: list,
+        interrupt_reason: str | None = None
         ):
+        mem_to_save = old_values.get("mem_to_save", "")
+
+        if interrupt_reason:
+            mem_to_save += (f"\n[系统] 当前思考被中断：{interrupt_reason}")
+
         self._resume_state = {
             "messages": messages,
             "name": self.name,
             "mem_summary": old_values.get("mem_summary", ""),
             "mem_fact": old_values.get("mem_fact", ""),
             "mem_episode": old_values.get("mem_episode", ""),
-            "mem_to_save": "",
+            "mem_to_save": mem_to_save,
             "logged_tool_call_ids": old_values.get("logged_tool_call_ids", [])
         }
 
@@ -405,7 +411,7 @@ class Agent:
             self._interrupt_event = asyncio.Event()
             self._process_task = asyncio.create_task(self.aprocess_message())
             self._running = True
-            self._interrupt_memory_saved = False
+            # self._interrupt_memory_saved = False
 
             print(f"[{self.name}] processing started")
             # snapshot = await self.graph.aget_state(self.config)
@@ -416,7 +422,7 @@ class Agent:
             # if has_checkpoint:
             #     print(f"[{self.name}] resume pending checkpoint")
 
-    async def asend_message(self, message: str, force_interrupt: bool = False):
+    async def asend_message(self, message: str):
         await self._asend_message(message, is_feedback=False)
 
     async def asend_feedback(self, feedback: str):
@@ -630,7 +636,7 @@ class Agent:
         }
         # 清空恢复状态
         self._resume_state = None
-        self._interrupt_memory_saved = False
+        # self._interrupt_memory_saved = False
 
         print(f"[{self.name}] LangGraph 对话记忆已清空")
 
@@ -686,9 +692,9 @@ class Agent:
             # =========================
             # 3. 保存 interrupt memory
             # =========================
-            if not self._interrupt_memory_saved:
-                await self._save_interrupt_memory(reason)
-                self._interrupt_memory_saved = True
+            # if not self._interrupt_memory_saved:
+            #     await self._save_interrupt_memory(reason)
+            #     self._interrupt_memory_saved = True
             # =========================
             # 4. 清理 unfinished tool call
             # =========================
@@ -723,7 +729,7 @@ class Agent:
             # =========================
             # 5. 创建 resume state
             # =========================
-            self._initialize_resume_state(old_values=old_values, messages=messages)
+            self._initialize_resume_state(old_values=old_values, messages=messages, interrupt_reason=reason)
             # =========================
             # 6. fork 新 lineage
             # =========================

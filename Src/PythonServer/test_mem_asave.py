@@ -19,5 +19,14 @@ async def test():
     await asyncio.sleep(500)
     result = await AgentManager().afinish()
 
+async def test2():
+    """
+    读取事实记忆
+    """
+    await MemoryManager().initialize()
+    # await TimeSystem().aset_time(year=2016, month=1, day=1)
+    mem_fact = await MemoryManager().search_fact_memory(name="小明", query="有哪些关于小红的信息", limit=10)
+    print(mem_fact)
+
 if __name__ == "__main__":
-    asyncio.run(test())
+    asyncio.run(test2())
