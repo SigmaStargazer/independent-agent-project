@@ -20,15 +20,27 @@ namespace ShootingEditor2D
         // Start is called before the first frame update
         void Start()
         {
-            AgentService.Instance.OnLoadAgent = this.OnLoadAgent;
-            //AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
-            AgentService.Instance.OnStartScene = this.OnStartScene;
+            //AgentService.Instance.OnLoadAgent = this.OnLoadAgent;
+            ////AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+            //AgentService.Instance.OnStartScene = this.OnStartScene;
+        }
+
+        void OnEnable()
+        {
+            AgentService.Instance.OnLoadAgent += OnLoadAgent;
+            AgentService.Instance.OnStartScene += OnStartScene;
         }
 
         // Update is called once per frame
         void Update()
         {
 
+        }
+
+        void OnDisable()
+        {
+            AgentService.Instance.OnLoadAgent -= OnLoadAgent;
+            AgentService.Instance.OnStartScene -= OnStartScene;
         }
         //public void OnClickSend()
         //{

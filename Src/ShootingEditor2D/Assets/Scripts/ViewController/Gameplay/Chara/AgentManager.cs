@@ -17,21 +17,40 @@ namespace ShootingEditor2D
         // Start is called before the first frame update
         void Start()
         {
-            AgentService.Instance.OnObserve = this.Observe;
-            AgentService.Instance.OnMoveAgent = this.Move;
-            AgentService.Instance.OnInteract = this.Interact;
-            AgentService.Instance.OnSelect = this.Select;
-            AgentService.Instance.OnInput = this.TextInput;
 
-            AgentService.Instance.OnPlanActionSequence = this.PlanActionSequence;
-            AgentService.Instance.OnStartActionSequence = this.StartActionSequence;
-            AgentService.Instance.OnContinueActionSequence = this.ContinueActionSequence;
-            AgentService.Instance.OnStopActionSequence = this.StopActionSequence;
+        }
+
+        void OnEnable()
+        {
+            AgentService.Instance.OnObserve += this.Observe;
+            AgentService.Instance.OnMoveAgent += this.Move;
+            AgentService.Instance.OnInteract += this.Interact;
+            AgentService.Instance.OnSelect += this.Select;
+            AgentService.Instance.OnInput += this.TextInput;
+
+            AgentService.Instance.OnPlanActionSequence += this.PlanActionSequence;
+            AgentService.Instance.OnStartActionSequence += this.StartActionSequence;
+            AgentService.Instance.OnContinueActionSequence += this.ContinueActionSequence;
+            AgentService.Instance.OnStopActionSequence += this.StopActionSequence;
         }
 
         void Update()
         {
 
+        }
+
+        void OnDisable()
+        {
+            AgentService.Instance.OnObserve -= this.Observe;
+            AgentService.Instance.OnMoveAgent -= this.Move;
+            AgentService.Instance.OnInteract -= this.Interact;
+            AgentService.Instance.OnSelect -= this.Select;
+            AgentService.Instance.OnInput -= this.TextInput;
+
+            AgentService.Instance.OnPlanActionSequence -= this.PlanActionSequence;
+            AgentService.Instance.OnStartActionSequence -= this.StartActionSequence;
+            AgentService.Instance.OnContinueActionSequence -= this.ContinueActionSequence;
+            AgentService.Instance.OnStopActionSequence -= this.StopActionSequence;
         }
         void OnDestroy()
         {

@@ -21,7 +21,12 @@ namespace ShootingEditor2D
         }
         void Start()
         {
-            AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+            //AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+        }
+
+        void OnEnable()
+        {
+            AgentService.Instance.OnGetAgentMessage += this.OnGetAgentMessage;
         }
 
         void Update()
@@ -31,6 +36,11 @@ namespace ShootingEditor2D
                 this.ToggleChat();
                 return;
             }
+        }
+
+        void OnDisable()
+        {
+            AgentService.Instance.OnGetAgentMessage -= this.OnGetAgentMessage;
         }
 
         public void ToggleChat()

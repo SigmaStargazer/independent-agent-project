@@ -95,6 +95,10 @@ namespace ShootingEditor2D
             mCurState?.OnFixedUpdate(this);
         }
 
+        /// <summary>
+        /// ×¢²á×´Ì¬
+        /// </summary>
+        /// <param name="state"></param>
         protected void RegisterState(FSMStateBase state)
         {
             mStates[state.Name] = state;

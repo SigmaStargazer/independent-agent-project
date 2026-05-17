@@ -25,6 +25,17 @@ namespace ShootingEditor2D
             }
         }
         public bool IsInteractable => true;
+
+        // Dead hooks
+        public virtual void OnDeadEnter() { }
+        public virtual void OnDeadUpdate() { }
+        public virtual void OnDeadFixedUpdate() { }
+        public virtual void OnDeadExit() { }
+        protected override void Awake()
+        {
+            base.Awake();
+            RegisterState(new DeadState());
+        }
         protected virtual void OnEnable()
         {
             if (SceneObjManager.Instance != null)
@@ -35,6 +46,33 @@ namespace ShootingEditor2D
         {
             if (SceneObjManager.Instance != null)
                 SceneObjManager.Instance.UnRegister(this);
+        }
+
+        public class DeadState : FSMStateBase
+        {
+            public override string Name => "Dead";
+
+            public override void OnEnter(SceneObjBase sceneObj) 
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnDeadEnter();
+            }
+            public override void OnUpdate(SceneObjBase sceneObj) 
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnDeadUpdate();
+            } 
+            public override void OnFixedUpdate(SceneObjBase sceneObj)
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnDeadFixedUpdate();
+            }
+                
+            public override void OnExit(SceneObjBase sceneObj)
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnDeadExit();
+            }
         }
 
         public virtual (bool success, string result) Interact(GameObject chara)

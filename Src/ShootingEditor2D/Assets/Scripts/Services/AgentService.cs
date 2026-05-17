@@ -12,9 +12,11 @@ using System.Text;
 using System.Xml.Serialization;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.MemoryProfiler;
 using UnityEditor.PackageManager.Requests;
 using UnityEditor.VersionControl;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace Services
@@ -24,25 +26,26 @@ namespace Services
         // 事件。其他
         //public UnityEngine.Events.UnityAction<Result, string> OnCreateAgent;
         //public UnityEngine.Events.UnityAction<Result, string> OnStartScene;
-        public UnityEngine.Events.UnityAction<bool, string> OnCreateAgent;
-        public UnityEngine.Events.UnityAction<bool, List<string>> OnLoadAgent;
-        public UnityEngine.Events.UnityAction<bool, string> OnStartScene;
-        public UnityEngine.Events.UnityAction<bool, string> OnStopScene;
-        public UnityEngine.Events.UnityAction<bool, string> OnBackupMemory;
-        public UnityEngine.Events.UnityAction<bool, string> OnRestoreMemory;
-        public UnityEngine.Events.UnityAction<bool, string> OnDeleteCurrentMemory;
-        public UnityEngine.Events.UnityAction<string, string> OnGetAgentMessage;
-        public UnityEngine.Events.UnityAction<string, string> OnObserve;
-        public UnityEngine.Events.UnityAction<string, bool, float> OnMoveAgent;
-        public UnityEngine.Events.UnityAction<string, string> OnInteract;
-        public UnityEngine.Events.UnityAction<string, int, string> OnSelect;
-        public UnityEngine.Events.UnityAction<string, string, string> OnInput;
-        public UnityEngine.Events.UnityAction<string, List<ActionStep>, string> OnPlanActionSequence;
-        public UnityEngine.Events.UnityAction<string, string> OnStartActionSequence;
-        public UnityEngine.Events.UnityAction<string, string> OnContinueActionSequence;
-        public UnityEngine.Events.UnityAction<string, string> OnStopActionSequence;
-        NetMessage pendingMessage = null;
-        bool connected = false;
+        public event UnityAction<bool, string> OnCreateAgent;
+        public event UnityAction<bool, List<string>> OnLoadAgent;
+        public event UnityAction<bool, string> OnStartScene;
+        public event UnityAction<bool, string> OnStopScene;
+        public event UnityAction<bool, string> OnBackupMemory;
+        public event UnityAction<bool, string> OnRestoreMemory;
+        public event UnityAction<bool, string> OnDeleteCurrentMemory;
+        public event UnityAction<string, string> OnGetAgentMessage;
+        public event UnityAction<string, string> OnObserve;
+        public event UnityAction<string, bool, float> OnMoveAgent;
+        public event UnityAction<string, string> OnInteract;
+        public event UnityAction<string, int, string> OnSelect;
+        public event UnityAction<string, string, string> OnInput;
+        public event UnityAction<string, List<ActionStep>, string> OnPlanActionSequence;
+        public event UnityAction<string, string> OnStartActionSequence;
+        public event UnityAction<string, string> OnContinueActionSequence;
+        public event UnityAction<string, string> OnStopActionSequence;
+        Queue<NetMessage> pendingMessages = new Queue<NetMessage>();
+        bool connected = false; // 连接完成
+        bool connecting = false; // 正在尝试连接
 
         public AgentService()
         {
@@ -75,7 +78,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<SceneStopResponse>(this.OnSceneStop);
             MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
-            MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
+            MessageDistributer.Instance.Unsubscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
@@ -97,10 +100,13 @@ namespace Services
 
         public void ConnectToServer()
         {
+            if (this.connected || this.connecting)
+                return;
+            this.connecting = true;
             Debug.Log("ConnectToServer() Start ");
             //NetClient.Instance.CryptKey = this.SessionId;
             int port = GetPort();
-            AgentClient.Instance.Init("127.0.0.1", GetPort());
+            AgentClient.Instance.Init("127.0.0.1", port);
             //AgentClient.Instance.Init("127.0.0.1", 8000);
             AgentClient.Instance.Connect();
         }
@@ -136,19 +142,20 @@ namespace Services
 
         void OnGameServerConnect(int result, string reason)
         {
+            this.connecting = false;
             //Log.InfoFormat("LoadingMesager::OnGameServerConnect :{0} reason:{1}", result, reason);
             Debug.LogFormat("LoadingMesager::OnGameServerConnect :{0} reason:{1}", result, reason);
             if (AgentClient.Instance.Connected)
             {
                 this.connected = true;
-                if (this.pendingMessage != null)
+                while (pendingMessages.Count > 0)
                 {
-                    AgentClient.Instance.SendMessage(this.pendingMessage);
-                    this.pendingMessage = null;
+                    AgentClient.Instance.SendMessage(pendingMessages.Dequeue());
                 }
             }
             else
             {
+                this.connected = false;
                 if (!this.DisconnectNotify(result, reason))
                 {
                     //MessageBox.Show(string.Format("网络错误，无法连接到服务器！\n RESULT:{0} ERROR:{1}", result, reason), "错误", MessageBoxType.Error);
@@ -159,24 +166,56 @@ namespace Services
 
         public void OnGameServerDisconnect(int result, string reason)
         {
+            this.connecting = false;
+            this.connected = false;
             this.DisconnectNotify(result, reason);
             return;
         }
 
         bool DisconnectNotify(int result, string reason)
         {
-            if (this.pendingMessage != null)
+            if (pendingMessages.Count == 0)
             {
-                if (this.pendingMessage.Request.agentCreateRequest != null)
-                {
-                    if (this.OnCreateAgent != null)
-                    {
-                        this.OnCreateAgent(false, string.Format("服务器断开！\n RESULT:{0} ERROR:{1}", result, reason));
-                    }
-                }
-                return true;
+                return false;
             }
-            return false;
+
+            string error =
+                $"服务器断开！\n RESULT:{result} ERROR:{reason}";
+
+            while (pendingMessages.Count > 0)
+            {
+                NetMessage message = pendingMessages.Dequeue();
+
+                if (message.Request.agentCreateRequest != null)
+                {
+                    OnCreateAgent?.Invoke(false, error);
+                }
+                else if (message.Request.agentLoadRequest != null)
+                {
+                    OnLoadAgent?.Invoke(false, null);
+                }
+                else if (message.Request.sceneStartRequest != null)
+                {
+                    OnStartScene?.Invoke(false, error);
+                }
+                else if (message.Request.sceneStopRequest != null)
+                {
+                    OnStopScene?.Invoke(false, error);
+                }
+                else if (message.Request.memoryBackupRequest != null)
+                {
+                    OnBackupMemory?.Invoke(false, error);
+                }
+                else if (message.Request.memoryRestoreRequest != null)
+                {
+                    OnRestoreMemory?.Invoke(false, error);
+                }
+                else if (message.Request.memoryDeleteCurrentRequest != null)
+                {
+                    OnDeleteCurrentMemory?.Invoke(false, error);
+                }
+            }
+            return true;
         }
 
         // 创建Agent
@@ -193,23 +232,22 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!this.connected && !this.connecting)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
         // 收到请求后
         void OnAgentCreate(object sender, AgentCreateResponse response)
         {
             Debug.LogFormat("OnAgentCreate::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnCreateAgent != null)
-            {
-                this.OnCreateAgent(response.Success, response.Errormsg);
-            }
+            this.OnCreateAgent?.Invoke(response.Success, response.Errormsg);
         }
 
         // 加载Agent
@@ -222,13 +260,15 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
 
@@ -236,10 +276,8 @@ namespace Services
         void OnAgentLoad(object sender, AgentLoadResponse response)
         {
             Debug.LogFormat("OnAgentLoad::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnLoadAgent != null)
-            {
-                this.OnLoadAgent(response.Success, response.AgentNames);
-            }
+            this.OnLoadAgent?.Invoke(response.Success, response.AgentNames);
+
         }
 
         // 启动场景
@@ -254,22 +292,21 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
         void OnSceneStart(object sender, SceneStartResponse response)
         {
             Debug.LogFormat("OnSceneStart::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnStartScene != null)
-            {
-                this.OnStartScene(response.Success, response.Errormsg);
-            }
+            this.OnStartScene?.Invoke(response.Success, response.Errormsg);
         }
 
         public void SendSceneStop()
@@ -282,23 +319,22 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
 
         void OnSceneStop(object sender, SceneStopResponse response)
         {
             Debug.LogFormat("OnSceneStop::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnStopScene != null)
-            {
-                this.OnStopScene(response.Success, response.Errormsg);
-            }
+            this.OnStopScene?.Invoke(response.Success, response.Errormsg);
         }
 
         #region 记忆备份与恢复
@@ -314,23 +350,22 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
 
         void OnMemoryBackup(object sender, MemoryBackupResponse response)
         {
             Debug.LogFormat("OnMemoryBackup::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnBackupMemory != null)
-            {
-                this.OnBackupMemory(response.Success, response.Errormsg);
-            }
+            this.OnBackupMemory?.Invoke(response.Success, response.Errormsg);
         }
 
 
@@ -345,23 +380,22 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
 
         void OnMemoryRestore(object sender, MemoryRestoreResponse response)
         {
             Debug.LogFormat("OnMemoryRestore::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnRestoreMemory != null)
-            {
-                this.OnRestoreMemory(response.Success, response.Errormsg);
-            }
+            this.OnRestoreMemory?.Invoke(response.Success, response.Errormsg);
         }
 
         public void SendMemoryDeleteCurrent()
@@ -374,23 +408,22 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
 
         void OnMemoryDeleteCurrent(object sender, MemoryDeleteCurrentResponse response)
         {
             Debug.LogFormat("OnMemoryDeleteCurrent::Success:{0} [{1}]", response.Success, response.Errormsg);
-            if (this.OnDeleteCurrentMemory != null)
-            {
-                this.OnDeleteCurrentMemory(response.Success, response.Errormsg);
-            }
+            this.OnDeleteCurrentMemory?.Invoke(response.Success, response.Errormsg);
         }
 
         #endregion 记忆备份与恢复
@@ -408,13 +441,15 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
         public void SendToolResultMessage(string agent, string toolName, string requestId, string toolResultMessage)
@@ -431,40 +466,33 @@ namespace Services
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)
             {
-                this.pendingMessage = null;
                 AgentClient.Instance.SendMessage(message);
             }
             else
             {
-                this.pendingMessage = message;
-                this.ConnectToServer();
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
             }
         }
         void OnAgentMessageGet(object sender, AgentSendMessageRequest request)
         {
             Debug.LogFormat("OnAgentMessageGet::Agent:{0} AiMessage:{1}", request.Agent, request.AiMessage);
-            if (this.OnGetAgentMessage != null)
-            {
-                this.OnGetAgentMessage(request.Agent, request.AiMessage);
-            }
+            this.OnGetAgentMessage?.Invoke(request.Agent, request.AiMessage);
         }
         // 观察
         void OnAgentObserve(object sender, AgentObserveRequest request)
         {
             Debug.LogFormat("OnAgentObserve::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
-            if (this.OnObserve != null)
-            {
-                this.OnObserve(request.Agent, request.RequestId);
-            }
+            this.OnObserve?.Invoke(request.Agent, request.RequestId);
         }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
         {
             Debug.LogFormat("OnAgentMove::Agent:{0} IsRight:{1} Distance:{2}", request.Agent, request.IsRight, request.Distance);
-            if (this.OnMoveAgent != null)
-            {
-                this.OnMoveAgent(request.Agent, request.IsRight, request.Distance);
-            }
+            this.OnMoveAgent?.Invoke(request.Agent, request.IsRight, request.Distance);
         }
 
 
@@ -472,64 +500,43 @@ namespace Services
         void OnAgentInteract(object sender, AgentInteractRequest request)
         {
             Debug.LogFormat("OnAgentInteract::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
-            if (this.OnInteract != null)
-            {
-                this.OnInteract(request.Agent, request.RequestId);
-            }
+            this.OnInteract?.Invoke(request.Agent, request.RequestId);
         }
 
         void OnAgentSelect(object sender, AgentSelectRequest request)
         {
             Debug.LogFormat("OnAgentSelect::Agent:{0} Selection:{1} RequestId:{2}", request.Agent, request.Selection, request.RequestId);
-            if (this.OnSelect != null)
-            {
-                this.OnSelect(request.Agent, request.Selection, request.RequestId);
-            }
+            this.OnSelect?.Invoke(request.Agent, request.Selection, request.RequestId);
         }
 
         void OnAgentInput(object sender, AgentInputRequest request)
         {
             Debug.LogFormat("OnAgentInput::Agent:{0} Text:{1} RequestId:{2}", request.Agent, request.InputText, request.RequestId);
-            if (this.OnInput != null)
-            {
-                this.OnInput(request.Agent,request.InputText, request.RequestId);
-            }
+            this.OnInput?.Invoke(request.Agent, request.InputText, request.RequestId);
         }
 
         private void OnAgentPlanActionSequence(object sender, AgentPlanActionSequenceRequest request)
         {
             Debug.LogFormat("OnAgentPlanActionSequence::Agent:{0} ActionSequence:{1} RequestId:{2}", request.Agent, request.ActionSequences, request.RequestId);
-            if (this.OnPlanActionSequence != null)
-            {
-                this.OnPlanActionSequence(request.Agent, request.ActionSequences, request.RequestId);
-            }
+            this.OnPlanActionSequence?.Invoke(request.Agent, request.ActionSequences, request.RequestId);
         }
 
         private void OnAgentStartActionSequence(object sender, AgentStartActionSequenceRequest request)
         {
             Debug.LogFormat("OnAgentStartActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
-            if (this.OnStartActionSequence != null)
-            {
-                this.OnStartActionSequence(request.Agent, request.RequestId);
-            }
+            this.OnStartActionSequence?.Invoke(request.Agent, request.RequestId);
         }
 
         private void OnAgentContinueActionSequence(object sender, AgentContinueActionSequenceRequest request)
         {
             Debug.LogFormat("OnAgentContinueActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
-            if (this.OnContinueActionSequence != null)
-            {
-                this.OnContinueActionSequence(request.Agent, request.RequestId);
-            }
+            this.OnContinueActionSequence?.Invoke(request.Agent, request.RequestId);
         }
 
         private void OnAgentStopActionSequence(object sender, AgentStopActionSequenceRequest request)
         {
             Debug.LogFormat("OnAgentStopActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
-            if (this.OnStopActionSequence != null)
-            {
-                this.OnStopActionSequence(request.Agent, request.RequestId);
-            }
+            this.OnStopActionSequence?.Invoke(request.Agent, request.RequestId);
         }
 
         #endregion
