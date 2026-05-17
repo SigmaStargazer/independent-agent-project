@@ -78,7 +78,7 @@ async def handle_scene_start_request(msg, context):
         await TimeSystem().aset_time(year=2016,month=1,day=1)
         await TimeSystem().astart_time()
         
-        AgentManager().start()
+        await AgentManager().astart()
         response.success = True
         # response.errormsg = ""
         await context['server'].send_message(response, context)
@@ -167,7 +167,7 @@ async def handle_memory_restore_request(msg, context):
         # print("重新加载 Agent...")
         # agent_names = await AgentManager().aload_agent()
         # print("重新启动 Agent...")
-        # AgentManager().start()
+        await AgentManager().astart()
         response.success = True
     except Exception as e:
         response.success = False

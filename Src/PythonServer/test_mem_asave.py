@@ -10,7 +10,7 @@ async def test():
 
     result = await AgentManager().acreate_agent(name="小明", summary="是一名应届生，目前正在求职agent工程师岗位", create_time=datetime.now())
     agent_names = await AgentManager().aload_agent()
-    AgentManager().start()
+    await AgentManager().astart()
     await AgentManager().agents['小明'].asend_message("你好，小明，请做一个自我介绍")
     await asyncio.sleep(10)
     await AgentManager().agents['小明'].asend_message("对于我们公司，你有什么想要了解的吗？")
