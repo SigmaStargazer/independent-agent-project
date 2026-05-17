@@ -137,7 +137,7 @@ prompt_template = ChatPromptTemplate.from_messages(
         MessagesPlaceholder(variable_name="messages")
     ]
 )
-# 初始化chain
+# 初始化chain(废弃)
 chain = (
     RunnablePassthrough.assign(messages=lambda x: _filter_messages(x["messages"], k = MAX_CONTEXT_SIZE)) 
     | prompt_template 
@@ -352,7 +352,9 @@ class Agent:
         }
 
         self.graph = graph_builder.compile(checkpointer=self.memory)
-
+        
+        # fork 后恢复用 state
+        self._resume_state = None
         # ========== runtime control ==========
         self._running = False
         self._interrupt_event = asyncio.Event()
@@ -370,23 +372,49 @@ class Agent:
 
         print(f"[{self.name}]Agent is created.")
 
+    def _initialize_resume_state(self,
+        old_values: dict,
+        messages: list
+        ):
+        self._resume_state = {
+            "messages": messages,
+            "name": self.name,
+            "mem_summary": old_values.get("mem_summary", ""),
+            "mem_fact": old_values.get("mem_fact", ""),
+            "mem_episode": old_values.get("mem_episode", ""),
+            "mem_to_save": "",
+            "logged_tool_call_ids": old_values.get("logged_tool_call_ids", [])
+        }
+
     async def astart(self):
         async with self._runtime_lock:
             if self._running:
                 return
+
+            # =========================
+            # fork 新 lineage 后
+            # 初始化 graph state
+            # =========================
+            if self._resume_state is not None:
+                print(f"[{self.name}] restore resume state")
+                await self.graph.aupdate_state(
+                    self.config,
+                    self._resume_state
+                )
+                self._resume_state = None
             self._interrupt_event = asyncio.Event()
             self._process_task = asyncio.create_task(self.aprocess_message())
             self._running = True
             self._interrupt_memory_saved = False
 
             print(f"[{self.name}] processing started")
-            snapshot = await self.graph.aget_state(self.config)
-            has_checkpoint = (
-                snapshot is not None 
-                and snapshot.next
-            )
-            if has_checkpoint:
-                print(f"[{self.name}] resume pending checkpoint")
+            # snapshot = await self.graph.aget_state(self.config)
+            # has_checkpoint = (
+            #     snapshot is not None 
+            #     and snapshot.next
+            # )
+            # if has_checkpoint:
+            #     print(f"[{self.name}] resume pending checkpoint")
 
     async def asend_message(self, message: str, force_interrupt: bool = False):
         await self._asend_message(message, is_feedback=False, force_interrupt=force_interrupt)
@@ -395,25 +423,25 @@ class Agent:
         await self._asend_message(feedback, is_feedback=True)
 
     async def _asend_message(self, message: str, is_feedback: bool = False, force_interrupt: bool = False):
+        # =========================
+        # 0. 记录消息时间
+        # =========================
+        real_time = time.time()
+        self._message_interval.append(real_time)
+        # 只保留5秒
+        self._message_interval[:] = [t for t in self._message_interval if t > real_time - 5]
+        # 如果短时间内消息数达到5条，强制进专注模式：
+        if len(self._message_interval) >= 5:
+            self.runtime_state["focus_mode"] = True
+        # =========================
+        # 1. 打断
+        # =========================
+        if not (self.runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
+            await self.ainterrupt(reason="被打断")
+        # =========================
+        # 2. 发送消息
+        # =========================
         async with self._message_lock:
-            # =========================
-            # 0. 记录消息时间
-            # =========================
-            real_time = time.time()
-            self._message_interval.append(real_time)
-            # 只保留5秒
-            self._message_interval[:] = [t for t in self._message_interval if t > real_time - 5]
-            # 如果短时间内消息数达到5条，强制进专注模式：
-            if len(self._message_interval) >= 5:
-                self.runtime_state["focus_mode"] = True
-            # =========================
-            # 1. 打断
-            # =========================
-            if not (self.runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
-                await self.ainterrupt(reason="被打断")
-            # =========================
-            # 2. 发送消息
-            # =========================
             real_time = time.time()
             virtual_time = await TimeSystem().aget_current_time(to_str = True)
             if virtual_time == "未启动":
@@ -427,11 +455,11 @@ class Agent:
             else:
                 print(f"[{self.name}]Get message: {text}")
                 await self.message_queue.put(TimedMessage(timestamp=real_time, content=text))
-            # =========================
-            # 3. 重启
-            # =========================
-            if not (self.runtime_state["focus_mode"] and not force_interrupt):
-                await self.astart()
+        # =========================
+        # 3. 重启
+        # =========================
+        if not (self.runtime_state["focus_mode"] and not force_interrupt):
+            await self.astart()
     
     async def _drain_items(self,
         include_message_queue: bool,
@@ -460,92 +488,92 @@ class Agent:
         self._running = True
         try:
             while not self._interrupt_event.is_set():
+                # # =====================================
+                # # 0. 优先恢复 checkpoint
+                # # =====================================
+                # snapshot = await self.graph.aget_state(self.config)
+                # has_checkpoint = (
+                #     snapshot is not None 
+                #     and snapshot.next
+                # )
+                # if has_checkpoint:
+                #     input_state = None # self.graph.ainvoke(None,self.config)时，会从checkpoint继续跑，避免重复执行 tool
+                #     print(f"[{self.name}] resume from checkpoint")
+                # else:
                 # =====================================
-                # 0. 优先恢复 checkpoint
+                # 1. 阻塞直到至少有 message
+                # 同时等待两个队列
                 # =====================================
-                snapshot = await self.graph.aget_state(self.config)
-                has_checkpoint = (
-                    snapshot is not None 
-                    and snapshot.next
+                msg_task = asyncio.create_task(self.message_queue.get())
+                fb_task = asyncio.create_task(self.feedback_queue.get())
+
+                interrupt_task = asyncio.create_task(self._interrupt_event.wait())
+
+                done, pending = await asyncio.wait(
+                    [msg_task, fb_task, interrupt_task], 
+                    return_when=asyncio.FIRST_COMPLETED
                 )
-                if has_checkpoint:
-                    input_state = None # self.graph.ainvoke(None,self.config)时，会从checkpoint继续跑，避免重复执行 tool
-                    print(f"[{self.name}] resume from checkpoint")
-                else:
-                    # =====================================
-                    # 1. 阻塞直到至少有 message
-                    # 同时等待两个队列
-                    # =====================================
-                    msg_task = asyncio.create_task(self.message_queue.get())
-                    fb_task = asyncio.create_task(self.feedback_queue.get())
+                # cleanup pending
+                for task in pending:
+                    task.cancel()
+                await asyncio.gather(*pending, return_exceptions=True)
 
-                    interrupt_task = asyncio.create_task(self._interrupt_event.wait())
-
-                    done, pending = await asyncio.wait(
-                        [msg_task, fb_task, interrupt_task], 
-                        return_when=asyncio.FIRST_COMPLETED
-                    )
-                    # cleanup pending
-                    for task in pending:
-                        task.cancel()
-                    await asyncio.gather(*pending, return_exceptions=True)
-
-                    # interrupted while waiting
-                    if interrupt_task in done:
-                        # # 把已经取出的消息放回 queue
-                        # for task in [msg_task, fb_task]:
-                        #     if task in done:
-                        #         try:
-                        #             item = task.result()
-                        #             if task is msg_task:
-                        #                 await self.message_queue.put(item)
-                        #             else:
-                        #                 await self.feedback_queue.put(item)
-                        #         except Exception:
-                        #             pass
-                        # for task in pending:
-                        #     task.cancel()
-                        break
-
-                    # =========================
-                    # 2. collect messages
-                    # =========================
-                    items = []
-                    # 哪个先完成就取哪个
-                    if msg_task in done:
-                        first_item = msg_task.result()
-                        self.message_queue.task_done()
-                    else:
-                        first_item = fb_task.result()
-                        self.feedback_queue.task_done()
+                # interrupted while waiting
+                if interrupt_task in done:
+                    # # 把已经取出的消息放回 queue
+                    # for task in [msg_task, fb_task]:
+                    #     if task in done:
+                    #         try:
+                    #             item = task.result()
+                    #             if task is msg_task:
+                    #                 await self.message_queue.put(item)
+                    #             else:
+                    #                 await self.feedback_queue.put(item)
+                    #         except Exception:
+                    #             pass
                     # for task in pending:
-                    #     try:
-                    #         await task
-                    #     except asyncio.CancelledError:
-                    #         pass
-                    items.append(first_item)
-                    # 2. 获取所有消息
-                    remaining_items = await self._drain_items(
-                        include_message_queue=True,
-                        include_feedback_queue=True
-                    )
-                    items.extend(remaining_items)
-                    items.sort()
-                    full_messages = "\n".join(item.content for item in items)
-                    
-                    # =====================================
-                    # 3. 初始化 input_state
-                    # =====================================
-                    msg_id = str(uuid.uuid4())
-                    human_msg = HumanMessage(content=full_messages, id=msg_id)
-                    
-                    # 初始输入状态
-                    input_state = {
-                        "messages": [human_msg], 
-                        "name": self.name
-                    }
-                    # 当前 checkpoint 正在处理中
-                    # self._has_unfinished_checkpoint = True
+                    #     task.cancel()
+                    break
+
+                # =========================
+                # 2. collect messages
+                # =========================
+                items = []
+                # 哪个先完成就取哪个
+                if msg_task in done:
+                    first_item = msg_task.result()
+                    self.message_queue.task_done()
+                else:
+                    first_item = fb_task.result()
+                    self.feedback_queue.task_done()
+                # for task in pending:
+                #     try:
+                #         await task
+                #     except asyncio.CancelledError:
+                #         pass
+                items.append(first_item)
+                # 2. 获取所有消息
+                remaining_items = await self._drain_items(
+                    include_message_queue=True,
+                    include_feedback_queue=True
+                )
+                items.extend(remaining_items)
+                items.sort()
+                full_messages = "\n".join(item.content for item in items)
+                
+                # =====================================
+                # 3. 初始化 input_state
+                # =====================================
+                msg_id = str(uuid.uuid4())
+                human_msg = HumanMessage(content=full_messages, id=msg_id)
+                
+                # 初始输入状态
+                input_state = {
+                    "messages": [human_msg], 
+                    "name": self.name
+                }
+                # 当前 checkpoint 正在处理中
+                # self._has_unfinished_checkpoint = True
 
                 # =========================
                 # 4. invoke loop
@@ -585,12 +613,23 @@ class Agent:
             print(f"[{self.name}] process stopped")
 
     async def clear_langgraph_memory(self):
-        """删除 LangGraph MemorySaver 中的对话状态"""
-        # 创建新的 MemorySaver 实例替换旧的
+        """
+        清空 LangGraph checkpoint
+        但保留 agent runtime
+        """
         self.memory = MemorySaver()
-        # 重新编译 graph
         self.graph = graph_builder.compile(checkpointer=self.memory)
-        # checkpoint 已不存在
+        self.session_id = str(uuid.uuid4())
+        self.config = {
+            "configurable": {
+                "thread_id": f"{self.name}:{self.session_id}",
+                "message_queue": self.message_queue,
+                "feedback_queue": self.feedback_queue,
+                "runtime_state": self.runtime_state
+            }
+        }
+        # 清空恢复状态
+        self._resume_state = None
         self._interrupt_memory_saved = False
 
         print(f"[{self.name}] LangGraph 对话记忆已清空")
@@ -681,10 +720,15 @@ class Agent:
                     if unfinished:
                         print(f"[{self.name}] remove unfinished tool call message")
                         messages = messages[:last_ai_index]
-            old_values["messages"] = messages
             # =========================
-            # 5. fork 新 lineage
+            # 5. 创建 resume state
             # =========================
+            self._initialize_resume_state(old_values=old_values, messages=messages)
+            # =========================
+            # 6. fork 新 lineage
+            # =========================
+            self.memory = MemorySaver()
+            self.graph = graph_builder.compile(checkpointer=self.memory)
             self.session_id = str(uuid.uuid4())
             self.config = {
                 "configurable": {
@@ -694,14 +738,6 @@ class Agent:
                     "runtime_state": self.runtime_state
                 }
             }
-            # =========================
-            # 6. 写入 clean state
-            # =========================
-            await self.graph.aupdate_state(
-                self.config,
-                old_values,
-                as_node="interrupt_fork"
-            )
 
             self._running = False
             print(f"[{self.name}] interrupted")
