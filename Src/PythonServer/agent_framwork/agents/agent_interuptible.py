@@ -336,6 +336,9 @@ class Agent:
         self.message_queue = asyncio.Queue()  
         # 反馈消息队列。移动、动作序列等需要先结束对话再等到结果的工具，应把反馈信息通过asend_feedback返回
         self.feedback_queue = asyncio.Queue() 
+        self.runtime_state = {
+            "focus_mode": False
+        }
 
         self.memory = MemorySaver()
         self.session_id = str(uuid.uuid4())
@@ -343,7 +346,8 @@ class Agent:
             "configurable": {
                 "thread_id": f"{self.name}:{self.session_id}",
                 "message_queue": self.message_queue,
-                "feedback_queue": self.feedback_queue
+                "feedback_queue": self.feedback_queue,
+                "runtime_state": self.runtime_state
             }
         }
 
@@ -354,12 +358,15 @@ class Agent:
         self._interrupt_event = asyncio.Event()
         self._process_task: asyncio.Task | None = None
         self._invoke_task: asyncio.Task | None = None
-        self._focus_mode = False
         self._runtime_lock = asyncio.Lock()
+        self._message_lock = asyncio.Lock()
 
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
         self._interrupt_memory_saved = False
+
+        # 记录message的时间，message风暴时自动进入专注模式
+        self._message_interval = []
 
         print(f"[{self.name}]Agent is created.")
 
@@ -381,26 +388,50 @@ class Agent:
             if has_checkpoint:
                 print(f"[{self.name}] resume pending checkpoint")
 
-    async def asend_message(self, message: str):
-        await self._send_message(message, is_feedback=False)
+    async def asend_message(self, message: str, force_interrupt: bool = False):
+        await self._asend_message(message, is_feedback=False, force_interrupt=force_interrupt)
 
     async def asend_feedback(self, feedback: str):
-        await self._send_message(feedback, is_feedback=True)
+        await self._asend_message(feedback, is_feedback=True)
 
-    async def _send_message(self, message: str, is_feedback: bool = False):
-        real_time = time.time()
-        virtual_time = await TimeSystem().aget_current_time(to_str = True)
-        if virtual_time == "未启动":
-            text = message
-        else:
-            text = f"[{virtual_time}]"+message
+    async def _asend_message(self, message: str, is_feedback: bool = False, force_interrupt: bool = False):
+        async with self._message_lock:
+            # =========================
+            # 0. 记录消息时间
+            # =========================
+            real_time = time.time()
+            self._message_interval.append(real_time)
+            # 只保留5秒
+            self._message_interval[:] = [t for t in self._message_interval if t > real_time - 5]
+            # 如果短时间内消息数达到5条，强制进专注模式：
+            if len(self._message_interval) >= 5:
+                self.runtime_state["focus_mode"] = True
+            # =========================
+            # 1. 打断
+            # =========================
+            if not (self.runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
+                await self.ainterrupt(reason="被打断")
+            # =========================
+            # 2. 发送消息
+            # =========================
+            real_time = time.time()
+            virtual_time = await TimeSystem().aget_current_time(to_str = True)
+            if virtual_time == "未启动":
+                text = message
+            else:
+                text = f"[{virtual_time}]"+message
 
-        if is_feedback:
-            print(f"[{self.name}]Get feedback: {text}")
-            await self.feedback_queue.put(TimedMessage(timestamp=real_time, content=text))
-        else:
-            print(f"[{self.name}]Get message: {text}")
-            await self.message_queue.put(TimedMessage(timestamp=real_time, content=text))
+            if is_feedback:
+                print(f"[{self.name}]Get feedback: {text}")
+                await self.feedback_queue.put(TimedMessage(timestamp=real_time, content=text))
+            else:
+                print(f"[{self.name}]Get message: {text}")
+                await self.message_queue.put(TimedMessage(timestamp=real_time, content=text))
+            # =========================
+            # 3. 重启
+            # =========================
+            if not (self.runtime_state["focus_mode"] and not force_interrupt):
+                await self.astart()
     
     async def _drain_items(self,
         include_message_queue: bool,
@@ -526,6 +557,7 @@ class Agent:
                         )
                         # ainvoke 已正式开始
                         response = await self._invoke_task
+                        self.runtime_state["focus_mode"] = False # 正常完成了一轮对话，关闭专注模式
                         output = response["messages"][-1].content
                         print(f"[{self.name}]Response: {output}")
                         break # 成功则跳出重试，回到最外层等待新消息
@@ -658,7 +690,8 @@ class Agent:
                 "configurable": {
                     "thread_id": f"{self.name}:{self.session_id}",
                     "message_queue": self.message_queue,
-                    "feedback_queue": self.feedback_queue
+                    "feedback_queue": self.feedback_queue,
+                    "runtime_state": self.runtime_state
                 }
             }
             # =========================

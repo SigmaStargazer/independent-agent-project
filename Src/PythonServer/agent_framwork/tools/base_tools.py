@@ -615,6 +615,25 @@ limit: int = 10):
     from memory_system.memory_manager import MemoryManager
     mem_episode = await MemoryManager().search_episode_memory(name=name, query=query, start_time=start_time, end_time=end_time, limit=limit)
     return mem_episode
+# endregion 记忆工具
+
+# region 专注模式工具
+@tool
+async def set_focus_mode(
+    agent: Annotated[str, InjectedState("name")], 
+    config: RunnableConfig,
+    focus_mode: bool):
+    """设置专注模式
+    当专注模式开启时，你将不再被外界信息干扰（紧急信息除外），直至本轮对话结束。
+    Args:
+        focus_mode(bool): 专注模式。True表示开启，False表示关闭
+    Return:
+        str: 专注模式设置结果
+    """
+    runtime_state = config["configurable"]["runtime_state"]
+    runtime_state["focus_mode"] = focus_mode
+    return f"专注模式已设置为{focus_mode}"
+
 
 # region 闹钟工具
 @tool
