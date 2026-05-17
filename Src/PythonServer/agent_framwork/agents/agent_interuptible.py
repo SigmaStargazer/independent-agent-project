@@ -417,12 +417,12 @@ class Agent:
             #     print(f"[{self.name}] resume pending checkpoint")
 
     async def asend_message(self, message: str, force_interrupt: bool = False):
-        await self._asend_message(message, is_feedback=False, force_interrupt=force_interrupt)
+        await self._asend_message(message, is_feedback=False)
 
     async def asend_feedback(self, feedback: str):
         await self._asend_message(feedback, is_feedback=True)
 
-    async def _asend_message(self, message: str, is_feedback: bool = False, force_interrupt: bool = False):
+    async def _asend_message(self, message: str, is_feedback: bool = False):
         # =========================
         # 0. 记录消息时间
         # =========================
@@ -436,8 +436,8 @@ class Agent:
         # =========================
         # 1. 打断
         # =========================
-        if not (self.runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
-            await self.ainterrupt(reason="被打断")
+        # if not (self.runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
+        #     await self.ainterrupt(reason="被打断")
         # =========================
         # 2. 发送消息
         # =========================
@@ -458,8 +458,8 @@ class Agent:
         # =========================
         # 3. 重启
         # =========================
-        if not (self.runtime_state["focus_mode"] and not force_interrupt):
-            await self.astart()
+        # if not (self.runtime_state["focus_mode"] and not force_interrupt):
+        #     await self.astart()
     
     async def _drain_items(self,
         include_message_queue: bool,

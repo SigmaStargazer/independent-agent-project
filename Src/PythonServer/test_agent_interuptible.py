@@ -32,11 +32,11 @@ async def test1():
 3）astart，然后再发场景“进入新场景”的消息
     """
     await init_create()
-    await AgentManager().agents['小明'].asend_message("用户: 您好，你记得哪些和小红有关的事情吗？")
-    await asyncio.sleep(5)
+    await AgentManager().asend_message(name="小明", message="用户: 您好，你记得哪些和小红有关的事情吗？")
+    await asyncio.sleep(6)
     # await AgentManager().ainterrupt(reason="进入新场景")
-    await AgentManager().agents['小明'].asend_message("系统: 进入新场景。用户不在该场景内，不再讨论小红的事情")
-    await asyncio.sleep(10)
+    await AgentManager().asend_message(name="小明", message="系统: 进入新场景。用户不在该场景内，不再讨论小红的事情")
+    await asyncio.sleep(100)
     await AgentManager().astart()
 
 

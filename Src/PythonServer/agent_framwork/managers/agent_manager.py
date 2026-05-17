@@ -88,6 +88,26 @@ RETURN n"""
         # print(f"加载Agent: {agent_names}")
         return agent_names
 
+    async def asend_message(self, name: str, message: str, force_interrupt: bool = False):
+        """
+        发送消息给指定Agent
+        Args:
+            name(str): Agent名称
+            message(str): 消息内容
+            force_interrupt(bool): 是否强制打断
+        """
+        # 1. 检查Agent是否存在
+        if name not in self.agents:
+            raise ValueError(f"Agent {name} 不存在")
+        # 2. 判读是否需要打断
+        if not (self.agents[name].runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
+            await self.agents[name].ainterrupt(reason="被打断")
+        # 3. 发送消息
+        await self.agents[name].asend_message(message)
+        # 4. 重启
+        if not (self.agents[name].runtime_state["focus_mode"] and not force_interrupt):
+            await self.agents[name].astart()
+
     async def astart(self):
         """
         启动所有Agent
