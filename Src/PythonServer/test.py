@@ -44,7 +44,7 @@ async def main():
     await TimeSystem().aset_speed(1440)
     await TimeSystem().aset_time(year=2016,month=1,day=1)
 
-    agent_names = await AgentManager().aload_agent()
+    agent_names = await AgentManager().aload_agent_all()
     print(f"加载Agent成功: {agent_names}")
 
     # await TimeSystem().astart_time()    # 先不启动

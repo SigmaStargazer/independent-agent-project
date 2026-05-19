@@ -9,15 +9,15 @@ async def test():
     await TimeSystem().aset_time(year=2016, month=1, day=1)
 
     result = await AgentManager().acreate_agent(name="小明", summary="是一名应届生，目前正在求职agent工程师岗位", create_time=datetime.now())
-    agent_names = await AgentManager().aload_agent()
-    await AgentManager().astart()
+    agent_names = await AgentManager().aload_agent_all()
+    await AgentManager().astart_all()
     await AgentManager().agents['小明'].asend_message("你好，小明，请做一个自我介绍")
     await asyncio.sleep(10)
     await AgentManager().agents['小明'].asend_message("对于我们公司，你有什么想要了解的吗？")
     await asyncio.sleep(100)
     await AgentManager().agents['小明'].asend_message("对于你的岗位，你有哪些期待？")
     await asyncio.sleep(500)
-    result = await AgentManager().afinish()
+    result = await AgentManager().afinish_all()
 
 async def test2():
     """

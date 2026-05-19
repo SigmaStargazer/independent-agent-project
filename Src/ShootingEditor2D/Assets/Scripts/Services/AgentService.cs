@@ -30,6 +30,7 @@ namespace Services
         public event UnityAction<bool, List<string>> OnLoadAgent;
         public event UnityAction<bool, string> OnStartScene;
         public event UnityAction<bool, string> OnStopScene;
+        public event UnityAction<bool, string> OnInterruptAgent;
         public event UnityAction<bool, string> OnBackupMemory;
         public event UnityAction<bool, string> OnRestoreMemory;
         public event UnityAction<bool, string> OnDeleteCurrentMemory;
@@ -55,6 +56,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<SceneStopResponse>(this.OnSceneStop);
+            MessageDistributer.Instance.Subscribe<AgentInterruptResponse>(this.OnAgentInterrupt);
             MessageDistributer.Instance.Subscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Subscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
@@ -76,6 +78,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<SceneStopResponse>(this.OnSceneStop);
+            MessageDistributer.Instance.Unsubscribe<AgentInterruptResponse>(this.OnAgentInterrupt);
             MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Unsubscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
@@ -309,6 +312,7 @@ namespace Services
             this.OnStartScene?.Invoke(response.Success, response.Errormsg);
         }
 
+        // 停止场景
         public void SendSceneStop()
         {
             Debug.LogFormat("SceneStopRequest::");
@@ -335,6 +339,36 @@ namespace Services
         {
             Debug.LogFormat("OnSceneStop::Success:{0} [{1}]", response.Success, response.Errormsg);
             this.OnStopScene?.Invoke(response.Success, response.Errormsg);
+        }
+
+        // 暂停Agent运行
+        public void SendAgentInterrupt(string stopReason = "系统关闭")
+        {
+            Debug.LogFormat($"AgentInterruptRequest::Reason:{stopReason}");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.agentInterruptRequest = new AgentInterruptRequest();
+            message.Request.agentInterruptRequest.Reason = stopReason;
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
+            }
+        }
+
+        void OnAgentInterrupt(object sender, AgentInterruptResponse response)
+        {
+            Debug.LogFormat("OnAgentInterrupt::Success:{0} [{1}]", response.Success, response.Errormsg);
+            this.OnInterruptAgent?.Invoke(response.Success, response.Errormsg);
         }
 
         #region 记忆备份与恢复
@@ -429,7 +463,7 @@ namespace Services
         #endregion 记忆备份与恢复
 
 
-        public void SendUserMessage(string agent, string userMessage)
+        public void SendUserMessage(string agent, string userMessage, bool forceInterrupt = false)
         {
             Debug.LogFormat("UserMessageRequest::agent:{0} userMessage:{1}", agent, userMessage);
             NetMessage message = new NetMessage();
@@ -437,6 +471,31 @@ namespace Services
             message.Request.userSendMessageRequest = new UserSendMessageRequest();
             message.Request.userSendMessageRequest.Agent = agent;
             message.Request.userSendMessageRequest.UserMessage = userMessage;
+            message.Request.userSendMessageRequest.ForceInterrupt = forceInterrupt;
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                pendingMessages.Enqueue(message);
+                if (!AgentClient.Instance.Connected)
+                {
+                    this.ConnectToServer();
+                }
+            }
+        }
+
+        public void SendUserMessageAll(string userMessage, bool forceInterrupt = false)
+        {
+            Debug.LogFormat("UserMessageAllRequest::userMessage:{0}", userMessage);
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.userSendMessageAllRequest = new UserSendMessageAllRequest();
+            message.Request.userSendMessageAllRequest.UserMessage = userMessage;
+            message.Request.userSendMessageAllRequest.ForceInterrupt = forceInterrupt;
 
             // 判断连上没
             if (this.connected && AgentClient.Instance.Connected)

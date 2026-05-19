@@ -119,5 +119,21 @@ namespace Services
             AgentService.Instance.SendSceneStop();
             return tcs.Task;
         }
+
+        public static UniTask InterruptAgentAsync(string stopReason = "ÏµÍ³¹Ø±Õ")
+        {
+            var tcs = new UniTaskCompletionSource();
+            void Handler(bool success, string reason)
+            {
+                AgentService.Instance.OnInterruptAgent -= Handler;
+                if (success)
+                    tcs.TrySetResult();
+                else
+                    tcs.TrySetException(new Exception(reason));
+            }
+            AgentService.Instance.OnInterruptAgent += Handler;
+            AgentService.Instance.SendAgentInterrupt(stopReason);
+            return tcs.Task;
+        }
     }
 }

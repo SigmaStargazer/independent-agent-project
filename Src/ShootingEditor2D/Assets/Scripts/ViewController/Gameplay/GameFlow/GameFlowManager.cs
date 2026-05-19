@@ -23,5 +23,11 @@ namespace ShootingEditor2D
             var flow = new ReturnToTitleFlow(titleSceneName);
             await FlowExecutor.Instance.Execute(flow);
         }
+
+        public async UniTask NextMap(string nextLevelName)
+        {
+            var flow = new NextMapFlow(nextLevelName);
+            await FlowExecutor.Instance.Execute(flow);
+        }
     }
 }

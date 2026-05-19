@@ -385,6 +385,7 @@ class Agent:
         self._resume_state = {
             "messages": messages,
             "name": self.name,
+            "index": old_values.get("index", 0),
             "mem_summary": old_values.get("mem_summary", ""),
             "mem_fact": old_values.get("mem_fact", ""),
             "mem_episode": old_values.get("mem_episode", ""),
@@ -618,27 +619,27 @@ class Agent:
             # self._interrupt_event.clear()
             print(f"[{self.name}] process stopped")
 
-    async def clear_langgraph_memory(self):
-        """
-        清空 LangGraph checkpoint
-        但保留 agent runtime
-        """
-        self.memory = MemorySaver()
-        self.graph = graph_builder.compile(checkpointer=self.memory)
-        self.session_id = str(uuid.uuid4())
-        self.config = {
-            "configurable": {
-                "thread_id": f"{self.name}:{self.session_id}",
-                "message_queue": self.message_queue,
-                "feedback_queue": self.feedback_queue,
-                "runtime_state": self.runtime_state
-            }
-        }
-        # 清空恢复状态
-        self._resume_state = None
-        # self._interrupt_memory_saved = False
+    # async def clear_langgraph_memory(self):
+    #     """
+    #     清空 LangGraph checkpoint
+    #     但保留 agent runtime
+    #     """
+    #     self.memory = MemorySaver()
+    #     self.graph = graph_builder.compile(checkpointer=self.memory)
+    #     self.session_id = str(uuid.uuid4())
+    #     self.config = {
+    #         "configurable": {
+    #             "thread_id": f"{self.name}:{self.session_id}",
+    #             "message_queue": self.message_queue,
+    #             "feedback_queue": self.feedback_queue,
+    #             "runtime_state": self.runtime_state
+    #         }
+    #     }
+    #     # 清空恢复状态
+    #     self._resume_state = None
+    #     # self._interrupt_memory_saved = False
 
-        print(f"[{self.name}] LangGraph 对话记忆已清空")
+    #     print(f"[{self.name}] LangGraph 对话记忆已清空")
 
     async def ainterrupt(
         self, 
@@ -780,3 +781,83 @@ class Agent:
 
         except Exception as e:
             print(f"[{self.name}] "f"save interrupt memory error: {e}")
+
+    async def afinish(self):
+        """
+        完全结束 Agent runtime
+
+        - 停止 ainvoke
+        - 停止 process loop
+        - 丢弃 checkpoint
+        - 丢弃 resume state
+        - 清空 queue
+        - 不保留未保存上下文
+        """
+        async with self._runtime_lock:
+            print(f"[{self.name}] finish requested")
+            self._running = False
+            # =========================
+            # 1. interrupt runtime
+            # =========================
+            self._interrupt_event.set()
+            if self._invoke_task:
+                try:
+                    self._invoke_task.cancel()
+                except Exception:
+                    pass
+            if self._process_task:
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(
+                            self._process_task,
+                            return_exceptions=True
+                        ),
+                        timeout=5
+                    )
+                except asyncio.TimeoutError:
+                    print(f"[{self.name}] finish timeout")
+            # =========================
+            # 2. clear queues
+            # =========================
+            await self._drain_items(
+                include_message_queue=True,
+                include_feedback_queue=True
+            )
+            # =========================
+            # 3. clear runtime state
+            # =========================
+            self.runtime_state["focus_mode"] = False
+            # =========================
+            # 4. clear resume state
+            # =========================
+            self._resume_state = None
+            # =========================
+            # 4. initialize queues
+            # =========================
+            self.message_queue = asyncio.Queue()
+            self.feedback_queue = asyncio.Queue()
+            self._message_interval = []
+            # =========================
+            # 5. clear langgraph state
+            # =========================
+            self.memory = MemorySaver()
+            self.graph = graph_builder.compile(
+                checkpointer=self.memory
+            )
+            self.session_id = str(uuid.uuid4())
+            self.config = {
+                "configurable": {
+                    "thread_id": f"{self.name}:{self.session_id}",
+                    "message_queue": self.message_queue,
+                    "feedback_queue": self.feedback_queue,
+                    "runtime_state": self.runtime_state
+                }
+            }
+            # =========================
+            # 6. clear tasks
+            # =========================
+            self._invoke_task = None
+            self._process_task = None
+            self._interrupt_event = asyncio.Event()
+
+            print(f"[{self.name}] finished")

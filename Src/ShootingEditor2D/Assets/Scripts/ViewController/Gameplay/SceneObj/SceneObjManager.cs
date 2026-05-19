@@ -124,6 +124,46 @@ namespace ShootingEditor2D
         }
         #endregion
 
+        #region Agent消息发送
+
+        /// <summary>
+        /// 向指定Agent发送消息
+        /// </summary>
+        public bool SendMessageToAgent(string agentName, string msg)
+        {
+            if (string.IsNullOrEmpty(agentName))
+                return false;
+
+            Agent targetAgent = mSceneObjs.OfType<Agent>().FirstOrDefault(agent => agent.Name == agentName);
+            if (targetAgent == null)
+            {
+                Debug.LogWarning($"未找到Agent: {agentName}");
+                return false;
+            }
+
+            targetAgent.SendMessageToAgent(msg);
+            return true;
+        }
+
+        /// <summary>
+        /// 向所有Agent广播消息
+        /// </summary>
+        public void BroadcastMessageToAgents(string msg)
+        {
+            List<Agent> agents = mSceneObjs.OfType<Agent>().ToList();
+            foreach (Agent agent in agents)
+            {
+                if (agent != null)
+                {
+                    agent.SendMessageToAgent(msg);
+                }
+            }
+
+            Debug.Log($"已向 {agents.Count} 个Agent广播消息");
+        }
+
+        #endregion
+
         #region 交互逻辑
 
         public (bool success, string result) Interact(GameObject chara)

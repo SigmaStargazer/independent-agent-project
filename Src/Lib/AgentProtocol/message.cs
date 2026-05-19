@@ -289,48 +289,54 @@ namespace SkillBridge.Message
         public SceneStopRequest sceneStopRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(5)]
-        public UserSendMessageRequest userSendMessageRequest { get; set; }
+        public AgentInterruptRequest agentInterruptRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
-        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
+        public UserSendMessageRequest userSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(7)]
-        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+        public UserSendMessageAllRequest userSendMessageAllRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(8)]
-        public AgentObserveRequest agentObserveRequest { get; set; }
+        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(9)]
-        public AgentMoveRequest agentMoveRequest { get; set; }
+        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(10)]
-        public AgentInteractRequest agentInteractRequest { get; set; }
+        public AgentObserveRequest agentObserveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(11)]
-        public AgentSelectRequest agentSelectRequest { get; set; }
+        public AgentMoveRequest agentMoveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(12)]
-        public AgentInputRequest agentInputRequest { get; set; }
+        public AgentInteractRequest agentInteractRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(13)]
-        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+        public AgentSelectRequest agentSelectRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(14)]
-        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+        public AgentInputRequest agentInputRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(15)]
-        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(16)]
-        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(17)]
-        public MemoryBackupRequest memoryBackupRequest { get; set; }
+        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(18)]
-        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(19)]
+        public MemoryBackupRequest memoryBackupRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(20)]
+        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(21)]
         public MemoryDeleteCurrentRequest memoryDeleteCurrentRequest { get; set; }
 
     }
@@ -355,12 +361,15 @@ namespace SkillBridge.Message
         public SceneStopResponse sceneStopResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(5)]
-        public MemoryBackupResponse memoryBackupResponse { get; set; }
+        public AgentInterruptResponse agentInterruptResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
-        public MemoryRestoreResponse memoryRestoreResponse { get; set; }
+        public MemoryBackupResponse memoryBackupResponse { get; set; }
 
         [global::ProtoBuf.ProtoMember(7)]
+        public MemoryRestoreResponse memoryRestoreResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(8)]
         public MemoryDeleteCurrentResponse memoryDeleteCurrentResponse { get; set; }
 
     }
@@ -480,6 +489,35 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class AgentInterruptRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"reason")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Reason { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentInterruptResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class UserSendMessageRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -493,6 +531,25 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"user_message")]
         [global::System.ComponentModel.DefaultValue("")]
         public string UserMessage { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"force_interrupt")]
+        public bool ForceInterrupt { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class UserSendMessageAllRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"user_message")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string UserMessage { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"force_interrupt")]
+        public bool ForceInterrupt { get; set; }
 
     }
 

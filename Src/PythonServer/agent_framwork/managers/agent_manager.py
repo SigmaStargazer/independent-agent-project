@@ -17,54 +17,83 @@ class AgentManager:
     def __init__(self):
         self.agents: Dict[str, Agent] = {}
 
-    async def acreate_agent(self, name:str, summary:str, create_time:datetime) -> str:
+    # =========================================================================
+    # 创建
+    # =========================================================================
+
+    async def acreate_agent(self, name:str, summary:str, create_time:datetime):
         """
         创建agent，存入self.agents。并将简介存入graphiti中
         Args:
             name(str): agent名称
             summary(str): agent简介
             cur_time(datetime): 当前时间
-        return:
-            str: 创建结果
         """
-        # 1.1. 检查agent manager是否已有该agent
+        # 1. 检查agent manager是否已有该agent
         if self.agents.get(name):
-            return f"[Agent Manager]: Agent {name} 已存在"
+            error_msg = f"[Agent Manager]创建Agent失败: Agent {name} 已存在"
+            print(error_msg)
+            raise ValueError(error_msg)
 
-        # 1.2. 检查graphiti是否已有该agent
+        # 2. 检查graphiti是否已有该agent
         group_id = name.encode('utf-8').hex()
         cypher = f"""
 MATCH (n: Entity {{group_id: '{group_id}'}})
 RETURN n"""
         result = await MemoryManager().conn.execute(cypher)
         if result.has_next():
-            return f"[Agent Manager]: Agent {name} 已存在"
-
-        # 2. 创建agent，存self.agents
+            error_msg = f"[Agent Manager]创建Agent失败: Agent {name} 已存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+        # 3. 创建agent，存self.agents
         agent = Agent(name=name)
         self.agents[agent.name] = agent
 
-        # 3. 初始化agent的设定和记忆
+        # 4. 初始化agent的设定和记忆
         await MemoryManager().init_agent_summary(
             name=name, 
             summary=summary, 
             create_time=create_time)
 
-        return f"[Agent Manager]: Agent {name} 创建成功"
+        print(f"[Agent Manager]创建Agent成功: Agent {name}")
+        print("-" * 80)
 
-    # async def create_agent(self, name:str, description:str):
-    #     """
-    #     添加agent到agent manager
-    #     """
-    #     if self.agents.get(name):
-    #         print(f"[Agent Manager]: Agent {name}已存在")
-    #         return
+    # =========================================================================
+    # 加载
+    # =========================================================================
+    async def aload_agent(self, name: str):
+        """
+        从graphiti加载指定Agent
+        Args:
+            name(str): Agent名称
+        """
+        if name in self.agents:
+            error_msg = f"[Agent Manager]加载Agent失败: Agent {name} 已存在"
+            print(error_msg)
+            raise ValueError(error_msg)
 
-    #     # 创建agent
-    #     agent = Agent(name=name, description=description)
-    #     self.agents[agent.name] = agent
+        group_id = name.encode("utf-8").hex()
+        cypher = f"""
+MATCH (n)
+WHERE n.group_id = '{group_id}'
+RETURN n
+LIMIT 1
+"""
 
-    async def aload_agent(self) -> list[str]:
+        result = await MemoryManager().conn.execute(cypher)
+        if not result.has_next():
+            error_msg = f"[Agent Manager]加载Agent失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+
+        agent = Agent(name=name)
+        self.agents[name] = agent
+
+        print(f"[Agent Manager]加载Agent成功: Agent {name}")
+        print("-" * 80)
+
+
+    async def aload_agent_all(self) -> list[str]:
         """
         从graphiti加载agent到self.agents
         Return:
@@ -88,6 +117,28 @@ RETURN n"""
         # print(f"加载Agent: {agent_names}")
         return agent_names
 
+    # =========================================================================
+    # 移除
+    # =========================================================================
+
+    async def aremove_agent(self, name: str):
+        """
+        从manager移除Agent
+        不删除graphiti中的数据
+        """
+        if name not in self.agents:
+            error_msg = f"[Agent Manager]移除Agent失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+
+        # 先finish
+        await self.agents[name].afinish()
+        del self.agents[name]
+
+    # =========================================================================
+    # 发消息
+    # =========================================================================
+
     async def asend_message(self, name: str, message: str, force_interrupt: bool = False):
         """
         发送消息给指定Agent
@@ -98,7 +149,9 @@ RETURN n"""
         """
         # 1. 检查Agent是否存在
         if name not in self.agents:
-            raise ValueError(f"Agent {name} 不存在")
+            error_msg = f"[Agent Manager]向Agent发送消息失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
         # 2. 判读是否需要打断
         if not (self.agents[name].runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
             await self.agents[name].ainterrupt(reason="被打断")
@@ -108,34 +161,107 @@ RETURN n"""
         if not (self.agents[name].runtime_state["focus_mode"] and not force_interrupt):
             await self.agents[name].astart()
 
-    async def astart(self):
+    async def asend_message_all(
+        self,
+        message: str,
+        force_interrupt: bool = False
+    ):
+        """
+        给所有Agent发送消息
+        Args:
+            message(str): 消息内容
+            force_interrupt(bool): 是否强制打断
+        """
+
+        await asyncio.gather(*[
+            self.asend_message(
+                name=name,
+                message=message,
+                force_interrupt=force_interrupt
+            ) for name in self.agents])
+
+    # =========================================================================
+    # 启动
+    # =========================================================================
+
+    async def astart(self, name: str):
+        """
+        启动指定Agent
+        Args:
+            name(str): Agent名称
+        """
+        if name not in self.agents:
+            error_msg = f"[Agent Manager]启动Agent失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+        await self.agents[name].astart()
+
+    async def astart_all(self):
         """
         启动所有Agent
         """
-        for agent in self.agents.values():
-            await agent.astart()
+        await asyncio.gather(*[
+            agent.astart()
+            for agent in self.agents.values()
+        ])
+
         print("[Agent Manager]: 已启动所有Agent")
         print("-" * 80)
 
-    async def ainterrupt(self, reason: str):
+    # =========================================================================
+    # 打断
+    # =========================================================================
+
+    async def ainterrupt(self, name: str, reason: str = "系统关闭"):
         """
-        中断所有Agent
+        打断指定Agent
+        Args:
+            name(str): Agent名称
+            reason(str): 打断原因
         """
-        for agent in self.agents.values():
-            await agent.ainterrupt(reason)
+        if name not in self.agents:
+            error_msg = f"[Agent Manager]打断Agent失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+        await self.agents[name].ainterrupt(reason)
+
+    async def ainterrupt_all(self, reason: str = "系统关闭"):
+        """
+        打断所有Agent
+        Args:
+            reason(str): 打断原因
+        """
+        await asyncio.gather(*[
+            agent.ainterrupt(reason)
+            for agent in self.agents.values()
+        ])
+
         print("[Agent Manager]: 已打断所有Agent")
         print("-" * 80)
-
-    async def afinish(self):
+    
+    # =========================================================================
+    # 结束
+    # =========================================================================
+    async def afinish(self, name: str):
         """
-        结束所有agent的process_message协程
+        结束指定Agent
+        Args:
+            name(str): Agent名称
         """
-        tasks = []
+        if name not in self.agents:
+            error_msg = f"[Agent Manager]结束Agent失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+        await self.agents[name].afinish()
 
-        for agent in self.agents.values():
-            tasks.append(agent.ainterrupt("系统关闭"))
+    async def afinish_all(self):
+        """
+        结束所有Agent
+        """
+        await asyncio.gather(*[
+            agent.afinish()
+            for agent in self.agents.values()
+        ])
 
-        await asyncio.gather(*tasks, return_exceptions=True)
-
-        print("-" * 80)
         print("[Agent Manager]: 已停止所有Agent")
+        print("-" * 80)

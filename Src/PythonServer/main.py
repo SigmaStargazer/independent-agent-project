@@ -54,7 +54,7 @@ async def handle_agent_load_request(msg, context):
     # await MemoryManager().initialize()
     response = message_pb2.AgentLoadResponse()
     try:
-        agent_names = await AgentManager().aload_agent()
+        agent_names = await AgentManager().aload_agent_all()
         response.agent_names.extend(agent_names) # agent_names 的list
         response.success = True
         # response.errormsg = ""
@@ -78,7 +78,7 @@ async def handle_scene_start_request(msg, context):
         await TimeSystem().aset_time(year=2016,month=1,day=1)
         await TimeSystem().astart_time()
         
-        await AgentManager().astart()
+        await AgentManager().astart_all()
         response.success = True
         # response.errormsg = ""
         await context['server'].send_message(response, context)
@@ -96,7 +96,7 @@ async def handle_scene_stop_request(msg, context):
         print("停止时间")
         await TimeSystem().apause_time()
         print("停止 Agent...")
-        await AgentManager().afinish()
+        await AgentManager().afinish_all()
         response.success = True
         await context['server'].send_message(response, context)
     except Exception as e:
@@ -105,16 +105,50 @@ async def handle_scene_stop_request(msg, context):
         print(f"场景停止失败: {str(e)}")
         await context['server'].send_message(response, context)
 
+@server.on_message(message_pb2.AgentInterruptRequest)
+async def handle_agent_interrupt_request(msg, context):
+    print("中断Agent")
+    reason = msg.reason
+    response = message_pb2.AgentInterruptResponse()
+    try:
+        await AgentManager().ainterrupt_all(reason=reason)
+        response.success = True
+        await context['server'].send_message(response, context)
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"中断Agent失败: {str(e)}")
+        await context['server'].send_message(response, context)    
+
 @server.on_message(message_pb2.UserSendMessageRequest)
 async def handle_user_send_msg_request(msg, context):
     agent = msg.agent
     user_message = msg.user_message
+    force_interrupt = msg.force_interrupt
     try:
         # to_agent_message = f"""用户向你发送了一则消息: {user_message}"""
         to_agent_message = f"""{user_message}"""
-        await AgentManager().agents.get(agent).asend_message(to_agent_message)
+        await AgentManager().asend_message(
+            name=agent, 
+            message=to_agent_message,
+            force_interrupt=force_interrupt
+            )
     except Exception as e:
-        print(f"发送消息失败: {str(e)}")
+        print(f"接收消息失败: {str(e)}")
+
+@server.on_message(message_pb2.UserSendMessageAllRequest)
+async def handle_user_send_msg_all_request(msg, context):
+    user_message = msg.user_message
+    force_interrupt = msg.force_interrupt
+    try:
+        # to_agent_message = f"""用户向你发送了一则消息: {user_message}"""
+        to_agent_message = f"""{user_message}"""
+        await AgentManager().asend_message_all(
+            message=to_agent_message,
+            force_interrupt=force_interrupt
+            )
+    except Exception as e:
+        print(f"接收消息失败: {str(e)}")
 
 @server.on_message(message_pb2.SendToolResultMessageRequest)
 async def handle_tool_result_request(msg, context):
@@ -138,6 +172,10 @@ async def handle_tool_result_request(msg, context):
 
     print(f"[TOOL_WAITERS] 工具回调完成: agent={agent}, tool={tool_name}, request_id={request_id}")
 
+# ======================
+# 记忆存档
+# ======================
+
 @server.on_message(message_pb2.MemoryBackupRequest)
 async def handle_memory_backup_request(msg, context):
     slot_id = msg.slot_id
@@ -159,7 +197,7 @@ async def handle_memory_restore_request(msg, context):
         print("停止时间")
         await TimeSystem().apause_time()
         print("停止 Agent...")
-        result = await AgentManager().afinish()
+        result = await AgentManager().ainterrupt_all()
         print("读档...")
         result = await MemoryManager().restore_memory(slot_id=slot_id)
         # print("重新初始化 MemoryManager...")
@@ -167,7 +205,7 @@ async def handle_memory_restore_request(msg, context):
         # print("重新加载 Agent...")
         # agent_names = await AgentManager().aload_agent()
         # print("重新启动 Agent...")
-        await AgentManager().astart()
+        await AgentManager().astart_all()
         response.success = True
     except Exception as e:
         response.success = False

@@ -13,15 +13,15 @@ async def init_create():
     await TimeSystem().aset_time(year=2016, month=1, day=1)
 
     result = await AgentManager().acreate_agent(name="小明", summary="是一个帮助机器人", create_time=datetime.now())
-    agent_names = await AgentManager().aload_agent()
-    await AgentManager().astart()
+    agent_names = await AgentManager().aload_agent_all()
+    await AgentManager().astart_all()
 
 async def init_load():
     await MemoryManager().initialize()
     await TimeSystem().aset_time(year=2016, month=1, day=1)
 
-    agent_names = await AgentManager().aload_agent()
-    await AgentManager().astart()
+    agent_names = await AgentManager().aload_agent_all()
+    await AgentManager().astart_all()
 
 async def test1():
     """
@@ -37,7 +37,7 @@ async def test1():
     # await AgentManager().ainterrupt(reason="进入新场景")
     await AgentManager().asend_message(name="小明", message="系统: 进入新场景。用户不在该场景内，不再讨论小红的事情")
     await asyncio.sleep(100)
-    await AgentManager().astart()
+    await AgentManager().astart_all()
 
 
 if __name__ == "__main__":

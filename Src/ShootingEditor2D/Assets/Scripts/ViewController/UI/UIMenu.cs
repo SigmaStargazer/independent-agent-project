@@ -39,6 +39,15 @@ namespace ShootingEditor2D
             SaveManager.Instance.Save(this.SceneName);
             Debug.Log($"保存成功");
         }
+        /// <summary>
+        /// (测试)下一关
+        /// </summary>
+        /// 
+        public void OnClickNextMap()
+        {
+            string nextLevelName = "Level2";
+            GameFlowManager.Instance.NextMap(nextLevelName).Forget(Debug.LogException);
+        }
         private void OnClickMenuBtn()
         {
             this.PanelMenu.SetActive(!this.PanelMenu.activeSelf);
