@@ -22,6 +22,7 @@ namespace ShootingEditor2D
         public async UniTask Execute()
         {
             await SceneManager.LoadSceneAsync(levalName);
+            await UniTask.NextFrame();// 进入到场景的第一帧，使得各GameObject的Start()方法执行完毕
         }
     }
 }

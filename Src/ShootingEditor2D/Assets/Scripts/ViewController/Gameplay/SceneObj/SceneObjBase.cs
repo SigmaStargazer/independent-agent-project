@@ -119,7 +119,7 @@ namespace ShootingEditor2D
 
         public string GetStateName()
         {
-            return mCurState.Name;
+            return mCurState?.Name ?? "Idle";
         }
 
         public void StopAction()
