@@ -4,6 +4,6 @@ namespace ShootingEditor2D
 {
     public abstract class PlayerBase : CharaBase
     {
-
+        public override bool IsInteractable => false;
     }
 }

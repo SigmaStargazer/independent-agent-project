@@ -24,7 +24,7 @@ namespace ShootingEditor2D
                 transform.localScale = localScale;
             }
         }
-        public bool IsInteractable => true;
+        public virtual bool IsInteractable => true;
 
         // Dead hooks
         public virtual void OnDeadEnter() { }

@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Unity.VisualScripting;
 using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
@@ -265,6 +266,29 @@ namespace ShootingEditor2D
         }
 
         /// <summary>
+        /// 获取地图描述
+        /// </summary>
+        /// <returns></returns>
+        private string GetSceneInfo()
+        {
+            if (SceneInfo.Current == null)
+                return "未知区域";
+
+            List<string> lines = new();
+            if (!string.IsNullOrWhiteSpace(SceneInfo.Current.DisplayName))
+            {
+                lines.Add($"场景名称: {SceneInfo.Current.DisplayName}");
+            }
+            if (!string.IsNullOrWhiteSpace(SceneInfo.Current.Description))
+            {
+                lines.Add($"场景描述: {SceneInfo.Current.Description}");
+            }
+
+            string result = string.Join("\n", lines);
+            return string.IsNullOrWhiteSpace(result) ? "未知区域" : result;
+        }
+
+        /// <summary>
         /// 发送消息给Agent
         /// </summary>
         /// <param name="msg"></param>
@@ -273,17 +297,21 @@ namespace ShootingEditor2D
             // 获取环境信息
             List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
             string selfStateInfo = this.GetSelfStateInfo();
+            string sceneInfo = this.GetSceneInfo();
             string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
 
             // 拼接
-            string messageToSend = $"{msg}" +
-                $"\n\n<你的状态>\n{selfStateInfo}\n<\\你的状态>" + 
-                $"\n\n<环境>\n{sceneObjsInfoDesc}\n<\\环境>";
+            List<string> messageToSend = new();
+            messageToSend.Add(msg);
+            messageToSend.Add($"<你的状态>\n{selfStateInfo}\n</你的状态>");
+            messageToSend.Add($"<当前场景>\n{sceneInfo}\n</当前场景>");
+            messageToSend.Add($"<环境>\n{sceneObjsInfoDesc}\n</环境>");
 
+            string result = string.Join("\n\n", messageToSend);
             // 发送给Agent
-            AgentService.Instance.SendUserMessage(this.Name, messageToSend);
+            AgentService.Instance.SendUserMessage(this.Name, result);
             // 测试用
-            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
+            Debug.Log($"已发送消息给{this.Name}: {result}");
         }
 
         #region Agent动作指令。当AgentManager收到服务端LLM的指令时，会调用相应Agent示例的下列方法
@@ -398,7 +426,7 @@ namespace ShootingEditor2D
             string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
 
             // 拼接
-            string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n<\\环境>";
+            string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n</环境>";
 
             // 发送给Agent
             // tool_name = "observe"只用于日志打印，不用于判断
