@@ -50,11 +50,16 @@ namespace ShootingEditor2D
         }
 
         #endregion
-
-        //public List<SceneObjBase> GetSceneObjs()
-        //{
-        //    return mSceneObjs;
-        //}
+        
+        /// <summary>
+        /// 获取场景中指定类型的场景物体列表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> GetSceneObjsOfType<T>() where T : SceneObjBase
+        {
+            return mSceneObjs.OfType<T>().ToList();
+        }
 
         /// <summary>
         /// 获取去掉指定物体的场景物体列表
@@ -134,7 +139,7 @@ namespace ShootingEditor2D
             if (string.IsNullOrEmpty(agentName))
                 return false;
 
-            Agent targetAgent = mSceneObjs.OfType<Agent>().FirstOrDefault(agent => agent.Name == agentName);
+            AIPlayer targetAgent = mSceneObjs.OfType<AIPlayer>().FirstOrDefault(agent => agent.Name == agentName);
             if (targetAgent == null)
             {
                 Debug.LogWarning($"未找到Agent: {agentName}");
@@ -150,8 +155,8 @@ namespace ShootingEditor2D
         /// </summary>
         public void BroadcastMessageToAgents(string msg)
         {
-            List<Agent> agents = mSceneObjs.OfType<Agent>().ToList();
-            foreach (Agent agent in agents)
+            List<AIPlayer> agents = mSceneObjs.OfType<AIPlayer>().ToList();
+            foreach (AIPlayer agent in agents)
             {
                 if (agent != null)
                 {

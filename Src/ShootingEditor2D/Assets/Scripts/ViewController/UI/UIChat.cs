@@ -10,13 +10,13 @@ namespace ShootingEditor2D
         public InputField messageInputField;
         public Text historyMessageText;
         public ScrollRect historyScrollRect;
-        private PlayerController player;
-        private Agent agent;
+        private HumanPlayer player;
+        private AIPlayer agent;
 
         private void Awake()
         {
-            player = FindObjectOfType<PlayerController>();
-            agent = FindObjectOfType<Agent>();
+            player = FindObjectOfType<HumanPlayer>();
+            agent = FindObjectOfType<AIPlayer>();
             PanalSend.SetActive(false);
         }
         void Start()

@@ -15,7 +15,7 @@ namespace ShootingEditor2D
     {
         public InputField messageInputField;
         public Text aiMessageText;
-        public Agent chara;
+        public AIPlayer chara;
         // Start is called before the first frame update
         void Start()
         {

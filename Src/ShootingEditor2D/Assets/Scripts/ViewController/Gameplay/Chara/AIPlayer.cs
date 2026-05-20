@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public class Agent : CharaBase
+    public class AIPlayer : PlayerBase
     //public class Agent : ShootingEditor2DController
     {
         public override string Name => "小明";

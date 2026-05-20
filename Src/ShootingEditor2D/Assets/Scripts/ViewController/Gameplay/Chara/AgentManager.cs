@@ -12,7 +12,7 @@ namespace ShootingEditor2D
     public class AgentManager : MonoSingleton<AgentManager>
     {
         //private List<Agent> mAgents = new List<Agent>();
-        private Dictionary<string, Agent> mAgents = new Dictionary<string, Agent>();
+        private Dictionary<string, AIPlayer> mAgents = new Dictionary<string, AIPlayer>();
 
         // Start is called before the first frame update
         void Start()
@@ -59,7 +59,7 @@ namespace ShootingEditor2D
 
         #region ×¢²áÓë×¢ÏúÂß¼­
 
-        public void Register(Agent agent)
+        public void Register(AIPlayer agent)
         {
             if (agent != null && !mAgents.ContainsKey(agent.Name))
             {
@@ -67,7 +67,7 @@ namespace ShootingEditor2D
             }
         }
 
-        public void UnRegister(Agent agent)
+        public void UnRegister(AIPlayer agent)
         {
             if (agent != null && mAgents.ContainsKey(agent.Name))
             {

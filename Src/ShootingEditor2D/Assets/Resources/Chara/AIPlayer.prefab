@@ -323,7 +323,7 @@ GameObject:
   - component: {fileID: 979267152774314568}
   - component: {fileID: -2183342054031178844}
   m_Layer: 6
-  m_Name: Agent
+  m_Name: AIPlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -457,4 +457,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 684ccf3c16d0f7a48bf81e4b3207f18a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mInteractionZones: []
   moveSpeed: 5

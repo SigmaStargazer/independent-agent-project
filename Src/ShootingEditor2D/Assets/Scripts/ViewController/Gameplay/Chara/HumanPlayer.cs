@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public class PlayerController : CharaBase
+    public class HumanPlayer : PlayerBase
     {
         public override string Name => "玩家";
         public override string Desc => "人类玩家";
@@ -82,7 +82,7 @@ namespace ShootingEditor2D
 
             if (Input.GetButtonDown("Interact"))
             {
-                InteractNearestDevice();
+                Interact();
             }
         }
 
@@ -165,30 +165,28 @@ namespace ShootingEditor2D
         // 交互最近设备
         // =========================
 
-        private void InteractNearestDevice()
+        private void Interact()
         {
             if (SceneObjManager.Instance == null)
                 return;
 
-            (bool success, string result) =
-                SceneObjManager.Instance.Interact(this.gameObject);
-
-            Debug.Log(result);
+            (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
+            Debug.Log($"玩家交互结果::success:{success} result:{result}");
         }
 
         // =========================
         // 聊天发送
         // =========================
 
-        public void SendChatMessage(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-                return;
+        //public void SendChatMessage(string text)
+        //{
+        //    if (string.IsNullOrEmpty(text))
+        //        return;
 
-            AgentService.Instance.SendUserMessage(
-                "玩家",
-                text
-            );
-        }
+        //    AgentService.Instance.SendUserMessage(
+        //        "玩家",
+        //        text
+        //    );
+        //}
     }
 }

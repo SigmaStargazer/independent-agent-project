@@ -110,9 +110,9 @@ GameObject:
   - component: {fileID: 8481221322996089390}
   - component: {fileID: 8481221322996089389}
   - component: {fileID: 8481221322996089388}
-  - component: {fileID: 8481221322996089384}
+  - component: {fileID: 4711315610715455783}
   m_Layer: 6
-  m_Name: PlayerController
+  m_Name: HumanPlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -234,7 +234,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &8481221322996089384
+--- !u!114 &4711315610715455783
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -243,9 +243,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8481221322996089298}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b40340ae82225f46a61a8ae1de72eb8, type: 3}
+  m_Script: {fileID: 11500000, guid: f24aa661665bbfd4e87b8d289eee1375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mInteractionZones: []
   moveSpeed: 5
 --- !u!1 &8481221323666365675
 GameObject:
