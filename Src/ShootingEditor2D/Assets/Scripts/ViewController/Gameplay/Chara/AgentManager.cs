@@ -1,4 +1,5 @@
 using FrameworkDesign;
+using IndependentAgentProject;
 using Services;
 using ShootingEditor2D;
 using SkillBridge.Message;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public class AgentManager : MonoSingleton<AgentManager>
+    public class AgentManager : MonoSingleton<AgentManager>, IController
     {
         //private List<Agent> mAgents = new List<Agent>();
         private Dictionary<string, AIPlayer> mAgents = new Dictionary<string, AIPlayer>();
@@ -17,7 +18,10 @@ namespace ShootingEditor2D
         // Start is called before the first frame update
         void Start()
         {
-
+            this.RegisterEvent<GameOverEvent>(e =>
+            {
+                AgentService.Instance.SendSceneStop();
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         void OnEnable()
@@ -32,11 +36,6 @@ namespace ShootingEditor2D
             AgentService.Instance.OnStartActionSequence += this.StartActionSequence;
             AgentService.Instance.OnContinueActionSequence += this.ContinueActionSequence;
             AgentService.Instance.OnStopActionSequence += this.StopActionSequence;
-        }
-
-        void Update()
-        {
-
         }
 
         void OnDisable()
@@ -151,6 +150,11 @@ namespace ShootingEditor2D
             }
         }
         #endregion
+
+        public IArchitecture GetArchitecture()
+        {
+            return IndependentAgentProject.IndependentAgentProject.Instance;
+        }
     }
 }
 

@@ -6,10 +6,12 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public abstract class CharaBase : SceneObjBase, IInteractable, IController
+    public abstract class CharaBase : SceneObjBase, IInteractable
     {
         // Ãæ³¯·½Ïò
-        public bool isRight => transform.localScale.x > 0;
+        public bool IsRight => transform.localScale.x > 0;
+        public bool IsDead => StateName == "Dead";
+        public virtual bool IsInteractable => true;
         public IArchitecture GetArchitecture()
         {
             return ShootingEditor2D.Instance;
@@ -24,8 +26,6 @@ namespace ShootingEditor2D
                 transform.localScale = localScale;
             }
         }
-        public virtual bool IsInteractable => true;
-
         // Dead hooks
         public virtual void OnDeadEnter() { }
         public virtual void OnDeadUpdate() { }
@@ -73,6 +73,16 @@ namespace ShootingEditor2D
                 if (sceneObj is CharaBase chara)
                     chara.OnDeadExit();
             }
+        }
+        public override void ChangeState(string stateName)
+        {
+            if (StateName == "Dead" && stateName != "Dead")
+                return;
+            base.ChangeState(stateName);
+        }
+        public void Die()
+        {
+            ChangeState("Dead");
         }
 
         public virtual (bool success, string result) Interact(GameObject chara)

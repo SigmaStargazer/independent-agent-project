@@ -1,3 +1,5 @@
+using FrameworkDesign;
+using IndependentAgentProject;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -5,7 +7,7 @@ using UnityEngine;
 
 namespace ShootingEditor2D
 {
-    public abstract class SceneObjBase : MonoBehaviour
+    public abstract class SceneObjBase : MonoBehaviour, IController
     {
         public abstract string Name { get; }
         public abstract string Desc { get; }
@@ -104,7 +106,7 @@ namespace ShootingEditor2D
             mStates[state.Name] = state;
         }
 
-        public void ChangeState(string stateName)
+        public virtual void ChangeState(string stateName)
         {
             if (!mStates.TryGetValue(stateName, out var newState))
             {
@@ -129,7 +131,6 @@ namespace ShootingEditor2D
                 mCurActionRuntime.State = ActionState.Aborted;
                 mCurActionRuntime = null;
             }
-            ChangeState("Idle");
             return;
         }
 
@@ -180,6 +181,11 @@ namespace ShootingEditor2D
             return null;
         }
         #endregion Ωªª•«¯”Ú≈–∂œ
+
+        public IArchitecture GetArchitecture()
+        {
+            return IndependentAgentProject.IndependentAgentProject.Instance;
+        }
     }
 
 }

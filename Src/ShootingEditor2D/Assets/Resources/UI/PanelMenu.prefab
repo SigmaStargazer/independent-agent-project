@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 56321525750957125}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ShootingEditor2D.UIMenu, Assembly-CSharp
         m_MethodName: OnClickRetry
         m_Mode: 1
@@ -256,9 +256,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 56321525750957125}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ShootingEditor2D.UIMenu, Assembly-CSharp
-        m_MethodName: OnClickSave
+        m_MethodName: OnClickNextMap
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -359,7 +359,6 @@ GameObject:
   - component: {fileID: 56321525750957120}
   - component: {fileID: 56321525750957122}
   - component: {fileID: 56321525750957123}
-  - component: {fileID: 56321525750957125}
   m_Layer: 5
   m_Name: PanelMenu
   m_TagString: Untagged
@@ -426,19 +425,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &56321525750957125
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 56321525750957121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d8a039e8418ee84c9c3436700b8b45f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PanelMenu: {fileID: 56321525793522629}
 --- !u!1 &56321525793522629
 GameObject:
   m_ObjectHideFlags: 0
@@ -451,12 +437,12 @@ GameObject:
   - component: {fileID: 56321525793522630}
   - component: {fileID: 56321525793522631}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: PanelMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &56321525793522628
 RectTransform:
   m_ObjectHideFlags: 0
@@ -801,7 +787,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 56321525750957125}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ShootingEditor2D.UIMenu, Assembly-CSharp
         m_MethodName: OnClickContinue
         m_Mode: 1
@@ -1015,7 +1001,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 56321525750957125}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ShootingEditor2D.UIMenu, Assembly-CSharp
         m_MethodName: OnClickReturnToTitle
         m_Mode: 1

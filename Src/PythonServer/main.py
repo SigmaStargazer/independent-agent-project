@@ -96,7 +96,7 @@ async def handle_scene_stop_request(msg, context):
         print("停止时间")
         await TimeSystem().apause_time()
         print("停止 Agent...")
-        await AgentManager().afinish_all()
+        await AgentManager().aremove_all()
         response.success = True
         await context['server'].send_message(response, context)
     except Exception as e:
@@ -197,14 +197,14 @@ async def handle_memory_restore_request(msg, context):
         print("停止时间")
         await TimeSystem().apause_time()
         print("停止 Agent...")
-        result = await AgentManager().ainterrupt_all()
+        result = await AgentManager().aremove_all()
         print("读档...")
         result = await MemoryManager().restore_memory(slot_id=slot_id)
         # print("重新初始化 MemoryManager...")
         # result = await MemoryManager().initialize()
-        # print("重新加载 Agent...")
-        # agent_names = await AgentManager().aload_agent()
-        # print("重新启动 Agent...")
+        print("重新加载 Agent...")
+        agent_names = await AgentManager().aload_agent_all()
+        print("重新启动 Agent...")
         await AgentManager().astart_all()
         response.success = True
     except Exception as e:

@@ -1,4 +1,5 @@
 ﻿using FrameworkDesign;
+using IndependentAgentProject;
 using Newtonsoft.Json;
 using Services;
 using SkillBridge.Message;
@@ -20,19 +21,7 @@ namespace ShootingEditor2D
         public override string Name => "小明";
         public override string Desc => "是一个帮助机器人";
 
-        private Rigidbody2D mRigidbody2D;
         private Trigger2DCheck mGroundCheck;
-        //private Gun mGun;
-        //public float isRight;
-
-        // move相关
-        public float moveSpeed = 5f;
-
-        private bool moveRight;
-        private bool moveFinished;
-        //private float moveDistance;
-        //private float moveStartX;
-        //private float moveTargetX;
 
         // 用于检查撞击场景对象时停止
         private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
@@ -46,25 +35,19 @@ namespace ShootingEditor2D
         protected override void Awake()
         {
             base.Awake();
-            mRigidbody2D = GetComponent<Rigidbody2D>();
             mGroundCheck = transform.Find("GroundCheck").GetComponent<Trigger2DCheck>();
             mConditionEvaluator = new ConditionEvaluator();
-            //mGun = transform.Find("Gun").GetComponent<Gun>();
-        }
-        protected override void Start()
-        {
-            base.Start();
-        }
 
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-
-        protected override void FixedUpdate()
-        {
-            base.FixedUpdate();
+            this.RegisterEvent<GameOverEvent>(e =>
+            {
+                if (this.GetStateName() != "Dead")
+                {
+                    if (mCurActionSequenceRuntime != null)
+                    {
+                        mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
+                    }
+                }
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         protected override void OnEnable()
@@ -94,45 +77,23 @@ namespace ShootingEditor2D
 
             SceneObjManager.OnSceneObjCreated -= OnSceneObjCreated;
         }
-        #region FSM Hook
-        public override void OnIdleEnter()
-        {
-            mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-        }
-        public override void OnMoveEnter()
-        {
-            moveFinished = false;
-            //moveStartX = transform.position.x;
-            float dir = moveRight ? 1f : -1f;
-            //moveTargetX = moveStartX + dir * moveDistance;
-
-            // 校正朝向
-            TurnBack(dir);
-        }
-
-        public override void OnMoveFixedUpdate()
-        {
-            if (moveFinished) return;
-
-            float dir = moveRight ? 1f : -1f;
-
-            // 持续移动
-            mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
-        }
-
-        public override void OnMoveExit()
-        {
-            // 刹车
-            mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-        }
-
-        #endregion
 
         private void OnSceneObjCreated(SceneObjBase obj)
         {
             mCurActionSequenceRuntime?.AddSceneObj(obj);
             mPlanningActionSequenceRuntime?.AddSceneObj(obj);
         }
+
+        #region FSM Hook
+        public override void OnDeadEnter()
+        {
+            base.OnDeadEnter();
+            if (mCurActionSequenceRuntime != null)
+            {
+                mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
+            }
+        }
+        #endregion
 
         /// <summary>
         /// OnActionFinished钩子逻辑：当Action结束且存在finishedCtx.Result.Message时，发送消息给llm
@@ -219,7 +180,7 @@ namespace ShootingEditor2D
         // 获取自身状态信息
         private string GetSelfStateInfo()
         {
-            Rigidbody2D rb = this.GetComponent<Rigidbody2D>();
+            Rigidbody2D rb = mRigidbody2D;
             Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
             string speedDirX = velocity.x > 0.01f ? "right" : (velocity.x < -0.01f ? "left" : "");
             string speedDirY = velocity.y > 0.01f ? "up" : (velocity.y < -0.01f ? "down" : "");
@@ -550,6 +511,7 @@ namespace ShootingEditor2D
             {
                 // 1.停止当前Action
                 this.StopAction();
+                ChangeState("Idle");
                 // 2.替换ActionSequence
                 // 保存旧的 runtime
                 var oldRuntime = this.mCurActionSequenceRuntime;
@@ -635,6 +597,7 @@ namespace ShootingEditor2D
 
             // 1. 停止当前的Action
             this.StopAction();
+            ChangeState("Idle");
             // 2. 设置终止状态（不清除是为了还能调用log）
             mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
             // 3. 发送取消信息

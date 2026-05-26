@@ -135,6 +135,17 @@ LIMIT 1
         await self.agents[name].afinish()
         del self.agents[name]
 
+    async def aremove_all(self):
+        """
+        移除所有Agent
+        """
+        names = list(self.agents.keys())
+
+        await asyncio.gather(*[
+            self.aremove_agent(name)
+            for name in names
+        ])
+
     # =========================================================================
     # 发消息
     # =========================================================================

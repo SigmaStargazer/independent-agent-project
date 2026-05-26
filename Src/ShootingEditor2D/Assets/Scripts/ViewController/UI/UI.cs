@@ -1,25 +1,36 @@
-using Cysharp.Threading.Tasks;
-using System.Collections;
+Ôªøusing Cysharp.Threading.Tasks;
+using FrameworkDesign;
+using IndependentAgentProject;
+using Services;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace ShootingEditor2D
 {
-    public class UIMenu : MonoBehaviour
+    public class UI : MonoBehaviour, IController
     {
-        public GameObject PanelMenu;
         public string titleSceneName = "Title";
         private string SceneName;
-        void Awake()
+
+        public GameObject PanelMenu;
+        public GameObject PanelGameOver;
+        private void Awake()
         {
             this.SceneName = SceneManager.GetActiveScene().name;
             this.PanelMenu.SetActive(false);
+            this.PanelGameOver.SetActive(false);
         }
-        // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
-            
+            this.RegisterEvent<GameOverEvent>(e =>
+            {
+                PanelGameOver.SetActive(true);
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         // Update is called once per frame
@@ -32,15 +43,15 @@ namespace ShootingEditor2D
 
         }
         /// <summary>
-        /// (≤‚ ‘)±£¥Ê¥Êµµ
+        /// (ÊµãËØï)‰øùÂ≠òÂ≠òÊ°£
         /// </summary>
         public void OnClickSave()
         {
             SaveManager.Instance.Save(this.SceneName);
-            Debug.Log($"±£¥Ê≥…π¶");
+            Debug.Log($"‰øùÂ≠òÊàêÂäü");
         }
         /// <summary>
-        /// (≤‚ ‘)œ¬“ªπÿ
+        /// (ÊµãËØï)‰∏ã‰∏ÄÂÖ≥
         /// </summary>
         /// 
         public void OnClickNextMap()
@@ -65,6 +76,10 @@ namespace ShootingEditor2D
         {
             this.PanelMenu.SetActive(false);
         }
+
+        public IArchitecture GetArchitecture()
+        {
+            return IndependentAgentProject.IndependentAgentProject.Instance;
+        }
     }
 }
-
