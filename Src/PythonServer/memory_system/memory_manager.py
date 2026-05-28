@@ -85,6 +85,11 @@ class MemoryManager:
         self._active_ops = 0
         self._active_cond = asyncio.Condition()
 
+        # ----------------------------
+        # 写入互斥锁
+        # ----------------------------
+        self._graph_write_lock = asyncio.Lock()
+
     async def _begin_memory_op(self):
         async with self._active_cond:
             while self._freeze:
@@ -178,8 +183,8 @@ class MemoryManager:
                     raise retry_err
             
             # 3. 首次建索引 (内部封装，外部无感)
-            # self.conn = kuzu.AsyncConnection(self._kuzu_db)
-            self.conn = kuzu.AsyncConnection(self._kuzu_db, max_concurrent_queries=1)
+            self.conn = kuzu.AsyncConnection(self._kuzu_db)
+            # self.conn = kuzu.AsyncConnection(self._kuzu_db, max_concurrent_queries=1)
 
             # 4. 判断 schema 是否存在
             schema_initialized = False
@@ -395,28 +400,46 @@ class MemoryManager:
                 )
                 memory = memory[:MAX_CHARS_PER_EPISODE]
 
-            episode_id = uuid4()
-            if wait_result:
-                result = await self.graphiti.add_episode(
-                    name=f"{name}_mem_{curtime}_{episode_id}",
-                    episode_body=memory,
-                    source=EpisodeType.text,
-                    source_description=f"{name}_mem_{curtime}", 
-                    reference_time=curtime,
-                    group_id=group_id
-                )
-                print(f"[MemoryManager][{name}]存储记忆成功")
-                return result
-            else:
-                await self.graphiti.add_episode(
-                    name=f"{name}_mem_{curtime}_{episode_id}",
-                    episode_body=memory,
-                    source=EpisodeType.text,
-                    source_description=f"{name}_mem_{curtime}", 
-                    reference_time=curtime,
-                    group_id=group_id
-                )
-                print(f"[MemoryManager][{name}]异步存储记忆任务启动")
+            async with self._graph_write_lock:
+                for i in range(3):
+                    episode_id = uuid4()
+                    if wait_result:
+                        result = None
+                        try:
+                            result = await self.graphiti.add_episode(
+                                name=f"{name}_mem_{curtime}_{episode_id}",
+                                episode_body=memory,
+                                source=EpisodeType.text,
+                                source_description=f"{name}_mem_{curtime}",
+                                reference_time=curtime,
+                                group_id=group_id
+                            )
+                        except Exception as e:
+                            if "duplicated primary key value" in str(e):
+                                print(f"[MemoryManager] duplicate edge retry {i+1}")
+                                await asyncio.sleep(0.2 * (i + 1))
+                                continue
+                            raise
+                        print(f"[MemoryManager][{name}]存储记忆成功")
+                        return result
+                    else:
+                        try:
+                            await self.graphiti.add_episode(
+                                name=f"{name}_mem_{curtime}_{episode_id}",
+                                episode_body=memory,
+                                source=EpisodeType.text,
+                                source_description=f"{name}_mem_{curtime}",
+                                reference_time=curtime,
+                                group_id=group_id
+                            )
+                        except Exception as e:
+                            if "duplicated primary key value" in str(e):
+                                print(f"[MemoryManager] duplicate edge retry {i+1}")
+                                await asyncio.sleep(0.2 * (i + 1))
+                                continue
+                            raise
+                        print(f"[MemoryManager][{name}]异步存储记忆任务启动")
+                        break
         except Exception as e:
             print(f"[MemoryManager][{name}]存储记忆失败: {e}")
             if wait_result:
