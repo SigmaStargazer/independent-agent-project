@@ -67,7 +67,13 @@ namespace IndependentAgentProject
         {
             GameFlowManager.Instance.ContinueGame().Forget(Debug.LogException);
         }
+
         public void OnClickReturnToTitle()
+        {
+
+        }
+
+        public void OnClickConfirmReturnToTitle()
         {
             GameFlowManager.Instance.ReturnToTitle(this.titleSceneName).Forget(Debug.LogException);
         }

@@ -289,7 +289,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2481559128330617772}
   - component: {fileID: 2481559128330617773}
-  - component: {fileID: 2481559128330617774}
   m_Layer: 6
   m_Name: Gun
   m_TagString: Untagged
@@ -365,18 +364,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2481559128330617774
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2481559128330617747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78b73e1805383b742a8de575cfc2fbf2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2481559129219893131
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,7 +374,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2481559129219893124}
   - component: {fileID: 2481559129219893126}
-  - component: {fileID: 2481559129219893125}
   m_Layer: 6
   m_Name: GroundCheck
   m_TagString: Untagged
@@ -426,22 +412,6 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.01
---- !u!114 &2481559129219893125
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2481559129219893131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb92a952bb006b0468acabcc473e6abd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  EnterCount: 0
-  TargetLayers:
-    serializedVersion: 2
-    m_Bits: 1
 --- !u!1 &2481559129725099329
 GameObject:
   m_ObjectHideFlags: 0
@@ -454,7 +424,6 @@ GameObject:
   - component: {fileID: 2481559129725099357}
   - component: {fileID: 2481559129725099356}
   - component: {fileID: 2481559129725099331}
-  - component: {fileID: 2481559129725099358}
   m_Layer: 6
   m_Name: Bullet
   m_TagString: Untagged
@@ -576,15 +545,3 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &2481559129725099358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2481559129725099329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92d0087f1b432e940b91367eceb50afe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

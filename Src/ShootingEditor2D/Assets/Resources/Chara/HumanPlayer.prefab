@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8481221322777286860}
   - component: {fileID: 8481221322777286861}
-  - component: {fileID: 8481221322777286862}
   m_Layer: 6
   m_Name: Gun
   m_TagString: Untagged
@@ -86,18 +85,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &8481221322777286862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8481221322777286899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78b73e1805383b742a8de575cfc2fbf2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8481221322996089298
 GameObject:
   m_ObjectHideFlags: 0
@@ -204,7 +191,7 @@ Rigidbody2D:
   m_AngularDrag: 0.05
   m_GravityScale: 1
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -258,7 +245,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8481221323666365668}
   - component: {fileID: 8481221323666365670}
-  - component: {fileID: 8481221323666365669}
   m_Layer: 6
   m_Name: GroundCheck
   m_TagString: Untagged
@@ -297,22 +283,6 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.01
---- !u!114 &8481221323666365669
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8481221323666365675}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb92a952bb006b0468acabcc473e6abd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  EnterCount: 0
-  TargetLayers:
-    serializedVersion: 2
-    m_Bits: 1
 --- !u!1 &8481221324171757089
 GameObject:
   m_ObjectHideFlags: 0
@@ -325,7 +295,6 @@ GameObject:
   - component: {fileID: 8481221324171757117}
   - component: {fileID: 8481221324171757116}
   - component: {fileID: 8481221324171757091}
-  - component: {fileID: 8481221324171757118}
   m_Layer: 6
   m_Name: Bullet
   m_TagString: Untagged
@@ -447,15 +416,3 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &8481221324171757118
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8481221324171757089}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92d0087f1b432e940b91367eceb50afe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
