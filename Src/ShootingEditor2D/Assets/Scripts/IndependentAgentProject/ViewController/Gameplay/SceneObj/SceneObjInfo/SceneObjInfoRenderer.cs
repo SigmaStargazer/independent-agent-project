@@ -55,9 +55,22 @@ namespace IndependentAgentProject
                 string speedXStr = sceneObjInfo.SpeedX <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirX} {sceneObjInfo.SpeedX}m/s";
                 string speedYStr = sceneObjInfo.SpeedY <= 0.01f ? $"0m/s" : $"方向{sceneObjInfo.SpeedDirY} {sceneObjInfo.SpeedDirY}m/s";
                 string faceDirectionStr = !string.IsNullOrEmpty(sceneObjInfo.FaceDirection) ? faceDirectionStr = $"朝向:{sceneObjInfo.FaceDirection}\n" : "";
+                // 方位
+                string directionStr;
+                if (sceneObjInfo.IsRangeDirection)
+                {
+                    directionStr =
+                        $"方位: 从{sceneObjInfo.RangeLeftDirection}方向{sceneObjInfo.RangeLeftDistance}m " +
+                        $"~ {sceneObjInfo.RangeRightDirection}方向{sceneObjInfo.RangeRightDistance}m";
+                }
+                else
+                {
+                    directionStr = $"方位:{sceneObjInfo.Direction}方向 {sceneObjInfo.Distance}m";
+                }
+
                 sceneObjInfoDesc = $"{sceneObjInfo.Name}: {sceneObjInfo.Desc}\n" +
                     $"状态:{sceneObjInfo.State}\n" +
-                    $"方位:{sceneObjInfo.Direction}方向 {sceneObjInfo.Distance}m\n" +
+                    $"{directionStr}\n" +
                     $"{faceDirectionStr}" +
                     $"横向速度:{speedXStr}\n纵向速度:{speedYStr}";
             }

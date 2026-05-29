@@ -1,5 +1,4 @@
 using FrameworkDesign;
-using IndependentAgentProject;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -11,6 +10,28 @@ namespace IndependentAgentProject
     {
         public abstract string Name { get; }
         public abstract string Desc { get; }
+
+        [Header("范围方位配置")]
+        [SerializeField]
+        protected bool mUseRangeDirection = false;
+
+        /// <summary>
+        /// 用于计算范围方位的Collider
+        /// 不填则默认使用自身Collider2D
+        /// </summary>
+        [SerializeField]
+        protected Collider2D mRangeCollider;
+
+        public bool UseRangeDirection => mUseRangeDirection;
+        public Collider2D RangeCollider
+        {
+            get
+            {
+                if (mRangeCollider != null)
+                    return mRangeCollider;
+                return GetComponent<Collider2D>();
+            }
+        }
 
         /// <summary>
         /// 状态机

@@ -1,6 +1,7 @@
 using Services;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace IndependentAgentProject
 {
@@ -8,7 +9,7 @@ namespace IndependentAgentProject
     {
         public GameObject PanalSend;
         public InputField messageInputField;
-        public Text historyMessageText;
+        public TMP_Text historyMessageText;
         public ScrollRect historyScrollRect;
         private HumanPlayer player;
         private AIPlayer agent;
@@ -21,7 +22,7 @@ namespace IndependentAgentProject
         }
         void Start()
         {
-            //AgentService.Instance.OnGetAgentMessage = this.OnGetAgentMessage;
+            historyMessageText.text = "";
         }
 
         void OnEnable()

@@ -222,7 +222,16 @@ class MemoryManager:
             # 7. 只在首次初始化时创建索引
             if is_new_db:
                 print("⏳ [MemorySystem] 首次初始化索引...")
-                await self.graphiti.build_indices_and_constraints()
+                for attempt in range(3):
+                    try:
+                        await self.graphiti.build_indices_and_constraints()
+                        break
+                    except Exception as e:
+                        if "write transaction" in str(e) and attempt < 2:
+                            print(f"⚠️ 索引创建冲突，第{attempt+1}次重试...")
+                            await asyncio.sleep(1.0 * (attempt + 1))
+                        else:
+                            raise
             else:
                 print("ℹ️ [MemorySystem] 使用已有数据库，跳过索引创建")
             
@@ -894,7 +903,9 @@ class MemoryManager:
             # 1. 显式关闭 AsyncConnection (这会停止后台线程池)
             if self.conn:
                 if hasattr(self.conn, 'close'):
-                    self.conn.close() # 这一步至关重要，它会等待线程结束
+                    result = self.conn.close() # 这一步至关重要，它会等待线程结束
+                    if asyncio.iscoroutine(result):
+                        await result
             
             # 2. 切断引用链 (让引用计数归零)
             self.conn = None
@@ -911,6 +922,8 @@ class MemoryManager:
             # Python 的 GC 是懒惰的，必须手动踢一脚
             # 只有 Database 对象被 GC 销毁，文件锁才会释放
             gc.collect()
+            await asyncio.sleep(0.5)  # ★ 让 C++ 层事务真正释放
+            gc.collect()              # ★ 二次回收，确保析构链完整
             print("✅ [3/4] Python 对象引用已清理")
             print("✅ [4/4] 垃圾回收完成，数据库锁应已释放")
             

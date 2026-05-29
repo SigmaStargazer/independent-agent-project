@@ -52,12 +52,38 @@ namespace IndependentAgentProject
             sceneObjInfo.Name = sceneObj.Name;
             // desc
             sceneObjInfo.Desc = sceneObj.Desc;
-            // dirction
-            float xDiff = sceneObj.transform.position.x - charaX;
-            string direction = xDiff < 0 ? "left" : "right";
-            sceneObjInfo.Direction = direction;
-            // distance
-            sceneObjInfo.Distance = Mathf.Abs(xDiff);
+
+            // ·½Î»
+            //// dirction
+            //float xDiff = sceneObj.transform.position.x - charaX;
+            //string direction = xDiff < 0 ? "left" : "right";
+            //sceneObjInfo.Direction = direction;
+            //// distance
+            //sceneObjInfo.Distance = Mathf.Abs(xDiff);
+            if (sceneObj.UseRangeDirection && sceneObj.RangeCollider != null)
+            {
+                Bounds bounds = sceneObj.RangeCollider.bounds;
+
+                float leftX = bounds.min.x;
+                float rightX = bounds.max.x;
+
+                float leftDiff = leftX - charaX;
+                float rightDiff = rightX - charaX;
+
+                sceneObjInfo.IsRangeDirection = true;
+                sceneObjInfo.RangeLeftDirection = leftDiff < 0 ? "left" : "right";
+                sceneObjInfo.RangeLeftDistance = Mathf.Abs(leftDiff);
+
+                sceneObjInfo.RangeRightDirection = rightDiff < 0 ? "left" : "right";
+                sceneObjInfo.RangeRightDistance = Mathf.Abs(rightDiff);
+            }
+            else
+            {
+                float xDiff = sceneObj.transform.position.x - charaX;
+
+                sceneObjInfo.Direction = xDiff < 0 ? "left" : "right";
+                sceneObjInfo.Distance = Mathf.Abs(xDiff);
+            }
 
             Rigidbody2D rb = sceneObj.GetComponent<Rigidbody2D>();
             Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;

@@ -58,7 +58,8 @@ model = ChatOpenAI(
 output_parser = StrOutputParser()
 
 # 生产工具列表
-tools = [base_tools.communicate_to_agent, 
+tools = [
+        # base_tools.communicate_to_agent, 
         base_tools.communicate_to_user,
         #  base_tools.get_agent_list, 
         base_tools.get_cur_time,
@@ -114,20 +115,20 @@ system_template = """{mem_summary}
 
 <现在时间>
 {curtime}
-<\现在时间>
+</现在时间>
 
 <回想>
 {mem_fact}
 
 {mem_episode}
-<\回想>
+</回想>
 
 <规则>
-你会不断从周围环境获取信息，你需要自主决定下一步行动，但请注意：
-1）你的直接回复不会被任何人看到，也不会对外界产生任何影响，只有你自己能看见！只作为你的心理活动
+你会不断从周围环境获取信息，你需要自主决定是否需要做出响应、下一步行动是什么，但请注意：
+1）你的直接回复不会被任何人看到，也不会对外界产生任何影响，只有你自己能看见！只作为你的心理活动。
 2）仅当你使用了工具时，才会对外界产生实际影响。
-3）如需与任一对象进行交流，请使用communicate系列工具，避免你想要传递的信息无法传达给对方。
-<\规则>
+由1）、2）可知，如需与任一对象进行交流，务必使用communicate系列工具来向指定对象发送消息，避免你想要传递的信息无法传达给对方。
+</规则>
 """
 
 

@@ -8,8 +8,18 @@ namespace IndependentAgentProject
 
         public string FaceDirection;
 
+        // 普通模式
         public string Direction;
         public float Distance;
+
+        // 范围模式
+        public bool IsRangeDirection;
+
+        public string RangeLeftDirection;
+        public float RangeLeftDistance;
+
+        public string RangeRightDirection;
+        public float RangeRightDistance;
 
         public float SpeedX;
         public string SpeedDirX;
