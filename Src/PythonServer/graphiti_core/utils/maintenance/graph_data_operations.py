@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import logging
+import re
 from datetime import datetime
 
 from typing_extensions import LiteralString
@@ -31,6 +32,13 @@ from graphiti_core.nodes import EpisodeType, EpisodicNode, get_episodic_node_fro
 EPISODE_WINDOW_LEN = 3
 
 logger = logging.getLogger(__name__)
+
+_KUZU_FTS_INDEX_NAME_RE = re.compile(r"CREATE_FTS_INDEX\([^,]+,\s*'([^']+)'")
+
+
+def _kuzu_fts_index_name(query: str) -> str:
+    match = _KUZU_FTS_INDEX_NAME_RE.search(query)
+    return match.group(1) if match else ''
 
 
 async def build_indices_and_constraints(driver: GraphDriver, delete_existing: bool = False):
@@ -59,15 +67,34 @@ async def build_indices_and_constraints(driver: GraphDriver, delete_existing: bo
     fulltext_indices: list[LiteralString] = get_fulltext_indices(driver.provider)
 
     if driver.provider == GraphProvider.KUZU:
-        # Skip creating fulltext indices if they already exist. Need to do this manually
-        # until Kuzu supports `IF NOT EXISTS` for indices.
-        result, _, _ = await driver.execute_query('CALL SHOW_INDEXES() RETURN *;')
-        if len(result) > 0:
-            fulltext_indices = []
+        # Skip only FTS indices that already exist. Kuzu does not support IF NOT EXISTS.
+        existing_fts_names: set[str] = set()
+        try:
+            result, _, _ = await driver.execute_query('CALL SHOW_INDEXES() RETURN *;')
+            for record in result:
+                if record.get('index_type') == 'FTS':
+                    existing_fts_names.add(record['index_name'])
+        except Exception as e:
+            logger.warning('Failed to list Kuzu FTS indexes, will attempt to create all: %s', e)
+
+        fulltext_indices = [
+            query
+            for query in fulltext_indices
+            if _kuzu_fts_index_name(query) not in existing_fts_names
+        ]
 
         # Only load the `fts` extension if it's not already loaded, otherwise throw an error.
-        result, _, _ = await driver.execute_query('CALL SHOW_LOADED_EXTENSIONS() RETURN *;')
-        if len(result) == 0:
+        loaded_extensions: set[str] = set()
+        try:
+            result, _, _ = await driver.execute_query('CALL SHOW_LOADED_EXTENSIONS() RETURN *;')
+            for record in result:
+                for value in record.values():
+                    if isinstance(value, str):
+                        loaded_extensions.add(value.upper())
+        except Exception as e:
+            logger.warning('Failed to list Kuzu extensions, will attempt to load FTS: %s', e)
+
+        if 'FTS' not in loaded_extensions:
             fulltext_indices.insert(
                 0,
                 """
@@ -75,6 +102,12 @@ async def build_indices_and_constraints(driver: GraphDriver, delete_existing: bo
                 LOAD fts;
                 """,
             )
+
+        index_queries: list[LiteralString] = range_indices + fulltext_indices
+        # Kuzu only allows one write transaction at a time.
+        for query in index_queries:
+            await driver.execute_query(query)
+        return
 
     index_queries: list[LiteralString] = range_indices + fulltext_indices
 

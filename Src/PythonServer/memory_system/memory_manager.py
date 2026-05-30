@@ -190,12 +190,11 @@ class MemoryManager:
             schema_initialized = False
             if db_exists:
                 try:
-                    result = await self.conn.execute("CALL show_tables()")
-                    tables = await result.fetchall()
-                    schema_initialized = len(tables) > 0
+                    result = await self.conn.execute("CALL show_tables() RETURN *")
+                    schema_initialized = any(True for _ in result.rows_as_dict())
                 except Exception:
                     schema_initialized = False
-            is_new_db = not schema_initialized         
+            is_new_db = not schema_initialized
             
             # 5. 加载 FTS 扩展 
             try:
@@ -210,7 +209,7 @@ class MemoryManager:
             print("🏗️ [MemorySystem] 正在检查/创建表结构 (Schema)...")
             try:
                 # 这一步会执行 CREATE NODE TABLE IF NOT EXISTS ...
-                self._kuzu_driver.setup_schema() 
+                self._kuzu_driver.setup_schema()
             except Exception as e:
                 print(f"⚠️ Schema setup warning (可忽略): {e}")
             self.graphiti = Graphiti(
@@ -219,21 +218,8 @@ class MemoryManager:
                 embedder=self._embedder,
                 cross_encoder=self._reranker
             )
-            # 7. 只在首次初始化时创建索引
-            if is_new_db:
-                print("⏳ [MemorySystem] 首次初始化索引...")
-                for attempt in range(3):
-                    try:
-                        await self.graphiti.build_indices_and_constraints()
-                        break
-                    except Exception as e:
-                        if "write transaction" in str(e) and attempt < 2:
-                            print(f"⚠️ 索引创建冲突，第{attempt+1}次重试...")
-                            await asyncio.sleep(1.0 * (attempt + 1))
-                        else:
-                            raise
-            else:
-                print("ℹ️ [MemorySystem] 使用已有数据库，跳过索引创建")
+            # 7. 确保 FTS 索引完整（Kuzu 不支持 IF NOT EXISTS，且只允许单写事务）
+            await self._ensure_fts_indexes(is_new_db=is_new_db)
             
             self._initialized = True
             # 8. 启动记忆存储 Worker
@@ -241,6 +227,22 @@ class MemoryManager:
                 self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker") 
                 print("✅ [MemorySystem] 记忆存储 Worker 已启动") 
         return self
+
+    async def _ensure_fts_indexes(self, is_new_db: bool):
+        if is_new_db:
+            print("⏳ [MemorySystem] 首次初始化索引...")
+        else:
+            print("ℹ️ [MemorySystem] 检查/补全 FTS 索引...")
+        for attempt in range(3):
+            try:
+                await self.graphiti.build_indices_and_constraints()
+                return
+            except Exception as e:
+                if "write transaction" in str(e).lower() and attempt < 2:
+                    print(f"⚠️ 索引创建冲突，第{attempt + 1}次重试...")
+                    await asyncio.sleep(1.0 * (attempt + 1))
+                else:
+                    raise
 
     async def _ensure_fts_loaded(self):
         """
