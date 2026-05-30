@@ -142,6 +142,8 @@ namespace IndependentAgentProject
 
         public virtual void ChangeState(string stateName)
         {
+            if (StateName == stateName)
+                return;
             if (!mStates.TryGetValue(stateName, out var newState))
             {
                 Debug.LogError($"State {stateName} not registered");
