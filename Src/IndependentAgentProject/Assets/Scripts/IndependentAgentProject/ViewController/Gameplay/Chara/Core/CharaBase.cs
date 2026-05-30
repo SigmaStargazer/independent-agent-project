@@ -32,17 +32,6 @@ namespace IndependentAgentProject
             base.Awake();
             RegisterState(new DeadState());
         }
-        protected virtual void OnEnable()
-        {
-            if (SceneObjManager.Instance != null)
-                SceneObjManager.Instance.Register(this);
-        }
-
-        protected virtual void OnDisable()
-        {
-            if (SceneObjManager.Instance != null)
-                SceneObjManager.Instance.UnRegister(this);
-        }
 
         public class DeadState : FSMStateBase
         {

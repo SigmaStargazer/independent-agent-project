@@ -13,17 +13,6 @@ namespace IndependentAgentProject
             // 默认空实现
         }
         public abstract bool IsInteractable { get; }
-        protected virtual void OnEnable()
-        {
-            if (SceneObjManager.Instance != null)
-                SceneObjManager.Instance.Register(this);
-        }
-
-        protected virtual void OnDisable()
-        {
-            if (SceneObjManager.Instance != null)
-                SceneObjManager.Instance.UnRegister(this);
-        }
         public virtual (bool success, string result) Interact(GameObject chara)
         {
             return (false, "该对象无法交互");

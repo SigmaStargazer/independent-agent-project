@@ -118,6 +118,19 @@ namespace IndependentAgentProject
             mCurState?.OnFixedUpdate(this);
         }
 
+        // ×¢²áµ½SceneObjManager
+        protected virtual void OnEnable()
+        {
+            if (SceneObjManager.Instance != null)
+                SceneObjManager.Instance.Register(this);
+        }
+
+        protected virtual void OnDisable()
+        {
+            if (SceneObjManager.Instance != null)
+                SceneObjManager.Instance.UnRegister(this);
+        }
+
         /// <summary>
         /// ×¢²á×´Ì¬
         /// </summary>
