@@ -8,17 +8,20 @@ namespace IndependentAgentProject
         public override string Name => "拉杆";
         public override string Desc => "拉动后似乎能控制什么的装置。";
         public override bool IsInteractable => true;
+        [Header("触发目标")]
         [SerializeField]
-        private List<ITriggerable> mTargets = new();
+        private List<MonoBehaviour> mTargets = new();
 
         public override (bool success, string result) Interact(GameObject chara)
         {
             bool success = false;
             foreach (var target in mTargets)
             {
-                if (!target.CanTrigger())
+                if (target is not ITriggerable triggerable)
                     continue;
-                target.Trigger();
+                if (!triggerable.CanTrigger())
+                    continue;
+                triggerable.Trigger();
                 success = true;
             }
             return (success, success ? "拉动后似乎有什么装置动了。" : "拉动后似乎没有作用。");

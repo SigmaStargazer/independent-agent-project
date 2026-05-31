@@ -69,7 +69,7 @@ MonoBehaviour:
   m_text: "\u8BF7\u8F93\u5165\u6587\u672C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 90f69a0322ff080439831de89544429e, type: 2}
-  m_sharedMaterial: {fileID: -3098043506727181316, guid: 90f69a0322ff080439831de89544429e, type: 2}
+  m_sharedMaterial: {fileID: 1815163392545232886, guid: 90f69a0322ff080439831de89544429e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
