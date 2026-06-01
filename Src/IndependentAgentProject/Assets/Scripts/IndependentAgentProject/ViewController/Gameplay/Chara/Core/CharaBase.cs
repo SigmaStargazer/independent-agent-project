@@ -37,7 +37,7 @@ namespace IndependentAgentProject
         {
             public override string Name => "Dead";
 
-            public override void OnEnter(SceneObjBase sceneObj) 
+            public override void OnEnter(SceneObjBase sceneObj)
             {
                 if (sceneObj is CharaBase chara)
                     chara.OnDeadEnter();
