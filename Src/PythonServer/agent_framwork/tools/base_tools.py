@@ -624,7 +624,13 @@ async def set_focus_state(
     config: RunnableConfig,
     focus_state: bool):
     """设置专注状态
-    当专注状态开启时，你将不再被外界信息干扰（紧急信息除外），直至本轮对话结束。
+    进入专注状态后，
+    你会更加专注于当前正在做的事情。
+    此时你不容易被普通信息吸引注意力，
+    但仍可能注意到重要或异常的情况。
+
+    在当前事情结束后，
+    你会重新留意那些此前没有关注的信息。
     Args:
         focus_state(bool): 专注状态。True表示开启，False表示关闭
     Return:
