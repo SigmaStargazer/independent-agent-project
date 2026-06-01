@@ -166,21 +166,22 @@ message NetMessageRequest{
 	SceneStopRequest sceneStopRequest = 4;
 	AgentInterruptRequest agentInterruptRequest = 5;
 	UserSendMessageRequest userSendMessageRequest = 6;
-	UserSendMessageAllRequest userSendMessageAllRequest = 7;
-	SendToolResultMessageRequest sendToolResultMessageRequest = 8;
-	AgentSendMessageRequest agentSendMessageRequest = 9;
-	AgentObserveRequest agentObserveRequest = 10;
-	AgentMoveRequest agentMoveRequest = 11;
-	AgentInteractRequest agentInteractRequest = 12;
-	AgentSelectRequest agentSelectRequest = 13;
-	AgentInputRequest agentInputRequest = 14;
-	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 15;
-	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 16;
-	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 17;
-	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 18;
-	MemoryBackupRequest memoryBackupRequest = 19;
-	MemoryRestoreRequest memoryRestoreRequest = 20;
-	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 21;
+	UserSendFeedbackRequest userSendFeedbackRequest = 7;
+	UserSendMessageAllRequest userSendMessageAllRequest = 8;
+	SendToolResultMessageRequest sendToolResultMessageRequest = 9;
+	AgentSendMessageRequest agentSendMessageRequest = 10;
+	AgentObserveRequest agentObserveRequest = 11;
+	AgentMoveRequest agentMoveRequest = 12;
+	AgentInteractRequest agentInteractRequest = 13;
+	AgentSelectRequest agentSelectRequest = 14;
+	AgentInputRequest agentInputRequest = 15;
+	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 16;
+	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 17;
+	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 18;
+	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 19;
+	MemoryBackupRequest memoryBackupRequest = 20;
+	MemoryRestoreRequest memoryRestoreRequest = 21;
+	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 22;
 	
 }
 
@@ -260,6 +261,12 @@ message AgentInterruptResponse {
 message UserSendMessageRequest {
 	string agent = 1;
 	string user_message = 2;
+	bool force_interrupt = 3;
+}
+
+message UserSendFeedbackRequest {
+	string agent = 1;
+	string user_feedback = 2;
 	bool force_interrupt = 3;
 }
 

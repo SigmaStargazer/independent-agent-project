@@ -295,48 +295,51 @@ namespace SkillBridge.Message
         public UserSendMessageRequest userSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(7)]
-        public UserSendMessageAllRequest userSendMessageAllRequest { get; set; }
+        public UserSendFeedbackRequest userSendFeedbackRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(8)]
-        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
+        public UserSendMessageAllRequest userSendMessageAllRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(9)]
-        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(10)]
-        public AgentObserveRequest agentObserveRequest { get; set; }
+        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(11)]
-        public AgentMoveRequest agentMoveRequest { get; set; }
+        public AgentObserveRequest agentObserveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(12)]
-        public AgentInteractRequest agentInteractRequest { get; set; }
+        public AgentMoveRequest agentMoveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(13)]
-        public AgentSelectRequest agentSelectRequest { get; set; }
+        public AgentInteractRequest agentInteractRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(14)]
-        public AgentInputRequest agentInputRequest { get; set; }
+        public AgentSelectRequest agentSelectRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(15)]
-        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+        public AgentInputRequest agentInputRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(16)]
-        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(17)]
-        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(18)]
-        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
+        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(19)]
-        public MemoryBackupRequest memoryBackupRequest { get; set; }
+        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(20)]
-        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+        public MemoryBackupRequest memoryBackupRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(21)]
+        public MemoryRestoreRequest memoryRestoreRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(22)]
         public MemoryDeleteCurrentRequest memoryDeleteCurrentRequest { get; set; }
 
     }
@@ -531,6 +534,26 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"user_message")]
         [global::System.ComponentModel.DefaultValue("")]
         public string UserMessage { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"force_interrupt")]
+        public bool ForceInterrupt { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class UserSendFeedbackRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"user_feedback")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string UserFeedback { get; set; } = "";
 
         [global::ProtoBuf.ProtoMember(3, Name = @"force_interrupt")]
         public bool ForceInterrupt { get; set; }

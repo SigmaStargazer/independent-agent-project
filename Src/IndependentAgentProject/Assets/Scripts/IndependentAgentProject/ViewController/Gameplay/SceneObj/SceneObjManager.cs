@@ -134,7 +134,7 @@ namespace IndependentAgentProject
         /// <summary>
         /// 向指定Agent发送消息
         /// </summary>
-        public bool SendMessageToAgent(string agentName, string msg)
+        public bool SendMessageToAgent(string agentName, string msg, bool forceInterrupt = false)
         {
             if (string.IsNullOrEmpty(agentName))
                 return false;
@@ -146,21 +146,21 @@ namespace IndependentAgentProject
                 return false;
             }
 
-            targetAgent.SendMessageToAgent(msg);
+            targetAgent.SendMessageToAgent(msg,forceInterrupt);
             return true;
         }
 
         /// <summary>
         /// 向所有Agent广播消息
         /// </summary>
-        public void BroadcastMessageToAgents(string msg)
+        public void BroadcastMessageToAgents(string msg, bool forceInterrupt = false)
         {
             List<AIPlayer> agents = mSceneObjs.OfType<AIPlayer>().ToList();
             foreach (AIPlayer agent in agents)
             {
                 if (agent != null)
                 {
-                    agent.SendMessageToAgent(msg);
+                    agent.SendMessageToAgent(msg, forceInterrupt);
                 }
             }
 

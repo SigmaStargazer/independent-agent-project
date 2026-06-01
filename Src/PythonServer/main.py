@@ -136,6 +136,20 @@ async def handle_user_send_msg_request(msg, context):
     except Exception as e:
         print(f"接收消息失败: {str(e)}")
 
+@server.on_message(message_pb2.UserSendFeedbackRequest)
+async def handle_user_send_feedback_request(msg, context):
+    agent = msg.agent
+    user_feedback = msg.user_feedback
+    force_interrupt = msg.force_interrupt
+    try:
+        await AgentManager().asend_feedback(
+            name=agent, 
+            feedback=user_feedback, 
+            force_interrupt=force_interrupt
+            )
+    except Exception as e:
+        print(f"接收反馈失败: {str(e)}")
+
 @server.on_message(message_pb2.UserSendMessageAllRequest)
 async def handle_user_send_msg_all_request(msg, context):
     user_message = msg.user_message

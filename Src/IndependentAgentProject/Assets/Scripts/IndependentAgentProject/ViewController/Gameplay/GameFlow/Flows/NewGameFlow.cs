@@ -19,6 +19,8 @@ namespace IndependentAgentProject
             this.TargetScene = firstLevelName;
             Steps = new List<IFlowStep>
             {
+                new StopAgentStep(),
+
                 new DeleteMemoryStep(),
 
                 new CreateAgentStep(agentName, agentDesc),

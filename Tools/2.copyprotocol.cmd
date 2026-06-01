@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 
 :: ================= 配置区域 =================
 :: 目标路径
-set DEST_PATH=..\Src\ShootingEditor2D\Assets\References
+set DEST_PATH=..\Src\IndependentAgentProject\Assets\References
 
 :: 源路径列表
 set SOURCES="..\Src\Lib\AgentProtocol\bin\Debug" "..\Src\Lib\Common\bin\Debug"

@@ -124,7 +124,7 @@ namespace IndependentAgentProject
                     mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
                     // 发送取消信息
                     string result = finishedActionRuntime.Result.Message;
-                    this.SendMessageToAgent($"[动作序列执行中断]{result}");
+                    this.SendFeedbackToAgent($"[动作序列执行中断]{result}");
 
                 }
                     return;
@@ -139,7 +139,7 @@ namespace IndependentAgentProject
 
                 if (finishedActionRuntime?.Result?.Message != null)
                 {
-                    this.SendMessageToAgent(finishedActionRuntime.Result.Message);
+                    this.SendFeedbackToAgent(finishedActionRuntime.Result.Message);
                 }
             }
         }
@@ -253,7 +253,25 @@ namespace IndependentAgentProject
         /// 发送消息给Agent
         /// </summary>
         /// <param name="msg"></param>
-        public void SendMessageToAgent(string msg)
+        public void SendMessageToAgent(string msg, bool forceInterrupt = false)
+        {
+            string text = this.CreateMessageText(msg);
+            // 发送给Agent
+            AgentService.Instance.SendUserMessage(this.Name, text, forceInterrupt);
+            // 测试用
+            Debug.Log($"已发送消息给{this.Name}: {text}");
+        }
+
+        public void SendFeedbackToAgent(string feedback, bool forceInterrupt = false)
+        {
+            string text = this.CreateMessageText(feedback);
+            // 发送给Agent
+            AgentService.Instance.SendUserFeedback(this.Name, text, forceInterrupt);
+            // 测试用
+            Debug.Log($"已发送反馈给{this.Name}: {text}");
+        }
+
+        private string CreateMessageText(string msg)
         {
             // 获取环境信息
             List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
@@ -268,11 +286,8 @@ namespace IndependentAgentProject
             messageToSend.Add($"<当前场景>\n{sceneInfo}\n</当前场景>");
             messageToSend.Add($"<环境>\n{sceneObjsInfoDesc}\n</环境>");
 
-            string result = string.Join("\n\n", messageToSend);
-            // 发送给Agent
-            AgentService.Instance.SendUserMessage(this.Name, result);
-            // 测试用
-            Debug.Log($"已发送消息给{this.Name}: {result}");
+            string text = string.Join("\n\n", messageToSend);
+            return text;
         }
 
         #region Agent动作指令。当AgentManager收到服务端LLM的指令时，会调用相应Agent示例的下列方法
@@ -925,8 +940,8 @@ namespace IndependentAgentProject
 
                 string messageToSend = $"[动作序列执行结果] 动作序列已执行完成！\n<动作序列日志>{actionSequenceLog}<\\动作序列日志>";
 
-                // 发送完成消息
-                this.SendMessageToAgent(messageToSend);
+                // 发送完成反馈
+                this.SendFeedbackToAgent(messageToSend);
             } 
         }
         #endregion

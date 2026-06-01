@@ -63,6 +63,7 @@ tools = [
         base_tools.communicate_to_user,
         #  base_tools.get_agent_list, 
         base_tools.get_cur_time,
+        base_tools.set_focus_state,
         base_tools.search_fact_memories,
         base_tools.search_episode_memories,
         base_tools.observe_cmd,
@@ -79,12 +80,14 @@ tools = [
         #  base_tools.remove_alarm
         ]
 
-# # 测试工具列表
-# tools = [base_tools.get_cur_time,
-#          base_tools.search_fact_memories,
-#          base_tools.search_episode_memories
-#          ]
-
+# # # 测试工具列表
+# tools = [
+#     base_tools.get_cur_time,
+#     base_tools.set_focus_state,
+#     base_tools.search_fact_memories,
+#     base_tools.search_episode_memories
+# ]
+         
 llm_with_tools = model.bind_tools(tools)
 
 MAX_CONTEXT_SIZE = 20
@@ -286,7 +289,10 @@ async def save_memory(state: State):
     await memory_manager.save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
     await aperf_print(f"[{name}]存储记忆任务启动，后台进行中")
 
-    return {"mem_to_save": ""}
+    return {
+        "mem_to_save": "",
+        "logged_tool_call_ids": []
+        }
 
 # 条件
 def route_chatbot(state: State) -> Literal["tools", "save_memory"]:
@@ -338,7 +344,7 @@ class Agent:
         # 反馈消息队列。移动、动作序列等需要先结束对话再等到结果的工具，应把反馈信息通过asend_feedback返回
         self.feedback_queue = asyncio.Queue() 
         self.runtime_state = {
-            "focus_mode": False
+            "focus_state": False
         }
 
         self.memory = MemorySaver()
@@ -368,7 +374,7 @@ class Agent:
         # self._has_unfinished_checkpoint = False
         # self._interrupt_memory_saved = False
 
-        # 记录message的时间，message风暴时自动进入专注模式
+        # 记录message的时间，message风暴时自动进入专注状态
         self._message_interval = []
 
         print(f"[{self.name}]Agent is created.")
@@ -424,13 +430,13 @@ class Agent:
             # if has_checkpoint:
             #     print(f"[{self.name}] resume pending checkpoint")
 
-    async def asend_message(self, message: str):
-        await self._asend_message(message, is_feedback=False)
+    async def asend_message(self, message: str, force_interrupt: bool = False):
+        await self._asend_message(message, is_feedback=False, force_interrupt=force_interrupt)
 
-    async def asend_feedback(self, feedback: str):
-        await self._asend_message(feedback, is_feedback=True)
+    async def asend_feedback(self, feedback: str, force_interrupt: bool = False):
+        await self._asend_message(feedback, is_feedback=True, force_interrupt=force_interrupt)
 
-    async def _asend_message(self, message: str, is_feedback: bool = False):
+    async def _asend_message(self, message: str, is_feedback: bool = False, force_interrupt: bool = False):
         # =========================
         # 0. 记录消息时间
         # =========================
@@ -438,14 +444,19 @@ class Agent:
         self._message_interval.append(real_time)
         # 只保留5秒
         self._message_interval[:] = [t for t in self._message_interval if t > real_time - 5]
-        # 如果短时间内消息数达到5条，强制进专注模式：
+        # 如果短时间内消息数达到5条，强制进专注状态：
         if len(self._message_interval) >= 5:
-            self.runtime_state["focus_mode"] = True
+            self.runtime_state["focus_state"] = True
         # =========================
         # 1. 打断
         # =========================
-        # if not (self.runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
-        #     await self.ainterrupt(reason="被打断")
+        should_interrupt = (
+            force_interrupt # 强制打断时，必定打断
+            or not self.runtime_state["focus_state"] # 非专注状态时，打断
+            or (self.runtime_state["focus_state"] and is_feedback) # 专注状态下，仅反馈消息打断
+        )
+        if should_interrupt:
+            await self.ainterrupt(reason="被打断")
         # =========================
         # 2. 发送消息
         # =========================
@@ -466,8 +477,8 @@ class Agent:
         # =========================
         # 3. 重启
         # =========================
-        # if not (self.runtime_state["focus_mode"] and not force_interrupt):
-        #     await self.astart()
+        if should_interrupt:
+            await self.astart()
     
     async def _drain_items(self,
         include_message_queue: bool,
@@ -593,7 +604,7 @@ class Agent:
                         )
                         # ainvoke 已正式开始
                         response = await self._invoke_task
-                        self.runtime_state["focus_mode"] = False # 正常完成了一轮对话，关闭专注模式
+                        self.runtime_state["focus_state"] = False # 正常完成了一轮对话，关闭专注状态
                         output = response["messages"][-1].content
                         print(f"[{self.name}]Response: {output}")
                         break # 成功则跳出重试，回到最外层等待新消息
@@ -827,7 +838,7 @@ class Agent:
             # =========================
             # 3. clear runtime state
             # =========================
-            self.runtime_state["focus_mode"] = False
+            self.runtime_state["focus_state"] = False
             # =========================
             # 4. clear resume state
             # =========================

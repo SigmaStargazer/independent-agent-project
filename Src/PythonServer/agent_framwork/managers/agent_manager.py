@@ -163,14 +163,33 @@ LIMIT 1
             error_msg = f"[Agent Manager]向Agent发送消息失败: Agent {name} 不存在"
             print(error_msg)
             raise ValueError(error_msg)
-        # 2. 判读是否需要打断
-        if not (self.agents[name].runtime_state["focus_mode"] and not force_interrupt):# 专注模式下且非强制打断时，不打断
-            await self.agents[name].ainterrupt(reason="被打断")
+        # # 2. 判读是否需要打断
+        # if not (self.agents[name].runtime_state["focus_state"] and not force_interrupt):# 专注状态下且非强制打断时，不打断
+        #     await self.agents[name].ainterrupt(reason="被打断")
         # 3. 发送消息
-        await self.agents[name].asend_message(message)
-        # 4. 重启
-        if not (self.agents[name].runtime_state["focus_mode"] and not force_interrupt):
-            await self.agents[name].astart()
+        await self.agents[name].asend_message(message, force_interrupt)
+        # # 4. 重启
+        # if not (self.agents[name].runtime_state["focus_state"] and not force_interrupt):
+        #     await self.agents[name].astart()
+
+    async def asend_feedback(self, name: str, feedback: str, force_interrupt: bool = False):
+        """
+        发送反馈给指定Agent
+        Args:
+            name(str): Agent名称
+            feedback(str): 反馈内容
+            force_interrupt(bool): 是否强制打断
+        """
+        # 1. 检查Agent是否存在
+        if name not in self.agents:
+            error_msg = f"[Agent Manager]向Agent发送反馈失败: Agent {name} 不存在"
+            print(error_msg)
+            raise ValueError(error_msg)
+        # 2. 发送反馈
+        await self.agents[name].asend_feedback(feedback, force_interrupt)
+        # # 3. 重启
+        # if not (self.agents[name].runtime_state["focus_state"] and not force_interrupt):
+        #     await self.agents[name].astart()
 
     async def asend_message_all(
         self,

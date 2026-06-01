@@ -617,22 +617,25 @@ limit: int = 10):
     return mem_episode
 # endregion 记忆工具
 
-# region 专注模式工具
+# region 专注状态工具
 @tool
-async def set_focus_mode(
+async def set_focus_state(
     agent: Annotated[str, InjectedState("name")], 
     config: RunnableConfig,
-    focus_mode: bool):
-    """设置专注模式
-    当专注模式开启时，你将不再被外界信息干扰（紧急信息除外），直至本轮对话结束。
+    focus_state: bool):
+    """设置专注状态
+    当专注状态开启时，你将不再被外界信息干扰（紧急信息除外），直至本轮对话结束。
     Args:
-        focus_mode(bool): 专注模式。True表示开启，False表示关闭
+        focus_state(bool): 专注状态。True表示开启，False表示关闭
     Return:
-        str: 专注模式设置结果
+        str: 当前是否为专注状态
     """
     runtime_state = config["configurable"]["runtime_state"]
-    runtime_state["focus_mode"] = focus_mode
-    return f"专注模式已设置为{focus_mode}"
+    runtime_state["focus_state"] = focus_state
+    if focus_state:
+        return f"当前处于专注状态，正在聚精会神地完成眼下的事情！"
+    else:
+        return f"当前不处于专注状态，可以接收到来着外界的信息！"
 
 
 # region 闹钟工具

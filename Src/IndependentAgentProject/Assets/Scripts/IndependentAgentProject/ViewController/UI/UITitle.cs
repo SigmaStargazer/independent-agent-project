@@ -10,15 +10,21 @@ namespace IndependentAgentProject
 {
     public class UITitle : MonoBehaviour
     {
-        public string firstLevelName = "Level1";
-        public string agentName = "小明";
-        public string agentDesc = "是一个帮助机器人";
-
-        public GameObject warningPanel;
+        [Header("第一关名称")]
+        [SerializeField]
+        private string mFirstLevelName = "Level1";
+        [Header("创建Agent配置")]
+        [SerializeField]
+        private string mAgentName = "小明";
+        [SerializeField]
+        private string mAgentDesc = "是一个帮助机器人";
+        [Header("新游戏弹窗")]
+        [SerializeField]
+        private GameObject mNewGameWarmimhPanel;
 
         void Awake()
         {
-            warningPanel.SetActive(false);
+            mNewGameWarmimhPanel.SetActive(false);
         }
         void Start()
         {
@@ -33,7 +39,7 @@ namespace IndependentAgentProject
 
         public void OnClickNewGame()
         {
-            GameFlowManager.Instance.StartNewGame(firstLevelName, agentName, agentDesc).Forget(Debug.LogException);
+            GameFlowManager.Instance.StartNewGame(mFirstLevelName, mAgentName, mAgentDesc).Forget(Debug.LogException);
         }
 
         public void OnClickContinueGame()

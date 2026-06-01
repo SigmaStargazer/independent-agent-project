@@ -465,7 +465,7 @@ namespace Services
 
         public void SendUserMessage(string agent, string userMessage, bool forceInterrupt = false)
         {
-            Debug.LogFormat("UserMessageRequest::agent:{0} userMessage:{1}", agent, userMessage);
+            Debug.LogFormat($"UserMessageRequest::agent:{agent} userMessage:{userMessage} forceInterrupt:{forceInterrupt}");
             NetMessage message = new NetMessage();
             message.Request = new NetMessageRequest();
             message.Request.userSendMessageRequest = new UserSendMessageRequest();
@@ -485,6 +485,27 @@ namespace Services
                 {
                     this.ConnectToServer();
                 }
+            }
+        }
+
+        public void SendUserFeedback(string agent, string userFeedback, bool forceInterrupt = false)
+        {
+            Debug.LogFormat($"UserFeedbackRequest::agent:{agent} userFeedback:{userFeedback} forceInterrupt:{forceInterrupt}");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.userSendFeedbackRequest = new UserSendFeedbackRequest();
+            message.Request.userSendFeedbackRequest.Agent = agent;
+            message.Request.userSendFeedbackRequest.UserFeedback = userFeedback;
+            message.Request.userSendFeedbackRequest.ForceInterrupt = forceInterrupt;
+
+            // 判断连上没
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                pendingMessages.Enqueue(message);
             }
         }
 
