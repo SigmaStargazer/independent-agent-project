@@ -20,13 +20,15 @@ namespace IndependentAgentProject
             this.TargetScene = data.LevelName;
             Steps = new List<IFlowStep>
             {
+                new StopAgentStep(),
+
                 new RestoreMemoryStep(0),
 
                 new LoadAgentStep(),
 
-                new StartAgentStep(1),
-
                 new LoadSceneStep(this.TargetScene),
+
+                new StartAgentStep(1),
             };
         }
     }

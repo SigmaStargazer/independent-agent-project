@@ -208,18 +208,8 @@ async def handle_memory_restore_request(msg, context):
     slot_id = msg.slot_id
     response = message_pb2.MemoryRestoreResponse()
     try:
-        print("停止时间")
-        await TimeSystem().apause_time()
-        print("停止 Agent...")
-        result = await AgentManager().aremove_all()
         print("读档...")
         result = await MemoryManager().restore_memory(slot_id=slot_id)
-        # print("重新初始化 MemoryManager...")
-        # result = await MemoryManager().initialize()
-        print("重新加载 Agent...")
-        agent_names = await AgentManager().aload_agent_all()
-        print("重新启动 Agent...")
-        await AgentManager().astart_all()
         response.success = True
     except Exception as e:
         response.success = False
