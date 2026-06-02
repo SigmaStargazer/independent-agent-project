@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace IndependentAgentProject
 {
@@ -53,6 +54,14 @@ namespace IndependentAgentProject
 
                     try
                     {
+                        var semanticCheck = ValidateNearestInteractableIndexReference(step.Condition, context);
+                        if (semanticCheck != null)
+                        {
+                            results.Add(semanticCheck);
+                            index++;
+                            continue;
+                        }
+
                         bool ok = mInterpreter.Eval<bool>(step.Condition);
                         result.Status = ok ? ConditionEvalStatus.True : ConditionEvalStatus.False;
                     }
@@ -108,6 +117,56 @@ namespace IndependentAgentProject
             mInterpreter.SetVariable("actionTime", context.ActionTime);
             mInterpreter.SetVariable("canInteract", context.CanInteract);
             mInterpreter.SetVariable("nearestInteractableIndex", context.NearestInteractableIndex);
+        }
+
+        private ConditionEvalResult ValidateNearestInteractableIndexReference(string condition, ConditionContext context)
+        {
+            if (string.IsNullOrWhiteSpace(condition))
+                return null;
+
+            // 匹配:
+            // nearestInteractableIndex == 7
+            // nearestInteractableIndex!=3
+            // nearestInteractableIndex == 12
+            var matches = Regex.Matches(condition,
+                @"nearestInteractableIndex\s*(==|!=)\s*(\d+)");
+
+            foreach (Match match in matches)
+            {
+                int objIndex;
+                objIndex = int.Parse(match.Groups[2].Value);
+                // Index越界
+                if (objIndex < 0 || objIndex >= context.ObjectsSrc.Count)
+                {
+                    return new ConditionEvalResult
+                    {
+                        Status = ConditionEvalStatus.Error,
+                        ErrorMessage = $"nearestInteractableIndex引用了不存在的objects[{objIndex}]"
+                    };
+                }
+
+                var obj = context.ObjectsSrc[objIndex];
+                if (obj is not IInteractable interactable)
+                {
+                    return new ConditionEvalResult
+                    {
+                        Status = ConditionEvalStatus.Error,
+                        ErrorMessage =$"objects[{objIndex}]({obj.Name})无法交互，不能用于nearestInteractableIndex判断。" +
+                        $"nearestInteractableIndex只能引用可交互对象。若目标是平台、墙体、悬崖等场景物体，请改用displacement或objects[{objIndex}].Position相关条件。"
+                    };
+                }
+                if (!interactable.IsInteractable)
+                {
+                    return new ConditionEvalResult
+                    {
+                        Status = ConditionEvalStatus.Error,
+                        ErrorMessage = $"objects[{objIndex}]({obj.Name})无法交互，不能用于nearestInteractableIndex判断。" +
+                        $"nearestInteractableIndex只能引用可交互对象。若目标是平台、墙体、悬崖等场景物体，请改用displacement或objects[{objIndex}].Position相关条件。"
+                    };
+                }
+            }
+
+            return null;
         }
     }
 }
