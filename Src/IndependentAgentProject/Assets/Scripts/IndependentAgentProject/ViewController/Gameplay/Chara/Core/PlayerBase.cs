@@ -21,7 +21,6 @@ namespace IndependentAgentProject
             {
                 if (this.GetStateName() != "Dead")
                 {
-                    this.StopAction();
                     ChangeState("Idle");
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -57,7 +56,6 @@ namespace IndependentAgentProject
         public override void OnDeadEnter()
         {
             base.OnDeadEnter();
-            this.StopAction();
             this.SendCommand<KillPlayerCommand>();
         }
         #endregion

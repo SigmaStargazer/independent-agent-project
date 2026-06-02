@@ -26,6 +26,9 @@ namespace IndependentAgentProject
         // 用于检查撞击场景对象时停止
         private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
 
+        // Action的上下文
+        private ActionRuntime mCurActionRuntime;
+
         //private ActionSequenceRuntime mCurActionSequenceRuntime = new ActionSequenceRuntime();
         private ActionSequenceRuntime mCurActionSequenceRuntime;
         private ActionSequenceRuntime mPlanningActionSequenceRuntime;
@@ -48,6 +51,42 @@ namespace IndependentAgentProject
                     }
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            // 判断是否有未完成的curActionCtx达到停止条件
+            if (mCurActionRuntime != null)
+            {
+                mCurActionRuntime.Displacement = Mathf.Abs(transform.position.x - mCurActionRuntime.StartPostion.x);
+                mCurActionRuntime.ActionTime += Time.deltaTime;
+                // ========= 1. 错误终止优先 =========
+                if (mCurActionRuntime.ErrorConditionFunc?.Invoke() == true)
+                {
+                    mCurActionRuntime.State = ActionState.Failed;
+                    var finishedRuntime = mCurActionRuntime;
+                    mCurActionRuntime = null;
+
+                    ChangeState("Idle");
+                    OnActionFinished(finishedRuntime);// 触发Hook
+                    return;
+                }
+                // ========= 2. 正常完成 =========
+                // 触发结束条件，并清空curActionCtx
+                if (mCurActionRuntime.CompleteConditionFunc?.Invoke() == true)
+                {
+                    mCurActionRuntime.State = ActionState.Done;
+                    var finishedRuntime = mCurActionRuntime;
+                    mCurActionRuntime = null;
+
+                    ChangeState("Idle");
+                    OnActionFinished(finishedRuntime);// 触发Hook
+                    return;
+                }
+            }
+
+            mCurState?.OnUpdate(this);
         }
 
         protected override void OnEnable()
@@ -291,6 +330,17 @@ namespace IndependentAgentProject
         }
 
         #region Agent动作指令。当AgentManager收到服务端LLM的指令时，会调用相应Agent示例的下列方法
+
+        public void StopAction()
+        {
+            if (mCurActionRuntime != null)
+            {
+                mCurActionRuntime.State = ActionState.Aborted;
+                mCurActionRuntime = null;
+            }
+            return;
+        }
+
         /// <summary>
         /// 移动
         /// </summary>

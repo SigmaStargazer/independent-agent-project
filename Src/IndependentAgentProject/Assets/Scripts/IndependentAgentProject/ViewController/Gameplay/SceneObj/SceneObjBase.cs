@@ -54,9 +54,6 @@ namespace IndependentAgentProject
         public virtual void OnMoveFixedUpdate() { }
         public virtual void OnMoveExit() { }
 
-        // Action的上下文
-        protected ActionRuntime mCurActionRuntime;
-
         protected virtual void OnActionFinished(ActionRuntime finishedActionRuntime) { }
 
         // 交互区域列表（在 Inspector 里拖拽，或 Awake 自动收集）
@@ -81,37 +78,7 @@ namespace IndependentAgentProject
 
         protected virtual void Update()
         {
-            // 判断是否有未完成的curActionCtx达到停止条件
-            if (mCurActionRuntime != null)
-            {
-                mCurActionRuntime.Displacement = Mathf.Abs(transform.position.x - mCurActionRuntime.StartPostion.x);
-                mCurActionRuntime.ActionTime += Time.deltaTime;
-                // ========= 1. 错误终止优先 =========
-                if (mCurActionRuntime.ErrorConditionFunc?.Invoke() == true)
-                {
-                    mCurActionRuntime.State = ActionState.Failed;
-                    var finishedRuntime = mCurActionRuntime;
-                    mCurActionRuntime = null;
 
-                    ChangeState("Idle");
-                    OnActionFinished(finishedRuntime);// 触发Hook
-                    return;
-                }
-                // ========= 2. 正常完成 =========
-                // 触发结束条件，并清空curActionCtx
-                if (mCurActionRuntime.CompleteConditionFunc?.Invoke() == true)
-                {
-                    mCurActionRuntime.State = ActionState.Done;
-                    var finishedRuntime = mCurActionRuntime;
-                    mCurActionRuntime = null;
-
-                    ChangeState("Idle");
-                    OnActionFinished(finishedRuntime);// 触发Hook
-                    return;
-                }
-            }
-
-            mCurState?.OnUpdate(this);
         }
         protected virtual void FixedUpdate()
         {
@@ -158,16 +125,6 @@ namespace IndependentAgentProject
         public string GetStateName()
         {
             return mCurState?.Name ?? "Idle";
-        }
-
-        public void StopAction()
-        {
-            if (mCurActionRuntime != null)
-            {
-                mCurActionRuntime.State = ActionState.Aborted;
-                mCurActionRuntime = null;
-            }
-            return;
         }
 
         #region 交互区域判断
