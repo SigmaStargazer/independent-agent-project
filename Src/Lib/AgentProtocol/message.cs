@@ -292,55 +292,64 @@ namespace SkillBridge.Message
         public AgentInterruptRequest agentInterruptRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(6)]
-        public UserSendMessageRequest userSendMessageRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(7)]
-        public UserSendFeedbackRequest userSendFeedbackRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(8)]
-        public UserSendMessageAllRequest userSendMessageAllRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(9)]
-        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(10)]
-        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(11)]
-        public AgentObserveRequest agentObserveRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(12)]
-        public AgentMoveRequest agentMoveRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(13)]
-        public AgentInteractRequest agentInteractRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(14)]
-        public AgentSelectRequest agentSelectRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(15)]
-        public AgentInputRequest agentInputRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(16)]
-        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(17)]
-        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(18)]
-        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(19)]
-        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
-
-        [global::ProtoBuf.ProtoMember(20)]
         public MemoryBackupRequest memoryBackupRequest { get; set; }
 
-        [global::ProtoBuf.ProtoMember(21)]
+        [global::ProtoBuf.ProtoMember(7)]
         public MemoryRestoreRequest memoryRestoreRequest { get; set; }
 
-        [global::ProtoBuf.ProtoMember(22)]
+        [global::ProtoBuf.ProtoMember(8)]
         public MemoryDeleteCurrentRequest memoryDeleteCurrentRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(9)]
+        public UserSendMessageRequest userSendMessageRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(10)]
+        public UserSendFeedbackRequest userSendFeedbackRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(11)]
+        public UserSendMessageAllRequest userSendMessageAllRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(12)]
+        public SendToolResultMessageRequest sendToolResultMessageRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(13)]
+        public AgentSendMessageRequest agentSendMessageRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(14)]
+        public AgentStopActionRequest agentStopActionRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(15)]
+        public AgentObserveRequest agentObserveRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(16)]
+        public AgentMonitorTargetRequest agentMonitorTargetRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(17)]
+        public AgentMoveRequest agentMoveRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(18)]
+        public AgentFollowTargetRequest agentFollowTargetRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(19)]
+        public AgentInteractRequest agentInteractRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(20)]
+        public AgentSelectRequest agentSelectRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(21)]
+        public AgentInputRequest agentInputRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(22)]
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(23)]
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(24)]
+        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(25)]
+        public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
     }
 
@@ -521,6 +530,87 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryBackupRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
+        public int SlotId { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryBackupResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryRestoreRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
+        public int SlotId { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryRestoreResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryDeleteCurrentRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class MemoryDeleteCurrentResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class UserSendMessageRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -619,6 +709,27 @@ namespace SkillBridge.Message
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class AgentStopActionRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"action_type")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string ActionType { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class AgentObserveRequest : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -632,6 +743,26 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
         [global::System.ComponentModel.DefaultValue("")]
         public string RequestId { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentMonitorTargetRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"object_index")]
+        public int ObjectIndex { get; set; }
 
     }
 
@@ -651,6 +782,90 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(3, Name = @"distance")]
         public float Distance { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentFollowTargetRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"object_index")]
+        public int ObjectIndex { get; set; }
+
+        [global::ProtoBuf.ProtoMember(4, Name = @"min_distance")]
+        public float MinDistance { get; set; }
+
+        [global::ProtoBuf.ProtoMember(5, Name = @"max_distance")]
+        public float MaxDistance { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentInteractRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentSelectRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"selection")]
+        public int Selection { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentInputRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"input_text")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string InputText { get; set; } = "";
 
     }
 
@@ -722,145 +937,6 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
         [global::System.ComponentModel.DefaultValue("")]
         public string RequestId { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class AgentInteractRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Agent { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string RequestId { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class AgentSelectRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Agent { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string RequestId { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(3, Name = @"selection")]
-        public int Selection { get; set; }
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class AgentInputRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Agent { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string RequestId { get; set; } = "";
-
-        [global::ProtoBuf.ProtoMember(3, Name = @"input_text")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string InputText { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class MemoryBackupRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
-        public int SlotId { get; set; }
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class MemoryBackupResponse : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
-        public bool Success { get; set; }
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Errormsg { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class MemoryRestoreRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"slot_id")]
-        public int SlotId { get; set; }
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class MemoryRestoreResponse : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
-        public bool Success { get; set; }
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Errormsg { get; set; } = "";
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class MemoryDeleteCurrentRequest : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class MemoryDeleteCurrentResponse : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
-        public bool Success { get; set; }
-
-        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string Errormsg { get; set; } = "";
 
     }
 

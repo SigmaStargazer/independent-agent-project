@@ -60,12 +60,12 @@ namespace IndependentAgentProject
                 if (sceneObjInfo.IsRangeDirection)
                 {
                     directionStr =
-                        $"方位: 从{sceneObjInfo.RangeLeftDirection}方向{sceneObjInfo.RangeLeftDistance}m " +
-                        $"~ {sceneObjInfo.RangeRightDirection}方向{sceneObjInfo.RangeRightDistance}m";
+                        $"范围: 从你的 {sceneObjInfo.RangeLeftDirection}方向{sceneObjInfo.RangeLeftDistance}m " +
+                        $"到你的 {sceneObjInfo.RangeRightDirection}方向{sceneObjInfo.RangeRightDistance}m 范围";
                 }
                 else
                 {
-                    directionStr = $"方位:{sceneObjInfo.Direction}方向 {sceneObjInfo.Distance}m";
+                    directionStr = $"方位:在你的 {sceneObjInfo.Direction}方向 {sceneObjInfo.Distance}m 位置";
                 }
 
                 sceneObjInfoDesc = $"{sceneObjInfo.Name}: {sceneObjInfo.Desc}\n" +

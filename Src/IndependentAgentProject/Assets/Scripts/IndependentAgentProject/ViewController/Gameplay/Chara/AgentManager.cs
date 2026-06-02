@@ -26,8 +26,11 @@ namespace IndependentAgentProject
 
         void OnEnable()
         {
+            AgentService.Instance.OnStopAction += this.StopAction;
             AgentService.Instance.OnObserve += this.Observe;
+            AgentService.Instance.OnMonitorTarget += this.MonitorTarget;
             AgentService.Instance.OnMoveAgent += this.Move;
+            AgentService.Instance.OnFollowTarget += this.FollowTarget;
             AgentService.Instance.OnInteract += this.Interact;
             AgentService.Instance.OnSelect += this.Select;
             AgentService.Instance.OnInput += this.TextInput;
@@ -40,8 +43,11 @@ namespace IndependentAgentProject
 
         void OnDisable()
         {
+            AgentService.Instance.OnStopAction -= this.StopAction;
             AgentService.Instance.OnObserve -= this.Observe;
+            AgentService.Instance.OnMonitorTarget -= this.MonitorTarget;
             AgentService.Instance.OnMoveAgent -= this.Move;
+            AgentService.Instance.OnFollowTarget -= this.FollowTarget;
             AgentService.Instance.OnInteract -= this.Interact;
             AgentService.Instance.OnSelect -= this.Select;
             AgentService.Instance.OnInput -= this.TextInput;
@@ -77,12 +83,20 @@ namespace IndependentAgentProject
         #endregion
 
         #region Ω” ’Agent÷∏¡Ó¬ﬂº≠
+        private void StopAction(string agent, string requestId, string actionType)
+        {
+            throw new NotImplementedException();
+        }
         private void Observe(string agent, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
                 agentObj.Observe(requestId);
             }
+        }
+        private void MonitorTarget(string agent, string requestId, int objectIndex)
+        {
+            throw new NotImplementedException();
         }
 
         private void Move(string agent, bool isRight, float distance)
@@ -91,6 +105,10 @@ namespace IndependentAgentProject
             {
                 agentObj.Move(isRight, distance);
             }
+        }
+        private void FollowTarget(string agent, string requestId, int objectIndex, float minDistance, float maxDistance)
+        {
+            throw new NotImplementedException();
         }
 
         private void Interact(string agent, string requestId)

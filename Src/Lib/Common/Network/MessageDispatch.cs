@@ -24,23 +24,34 @@ namespace Network
             if (message.sceneStartRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStartRequest); }
             if (message.sceneStopRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sceneStopRequest); }
             if (message.agentInterruptRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentInterruptRequest);}
+
+            if (message.memoryBackupRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryBackupRequest); }
+            if (message.memoryRestoreRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryRestoreRequest); }
+            if (message.memoryDeleteCurrentRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryDeleteCurrentRequest); }
+
             if (message.userSendMessageRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.userSendMessageRequest); }
             if (message.userSendFeedbackRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.userSendFeedbackRequest);}
             if (message.userSendMessageAllRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.userSendMessageAllRequest); }
+
             if (message.sendToolResultMessageRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.sendToolResultMessageRequest); }
             if (message.agentSendMessageRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentSendMessageRequest); }
+            if (message.agentStopActionRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStopActionRequest);}
+
             if (message.agentObserveRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentObserveRequest); }
+            if (message.agentMonitorTargetRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentMonitorTargetRequest);}
+
             if (message.agentMoveRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentMoveRequest); }
+            if (message.agentFollowTargetRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentFollowTargetRequest);}
+
             if (message.agentInteractRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentInteractRequest); }
             if (message.agentSelectRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentSelectRequest); }
             if (message.agentInputRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentInputRequest); }
+
+
             if (message.agentPlanActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentPlanActionSequenceRequest); }
             if (message.agentStartActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStartActionSequenceRequest); }
             if (message.agentContinueActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentContinueActionSequenceRequest); }
             if (message.agentStopActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStopActionSequenceRequest); }
-            if (message.memoryBackupRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryBackupRequest); }
-            if (message.memoryRestoreRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryRestoreRequest); }
-            if (message.memoryDeleteCurrentRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryDeleteCurrentRequest); }
         }
     }
 }

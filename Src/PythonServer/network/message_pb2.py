@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='SkillBridge.Message',
   syntax='proto3',
-  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"I\n\tNUserInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x06player\x18\x02 \x01(\x0b\x32 .SkillBridge.Message.NPlayerInfo\"R\n\x0bNPlayerInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x37\n\ncharacters\x18\x02 \x03(\x0b\x32#.SkillBridge.Message.NCharacterInfo\"\xeb\x01\n\x0eNCharacterInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03tid\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x31\n\x04type\x18\x04 \x01(\x0e\x32#.SkillBridge.Message.CHARACTER_TYPE\x12\x33\n\x05\x63lass\x18\x05 \x01(\x0e\x32$.SkillBridge.Message.CHARACTER_CLASS\x12\r\n\x05level\x18\x06 \x01(\x05\x12\r\n\x05mapId\x18\x07 \x01(\x05\x12,\n\x06\x65ntity\x18\x08 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"+\n\x08NVector3\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x87\x01\n\x07NEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\x30\n\tdirection\x18\x03 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\r\n\x05speed\x18\x04 \x01(\x05\"y\n\x0bNEntitySync\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x05\x65vent\x18\x02 \x01(\x0e\x32!.SkillBridge.Message.ENTITY_EVENT\x12,\n\x06\x65ntity\x18\x03 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"\xac\x02\n\nActionStep\x12\x11\n\tcondition\x18\x01 \x01(\t\x12/\n\x04wait\x18\x02 \x01(\x0b\x32\x1f.SkillBridge.Message.WaitActionH\x00\x12/\n\x04move\x18\x03 \x01(\x0b\x32\x1f.SkillBridge.Message.MoveActionH\x00\x12\x37\n\x08interact\x18\x04 \x01(\x0b\x32#.SkillBridge.Message.InteractActionH\x00\x12\x33\n\x06select\x18\x05 \x01(\x0b\x32!.SkillBridge.Message.SelectActionH\x00\x12\x31\n\x05input\x18\x06 \x01(\x0b\x32 .SkillBridge.Message.InputActionH\x00\x42\x08\n\x06\x61\x63tion\"\x0c\n\nWaitAction\"\x8d\x01\n\nMoveAction\x12<\n\tdirection\x18\x01 \x01(\x0e\x32).SkillBridge.Message.MoveAction.Direction\x12\x1f\n\x17\x61llowed_contact_obj_ids\x18\x02 \x03(\x05\" \n\tDirection\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\"\x10\n\x0eInteractAction\"!\n\x0cSelectAction\x12\x11\n\tselection\x18\x01 \x01(\x05\"!\n\x0bInputAction\x12\x12\n\ninput_text\x18\x01 \x01(\t\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\xbb\r\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12?\n\x10\x61gentLoadRequest\x18\x02 \x01(\x0b\x32%.SkillBridge.Message.AgentLoadRequest\x12\x41\n\x11sceneStartRequest\x18\x03 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12?\n\x10sceneStopRequest\x18\x04 \x01(\x0b\x32%.SkillBridge.Message.SceneStopRequest\x12I\n\x15\x61gentInterruptRequest\x18\x05 \x01(\x0b\x32*.SkillBridge.Message.AgentInterruptRequest\x12K\n\x16userSendMessageRequest\x18\x06 \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12M\n\x17userSendFeedbackRequest\x18\x07 \x01(\x0b\x32,.SkillBridge.Message.UserSendFeedbackRequest\x12Q\n\x19userSendMessageAllRequest\x18\x08 \x01(\x0b\x32..SkillBridge.Message.UserSendMessageAllRequest\x12W\n\x1csendToolResultMessageRequest\x18\t \x01(\x0b\x32\x31.SkillBridge.Message.SendToolResultMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\n \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\x12\x45\n\x13\x61gentObserveRequest\x18\x0b \x01(\x0b\x32(.SkillBridge.Message.AgentObserveRequest\x12?\n\x10\x61gentMoveRequest\x18\x0c \x01(\x0b\x32%.SkillBridge.Message.AgentMoveRequest\x12G\n\x14\x61gentInteractRequest\x18\r \x01(\x0b\x32).SkillBridge.Message.AgentInteractRequest\x12\x43\n\x12\x61gentSelectRequest\x18\x0e \x01(\x0b\x32\'.SkillBridge.Message.AgentSelectRequest\x12\x41\n\x11\x61gentInputRequest\x18\x0f \x01(\x0b\x32&.SkillBridge.Message.AgentInputRequest\x12[\n\x1e\x61gentPlanActionSequenceRequest\x18\x10 \x01(\x0b\x32\x33.SkillBridge.Message.AgentPlanActionSequenceRequest\x12]\n\x1f\x61gentStartActionSequenceRequest\x18\x11 \x01(\x0b\x32\x34.SkillBridge.Message.AgentStartActionSequenceRequest\x12\x63\n\"agentContinueActionSequenceRequest\x18\x12 \x01(\x0b\x32\x37.SkillBridge.Message.AgentContinueActionSequenceRequest\x12[\n\x1e\x61gentStopActionSequenceRequest\x18\x13 \x01(\x0b\x32\x33.SkillBridge.Message.AgentStopActionSequenceRequest\x12\x45\n\x13memoryBackupRequest\x18\x14 \x01(\x0b\x32(.SkillBridge.Message.MemoryBackupRequest\x12G\n\x14memoryRestoreRequest\x18\x15 \x01(\x0b\x32).SkillBridge.Message.MemoryRestoreRequest\x12S\n\x1amemoryDeleteCurrentRequest\x18\x16 \x01(\x0b\x32/.SkillBridge.Message.MemoryDeleteCurrentRequest\"\xde\x04\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x41\n\x11\x61gentLoadResponse\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.AgentLoadResponse\x12\x43\n\x12sceneStartResponse\x18\x03 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\x12\x41\n\x11sceneStopResponse\x18\x04 \x01(\x0b\x32&.SkillBridge.Message.SceneStopResponse\x12K\n\x16\x61gentInterruptResponse\x18\x05 \x01(\x0b\x32+.SkillBridge.Message.AgentInterruptResponse\x12G\n\x14memoryBackupResponse\x18\x06 \x01(\x0b\x32).SkillBridge.Message.MemoryBackupResponse\x12I\n\x15memoryRestoreResponse\x18\x07 \x01(\x0b\x32*.SkillBridge.Message.MemoryRestoreResponse\x12U\n\x1bmemoryDeleteCurrentResponse\x18\x08 \x01(\x0b\x32\x30.SkillBridge.Message.MemoryDeleteCurrentResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10\x41gentLoadRequest\"K\n\x11\x41gentLoadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0b\x61gent_names\x18\x02 \x03(\t\x12\x10\n\x08\x65rrormsg\x18\x03 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10SceneStopRequest\"6\n\x11SceneStopResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x15\x41gentInterruptRequest\x12\x0e\n\x06reason\x18\x01 \x01(\t\";\n\x16\x41gentInterruptResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"V\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"X\n\x17UserSendFeedbackRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x15\n\ruser_feedback\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"J\n\x19UserSendMessageAllRequest\x12\x14\n\x0cuser_message\x18\x01 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x02 \x01(\x08\"d\n\x1cSendToolResultMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x11\n\ttool_name\x18\x02 \x01(\t\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0e\n\x06result\x18\x04 \x01(\t\"<\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t\"8\n\x13\x41gentObserveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"E\n\x10\x41gentMoveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x10\n\x08is_right\x18\x02 \x01(\x08\x12\x10\n\x08\x64istance\x18\x03 \x01(\x02\"}\n\x1e\x41gentPlanActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x38\n\x0f\x61\x63tion_sequence\x18\x03 \x03(\x0b\x32\x1f.SkillBridge.Message.ActionStep\"D\n\x1f\x41gentStartActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"G\n\"AgentContinueActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"C\n\x1e\x41gentStopActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"9\n\x14\x41gentInteractRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"J\n\x12\x41gentSelectRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x11\n\tselection\x18\x03 \x01(\x05\"J\n\x11\x41gentInputRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ninput_text\x18\x03 \x01(\t\"&\n\x13MemoryBackupRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\"9\n\x14MemoryBackupResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x14MemoryRestoreRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\":\n\x15MemoryRestoreResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x1c\n\x1aMemoryDeleteCurrentRequest\"@\n\x1bMemoryDeleteCurrentResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01*2\n\x0e\x43HARACTER_TYPE\x12\n\n\x06Player\x10\x00\x12\x07\n\x03NPC\x10\x01\x12\x0b\n\x07Monster\x10\x02*@\n\x0f\x43HARACTER_CLASS\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07WARRIOR\x10\x01\x12\n\n\x06WIZARD\x10\x02\x12\n\n\x06\x41RCHER\x10\x03*%\n\x0f\x43HARACTER_STATE\x12\x08\n\x04IDLE\x10\x00\x12\x08\n\x04MOVE\x10\x01*]\n\x0c\x45NTITY_EVENT\x12\x0c\n\x08\x45VT_NONE\x10\x00\x12\x0c\n\x08\x45VT_IDLE\x10\x01\x12\x10\n\x0c\x45VT_MOVE_FWD\x10\x02\x12\x11\n\rEVT_MOVE_BACK\x10\x03\x12\x0c\n\x08\x45VT_JUMP\x10\x04* \n\tDIRECTION\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
+  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"I\n\tNUserInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x06player\x18\x02 \x01(\x0b\x32 .SkillBridge.Message.NPlayerInfo\"R\n\x0bNPlayerInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x37\n\ncharacters\x18\x02 \x03(\x0b\x32#.SkillBridge.Message.NCharacterInfo\"\xeb\x01\n\x0eNCharacterInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03tid\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x31\n\x04type\x18\x04 \x01(\x0e\x32#.SkillBridge.Message.CHARACTER_TYPE\x12\x33\n\x05\x63lass\x18\x05 \x01(\x0e\x32$.SkillBridge.Message.CHARACTER_CLASS\x12\r\n\x05level\x18\x06 \x01(\x05\x12\r\n\x05mapId\x18\x07 \x01(\x05\x12,\n\x06\x65ntity\x18\x08 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"+\n\x08NVector3\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x87\x01\n\x07NEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\x30\n\tdirection\x18\x03 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\r\n\x05speed\x18\x04 \x01(\x05\"y\n\x0bNEntitySync\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x05\x65vent\x18\x02 \x01(\x0e\x32!.SkillBridge.Message.ENTITY_EVENT\x12,\n\x06\x65ntity\x18\x03 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"\xac\x02\n\nActionStep\x12\x11\n\tcondition\x18\x01 \x01(\t\x12/\n\x04wait\x18\x02 \x01(\x0b\x32\x1f.SkillBridge.Message.WaitActionH\x00\x12/\n\x04move\x18\x03 \x01(\x0b\x32\x1f.SkillBridge.Message.MoveActionH\x00\x12\x37\n\x08interact\x18\x04 \x01(\x0b\x32#.SkillBridge.Message.InteractActionH\x00\x12\x33\n\x06select\x18\x05 \x01(\x0b\x32!.SkillBridge.Message.SelectActionH\x00\x12\x31\n\x05input\x18\x06 \x01(\x0b\x32 .SkillBridge.Message.InputActionH\x00\x42\x08\n\x06\x61\x63tion\"\x0c\n\nWaitAction\"\x8d\x01\n\nMoveAction\x12<\n\tdirection\x18\x01 \x01(\x0e\x32).SkillBridge.Message.MoveAction.Direction\x12\x1f\n\x17\x61llowed_contact_obj_ids\x18\x02 \x03(\x05\" \n\tDirection\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\"\x10\n\x0eInteractAction\"!\n\x0cSelectAction\x12\x11\n\tselection\x18\x01 \x01(\x05\"!\n\x0bInputAction\x12\x12\n\ninput_text\x18\x01 \x01(\t\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\xac\x0f\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12?\n\x10\x61gentLoadRequest\x18\x02 \x01(\x0b\x32%.SkillBridge.Message.AgentLoadRequest\x12\x41\n\x11sceneStartRequest\x18\x03 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12?\n\x10sceneStopRequest\x18\x04 \x01(\x0b\x32%.SkillBridge.Message.SceneStopRequest\x12I\n\x15\x61gentInterruptRequest\x18\x05 \x01(\x0b\x32*.SkillBridge.Message.AgentInterruptRequest\x12\x45\n\x13memoryBackupRequest\x18\x06 \x01(\x0b\x32(.SkillBridge.Message.MemoryBackupRequest\x12G\n\x14memoryRestoreRequest\x18\x07 \x01(\x0b\x32).SkillBridge.Message.MemoryRestoreRequest\x12S\n\x1amemoryDeleteCurrentRequest\x18\x08 \x01(\x0b\x32/.SkillBridge.Message.MemoryDeleteCurrentRequest\x12K\n\x16userSendMessageRequest\x18\t \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12M\n\x17userSendFeedbackRequest\x18\n \x01(\x0b\x32,.SkillBridge.Message.UserSendFeedbackRequest\x12Q\n\x19userSendMessageAllRequest\x18\x0b \x01(\x0b\x32..SkillBridge.Message.UserSendMessageAllRequest\x12W\n\x1csendToolResultMessageRequest\x18\x0c \x01(\x0b\x32\x31.SkillBridge.Message.SendToolResultMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\r \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\x12K\n\x16\x61gentStopActionRequest\x18\x0e \x01(\x0b\x32+.SkillBridge.Message.AgentStopActionRequest\x12\x45\n\x13\x61gentObserveRequest\x18\x0f \x01(\x0b\x32(.SkillBridge.Message.AgentObserveRequest\x12Q\n\x19\x61gentMonitorTargetRequest\x18\x10 \x01(\x0b\x32..SkillBridge.Message.AgentMonitorTargetRequest\x12?\n\x10\x61gentMoveRequest\x18\x11 \x01(\x0b\x32%.SkillBridge.Message.AgentMoveRequest\x12O\n\x18\x61gentFollowTargetRequest\x18\x12 \x01(\x0b\x32-.SkillBridge.Message.AgentFollowTargetRequest\x12G\n\x14\x61gentInteractRequest\x18\x13 \x01(\x0b\x32).SkillBridge.Message.AgentInteractRequest\x12\x43\n\x12\x61gentSelectRequest\x18\x14 \x01(\x0b\x32\'.SkillBridge.Message.AgentSelectRequest\x12\x41\n\x11\x61gentInputRequest\x18\x15 \x01(\x0b\x32&.SkillBridge.Message.AgentInputRequest\x12[\n\x1e\x61gentPlanActionSequenceRequest\x18\x16 \x01(\x0b\x32\x33.SkillBridge.Message.AgentPlanActionSequenceRequest\x12]\n\x1f\x61gentStartActionSequenceRequest\x18\x17 \x01(\x0b\x32\x34.SkillBridge.Message.AgentStartActionSequenceRequest\x12\x63\n\"agentContinueActionSequenceRequest\x18\x18 \x01(\x0b\x32\x37.SkillBridge.Message.AgentContinueActionSequenceRequest\x12[\n\x1e\x61gentStopActionSequenceRequest\x18\x19 \x01(\x0b\x32\x33.SkillBridge.Message.AgentStopActionSequenceRequest\"\xde\x04\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x41\n\x11\x61gentLoadResponse\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.AgentLoadResponse\x12\x43\n\x12sceneStartResponse\x18\x03 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\x12\x41\n\x11sceneStopResponse\x18\x04 \x01(\x0b\x32&.SkillBridge.Message.SceneStopResponse\x12K\n\x16\x61gentInterruptResponse\x18\x05 \x01(\x0b\x32+.SkillBridge.Message.AgentInterruptResponse\x12G\n\x14memoryBackupResponse\x18\x06 \x01(\x0b\x32).SkillBridge.Message.MemoryBackupResponse\x12I\n\x15memoryRestoreResponse\x18\x07 \x01(\x0b\x32*.SkillBridge.Message.MemoryRestoreResponse\x12U\n\x1bmemoryDeleteCurrentResponse\x18\x08 \x01(\x0b\x32\x30.SkillBridge.Message.MemoryDeleteCurrentResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10\x41gentLoadRequest\"K\n\x11\x41gentLoadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0b\x61gent_names\x18\x02 \x03(\t\x12\x10\n\x08\x65rrormsg\x18\x03 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10SceneStopRequest\"6\n\x11SceneStopResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x15\x41gentInterruptRequest\x12\x0e\n\x06reason\x18\x01 \x01(\t\";\n\x16\x41gentInterruptResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"&\n\x13MemoryBackupRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\"9\n\x14MemoryBackupResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x14MemoryRestoreRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\":\n\x15MemoryRestoreResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x1c\n\x1aMemoryDeleteCurrentRequest\"@\n\x1bMemoryDeleteCurrentResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"V\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"X\n\x17UserSendFeedbackRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x15\n\ruser_feedback\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"J\n\x19UserSendMessageAllRequest\x12\x14\n\x0cuser_message\x18\x01 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x02 \x01(\x08\"d\n\x1cSendToolResultMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x11\n\ttool_name\x18\x02 \x01(\t\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0e\n\x06result\x18\x04 \x01(\t\"<\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nai_message\x18\x02 \x01(\t\"P\n\x16\x41gentStopActionRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x13\n\x0b\x61\x63tion_type\x18\x03 \x01(\t\"8\n\x13\x41gentObserveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"T\n\x19\x41gentMonitorTargetRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x14\n\x0cobject_index\x18\x03 \x01(\x05\"E\n\x10\x41gentMoveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x10\n\x08is_right\x18\x02 \x01(\x08\x12\x10\n\x08\x64istance\x18\x03 \x01(\x02\"\x7f\n\x18\x41gentFollowTargetRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x14\n\x0cobject_index\x18\x03 \x01(\x05\x12\x14\n\x0cmin_distance\x18\x04 \x01(\x02\x12\x14\n\x0cmax_distance\x18\x05 \x01(\x02\"9\n\x14\x41gentInteractRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"J\n\x12\x41gentSelectRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x11\n\tselection\x18\x03 \x01(\x05\"J\n\x11\x41gentInputRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ninput_text\x18\x03 \x01(\t\"}\n\x1e\x41gentPlanActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x38\n\x0f\x61\x63tion_sequence\x18\x03 \x03(\x0b\x32\x1f.SkillBridge.Message.ActionStep\"D\n\x1f\x41gentStartActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"G\n\"AgentContinueActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"C\n\x1e\x41gentStopActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01*2\n\x0e\x43HARACTER_TYPE\x12\n\n\x06Player\x10\x00\x12\x07\n\x03NPC\x10\x01\x12\x0b\n\x07Monster\x10\x02*@\n\x0f\x43HARACTER_CLASS\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07WARRIOR\x10\x01\x12\n\n\x06WIZARD\x10\x02\x12\n\n\x06\x41RCHER\x10\x03*%\n\x0f\x43HARACTER_STATE\x12\x08\n\x04IDLE\x10\x00\x12\x08\n\x04MOVE\x10\x01*]\n\x0c\x45NTITY_EVENT\x12\x0c\n\x08\x45VT_NONE\x10\x00\x12\x0c\n\x08\x45VT_IDLE\x10\x01\x12\x10\n\x0c\x45VT_MOVE_FWD\x10\x02\x12\x11\n\rEVT_MOVE_BACK\x10\x03\x12\x0c\n\x08\x45VT_JUMP\x10\x04* \n\tDIRECTION\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -41,8 +41,8 @@ _RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5626,
-  serialized_end=5659,
+  serialized_start=6164,
+  serialized_end=6197,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT)
 
@@ -68,8 +68,8 @@ _CHARACTER_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5661,
-  serialized_end=5711,
+  serialized_start=6199,
+  serialized_end=6249,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_TYPE)
 
@@ -99,8 +99,8 @@ _CHARACTER_CLASS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5713,
-  serialized_end=5777,
+  serialized_start=6251,
+  serialized_end=6315,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_CLASS)
 
@@ -122,8 +122,8 @@ _CHARACTER_STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5779,
-  serialized_end=5816,
+  serialized_start=6317,
+  serialized_end=6354,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_STATE)
 
@@ -157,8 +157,8 @@ _ENTITY_EVENT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5818,
-  serialized_end=5911,
+  serialized_start=6356,
+  serialized_end=6449,
 )
 _sym_db.RegisterEnumDescriptor(_ENTITY_EVENT)
 
@@ -180,8 +180,8 @@ _DIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5913,
-  serialized_end=5945,
+  serialized_start=6451,
+  serialized_end=6483,
 )
 _sym_db.RegisterEnumDescriptor(_DIRECTION)
 
@@ -826,120 +826,141 @@ _NETMESSAGEREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='userSendMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendMessageRequest', index=5,
+      name='memoryBackupRequest', full_name='SkillBridge.Message.NetMessageRequest.memoryBackupRequest', index=5,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='userSendFeedbackRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendFeedbackRequest', index=6,
+      name='memoryRestoreRequest', full_name='SkillBridge.Message.NetMessageRequest.memoryRestoreRequest', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='userSendMessageAllRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendMessageAllRequest', index=7,
+      name='memoryDeleteCurrentRequest', full_name='SkillBridge.Message.NetMessageRequest.memoryDeleteCurrentRequest', index=7,
       number=8, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='sendToolResultMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.sendToolResultMessageRequest', index=8,
+      name='userSendMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendMessageRequest', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentSendMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.agentSendMessageRequest', index=9,
+      name='userSendFeedbackRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendFeedbackRequest', index=9,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentObserveRequest', full_name='SkillBridge.Message.NetMessageRequest.agentObserveRequest', index=10,
+      name='userSendMessageAllRequest', full_name='SkillBridge.Message.NetMessageRequest.userSendMessageAllRequest', index=10,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentMoveRequest', full_name='SkillBridge.Message.NetMessageRequest.agentMoveRequest', index=11,
+      name='sendToolResultMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.sendToolResultMessageRequest', index=11,
       number=12, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentInteractRequest', full_name='SkillBridge.Message.NetMessageRequest.agentInteractRequest', index=12,
+      name='agentSendMessageRequest', full_name='SkillBridge.Message.NetMessageRequest.agentSendMessageRequest', index=12,
       number=13, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentSelectRequest', full_name='SkillBridge.Message.NetMessageRequest.agentSelectRequest', index=13,
+      name='agentStopActionRequest', full_name='SkillBridge.Message.NetMessageRequest.agentStopActionRequest', index=13,
       number=14, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentInputRequest', full_name='SkillBridge.Message.NetMessageRequest.agentInputRequest', index=14,
+      name='agentObserveRequest', full_name='SkillBridge.Message.NetMessageRequest.agentObserveRequest', index=14,
       number=15, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentPlanActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentPlanActionSequenceRequest', index=15,
+      name='agentMonitorTargetRequest', full_name='SkillBridge.Message.NetMessageRequest.agentMonitorTargetRequest', index=15,
       number=16, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentStartActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentStartActionSequenceRequest', index=16,
+      name='agentMoveRequest', full_name='SkillBridge.Message.NetMessageRequest.agentMoveRequest', index=16,
       number=17, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentContinueActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentContinueActionSequenceRequest', index=17,
+      name='agentFollowTargetRequest', full_name='SkillBridge.Message.NetMessageRequest.agentFollowTargetRequest', index=17,
       number=18, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='agentStopActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentStopActionSequenceRequest', index=18,
+      name='agentInteractRequest', full_name='SkillBridge.Message.NetMessageRequest.agentInteractRequest', index=18,
       number=19, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='memoryBackupRequest', full_name='SkillBridge.Message.NetMessageRequest.memoryBackupRequest', index=19,
+      name='agentSelectRequest', full_name='SkillBridge.Message.NetMessageRequest.agentSelectRequest', index=19,
       number=20, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='memoryRestoreRequest', full_name='SkillBridge.Message.NetMessageRequest.memoryRestoreRequest', index=20,
+      name='agentInputRequest', full_name='SkillBridge.Message.NetMessageRequest.agentInputRequest', index=20,
       number=21, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='memoryDeleteCurrentRequest', full_name='SkillBridge.Message.NetMessageRequest.memoryDeleteCurrentRequest', index=21,
+      name='agentPlanActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentPlanActionSequenceRequest', index=21,
       number=22, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='agentStartActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentStartActionSequenceRequest', index=22,
+      number=23, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='agentContinueActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentContinueActionSequenceRequest', index=23,
+      number=24, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='agentStopActionSequenceRequest', full_name='SkillBridge.Message.NetMessageRequest.agentStopActionSequenceRequest', index=24,
+      number=25, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -957,7 +978,7 @@ _NETMESSAGEREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1422,
-  serialized_end=3145,
+  serialized_end=3386,
 )
 
 
@@ -1036,8 +1057,8 @@ _NETMESSAGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3148,
-  serialized_end=3754,
+  serialized_start=3389,
+  serialized_end=3995,
 )
 
 
@@ -1074,8 +1095,8 @@ _AGENTCREATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3756,
-  serialized_end=3804,
+  serialized_start=3997,
+  serialized_end=4045,
 )
 
 
@@ -1112,8 +1133,8 @@ _AGENTCREATERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3806,
-  serialized_end=3862,
+  serialized_start=4047,
+  serialized_end=4103,
 )
 
 
@@ -1136,8 +1157,8 @@ _AGENTLOADREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3864,
-  serialized_end=3882,
+  serialized_start=4105,
+  serialized_end=4123,
 )
 
 
@@ -1181,8 +1202,8 @@ _AGENTLOADRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3884,
-  serialized_end=3959,
+  serialized_start=4125,
+  serialized_end=4200,
 )
 
 
@@ -1212,8 +1233,8 @@ _SCENESTARTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3961,
-  serialized_end=3996,
+  serialized_start=4202,
+  serialized_end=4237,
 )
 
 
@@ -1250,8 +1271,8 @@ _SCENESTARTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3998,
-  serialized_end=4053,
+  serialized_start=4239,
+  serialized_end=4294,
 )
 
 
@@ -1274,8 +1295,8 @@ _SCENESTOPREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4055,
-  serialized_end=4073,
+  serialized_start=4296,
+  serialized_end=4314,
 )
 
 
@@ -1312,8 +1333,8 @@ _SCENESTOPRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4075,
-  serialized_end=4129,
+  serialized_start=4316,
+  serialized_end=4370,
 )
 
 
@@ -1343,8 +1364,8 @@ _AGENTINTERRUPTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4131,
-  serialized_end=4170,
+  serialized_start=4372,
+  serialized_end=4411,
 )
 
 
@@ -1381,8 +1402,208 @@ _AGENTINTERRUPTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4172,
-  serialized_end=4231,
+  serialized_start=4413,
+  serialized_end=4472,
+)
+
+
+_MEMORYBACKUPREQUEST = _descriptor.Descriptor(
+  name='MemoryBackupRequest',
+  full_name='SkillBridge.Message.MemoryBackupRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='slot_id', full_name='SkillBridge.Message.MemoryBackupRequest.slot_id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4474,
+  serialized_end=4512,
+)
+
+
+_MEMORYBACKUPRESPONSE = _descriptor.Descriptor(
+  name='MemoryBackupResponse',
+  full_name='SkillBridge.Message.MemoryBackupResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='success', full_name='SkillBridge.Message.MemoryBackupResponse.success', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='errormsg', full_name='SkillBridge.Message.MemoryBackupResponse.errormsg', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4514,
+  serialized_end=4571,
+)
+
+
+_MEMORYRESTOREREQUEST = _descriptor.Descriptor(
+  name='MemoryRestoreRequest',
+  full_name='SkillBridge.Message.MemoryRestoreRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='slot_id', full_name='SkillBridge.Message.MemoryRestoreRequest.slot_id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4573,
+  serialized_end=4612,
+)
+
+
+_MEMORYRESTORERESPONSE = _descriptor.Descriptor(
+  name='MemoryRestoreResponse',
+  full_name='SkillBridge.Message.MemoryRestoreResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='success', full_name='SkillBridge.Message.MemoryRestoreResponse.success', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='errormsg', full_name='SkillBridge.Message.MemoryRestoreResponse.errormsg', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4614,
+  serialized_end=4672,
+)
+
+
+_MEMORYDELETECURRENTREQUEST = _descriptor.Descriptor(
+  name='MemoryDeleteCurrentRequest',
+  full_name='SkillBridge.Message.MemoryDeleteCurrentRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4674,
+  serialized_end=4702,
+)
+
+
+_MEMORYDELETECURRENTRESPONSE = _descriptor.Descriptor(
+  name='MemoryDeleteCurrentResponse',
+  full_name='SkillBridge.Message.MemoryDeleteCurrentResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='success', full_name='SkillBridge.Message.MemoryDeleteCurrentResponse.success', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='errormsg', full_name='SkillBridge.Message.MemoryDeleteCurrentResponse.errormsg', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4704,
+  serialized_end=4768,
 )
 
 
@@ -1426,8 +1647,8 @@ _USERSENDMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4233,
-  serialized_end=4319,
+  serialized_start=4770,
+  serialized_end=4856,
 )
 
 
@@ -1471,8 +1692,8 @@ _USERSENDFEEDBACKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4321,
-  serialized_end=4409,
+  serialized_start=4858,
+  serialized_end=4946,
 )
 
 
@@ -1509,8 +1730,8 @@ _USERSENDMESSAGEALLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4411,
-  serialized_end=4485,
+  serialized_start=4948,
+  serialized_end=5022,
 )
 
 
@@ -1561,8 +1782,8 @@ _SENDTOOLRESULTMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4487,
-  serialized_end=4587,
+  serialized_start=5024,
+  serialized_end=5124,
 )
 
 
@@ -1599,8 +1820,53 @@ _AGENTSENDMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4589,
-  serialized_end=4649,
+  serialized_start=5126,
+  serialized_end=5186,
+)
+
+
+_AGENTSTOPACTIONREQUEST = _descriptor.Descriptor(
+  name='AgentStopActionRequest',
+  full_name='SkillBridge.Message.AgentStopActionRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='agent', full_name='SkillBridge.Message.AgentStopActionRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='request_id', full_name='SkillBridge.Message.AgentStopActionRequest.request_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='action_type', full_name='SkillBridge.Message.AgentStopActionRequest.action_type', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5188,
+  serialized_end=5268,
 )
 
 
@@ -1637,8 +1903,53 @@ _AGENTOBSERVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4651,
-  serialized_end=4707,
+  serialized_start=5270,
+  serialized_end=5326,
+)
+
+
+_AGENTMONITORTARGETREQUEST = _descriptor.Descriptor(
+  name='AgentMonitorTargetRequest',
+  full_name='SkillBridge.Message.AgentMonitorTargetRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='agent', full_name='SkillBridge.Message.AgentMonitorTargetRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='request_id', full_name='SkillBridge.Message.AgentMonitorTargetRequest.request_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='object_index', full_name='SkillBridge.Message.AgentMonitorTargetRequest.object_index', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5328,
+  serialized_end=5412,
 )
 
 
@@ -1682,36 +1993,50 @@ _AGENTMOVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4709,
-  serialized_end=4778,
+  serialized_start=5414,
+  serialized_end=5483,
 )
 
 
-_AGENTPLANACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
-  name='AgentPlanActionSequenceRequest',
-  full_name='SkillBridge.Message.AgentPlanActionSequenceRequest',
+_AGENTFOLLOWTARGETREQUEST = _descriptor.Descriptor(
+  name='AgentFollowTargetRequest',
+  full_name='SkillBridge.Message.AgentFollowTargetRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='agent', full_name='SkillBridge.Message.AgentPlanActionSequenceRequest.agent', index=0,
+      name='agent', full_name='SkillBridge.Message.AgentFollowTargetRequest.agent', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='request_id', full_name='SkillBridge.Message.AgentPlanActionSequenceRequest.request_id', index=1,
+      name='request_id', full_name='SkillBridge.Message.AgentFollowTargetRequest.request_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='action_sequence', full_name='SkillBridge.Message.AgentPlanActionSequenceRequest.action_sequence', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='object_index', full_name='SkillBridge.Message.AgentFollowTargetRequest.object_index', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='min_distance', full_name='SkillBridge.Message.AgentFollowTargetRequest.min_distance', index=3,
+      number=4, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='max_distance', full_name='SkillBridge.Message.AgentFollowTargetRequest.max_distance', index=4,
+      number=5, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1727,122 +2052,8 @@ _AGENTPLANACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4780,
-  serialized_end=4905,
-)
-
-
-_AGENTSTARTACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
-  name='AgentStartActionSequenceRequest',
-  full_name='SkillBridge.Message.AgentStartActionSequenceRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='agent', full_name='SkillBridge.Message.AgentStartActionSequenceRequest.agent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='request_id', full_name='SkillBridge.Message.AgentStartActionSequenceRequest.request_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4907,
-  serialized_end=4975,
-)
-
-
-_AGENTCONTINUEACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
-  name='AgentContinueActionSequenceRequest',
-  full_name='SkillBridge.Message.AgentContinueActionSequenceRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='agent', full_name='SkillBridge.Message.AgentContinueActionSequenceRequest.agent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='request_id', full_name='SkillBridge.Message.AgentContinueActionSequenceRequest.request_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4977,
-  serialized_end=5048,
-)
-
-
-_AGENTSTOPACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
-  name='AgentStopActionSequenceRequest',
-  full_name='SkillBridge.Message.AgentStopActionSequenceRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='agent', full_name='SkillBridge.Message.AgentStopActionSequenceRequest.agent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='request_id', full_name='SkillBridge.Message.AgentStopActionSequenceRequest.request_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5050,
-  serialized_end=5117,
+  serialized_start=5485,
+  serialized_end=5612,
 )
 
 
@@ -1879,8 +2090,8 @@ _AGENTINTERACTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5119,
-  serialized_end=5176,
+  serialized_start=5614,
+  serialized_end=5671,
 )
 
 
@@ -1924,8 +2135,8 @@ _AGENTSELECTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5178,
-  serialized_end=5252,
+  serialized_start=5673,
+  serialized_end=5747,
 )
 
 
@@ -1969,22 +2180,36 @@ _AGENTINPUTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5254,
-  serialized_end=5328,
+  serialized_start=5749,
+  serialized_end=5823,
 )
 
 
-_MEMORYBACKUPREQUEST = _descriptor.Descriptor(
-  name='MemoryBackupRequest',
-  full_name='SkillBridge.Message.MemoryBackupRequest',
+_AGENTPLANACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
+  name='AgentPlanActionSequenceRequest',
+  full_name='SkillBridge.Message.AgentPlanActionSequenceRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='slot_id', full_name='SkillBridge.Message.MemoryBackupRequest.slot_id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='agent', full_name='SkillBridge.Message.AgentPlanActionSequenceRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='request_id', full_name='SkillBridge.Message.AgentPlanActionSequenceRequest.request_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='action_sequence', full_name='SkillBridge.Message.AgentPlanActionSequenceRequest.action_sequence', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -2000,27 +2225,27 @@ _MEMORYBACKUPREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5330,
-  serialized_end=5368,
+  serialized_start=5825,
+  serialized_end=5950,
 )
 
 
-_MEMORYBACKUPRESPONSE = _descriptor.Descriptor(
-  name='MemoryBackupResponse',
-  full_name='SkillBridge.Message.MemoryBackupResponse',
+_AGENTSTARTACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
+  name='AgentStartActionSequenceRequest',
+  full_name='SkillBridge.Message.AgentStartActionSequenceRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='SkillBridge.Message.MemoryBackupResponse.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='agent', full_name='SkillBridge.Message.AgentStartActionSequenceRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='errormsg', full_name='SkillBridge.Message.MemoryBackupResponse.errormsg', index=1,
+      name='request_id', full_name='SkillBridge.Message.AgentStartActionSequenceRequest.request_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2038,58 +2263,27 @@ _MEMORYBACKUPRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5370,
-  serialized_end=5427,
+  serialized_start=5952,
+  serialized_end=6020,
 )
 
 
-_MEMORYRESTOREREQUEST = _descriptor.Descriptor(
-  name='MemoryRestoreRequest',
-  full_name='SkillBridge.Message.MemoryRestoreRequest',
+_AGENTCONTINUEACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
+  name='AgentContinueActionSequenceRequest',
+  full_name='SkillBridge.Message.AgentContinueActionSequenceRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='slot_id', full_name='SkillBridge.Message.MemoryRestoreRequest.slot_id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5429,
-  serialized_end=5468,
-)
-
-
-_MEMORYRESTORERESPONSE = _descriptor.Descriptor(
-  name='MemoryRestoreResponse',
-  full_name='SkillBridge.Message.MemoryRestoreResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='SkillBridge.Message.MemoryRestoreResponse.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='agent', full_name='SkillBridge.Message.AgentContinueActionSequenceRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='errormsg', full_name='SkillBridge.Message.MemoryRestoreResponse.errormsg', index=1,
+      name='request_id', full_name='SkillBridge.Message.AgentContinueActionSequenceRequest.request_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2107,51 +2301,27 @@ _MEMORYRESTORERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5470,
-  serialized_end=5528,
+  serialized_start=6022,
+  serialized_end=6093,
 )
 
 
-_MEMORYDELETECURRENTREQUEST = _descriptor.Descriptor(
-  name='MemoryDeleteCurrentRequest',
-  full_name='SkillBridge.Message.MemoryDeleteCurrentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5530,
-  serialized_end=5558,
-)
-
-
-_MEMORYDELETECURRENTRESPONSE = _descriptor.Descriptor(
-  name='MemoryDeleteCurrentResponse',
-  full_name='SkillBridge.Message.MemoryDeleteCurrentResponse',
+_AGENTSTOPACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
+  name='AgentStopActionSequenceRequest',
+  full_name='SkillBridge.Message.AgentStopActionSequenceRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='SkillBridge.Message.MemoryDeleteCurrentResponse.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='agent', full_name='SkillBridge.Message.AgentStopActionSequenceRequest.agent', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='errormsg', full_name='SkillBridge.Message.MemoryDeleteCurrentResponse.errormsg', index=1,
+      name='request_id', full_name='SkillBridge.Message.AgentStopActionSequenceRequest.request_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2169,8 +2339,8 @@ _MEMORYDELETECURRENTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5560,
-  serialized_end=5624,
+  serialized_start=6095,
+  serialized_end=6162,
 )
 
 _NUSERINFO.fields_by_name['player'].message_type = _NPLAYERINFO
@@ -2211,13 +2381,19 @@ _NETMESSAGEREQUEST.fields_by_name['agentLoadRequest'].message_type = _AGENTLOADR
 _NETMESSAGEREQUEST.fields_by_name['sceneStartRequest'].message_type = _SCENESTARTREQUEST
 _NETMESSAGEREQUEST.fields_by_name['sceneStopRequest'].message_type = _SCENESTOPREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentInterruptRequest'].message_type = _AGENTINTERRUPTREQUEST
+_NETMESSAGEREQUEST.fields_by_name['memoryBackupRequest'].message_type = _MEMORYBACKUPREQUEST
+_NETMESSAGEREQUEST.fields_by_name['memoryRestoreRequest'].message_type = _MEMORYRESTOREREQUEST
+_NETMESSAGEREQUEST.fields_by_name['memoryDeleteCurrentRequest'].message_type = _MEMORYDELETECURRENTREQUEST
 _NETMESSAGEREQUEST.fields_by_name['userSendMessageRequest'].message_type = _USERSENDMESSAGEREQUEST
 _NETMESSAGEREQUEST.fields_by_name['userSendFeedbackRequest'].message_type = _USERSENDFEEDBACKREQUEST
 _NETMESSAGEREQUEST.fields_by_name['userSendMessageAllRequest'].message_type = _USERSENDMESSAGEALLREQUEST
 _NETMESSAGEREQUEST.fields_by_name['sendToolResultMessageRequest'].message_type = _SENDTOOLRESULTMESSAGEREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentSendMessageRequest'].message_type = _AGENTSENDMESSAGEREQUEST
+_NETMESSAGEREQUEST.fields_by_name['agentStopActionRequest'].message_type = _AGENTSTOPACTIONREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentObserveRequest'].message_type = _AGENTOBSERVEREQUEST
+_NETMESSAGEREQUEST.fields_by_name['agentMonitorTargetRequest'].message_type = _AGENTMONITORTARGETREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentMoveRequest'].message_type = _AGENTMOVEREQUEST
+_NETMESSAGEREQUEST.fields_by_name['agentFollowTargetRequest'].message_type = _AGENTFOLLOWTARGETREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentInteractRequest'].message_type = _AGENTINTERACTREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentSelectRequest'].message_type = _AGENTSELECTREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentInputRequest'].message_type = _AGENTINPUTREQUEST
@@ -2225,9 +2401,6 @@ _NETMESSAGEREQUEST.fields_by_name['agentPlanActionSequenceRequest'].message_type
 _NETMESSAGEREQUEST.fields_by_name['agentStartActionSequenceRequest'].message_type = _AGENTSTARTACTIONSEQUENCEREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentContinueActionSequenceRequest'].message_type = _AGENTCONTINUEACTIONSEQUENCEREQUEST
 _NETMESSAGEREQUEST.fields_by_name['agentStopActionSequenceRequest'].message_type = _AGENTSTOPACTIONSEQUENCEREQUEST
-_NETMESSAGEREQUEST.fields_by_name['memoryBackupRequest'].message_type = _MEMORYBACKUPREQUEST
-_NETMESSAGEREQUEST.fields_by_name['memoryRestoreRequest'].message_type = _MEMORYRESTOREREQUEST
-_NETMESSAGEREQUEST.fields_by_name['memoryDeleteCurrentRequest'].message_type = _MEMORYDELETECURRENTREQUEST
 _NETMESSAGERESPONSE.fields_by_name['agentCreateResponse'].message_type = _AGENTCREATERESPONSE
 _NETMESSAGERESPONSE.fields_by_name['agentLoadResponse'].message_type = _AGENTLOADRESPONSE
 _NETMESSAGERESPONSE.fields_by_name['sceneStartResponse'].message_type = _SCENESTARTRESPONSE
@@ -2262,26 +2435,29 @@ DESCRIPTOR.message_types_by_name['SceneStopRequest'] = _SCENESTOPREQUEST
 DESCRIPTOR.message_types_by_name['SceneStopResponse'] = _SCENESTOPRESPONSE
 DESCRIPTOR.message_types_by_name['AgentInterruptRequest'] = _AGENTINTERRUPTREQUEST
 DESCRIPTOR.message_types_by_name['AgentInterruptResponse'] = _AGENTINTERRUPTRESPONSE
-DESCRIPTOR.message_types_by_name['UserSendMessageRequest'] = _USERSENDMESSAGEREQUEST
-DESCRIPTOR.message_types_by_name['UserSendFeedbackRequest'] = _USERSENDFEEDBACKREQUEST
-DESCRIPTOR.message_types_by_name['UserSendMessageAllRequest'] = _USERSENDMESSAGEALLREQUEST
-DESCRIPTOR.message_types_by_name['SendToolResultMessageRequest'] = _SENDTOOLRESULTMESSAGEREQUEST
-DESCRIPTOR.message_types_by_name['AgentSendMessageRequest'] = _AGENTSENDMESSAGEREQUEST
-DESCRIPTOR.message_types_by_name['AgentObserveRequest'] = _AGENTOBSERVEREQUEST
-DESCRIPTOR.message_types_by_name['AgentMoveRequest'] = _AGENTMOVEREQUEST
-DESCRIPTOR.message_types_by_name['AgentPlanActionSequenceRequest'] = _AGENTPLANACTIONSEQUENCEREQUEST
-DESCRIPTOR.message_types_by_name['AgentStartActionSequenceRequest'] = _AGENTSTARTACTIONSEQUENCEREQUEST
-DESCRIPTOR.message_types_by_name['AgentContinueActionSequenceRequest'] = _AGENTCONTINUEACTIONSEQUENCEREQUEST
-DESCRIPTOR.message_types_by_name['AgentStopActionSequenceRequest'] = _AGENTSTOPACTIONSEQUENCEREQUEST
-DESCRIPTOR.message_types_by_name['AgentInteractRequest'] = _AGENTINTERACTREQUEST
-DESCRIPTOR.message_types_by_name['AgentSelectRequest'] = _AGENTSELECTREQUEST
-DESCRIPTOR.message_types_by_name['AgentInputRequest'] = _AGENTINPUTREQUEST
 DESCRIPTOR.message_types_by_name['MemoryBackupRequest'] = _MEMORYBACKUPREQUEST
 DESCRIPTOR.message_types_by_name['MemoryBackupResponse'] = _MEMORYBACKUPRESPONSE
 DESCRIPTOR.message_types_by_name['MemoryRestoreRequest'] = _MEMORYRESTOREREQUEST
 DESCRIPTOR.message_types_by_name['MemoryRestoreResponse'] = _MEMORYRESTORERESPONSE
 DESCRIPTOR.message_types_by_name['MemoryDeleteCurrentRequest'] = _MEMORYDELETECURRENTREQUEST
 DESCRIPTOR.message_types_by_name['MemoryDeleteCurrentResponse'] = _MEMORYDELETECURRENTRESPONSE
+DESCRIPTOR.message_types_by_name['UserSendMessageRequest'] = _USERSENDMESSAGEREQUEST
+DESCRIPTOR.message_types_by_name['UserSendFeedbackRequest'] = _USERSENDFEEDBACKREQUEST
+DESCRIPTOR.message_types_by_name['UserSendMessageAllRequest'] = _USERSENDMESSAGEALLREQUEST
+DESCRIPTOR.message_types_by_name['SendToolResultMessageRequest'] = _SENDTOOLRESULTMESSAGEREQUEST
+DESCRIPTOR.message_types_by_name['AgentSendMessageRequest'] = _AGENTSENDMESSAGEREQUEST
+DESCRIPTOR.message_types_by_name['AgentStopActionRequest'] = _AGENTSTOPACTIONREQUEST
+DESCRIPTOR.message_types_by_name['AgentObserveRequest'] = _AGENTOBSERVEREQUEST
+DESCRIPTOR.message_types_by_name['AgentMonitorTargetRequest'] = _AGENTMONITORTARGETREQUEST
+DESCRIPTOR.message_types_by_name['AgentMoveRequest'] = _AGENTMOVEREQUEST
+DESCRIPTOR.message_types_by_name['AgentFollowTargetRequest'] = _AGENTFOLLOWTARGETREQUEST
+DESCRIPTOR.message_types_by_name['AgentInteractRequest'] = _AGENTINTERACTREQUEST
+DESCRIPTOR.message_types_by_name['AgentSelectRequest'] = _AGENTSELECTREQUEST
+DESCRIPTOR.message_types_by_name['AgentInputRequest'] = _AGENTINPUTREQUEST
+DESCRIPTOR.message_types_by_name['AgentPlanActionSequenceRequest'] = _AGENTPLANACTIONSEQUENCEREQUEST
+DESCRIPTOR.message_types_by_name['AgentStartActionSequenceRequest'] = _AGENTSTARTACTIONSEQUENCEREQUEST
+DESCRIPTOR.message_types_by_name['AgentContinueActionSequenceRequest'] = _AGENTCONTINUEACTIONSEQUENCEREQUEST
+DESCRIPTOR.message_types_by_name['AgentStopActionSequenceRequest'] = _AGENTSTOPACTIONSEQUENCEREQUEST
 DESCRIPTOR.enum_types_by_name['RESULT'] = _RESULT
 DESCRIPTOR.enum_types_by_name['CHARACTER_TYPE'] = _CHARACTER_TYPE
 DESCRIPTOR.enum_types_by_name['CHARACTER_CLASS'] = _CHARACTER_CLASS
@@ -2464,104 +2640,6 @@ AgentInterruptResponse = _reflection.GeneratedProtocolMessageType('AgentInterrup
   ))
 _sym_db.RegisterMessage(AgentInterruptResponse)
 
-UserSendMessageRequest = _reflection.GeneratedProtocolMessageType('UserSendMessageRequest', (_message.Message,), dict(
-  DESCRIPTOR = _USERSENDMESSAGEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendMessageRequest)
-  ))
-_sym_db.RegisterMessage(UserSendMessageRequest)
-
-UserSendFeedbackRequest = _reflection.GeneratedProtocolMessageType('UserSendFeedbackRequest', (_message.Message,), dict(
-  DESCRIPTOR = _USERSENDFEEDBACKREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendFeedbackRequest)
-  ))
-_sym_db.RegisterMessage(UserSendFeedbackRequest)
-
-UserSendMessageAllRequest = _reflection.GeneratedProtocolMessageType('UserSendMessageAllRequest', (_message.Message,), dict(
-  DESCRIPTOR = _USERSENDMESSAGEALLREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendMessageAllRequest)
-  ))
-_sym_db.RegisterMessage(UserSendMessageAllRequest)
-
-SendToolResultMessageRequest = _reflection.GeneratedProtocolMessageType('SendToolResultMessageRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SENDTOOLRESULTMESSAGEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.SendToolResultMessageRequest)
-  ))
-_sym_db.RegisterMessage(SendToolResultMessageRequest)
-
-AgentSendMessageRequest = _reflection.GeneratedProtocolMessageType('AgentSendMessageRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTSENDMESSAGEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentSendMessageRequest)
-  ))
-_sym_db.RegisterMessage(AgentSendMessageRequest)
-
-AgentObserveRequest = _reflection.GeneratedProtocolMessageType('AgentObserveRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTOBSERVEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentObserveRequest)
-  ))
-_sym_db.RegisterMessage(AgentObserveRequest)
-
-AgentMoveRequest = _reflection.GeneratedProtocolMessageType('AgentMoveRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTMOVEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentMoveRequest)
-  ))
-_sym_db.RegisterMessage(AgentMoveRequest)
-
-AgentPlanActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentPlanActionSequenceRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTPLANACTIONSEQUENCEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentPlanActionSequenceRequest)
-  ))
-_sym_db.RegisterMessage(AgentPlanActionSequenceRequest)
-
-AgentStartActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentStartActionSequenceRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTSTARTACTIONSEQUENCEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentStartActionSequenceRequest)
-  ))
-_sym_db.RegisterMessage(AgentStartActionSequenceRequest)
-
-AgentContinueActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentContinueActionSequenceRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTCONTINUEACTIONSEQUENCEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentContinueActionSequenceRequest)
-  ))
-_sym_db.RegisterMessage(AgentContinueActionSequenceRequest)
-
-AgentStopActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentStopActionSequenceRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTSTOPACTIONSEQUENCEREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentStopActionSequenceRequest)
-  ))
-_sym_db.RegisterMessage(AgentStopActionSequenceRequest)
-
-AgentInteractRequest = _reflection.GeneratedProtocolMessageType('AgentInteractRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTINTERACTREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentInteractRequest)
-  ))
-_sym_db.RegisterMessage(AgentInteractRequest)
-
-AgentSelectRequest = _reflection.GeneratedProtocolMessageType('AgentSelectRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTSELECTREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentSelectRequest)
-  ))
-_sym_db.RegisterMessage(AgentSelectRequest)
-
-AgentInputRequest = _reflection.GeneratedProtocolMessageType('AgentInputRequest', (_message.Message,), dict(
-  DESCRIPTOR = _AGENTINPUTREQUEST,
-  __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentInputRequest)
-  ))
-_sym_db.RegisterMessage(AgentInputRequest)
-
 MemoryBackupRequest = _reflection.GeneratedProtocolMessageType('MemoryBackupRequest', (_message.Message,), dict(
   DESCRIPTOR = _MEMORYBACKUPREQUEST,
   __module__ = 'message_pb2'
@@ -2603,6 +2681,125 @@ MemoryDeleteCurrentResponse = _reflection.GeneratedProtocolMessageType('MemoryDe
   # @@protoc_insertion_point(class_scope:SkillBridge.Message.MemoryDeleteCurrentResponse)
   ))
 _sym_db.RegisterMessage(MemoryDeleteCurrentResponse)
+
+UserSendMessageRequest = _reflection.GeneratedProtocolMessageType('UserSendMessageRequest', (_message.Message,), dict(
+  DESCRIPTOR = _USERSENDMESSAGEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendMessageRequest)
+  ))
+_sym_db.RegisterMessage(UserSendMessageRequest)
+
+UserSendFeedbackRequest = _reflection.GeneratedProtocolMessageType('UserSendFeedbackRequest', (_message.Message,), dict(
+  DESCRIPTOR = _USERSENDFEEDBACKREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendFeedbackRequest)
+  ))
+_sym_db.RegisterMessage(UserSendFeedbackRequest)
+
+UserSendMessageAllRequest = _reflection.GeneratedProtocolMessageType('UserSendMessageAllRequest', (_message.Message,), dict(
+  DESCRIPTOR = _USERSENDMESSAGEALLREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.UserSendMessageAllRequest)
+  ))
+_sym_db.RegisterMessage(UserSendMessageAllRequest)
+
+SendToolResultMessageRequest = _reflection.GeneratedProtocolMessageType('SendToolResultMessageRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SENDTOOLRESULTMESSAGEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.SendToolResultMessageRequest)
+  ))
+_sym_db.RegisterMessage(SendToolResultMessageRequest)
+
+AgentSendMessageRequest = _reflection.GeneratedProtocolMessageType('AgentSendMessageRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTSENDMESSAGEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentSendMessageRequest)
+  ))
+_sym_db.RegisterMessage(AgentSendMessageRequest)
+
+AgentStopActionRequest = _reflection.GeneratedProtocolMessageType('AgentStopActionRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTSTOPACTIONREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentStopActionRequest)
+  ))
+_sym_db.RegisterMessage(AgentStopActionRequest)
+
+AgentObserveRequest = _reflection.GeneratedProtocolMessageType('AgentObserveRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTOBSERVEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentObserveRequest)
+  ))
+_sym_db.RegisterMessage(AgentObserveRequest)
+
+AgentMonitorTargetRequest = _reflection.GeneratedProtocolMessageType('AgentMonitorTargetRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTMONITORTARGETREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentMonitorTargetRequest)
+  ))
+_sym_db.RegisterMessage(AgentMonitorTargetRequest)
+
+AgentMoveRequest = _reflection.GeneratedProtocolMessageType('AgentMoveRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTMOVEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentMoveRequest)
+  ))
+_sym_db.RegisterMessage(AgentMoveRequest)
+
+AgentFollowTargetRequest = _reflection.GeneratedProtocolMessageType('AgentFollowTargetRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTFOLLOWTARGETREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentFollowTargetRequest)
+  ))
+_sym_db.RegisterMessage(AgentFollowTargetRequest)
+
+AgentInteractRequest = _reflection.GeneratedProtocolMessageType('AgentInteractRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTINTERACTREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentInteractRequest)
+  ))
+_sym_db.RegisterMessage(AgentInteractRequest)
+
+AgentSelectRequest = _reflection.GeneratedProtocolMessageType('AgentSelectRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTSELECTREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentSelectRequest)
+  ))
+_sym_db.RegisterMessage(AgentSelectRequest)
+
+AgentInputRequest = _reflection.GeneratedProtocolMessageType('AgentInputRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTINPUTREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentInputRequest)
+  ))
+_sym_db.RegisterMessage(AgentInputRequest)
+
+AgentPlanActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentPlanActionSequenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTPLANACTIONSEQUENCEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentPlanActionSequenceRequest)
+  ))
+_sym_db.RegisterMessage(AgentPlanActionSequenceRequest)
+
+AgentStartActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentStartActionSequenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTSTARTACTIONSEQUENCEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentStartActionSequenceRequest)
+  ))
+_sym_db.RegisterMessage(AgentStartActionSequenceRequest)
+
+AgentContinueActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentContinueActionSequenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTCONTINUEACTIONSEQUENCEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentContinueActionSequenceRequest)
+  ))
+_sym_db.RegisterMessage(AgentContinueActionSequenceRequest)
+
+AgentStopActionSequenceRequest = _reflection.GeneratedProtocolMessageType('AgentStopActionSequenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _AGENTSTOPACTIONSEQUENCEREQUEST,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:SkillBridge.Message.AgentStopActionSequenceRequest)
+  ))
+_sym_db.RegisterMessage(AgentStopActionSequenceRequest)
 
 
 DESCRIPTOR.has_options = True

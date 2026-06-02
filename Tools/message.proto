@@ -165,24 +165,33 @@ message NetMessageRequest{
 	SceneStartRequest sceneStartRequest = 3;
 	SceneStopRequest sceneStopRequest = 4;
 	AgentInterruptRequest agentInterruptRequest = 5;
-	UserSendMessageRequest userSendMessageRequest = 6;
-	UserSendFeedbackRequest userSendFeedbackRequest = 7;
-	UserSendMessageAllRequest userSendMessageAllRequest = 8;
-	SendToolResultMessageRequest sendToolResultMessageRequest = 9;
-	AgentSendMessageRequest agentSendMessageRequest = 10;
-	AgentObserveRequest agentObserveRequest = 11;
-	AgentMoveRequest agentMoveRequest = 12;
-	AgentInteractRequest agentInteractRequest = 13;
-	AgentSelectRequest agentSelectRequest = 14;
-	AgentInputRequest agentInputRequest = 15;
-	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 16;
-	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 17;
-	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 18;
-	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 19;
-	MemoryBackupRequest memoryBackupRequest = 20;
-	MemoryRestoreRequest memoryRestoreRequest = 21;
-	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 22;
 	
+	MemoryBackupRequest memoryBackupRequest = 6;
+	MemoryRestoreRequest memoryRestoreRequest = 7;
+	MemoryDeleteCurrentRequest memoryDeleteCurrentRequest = 8;
+	
+	UserSendMessageRequest userSendMessageRequest = 9;
+	UserSendFeedbackRequest userSendFeedbackRequest = 10;
+	UserSendMessageAllRequest userSendMessageAllRequest = 11;
+	
+	SendToolResultMessageRequest sendToolResultMessageRequest = 12;
+	AgentSendMessageRequest agentSendMessageRequest = 13;
+	AgentStopActionRequest agentStopActionRequest = 14;
+	
+	AgentObserveRequest agentObserveRequest = 15;
+	AgentMonitorTargetRequest agentMonitorTargetRequest = 16;
+	
+	AgentMoveRequest agentMoveRequest = 17;
+	AgentFollowTargetRequest agentFollowTargetRequest = 18;
+	
+	AgentInteractRequest agentInteractRequest = 19;
+	AgentSelectRequest agentSelectRequest = 20;
+	AgentInputRequest agentInputRequest = 21;
+	
+	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 22;
+	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 23;
+	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 24;
+	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 25;
 }
 
 message NetMessageResponse{
@@ -254,101 +263,6 @@ message AgentInterruptResponse {
 
 ////////////////////////////////////////////////////////////////
 //
-// 用户向智能体发消息
-//
-////////////////////////////////////////////////////////////////
-
-message UserSendMessageRequest {
-	string agent = 1;
-	string user_message = 2;
-	bool force_interrupt = 3;
-}
-
-message UserSendFeedbackRequest {
-	string agent = 1;
-	string user_feedback = 2;
-	bool force_interrupt = 3;
-}
-
-message UserSendMessageAllRequest {
-	string user_message = 1;
-	bool force_interrupt = 2;
-}
-
-////////////////////////////////////////////////////////////////
-//
-//  智能体工具
-//
-////////////////////////////////////////////////////////////////
-
-// 统一工具回调（实现异步 Tool RPC系统）
-message SendToolResultMessageRequest {
-    string agent = 1;
-    string tool_name = 2;
-    string request_id = 3;
-    string result = 4;
-}
-
-// 智能体向用户发消息
-message AgentSendMessageRequest {
-	string agent = 1;
-	string ai_message = 2;
-}
-
-// 观察场景
-message AgentObserveRequest {
-	string agent = 1;
-	string request_id = 2;
-}
-
-// 向指定方向移动指定距离
-message AgentMoveRequest {
-	string agent = 1;
-	bool is_right = 2;
-	float distance = 3;
-}
-
-// 与设备进行交互
-message AgentPlanActionSequenceRequest {
-	string agent = 1;
-	string request_id = 2;
-	repeated ActionStep action_sequence = 3;
-}
-
-message AgentStartActionSequenceRequest {
-	string agent = 1;
-	string request_id = 2;
-}
-
-message AgentContinueActionSequenceRequest {
-	string agent = 1;
-	string request_id = 2;
-}
-
-message AgentStopActionSequenceRequest {
-	string agent = 1;
-	string request_id = 2;
-}
-
-message AgentInteractRequest {
-	string agent = 1;
-	string request_id = 2;
-}
-
-message AgentSelectRequest {
-	string agent = 1;
-	string request_id = 2;
-	int32 selection = 3;
-}
-
-message AgentInputRequest {
-	string agent = 1;
-	string request_id = 2;
-	string input_text = 3;
-}
-
-////////////////////////////////////////////////////////////////
-//
 //  存档
 //
 ////////////////////////////////////////////////////////////////
@@ -376,5 +290,142 @@ message MemoryDeleteCurrentRequest {
 message MemoryDeleteCurrentResponse {
 	bool success = 1;
 	string errormsg = 2;
+}
+
+////////////////////////////////////////////////////////////////
+//
+// 用户向智能体发消息
+//
+////////////////////////////////////////////////////////////////
+
+message UserSendMessageRequest {
+	string agent = 1;
+	string user_message = 2;
+	bool force_interrupt = 3;
+}
+
+message UserSendFeedbackRequest {
+	string agent = 1;
+	string user_feedback = 2;
+	bool force_interrupt = 3;
+}
+
+message UserSendMessageAllRequest {
+	string user_message = 1;
+	bool force_interrupt = 2;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  智能体工具
+//  1. 基础及普通工具
+//
+////////////////////////////////////////////////////////////////
+
+// 统一工具回调（实现异步 Tool RPC系统）
+message SendToolResultMessageRequest {
+    string agent = 1;
+    string tool_name = 2;
+    string request_id = 3;
+    string result = 4;
+}
+
+// 智能体向用户发消息
+message AgentSendMessageRequest {
+	string agent = 1;
+	string ai_message = 2;
+}
+
+message AgentStopActionRequest {
+    string agent = 1;
+	string request_id = 2;
+    string action_type = 3;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  2. 观察类工具
+//
+////////////////////////////////////////////////////////////////
+// 观察场景
+message AgentObserveRequest {
+	string agent = 1;
+	string request_id = 2;
+}
+
+message AgentMonitorTargetRequest {
+	string agent = 1;
+	string request_id = 2;
+	int32 object_index = 3;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  3. 移动类工具
+//
+////////////////////////////////////////////////////////////////
+
+// 向指定方向移动指定距离
+message AgentMoveRequest {
+	string agent = 1;
+	bool is_right = 2;
+	float distance = 3;
+}
+
+message AgentFollowTargetRequest {
+	string agent = 1;
+	string request_id = 2;
+    int32 object_index = 3;
+    float min_distance = 4;
+    float max_distance = 5;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  4. 交互类工具
+//
+////////////////////////////////////////////////////////////////
+message AgentInteractRequest {
+	string agent = 1;
+	string request_id = 2;
+}
+
+message AgentSelectRequest {
+	string agent = 1;
+	string request_id = 2;
+	int32 selection = 3;
+}
+
+message AgentInputRequest {
+	string agent = 1;
+	string request_id = 2;
+	string input_text = 3;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  5. 动作序列 
+//
+////////////////////////////////////////////////////////////////
+
+message AgentPlanActionSequenceRequest {
+	string agent = 1;
+	string request_id = 2;
+	repeated ActionStep action_sequence = 3;
+}
+
+message AgentStartActionSequenceRequest {
+	string agent = 1;
+	string request_id = 2;
+}
+
+message AgentContinueActionSequenceRequest {
+	string agent = 1;
+	string request_id = 2;
+}
+
+message AgentStopActionSequenceRequest {
+	string agent = 1;
+	string request_id = 2;
 }
 

@@ -333,6 +333,50 @@ async def stop_action_sequence_cmd(
     finally:
         TOOL_WAITERS.pop(request_id, None)
 
+@tool
+async def stop_action_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    action_type: str
+) -> str:
+    """
+    停止持续动作
+
+    action_type:
+        move: 移动类动作
+        observe: 持续观察类动作
+    Return:
+        str: 持续动作停止结果
+    """
+    if action_type not in ["move", "observe"]:
+        return "动作类型错误，请填move或者observe"
+
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentStopActionRequest()
+        request.agent = agent
+        request.request_id = request_id
+        request.action_type = action_type
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] stop_action_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]持续动作未停止，超时"
+    except Exception as e:
+        return f"[{agent}]持续动作未停止，异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
 async def drain_feedback_queue(feedback_queue: asyncio.Queue) -> str:
     """
     取出 feedback_queue 内全部内容，并按时间排序
@@ -413,6 +457,51 @@ async def observe_cmd(
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
+async def monitor_object_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    object_index: int,
+) -> str:
+    """持续观察一个目标物体。
+
+    当目标状态发生变化时，
+    系统会主动发送反馈消息。
+
+    该任务会持续运行，
+    直到被 stop_action_cmd 停止。
+
+    Args:
+        object_index(int): 目标物体编号
+    Return:
+        str: 持续观察目标物体是否开始
+    """
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentMonitorTargetRequest()
+        request.agent = agent
+        request.request_id = request_id
+        request.object_index = object_index
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] monitor_object_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]持续观察目标物体未开始，超时"
+    except Exception as e:
+        return f"[{agent}]持续观察目标物体异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+@tool
 async def move_cmd(
     agent: Annotated[str, InjectedState("name")], 
     tool_call_id: Annotated[str, InjectedToolCallId],
@@ -444,11 +533,58 @@ async def move_cmd(
         request.agent = agent
         request.is_right = direction == "right"
         request.distance = distance
+
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}]尝试向{direction}移动了{distance}距离。待移动完成后，你将收到移动完成的消息。")
         return f"[{agent}]尝试向{direction}移动了{distance}距离。待移动完成后，你将收到移动完成的消息。"
     except Exception as e:
         return f"移动失败: {e}"
+
+@tool
+async def follow_target_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    object_index: int,
+    min_distance: float = 0,
+    max_distance: float = 2,
+) -> str:
+    """
+    持续跟随目标。
+
+    Args:
+        object_index(int)
+        min_distance(float)
+        max_distance(float)
+    Return:
+        str: 持续跟随目标是否开始
+    """
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentFollowTargetRequest()
+        request.agent = agent
+        request.request_id = request_id
+        request.object_index = object_index
+        request.min_distance = min_distance
+        request.max_distance = max_distance
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] follow_target_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]持续跟随目标未开始，超时"
+    except Exception as e:
+        return f"[{agent}]持续跟随目标未开始，异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 
 @tool
 async def interact_cmd(

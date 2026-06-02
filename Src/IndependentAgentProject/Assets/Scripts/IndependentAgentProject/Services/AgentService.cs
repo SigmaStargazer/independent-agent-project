@@ -31,15 +31,24 @@ namespace Services
         public event UnityAction<bool, string> OnStartScene;
         public event UnityAction<bool, string> OnStopScene;
         public event UnityAction<bool, string> OnInterruptAgent;
+
         public event UnityAction<bool, string> OnBackupMemory;
         public event UnityAction<bool, string> OnRestoreMemory;
         public event UnityAction<bool, string> OnDeleteCurrentMemory;
+
         public event UnityAction<string, string> OnGetAgentMessage;
+        public event UnityAction<string, string, string> OnStopAction;
+
         public event UnityAction<string, string> OnObserve;
+        public event UnityAction<string, string, int> OnMonitorTarget;
+
         public event UnityAction<string, bool, float> OnMoveAgent;
+        public event Action<string, string, int, float, float> OnFollowTarget;
+
         public event UnityAction<string, string> OnInteract;
         public event UnityAction<string, int, string> OnSelect;
         public event UnityAction<string, string, string> OnInput;
+
         public event UnityAction<string, List<ActionStep>, string> OnPlanActionSequence;
         public event UnityAction<string, string> OnStartActionSequence;
         public event UnityAction<string, string> OnContinueActionSequence;
@@ -57,15 +66,24 @@ namespace Services
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<SceneStopResponse>(this.OnSceneStop);
             MessageDistributer.Instance.Subscribe<AgentInterruptResponse>(this.OnAgentInterrupt);
+
             MessageDistributer.Instance.Subscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Subscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
+
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
+            MessageDistributer.Instance.Subscribe<AgentStopActionRequest>(this.OnAgentStopAction);
+
             MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
+            MessageDistributer.Instance.Subscribe<AgentMonitorTargetRequest>(this.OnAgentMonitorTarget);
+
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
+            MessageDistributer.Instance.Subscribe<AgentFollowTargetRequest>(this.OnAgentFollowTarget);
+
             MessageDistributer.Instance.Subscribe<AgentInteractRequest>(this.OnAgentInteract);
             MessageDistributer.Instance.Subscribe<AgentSelectRequest>(this.OnAgentSelect);
             MessageDistributer.Instance.Subscribe<AgentInputRequest>(this.OnAgentInput);
+
             MessageDistributer.Instance.Subscribe<AgentPlanActionSequenceRequest>(this.OnAgentPlanActionSequence);
             MessageDistributer.Instance.Subscribe<AgentStartActionSequenceRequest>(this.OnAgentStartActionSequence);
             MessageDistributer.Instance.Subscribe<AgentContinueActionSequenceRequest>(this.OnAgentContinueActionSequence);
@@ -79,15 +97,24 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<SceneStopResponse>(this.OnSceneStop);
             MessageDistributer.Instance.Unsubscribe<AgentInterruptResponse>(this.OnAgentInterrupt);
+
             MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Unsubscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
+
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
+            MessageDistributer.Instance.Unsubscribe<AgentStopActionRequest>(this.OnAgentStopAction);
+
             MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
+            MessageDistributer.Instance.Unsubscribe<AgentMonitorTargetRequest>(this.OnAgentMonitorTarget);
+
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
+            MessageDistributer.Instance.Unsubscribe<AgentFollowTargetRequest>(this.OnAgentFollowTarget);
+
             MessageDistributer.Instance.Unsubscribe<AgentInteractRequest>(this.OnAgentInteract);
             MessageDistributer.Instance.Unsubscribe<AgentSelectRequest>(this.OnAgentSelect);
             MessageDistributer.Instance.Unsubscribe<AgentInputRequest>(this.OnAgentInput);
+
             MessageDistributer.Instance.Unsubscribe<AgentPlanActionSequenceRequest>(this.OnAgentPlanActionSequence);
             MessageDistributer.Instance.Unsubscribe<AgentStartActionSequenceRequest>(this.OnAgentStartActionSequence);
             MessageDistributer.Instance.Unsubscribe<AgentContinueActionSequenceRequest>(this.OnAgentContinueActionSequence);
@@ -562,11 +589,22 @@ namespace Services
             Debug.LogFormat("OnAgentMessageGet::Agent:{0} AiMessage:{1}", request.Agent, request.AiMessage);
             this.OnGetAgentMessage?.Invoke(request.Agent, request.AiMessage);
         }
+
+        void OnAgentStopAction(object sender, AgentStopActionRequest response)
+        {
+            Debug.LogFormat($"OnAgentStopAction::Agent:{response.Agent} RequestId:{response.RequestId} ActionType:{response.ActionType}");
+            this.OnStopAction?.Invoke(response.Agent, response.RequestId, response.ActionType);
+        }
         // 观察
         void OnAgentObserve(object sender, AgentObserveRequest request)
         {
             Debug.LogFormat("OnAgentObserve::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
             this.OnObserve?.Invoke(request.Agent, request.RequestId);
+        }
+        void OnAgentMonitorTarget(object sender, AgentMonitorTargetRequest request)
+        {
+            Debug.LogFormat($"OnAgentMonitorTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex}");
+            this.OnMonitorTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex);
         }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
@@ -574,7 +612,11 @@ namespace Services
             Debug.LogFormat("OnAgentMove::Agent:{0} IsRight:{1} Distance:{2}", request.Agent, request.IsRight, request.Distance);
             this.OnMoveAgent?.Invoke(request.Agent, request.IsRight, request.Distance);
         }
-
+        void OnAgentFollowTarget(object sender, AgentFollowTargetRequest request)
+        {
+            Debug.LogFormat($"OnAgentFollowTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex} MinDistance:{request.MinDistance} MaxDistance:{request.MaxDistance}");
+            this.OnFollowTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex, request.MinDistance, request.MaxDistance);
+        }
 
         #region 交互
         void OnAgentInteract(object sender, AgentInteractRequest request)
