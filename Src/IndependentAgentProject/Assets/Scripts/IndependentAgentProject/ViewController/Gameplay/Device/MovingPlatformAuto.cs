@@ -19,6 +19,7 @@ namespace IndependentAgentProject
 
         private int mCurrentIndex = 0;
         private float mWaitTimer = 0f;
+        [SerializeField]
         private Transform mTargetPoint;
 
         protected override void Start()

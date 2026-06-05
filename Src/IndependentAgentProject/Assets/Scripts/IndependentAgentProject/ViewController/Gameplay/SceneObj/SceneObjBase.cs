@@ -1,4 +1,5 @@
 using FrameworkDesign;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -33,15 +34,17 @@ namespace IndependentAgentProject
             }
         }
 
+        // 交互区域列表（在 Inspector 里拖拽，或 Awake 自动收集）
+        [Header("交互区域（留空则使用自身Collider）")]
+        [SerializeField] private List<InteractionZone> mInteractionZones = new List<InteractionZone>();
+
         /// <summary>
         /// 状态机
         /// </summary>
         protected Dictionary<string, FSMStateBase> mStates = new Dictionary<string, FSMStateBase>();
-
         protected FSMStateBase mCurState;
-
         public string StateName { get; protected set; }
-
+        public event Action<SceneObjBase, string, string> OnStateChanged;
         // Idle hooks
         public virtual void OnIdleEnter() { }
         public virtual void OnIdleUpdate() { }
@@ -53,12 +56,6 @@ namespace IndependentAgentProject
         public virtual void OnMoveUpdate() { }
         public virtual void OnMoveFixedUpdate() { }
         public virtual void OnMoveExit() { }
-
-        protected virtual void OnActionFinished(ActionRuntime finishedActionRuntime) { }
-
-        // 交互区域列表（在 Inspector 里拖拽，或 Awake 自动收集）
-        [Header("交互区域（留空则使用自身Collider）")]
-        [SerializeField] private List<InteractionZone> mInteractionZones = new List<InteractionZone>();
 
         protected virtual void Awake()
         {
@@ -78,7 +75,7 @@ namespace IndependentAgentProject
 
         protected virtual void Update()
         {
-
+            mCurState?.OnUpdate(this);
         }
         protected virtual void FixedUpdate()
         {
@@ -111,6 +108,8 @@ namespace IndependentAgentProject
         {
             if (StateName == stateName)
                 return;
+
+            string oldStateName = StateName;
             if (!mStates.TryGetValue(stateName, out var newState))
             {
                 Debug.LogError($"State {stateName} not registered");
@@ -120,6 +119,8 @@ namespace IndependentAgentProject
             mCurState?.OnExit(this);
             mCurState = newState;
             mCurState.OnEnter(this);
+
+            OnStateChanged?.Invoke(this, oldStateName, stateName);
         }
 
         public string GetStateName()

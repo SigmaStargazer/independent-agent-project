@@ -213,7 +213,7 @@ async def start_action_sequence_cmd(
     tool_call_id: Annotated[str, InjectedToolCallId],
     ) -> str:
     """
-    确认开始执行动作序列。
+    持续行动类动作-确认开始执行动作序列。
     重要行为规则：
     - 动作序列是长时任务（long-running task）。
     - 执行结果不会在本轮对话中返回。
@@ -343,13 +343,13 @@ async def stop_action_cmd(
     停止持续动作
 
     action_type:
-        move: 移动类动作
+        movement: 持续行动类动作
         observe: 持续观察类动作
     Return:
         str: 持续动作停止结果
     """
-    if action_type not in ["move", "observe"]:
-        return "动作类型错误，请填move或者observe"
+    if action_type not in ["movement", "observe"]:
+        return "动作类型错误，请填movement或者observe"
 
     request_id = tool_call_id
     loop = asyncio.get_running_loop()
@@ -398,10 +398,9 @@ async def observe_cmd(
     config: RunnableConfig
     # feedback_queue: Annotated[asyncio.Queue, InjectedState("feedback_queue")]
     ) -> str:
-    """观察周围环境。
-    用途：
-    - 获取当前环境信息
-    - 获取系统发送的反馈消息（例如动作完成通知）
+    """立刻观察当下的周围环境。
+    使用场景推荐：
+    - 当你需要获取当下环境信息时，可以使用此工具。
 
     重要行为规则：
 
@@ -457,18 +456,24 @@ async def observe_cmd(
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
-async def monitor_object_cmd(
+async def monitor_target_cmd(
     agent: Annotated[str, InjectedState("name")],
     tool_call_id: Annotated[str, InjectedToolCallId],
     object_index: int,
 ) -> str:
-    """持续观察一个目标物体。
+    """持续观察类动作-持续观察一个目标物体。
 
     当目标状态发生变化时，
     系统会主动发送反馈消息。
 
     该任务会持续运行，
     直到被 stop_action_cmd 停止。
+
+    使用场景推荐:
+    - 当你需要持续观察一个目标物体，以发现其状态变化的方式、运动轨迹等规律时，可以使用此工具。
+
+    限制:
+    由于注意力有限，你最多只能同时持续观察3个目标。
 
     Args:
         object_index(int): 目标物体编号
@@ -507,7 +512,7 @@ async def move_cmd(
     tool_call_id: Annotated[str, InjectedToolCallId],
     direction: str, distance: float
     ) -> str:
-    """向指定方向移动指定距离
+    """持续行动类动作-向指定方向移动指定距离
     重要行为规则：
     - 移动是异步执行的。
     - 移动结果不会在本轮对话中返回。
@@ -549,7 +554,7 @@ async def follow_target_cmd(
     max_distance: float = 2,
 ) -> str:
     """
-    持续跟随目标。
+    持续行动类动作-持续跟随目标。
 
     Args:
         object_index(int)

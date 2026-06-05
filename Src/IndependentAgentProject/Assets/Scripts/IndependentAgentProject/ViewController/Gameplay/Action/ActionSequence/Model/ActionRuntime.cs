@@ -4,21 +4,13 @@ using UnityEngine;
 
 namespace IndependentAgentProject
 {
-    public enum ActionState
-    {
-        Todo,
-        Doing,
-        Done,
-        Failed,
-        Aborted
-    }
     public class ActionRuntime
     {
         public string ActionName;
+        public ActionState State;
         public string CompleteCondition;
         public Func<bool> CompleteConditionFunc;
         public Func<bool> ErrorConditionFunc;
-        public ActionState State;
 
         // 动作开始位置
         public Vector2 StartPostion;
@@ -28,6 +20,9 @@ namespace IndependentAgentProject
         public float ActionTime = 0;
         public string StartEnv = "";
         public string EndEnv = "";
+
+        // 跟随动作参数
+        public SceneObjBase TargetFollowing;
 
         // 动作开始时接触的物体集合
         public HashSet<SceneObjBase> StartTouchingObjs = new HashSet<SceneObjBase>();

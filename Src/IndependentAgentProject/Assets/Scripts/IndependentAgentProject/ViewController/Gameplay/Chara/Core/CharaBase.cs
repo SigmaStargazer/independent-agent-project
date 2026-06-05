@@ -8,9 +8,15 @@ namespace IndependentAgentProject
 {
     public abstract class CharaBase : SceneObjBase, IInteractable
     {
+        protected Rigidbody2D mRigidbody2D;
+        public float moveSpeed = 5f;
+        protected bool moveRight;
         // 面朝方向
         public bool IsRight => transform.localScale.x > 0;
         public bool IsDead => StateName == "Dead";
+        public SceneObjBase TargetFollowing { get; protected set; }
+        public float FollowMinDistance { get; protected set; }
+        public float FollowMaxDistance { get; protected set; }
         public virtual bool IsInteractable => true;
         protected void TurnBack(float horizontalDirection)
         {
@@ -27,10 +33,49 @@ namespace IndependentAgentProject
         public virtual void OnDeadUpdate() { }
         public virtual void OnDeadFixedUpdate() { }
         public virtual void OnDeadExit() { }
+
+        // Follow hooks
+        public virtual void OnFollowEnter() { }
+        public virtual void OnFollowUpdate() { }
+        public virtual void OnFollowFixedUpdate() 
+        {
+            if (TargetFollowing == null)
+            {
+                ChangeState("Idle");
+                return;
+            }
+
+            float delta = TargetFollowing.transform.position.x - transform.position.x;
+            float distance = Mathf.Abs(delta);
+            // 超出跟随范围，进行跟随
+            if (distance > FollowMaxDistance)
+            {
+                float dir = Mathf.Sign(delta);
+                TurnBack(dir);
+                mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
+            }
+            // 处于保持范围内，保持距离
+            else if (distance < FollowMinDistance)
+            {
+                float dir = -Mathf.Sign(delta);
+                TurnBack(dir);
+                mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
+            }
+            // 处于合适的范围内，停止移动
+            else
+            {
+                float dir = Mathf.Sign(delta);
+                TurnBack(dir);
+                mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
+            }
+        }
+        public virtual void OnFollowExit() { }
         protected override void Awake()
         {
             base.Awake();
+            mRigidbody2D = GetComponent<Rigidbody2D>();
             RegisterState(new DeadState());
+            RegisterState(new FollowState());
         }
 
         public class DeadState : FSMStateBase
@@ -57,6 +102,32 @@ namespace IndependentAgentProject
             {
                 if (sceneObj is CharaBase chara)
                     chara.OnDeadExit();
+            }
+        }
+        public class FollowState : FSMStateBase
+        {
+            public override string Name => "Follow";
+
+            public override void OnEnter(SceneObjBase sceneObj)
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnFollowEnter();
+            }
+            public override void OnUpdate(SceneObjBase sceneObj)
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnFollowUpdate();
+            }
+            public override void OnFixedUpdate(SceneObjBase sceneObj)
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnFollowFixedUpdate();
+            }
+
+            public override void OnExit(SceneObjBase sceneObj)
+            {
+                if (sceneObj is CharaBase chara)
+                    chara.OnFollowExit();
             }
         }
         public override void ChangeState(string stateName)

@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static TMPro.Examples.ObjectSpin;
 
 namespace IndependentAgentProject
 {
@@ -85,7 +86,10 @@ namespace IndependentAgentProject
         #region Ω” ’Agent÷∏¡Ó¬ﬂº≠
         private void StopAction(string agent, string requestId, string actionType)
         {
-            throw new NotImplementedException();
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.StopAction(requestId, actionType);
+            }
         }
         private void Observe(string agent, string requestId)
         {
@@ -96,7 +100,10 @@ namespace IndependentAgentProject
         }
         private void MonitorTarget(string agent, string requestId, int objectIndex)
         {
-            throw new NotImplementedException();
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.MonitorTarget(requestId, objectIndex);
+            }
         }
 
         private void Move(string agent, bool isRight, float distance)
@@ -108,7 +115,10 @@ namespace IndependentAgentProject
         }
         private void FollowTarget(string agent, string requestId, int objectIndex, float minDistance, float maxDistance)
         {
-            throw new NotImplementedException();
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.FollowTarget(requestId, objectIndex, minDistance, maxDistance);
+            }
         }
 
         private void Interact(string agent, string requestId)

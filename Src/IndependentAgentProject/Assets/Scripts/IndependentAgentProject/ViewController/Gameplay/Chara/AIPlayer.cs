@@ -23,17 +23,15 @@ namespace IndependentAgentProject
 
         //private Trigger2DCheck mGroundCheck;
 
-        // 用于检查撞击场景对象时停止
-        private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
-
         // Action的上下文
         private ActionRuntime mCurActionRuntime;
+        private List<ObserveRuntime> mObserveRuntimes = new();
 
-        //private ActionSequenceRuntime mCurActionSequenceRuntime = new ActionSequenceRuntime();
         private ActionSequenceRuntime mCurActionSequenceRuntime;
         private ActionSequenceRuntime mPlanningActionSequenceRuntime;
-
         private ConditionEvaluator mConditionEvaluator;
+        // 用于检查撞击场景对象时停止
+        private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
 
         protected override void Awake()
         {
@@ -138,7 +136,7 @@ namespace IndependentAgentProject
         /// OnActionFinished钩子逻辑：当Action结束且存在finishedCtx.Result.Message时，发送消息给llm
         /// </summary>
         /// <param name="finishedActionRuntime"></param>
-        protected override void OnActionFinished(ActionRuntime finishedActionRuntime)
+        private void OnActionFinished(ActionRuntime finishedActionRuntime)
         {
             if (finishedActionRuntime == null)
             {
@@ -228,13 +226,15 @@ namespace IndependentAgentProject
             string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"方向{speedDirY} {Mathf.Abs(velocity.y)}m/s";
 
             var actionInfoRenderer = new ActionInfoRenderer();
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
 
             // 拼接返回字符串
             string selfStateInfo = $"# 状态:{this.GetStateName()}" + 
                 $"\n# 横向速度:{speed_x_str}\n# 纵向速度:{speed_y_str}" +
-                $"\n# 计划中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mPlanningActionSequenceRuntime)}" +
-                $"\n# 进行中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mCurActionSequenceRuntime)}" +
-                $"\n# 进行中的动作:\n{actionInfoRenderer.RenderActionRuntime(this.mCurActionRuntime)}";
+                $"\n# 持续观察中的目标:\n{actionInfoRenderer.RenderObserveRuntime(this.mObserveRuntimes, sceneObjs)}" +
+                $"\n# 计划中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mPlanningActionSequenceRuntime, sceneObjs)}" +
+                $"\n# 进行中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mCurActionSequenceRuntime, sceneObjs)}" +
+                $"\n# 进行中的动作:\n{actionInfoRenderer.RenderActionRuntime(this.mCurActionRuntime, sceneObjs)}";
 
             return selfStateInfo;
         }
@@ -331,14 +331,161 @@ namespace IndependentAgentProject
 
         #region Agent动作指令。当AgentManager收到服务端LLM的指令时，会调用相应Agent示例的下列方法
 
-        public void StopAction()
+        public bool StopMovement(bool stopActionSequence = true)
         {
+            bool success = false;
             if (mCurActionRuntime != null)
             {
                 mCurActionRuntime.State = ActionState.Aborted;
                 mCurActionRuntime = null;
+                success = true;
             }
-            return;
+            if (stopActionSequence && mCurActionSequenceRuntime != null && mCurActionSequenceRuntime.State == ActionSequenceState.Executing)
+            {
+                mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
+                success = true;
+            }
+            ChangeState("Idle");
+            return success;
+        }
+
+        public void StopAction(string requestId, string actionType)
+        {
+            switch (actionType)
+            {
+                case "movement":
+                    {
+                        bool success = this.StopMovement();
+                        AgentService.Instance.SendToolResultMessage(
+                            Name,
+                            "StopAction",
+                            requestId,
+                            success
+                                ? "[停止动作结果]Movement已停止"
+                                : "[停止动作结果]当前没有Movement动作"
+                        );
+                        break;
+                    }
+
+                case "observe":
+                    {
+                        int count = mObserveRuntimes.Count;
+                        foreach (var runtime in mObserveRuntimes)
+                        {
+                            if (runtime.Target != null && runtime.StateChangedHandler != null)
+                            {
+                                runtime.Target.OnStateChanged -= runtime.StateChangedHandler;
+                            }
+                        }
+                        mObserveRuntimes.Clear();
+                        AgentService.Instance.SendToolResultMessage(
+                            Name,
+                            "StopAction",
+                            requestId,
+                            $"[停止动作结果]已停止{count}个观察任务"
+                        );
+                        break;
+                    }
+                default:
+                    {
+                        AgentService.Instance.SendToolResultMessage(
+                            Name,
+                            "StopAction",
+                            requestId,
+                            "[停止动作结果]actionType仅支持movement、observe"
+                        );
+                        break;
+                    }
+            }
+        }
+
+        /// <summary>
+        /// 观察场景
+        /// </summary>
+        public void Observe(string requestId)
+        {
+            // 获取设备信息
+            List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
+            string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
+
+            // 拼接
+            string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n</环境>";
+
+            // 发送给Agent
+            // tool_name = "observe"只用于日志打印，不用于判断
+            AgentService.Instance.SendToolResultMessage(this.Name, "Observe", requestId, messageToSend);
+            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
+        }
+
+        /// <summary>
+        /// 持续观察目标
+        /// </summary>
+        /// <param name="agent"></param>
+        /// <param name="requestId"></param>
+        /// <param name="objectIndex"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public void MonitorTarget(string requestId, int objectIndex)
+        {
+            // 1. 判断观察目标数量过多
+            if (mObserveRuntimes.Count > 3)
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "MonitorTarget",
+                    requestId,
+                    $"[持续观察失败] 最多同时持续观察3个目标！你并没有那么多的注意力去注意那么多目标！"
+                );
+            }
+            // 2. 判断目标索引超出范围
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+            if (objectIndex < 0 || objectIndex >= sceneObjs.Count)
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "MonitorTarget",
+                    requestId,
+                    $"[持续观察失败] object[{objectIndex}]不存在"
+                );
+                return;
+            }
+            // 3. 判断目标是否已持续观察
+            SceneObjBase target = sceneObjs[objectIndex];
+            if (mObserveRuntimes.Any(r => r.Target == target))
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "MonitorTarget",
+                    requestId,
+                    $"[持续观察结果]目标:{target.Name}已在观察中"
+                );
+                return;
+            }
+            // 4， 创建持续观察任务
+            var runtime = new ObserveRuntime
+            {
+                Target = target,
+                LastStateName = target.GetStateName(),
+                State = ActionState.Doing
+            };
+            // 5. 目标状态变化时的回调函数注册
+            runtime.StateChangedHandler = (obj, oldState, newState) =>
+                {
+                    string msg =
+                        $"[持续观察目标状态变化]\n" +
+                        $"目标:{obj.Name}\n" +
+                        $"状态:{oldState} -> {newState}\n" +
+                        $"[提示]如果已观察到了所需信息，记得及时停止持续观察哟！";
+                    SendFeedbackToAgent(msg);
+                };
+            target.OnStateChanged += runtime.StateChangedHandler;
+            mObserveRuntimes.Add(runtime);
+            // 6. 返回持续观察开始反馈
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "MonitorTarget",
+                requestId,
+                $"[持续观察结果]开始持续观察目标:{target.Name}"
+            );
         }
 
         /// <summary>
@@ -349,8 +496,8 @@ namespace IndependentAgentProject
         /// 
         public void Move(bool moveRight, float distance)
         {
+            this.StopMovement();
             this.moveRight = moveRight;
-
             float startX = transform.position.x;
             //this.moveDistance = distance;
             mCurActionRuntime = new ActionRuntime
@@ -398,6 +545,63 @@ namespace IndependentAgentProject
             ChangeState("Move");
         }
 
+        public void FollowTarget(string requestId, int objectIndex, float minDistance, float maxDistance)
+        {
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+            if (objectIndex < 0 || objectIndex >= sceneObjs.Count)
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "FollowTarget",
+                    requestId,
+                    $"[跟随结果]失败！物体[{objectIndex}]不存在"
+                );
+                return;
+            }
+
+            this.StopMovement();
+            SceneObjBase target = sceneObjs[objectIndex];
+            TargetFollowing = target;
+            FollowMinDistance = minDistance;
+            FollowMaxDistance = maxDistance;
+            mCurActionRuntime = new ActionRuntime
+            {
+                ActionName = "FollowTarget",
+                State = ActionState.Doing,
+                TargetFollowing = target,
+                Result = new ActionResult()
+            };
+            this.mCurActionRuntime.ErrorConditionFunc = () =>
+            {
+                // 碰撞判断
+                foreach (var obj in this.mTouchingObjs)
+                {
+                    if (!this.mCurActionRuntime.StartTouchingObjs.Contains(obj))
+                    {
+                        if (this.mCurActionRuntime.Result == null)
+                            this.mCurActionRuntime.Result = new ActionResult();
+
+                        this.mCurActionRuntime.Result.Message =
+                            $"[移动中断]撞击到物体: {obj?.Name ?? "Unknown SceneObj"}";
+
+                        return true;
+                    }
+                }
+                return false;
+            };
+            // 重置初始接触物体信息
+            foreach (var obj in mTouchingObjs)
+                this.mCurActionRuntime.StartTouchingObjs.Add(obj);
+            ChangeState("Follow");
+
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "FollowTarget",
+                requestId,
+                $"[跟随结果]开始跟随:{objectIndex}. {target.Name}"
+            );
+        }
+
         /// <summary>
         /// 交互
         /// </summary>
@@ -437,26 +641,6 @@ namespace IndependentAgentProject
             (bool success, string result) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
             string messageToSend = $"[输入结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "TextInput", requestId, messageToSend);
-            Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
-        }
-
-
-
-        /// <summary>
-        /// 观察场景
-        /// </summary>
-        public void Observe(string requestId)
-        {
-            // 获取设备信息
-            List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
-            string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
-
-            // 拼接
-            string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n</环境>";
-
-            // 发送给Agent
-            // tool_name = "observe"只用于日志打印，不用于判断
-            AgentService.Instance.SendToolResultMessage(this.Name, "Observe", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
         #endregion
@@ -575,7 +759,7 @@ namespace IndependentAgentProject
             try
             {
                 // 1.停止当前Action
-                this.StopAction();
+                this.StopMovement(false);
                 ChangeState("Idle");
                 // 2.替换ActionSequence
                 // 保存旧的 runtime
@@ -661,7 +845,7 @@ namespace IndependentAgentProject
             }
 
             // 1. 停止当前的Action
-            this.StopAction();
+            this.StopMovement(false);
             ChangeState("Idle");
             // 2. 设置终止状态（不清除是为了还能调用log）
             mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
