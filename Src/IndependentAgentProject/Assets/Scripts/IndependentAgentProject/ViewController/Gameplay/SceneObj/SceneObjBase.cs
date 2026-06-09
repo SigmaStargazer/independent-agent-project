@@ -45,6 +45,8 @@ namespace IndependentAgentProject
         protected FSMStateBase mCurState;
         public string StateName { get; protected set; }
         public event Action<SceneObjBase, string, string> OnStateChanged;
+        public event Action<SceneObjBase, string, string> OnObjectEnabled;
+        public event Action<SceneObjBase, string, string> OnObjectDisabled;
         // Idle hooks
         public virtual void OnIdleEnter() { }
         public virtual void OnIdleUpdate() { }
@@ -87,12 +89,14 @@ namespace IndependentAgentProject
         {
             if (SceneObjManager.Instance != null)
                 SceneObjManager.Instance.Register(this);
+            OnObjectEnabled?.Invoke(this, "Disappearance", "Appearance");
         }
 
         protected virtual void OnDisable()
         {
             if (SceneObjManager.Instance != null)
                 SceneObjManager.Instance.UnRegister(this);
+            OnObjectDisabled?.Invoke(this, StateName, "Disappearance");
         }
 
         /// <summary>

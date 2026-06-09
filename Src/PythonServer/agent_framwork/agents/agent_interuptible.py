@@ -68,7 +68,8 @@ tools = [
         base_tools.search_episode_memories,
         base_tools.stop_action_cmd,
         base_tools.observe_cmd,
-        # base_tools.monitor_object_cmd,
+        base_tools.monitor_target_cmd,
+        base_tools.get_monitor_records_cmd,
         base_tools.move_cmd,
         base_tools.follow_target_cmd,
         base_tools.interact_cmd,
@@ -455,8 +456,8 @@ class Agent:
         # =========================
         should_interrupt = (
             force_interrupt # 强制打断时，必定打断
+            or is_feedback # 反馈消息时，必定打断
             or not self.runtime_state["focus_state"] # 非专注状态时，打断
-            or (self.runtime_state["focus_state"] and is_feedback) # 专注状态下，仅反馈消息打断
         )
         if should_interrupt:
             await self.ainterrupt(reason="被打断")

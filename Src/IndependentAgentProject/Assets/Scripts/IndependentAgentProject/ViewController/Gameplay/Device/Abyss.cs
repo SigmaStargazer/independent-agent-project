@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace IndependentAgentProject
 {
-    public class Cliff : SceneObjBase
+    public class Abyss : SceneObjBase
     {
-        public override string Name => "悬崖";
+        public override string Name => "深渊";
         public override string Desc => "深不见底。一旦掉下去，后果不堪设想。";
 
 

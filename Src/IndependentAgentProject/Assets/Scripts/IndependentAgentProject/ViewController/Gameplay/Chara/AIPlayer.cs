@@ -215,7 +215,7 @@ namespace IndependentAgentProject
         //}
 
         // 获取自身状态信息
-        private string GetSelfStateInfo()
+        private string GetSelfStateInfo(bool includeObserveTagerts = true)
         {
             Rigidbody2D rb = mRigidbody2D;
             Vector2 velocity = rb != null ? rb.velocity : Vector2.zero;
@@ -225,20 +225,23 @@ namespace IndependentAgentProject
             string speed_x_str = speedDirX == "" ? $"{Mathf.Abs(velocity.x)}m/s" : $"方向{speedDirX} {Mathf.Abs(velocity.x)}m/s";
             string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"方向{speedDirY} {Mathf.Abs(velocity.y)}m/s";
 
-            var actionInfoRenderer = new ActionInfoRenderer();
+            var actionInfoRenderer = new ActionRuntimeInfoRenderer();
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
 
+            string ObserveTargetsInfo = includeObserveTagerts ?
+                $"# 持续观察中的目标:\n{actionInfoRenderer.RenderObserveRuntimeSummary(this.mObserveRuntimes, sceneObjs)}\n"
+                : "";
+
             // 拼接返回字符串
-            string selfStateInfo = $"# 状态:{this.GetStateName()}" + 
-                $"\n# 横向速度:{speed_x_str}\n# 纵向速度:{speed_y_str}" +
-                $"\n# 持续观察中的目标:\n{actionInfoRenderer.RenderObserveRuntime(this.mObserveRuntimes, sceneObjs)}" +
-                $"\n# 计划中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mPlanningActionSequenceRuntime, sceneObjs)}" +
-                $"\n# 进行中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mCurActionSequenceRuntime, sceneObjs)}" +
-                $"\n# 进行中的动作:\n{actionInfoRenderer.RenderActionRuntime(this.mCurActionRuntime, sceneObjs)}";
+            string selfStateInfo = $"# 状态:{this.GetStateName()}\n" +
+                $"# 横向速度:{speed_x_str}\n# 纵向速度:{speed_y_str}\n" +
+                $"{ObserveTargetsInfo}" +
+                $"# 计划中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mPlanningActionSequenceRuntime, sceneObjs)}\n" +
+                $"# 进行中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mCurActionSequenceRuntime, sceneObjs)}\n" +
+                $"# 进行中的动作:\n{actionInfoRenderer.RenderActionRuntime(this.mCurActionRuntime, sceneObjs)}\n";
 
             return selfStateInfo;
         }
-
         /// <summary>
         /// 获取设备信息列表DevicesInfo，以及转化为的文字描述sceneObjsInfoDesc
         /// </summary>
@@ -292,29 +295,29 @@ namespace IndependentAgentProject
         /// 发送消息给Agent
         /// </summary>
         /// <param name="msg"></param>
-        public void SendMessageToAgent(string msg, bool forceInterrupt = false)
+        public void SendMessageToAgent(string msg, bool forceInterrupt = false, bool includeObserveTagerts = true)
         {
-            string text = this.CreateMessageText(msg);
+            string text = this.CreateMessageText(msg, includeObserveTagerts);
             // 发送给Agent
             AgentService.Instance.SendUserMessage(this.Name, text, forceInterrupt);
             // 测试用
             Debug.Log($"已发送消息给{this.Name}: {text}");
         }
 
-        public void SendFeedbackToAgent(string feedback, bool forceInterrupt = false)
+        public void SendFeedbackToAgent(string feedback, bool forceInterrupt = false, bool includeObserveTagerts = true)
         {
-            string text = this.CreateMessageText(feedback);
+            string text = this.CreateMessageText(feedback, includeObserveTagerts);
             // 发送给Agent
             AgentService.Instance.SendUserFeedback(this.Name, text, forceInterrupt);
             // 测试用
             Debug.Log($"已发送反馈给{this.Name}: {text}");
         }
 
-        private string CreateMessageText(string msg)
+        private string CreateMessageText(string msg, bool includeObserveTagerts = true)
         {
             // 获取环境信息
             List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
-            string selfStateInfo = this.GetSelfStateInfo();
+            string selfStateInfo = this.GetSelfStateInfo(includeObserveTagerts);
             string sceneInfo = this.GetSceneInfo();
             string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
 
@@ -370,11 +373,13 @@ namespace IndependentAgentProject
                 case "observe":
                     {
                         int count = mObserveRuntimes.Count;
-                        foreach (var runtime in mObserveRuntimes)
+                        foreach (var runtime in mObserveRuntimes.ToList())
                         {
                             if (runtime.Target != null && runtime.StateChangedHandler != null)
                             {
                                 runtime.Target.OnStateChanged -= runtime.StateChangedHandler;
+                                runtime.Target.OnObjectEnabled -= runtime.StateChangedHandler;
+                                runtime.Target.OnObjectDisabled -= runtime.StateChangedHandler;
                             }
                         }
                         mObserveRuntimes.Clear();
@@ -427,7 +432,7 @@ namespace IndependentAgentProject
         public void MonitorTarget(string requestId, int objectIndex)
         {
             // 1. 判断观察目标数量过多
-            if (mObserveRuntimes.Count > 3)
+            if (mObserveRuntimes.Count >= 3)
             {
                 AgentService.Instance.SendToolResultMessage(
                     Name,
@@ -435,6 +440,7 @@ namespace IndependentAgentProject
                     requestId,
                     $"[持续观察失败] 最多同时持续观察3个目标！你并没有那么多的注意力去注意那么多目标！"
                 );
+                return;
             }
             // 2. 判断目标索引超出范围
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
@@ -444,7 +450,7 @@ namespace IndependentAgentProject
                     Name,
                     "MonitorTarget",
                     requestId,
-                    $"[持续观察失败] object[{objectIndex}]不存在"
+                    $"[持续观察失败] 索引[{objectIndex}]超出范围！"
                 );
                 return;
             }
@@ -456,36 +462,92 @@ namespace IndependentAgentProject
                     Name,
                     "MonitorTarget",
                     requestId,
-                    $"[持续观察结果]目标:{target.Name}已在观察中"
+                    $"[持续观察结果]对象:{objectIndex}. {target.Name} 已在观察中"
                 );
                 return;
             }
             // 4， 创建持续观察任务
+            var curTime = Time.time;
             var runtime = new ObserveRuntime
             {
                 Target = target,
+                TargetName = target.Name,
+                ObserveStartTime = curTime,
                 LastStateName = target.GetStateName(),
-                State = ActionState.Doing
+                State = ActionState.Doing,
+                LastChangeTime = curTime
             };
-            // 5. 目标状态变化时的回调函数注册
+            // 5. 回调函数注册
             runtime.StateChangedHandler = (obj, oldState, newState) =>
                 {
+                    // 0.更新状态变化次数
+                    runtime.StateChangeNum++;
+                    // 1.消息拼接
+                    var curTime = Time.time;
+                    var elapsed = curTime - runtime.LastChangeTime;
+                    string elapsedKey = runtime.StateChangeNum == 1 ? $"距离开始观察" : $"距离上次状态改变";
+                    var observeTime = curTime - runtime.ObserveStartTime;
                     string msg =
-                        $"[持续观察目标状态变化]\n" +
-                        $"目标:{obj.Name}\n" +
-                        $"状态:{oldState} -> {newState}\n" +
-                        $"[提示]如果已观察到了所需信息，记得及时停止持续观察哟！";
-                    SendFeedbackToAgent(msg);
+                        $"[第{runtime.StateChangeNum}次状态变化]\n" +
+                        $"观察时长:{observeTime:F1}秒\n" +
+                        $"状态变化:{oldState} -> {newState}\n" +
+                        $"{elapsedKey}:{elapsed:F1}秒前";
+                    // 2.记录
+                    string record = this.CreateMessageText(msg: msg, includeObserveTagerts:false);
+                    runtime.Records.Enqueue(record);
+                    while (runtime.Records.Count > ObserveRuntime.MaxRecords)
+                    {
+                        runtime.Records.Dequeue();
+                    }
+                    runtime.UnreadCount++;
+                    // 3.更新状态
+                    runtime.LastStateName = newState;
+                    runtime.LastChangeTime = curTime;
                 };
             target.OnStateChanged += runtime.StateChangedHandler;
+            target.OnObjectEnabled += runtime.StateChangedHandler;
+            target.OnObjectDisabled += runtime.StateChangedHandler;
+            // 6. 添加初始记录
+            string initRecord = this.CreateMessageText($"[持续观察开始]\n" +
+                $"目标:{target.Name}\n" +
+                $"初始状态:{target.GetStateName()}",
+                includeObserveTagerts:false);
+            runtime.Records.Enqueue(initRecord);
+            runtime.UnreadCount++;
             mObserveRuntimes.Add(runtime);
-            // 6. 返回持续观察开始反馈
+            // 7. 返回持续观察开始反馈
             AgentService.Instance.SendToolResultMessage(
                 Name,
                 "MonitorTarget",
                 requestId,
                 $"[持续观察结果]开始持续观察目标:{target.Name}"
             );
+        }
+        public void GetMonitorRecords(string requestId, int monitorIndex)
+        {
+            if (monitorIndex < 1 || monitorIndex > mObserveRuntimes.Count)
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "GetMonitorRecords",
+                    requestId,
+                    $"[获取观察记录失败] monitor[{monitorIndex}]不存在"
+                );
+                return;
+            }
+            // 1. 获取记录消息
+            ObserveRuntime runtime = mObserveRuntimes[monitorIndex - 1];
+            var actionInfoRenderer = new ActionRuntimeInfoRenderer();
+            string text = actionInfoRenderer.RenderObserveTargetRuntime(runtime);
+            // 2. 发送消息
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "GetMonitorRecords",
+                requestId,
+                text
+            );
+            // 4. 重置未读记录数
+            runtime.UnreadCount = 0;
         }
 
         /// <summary>

@@ -3,7 +3,7 @@ from typing import Literal, List
 from .base_action import BaseAction, StateChangeAction
 
 class WaitAction(StateChangeAction):
-    action: Literal["wait"] = Field(default="wait", description="等待，直至满足条件") #要作为Annotated的判断条件，必须是Literal[
+    action: Literal["wait"] = Field(default="wait", description="原地等待，直至满足条件") #要作为Annotated的判断条件，必须是Literal
 
 class MoveAction(StateChangeAction):
     action: Literal["move"] = Field(default="move", description="移动，直至满足条件")

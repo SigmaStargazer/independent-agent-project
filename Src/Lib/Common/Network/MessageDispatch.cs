@@ -39,6 +39,7 @@ namespace Network
 
             if (message.agentObserveRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentObserveRequest); }
             if (message.agentMonitorTargetRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentMonitorTargetRequest);}
+            if (message.agentGetMonitorRecordsRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentGetMonitorRecordsRequest);}
 
             if (message.agentMoveRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentMoveRequest); }
             if (message.agentFollowTargetRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentFollowTargetRequest);}

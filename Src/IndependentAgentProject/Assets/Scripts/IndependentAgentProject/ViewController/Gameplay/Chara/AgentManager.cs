@@ -30,6 +30,7 @@ namespace IndependentAgentProject
             AgentService.Instance.OnStopAction += this.StopAction;
             AgentService.Instance.OnObserve += this.Observe;
             AgentService.Instance.OnMonitorTarget += this.MonitorTarget;
+            AgentService.Instance.OnGetMonitorRecords += this.GetMonitorRecords;
             AgentService.Instance.OnMoveAgent += this.Move;
             AgentService.Instance.OnFollowTarget += this.FollowTarget;
             AgentService.Instance.OnInteract += this.Interact;
@@ -47,6 +48,7 @@ namespace IndependentAgentProject
             AgentService.Instance.OnStopAction -= this.StopAction;
             AgentService.Instance.OnObserve -= this.Observe;
             AgentService.Instance.OnMonitorTarget -= this.MonitorTarget;
+            AgentService.Instance.OnGetMonitorRecords -= this.GetMonitorRecords;
             AgentService.Instance.OnMoveAgent -= this.Move;
             AgentService.Instance.OnFollowTarget -= this.FollowTarget;
             AgentService.Instance.OnInteract -= this.Interact;
@@ -103,6 +105,13 @@ namespace IndependentAgentProject
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
                 agentObj.MonitorTarget(requestId, objectIndex);
+            }
+        }
+        private void GetMonitorRecords(string agent, string requestId, int monitorIndex)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.GetMonitorRecords(requestId, monitorIndex);
             }
         }
 

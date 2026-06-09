@@ -180,18 +180,19 @@ message NetMessageRequest{
 	
 	AgentObserveRequest agentObserveRequest = 15;
 	AgentMonitorTargetRequest agentMonitorTargetRequest = 16;
+	AgentGetMonitorRecordsRequest agentGetMonitorRecordsRequest = 17;
 	
-	AgentMoveRequest agentMoveRequest = 17;
-	AgentFollowTargetRequest agentFollowTargetRequest = 18;
+	AgentMoveRequest agentMoveRequest = 18;
+	AgentFollowTargetRequest agentFollowTargetRequest = 19;
 	
-	AgentInteractRequest agentInteractRequest = 19;
-	AgentSelectRequest agentSelectRequest = 20;
-	AgentInputRequest agentInputRequest = 21;
+	AgentInteractRequest agentInteractRequest = 20;
+	AgentSelectRequest agentSelectRequest = 21;
+	AgentInputRequest agentInputRequest = 22;
 	
-	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 22;
-	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 23;
-	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 24;
-	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 25;
+	AgentPlanActionSequenceRequest agentPlanActionSequenceRequest = 23;
+	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 24;
+	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 25;
+	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 26;
 }
 
 message NetMessageResponse{
@@ -357,6 +358,12 @@ message AgentMonitorTargetRequest {
 	string agent = 1;
 	string request_id = 2;
 	int32 object_index = 3;
+}
+
+message AgentGetMonitorRecordsRequest {
+	string agent = 1;
+	string request_id = 2;
+	int32 monitor_index = 3;
 }
 
 ////////////////////////////////////////////////////////////////

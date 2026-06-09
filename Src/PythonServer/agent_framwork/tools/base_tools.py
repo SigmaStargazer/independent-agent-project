@@ -507,6 +507,50 @@ async def monitor_target_cmd(
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
+async def get_monitor_records_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    monitor_index: int,
+) -> str:
+    """
+    获取持续观察记录。
+
+    使用场景:
+    - 当持续观察目标后，希望查看观察到的详细历史记录时。
+
+    Args:
+        monitor_index(int): 持续观察目标编号
+
+    Return:
+        str: 观察记录
+    """
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    # 注册等待池
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentGetMonitorRecordsRequest()
+        request.agent = agent
+        request.request_id = request_id
+        request.monitor_index = monitor_index
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] get_monitor_records_cmd 发起请求 {request_id}")
+        # 等待客户端回调（阻塞 await）
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        # 闭环返回模型
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]获取观察记录超时"
+    except Exception as e:
+        return f"[{agent}]获取观察记录异常:{e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+@tool
 async def move_cmd(
     agent: Annotated[str, InjectedState("name")], 
     tool_call_id: Annotated[str, InjectedToolCallId],

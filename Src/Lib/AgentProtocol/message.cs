@@ -325,30 +325,33 @@ namespace SkillBridge.Message
         public AgentMonitorTargetRequest agentMonitorTargetRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(17)]
-        public AgentMoveRequest agentMoveRequest { get; set; }
+        public AgentGetMonitorRecordsRequest agentGetMonitorRecordsRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(18)]
-        public AgentFollowTargetRequest agentFollowTargetRequest { get; set; }
+        public AgentMoveRequest agentMoveRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(19)]
-        public AgentInteractRequest agentInteractRequest { get; set; }
+        public AgentFollowTargetRequest agentFollowTargetRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(20)]
-        public AgentSelectRequest agentSelectRequest { get; set; }
+        public AgentInteractRequest agentInteractRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(21)]
-        public AgentInputRequest agentInputRequest { get; set; }
+        public AgentSelectRequest agentSelectRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(22)]
-        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
+        public AgentInputRequest agentInputRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(23)]
-        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
+        public AgentPlanActionSequenceRequest agentPlanActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(24)]
-        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
+        public AgentStartActionSequenceRequest agentStartActionSequenceRequest { get; set; }
 
         [global::ProtoBuf.ProtoMember(25)]
+        public AgentContinueActionSequenceRequest agentContinueActionSequenceRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(26)]
         public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
     }
@@ -763,6 +766,26 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(3, Name = @"object_index")]
         public int ObjectIndex { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentGetMonitorRecordsRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"monitor_index")]
+        public int MonitorIndex { get; set; }
 
     }
 

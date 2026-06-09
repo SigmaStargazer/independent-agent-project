@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace IndependentAgentProject
 {
-    public class ActionInfoRenderer
+    public class ActionRuntimeInfoRenderer
     {
         public string RenderActionSequenceRuntime(ActionSequenceRuntime actionSequenceRuntime, List<SceneObjBase> sceneObjs)
         {
@@ -51,7 +51,7 @@ namespace IndependentAgentProject
             return text;
         }
 
-        public string RenderObserveRuntime(List<ObserveRuntime> observeRuntimes, List<SceneObjBase> sceneObjs)
+        public string RenderObserveRuntimeSummary(List<ObserveRuntime> observeRuntimes, List<SceneObjBase> sceneObjs)
         {
             if (observeRuntimes.Count == 0)
             {
@@ -59,24 +59,61 @@ namespace IndependentAgentProject
             }
 
             List<string> infos = new();
+            int num = 1;
             foreach (var runtime in observeRuntimes)
             {
                 if (runtime.Target == null)
                     continue;
-
+                
                 int index = sceneObjs.IndexOf(runtime.Target);
-
                 if (index >= 0)
                 {
-                    infos.Add($"- {index}. {runtime.Target.Name}");
+                    var curTime = Time.time;
+                    var elapsed = curTime - runtime.LastChangeTime;
+                    var observeTime = curTime - runtime.ObserveStartTime;
+                    infos.Add($"观察目标[{num}]\n" +
+                        $"对象: {index}. {runtime.TargetName}\n" +
+                        $"观察时长:{observeTime:F1}秒\n" +
+                        $"最后状态: {runtime.LastStateName}\n" +
+                        $"最后变化: {elapsed:F1}秒前\n" +
+                        $"状态变化次数:{runtime.StateChangeNum}次\n" +
+                        $"未读记录: {runtime.UnreadCount}条\n" +
+                        $"存储记录: {runtime.Records.Count}条");
                 }
                 else
                 {
-                    infos.Add($"- {runtime.Target.Name}(目前不在视线内)");
+                    infos.Add($"观察目标[{num}]:\n" +
+                        $"对象: {runtime.TargetName}(目前不在视线内)");
                 }
+                num++;
             }
             return $"目前正对{observeRuntimes.Count}个目标进行持续观察\n" +
-                string.Join("\n", infos);
+                string.Join("\n\n", infos);
+        }
+
+        public string RenderObserveTargetRuntime(ObserveRuntime runtime)
+        {
+            var curTime = Time.time;
+            var elapsed = curTime - runtime.LastChangeTime;
+            string elapsedKey = runtime.StateChangeNum == 0 ? $"距离开始观察" : $"距离上次状态改变";
+            var observeTime = curTime - runtime.ObserveStartTime;
+            string text =
+                $"[观察记录]\n" +
+                $"对象:{runtime.TargetName}\n" +
+                $"观察时长:{observeTime:F1}秒\n" +
+                $"最后状态:{runtime.LastStateName}\n" +
+                $"{elapsedKey}:{elapsed:F1}秒前\n" +
+                $"存储记录: {runtime.Records.Count}条\n\n";
+            // 2. 逐条记录拼接
+            int idx = 1;
+            foreach (string record in runtime.Records)
+            {
+                text += $"==========记录{idx}==========\n";
+                text += record;
+                text += "\n\n";
+                idx++;
+            }
+            return text;
         }
     }
 }

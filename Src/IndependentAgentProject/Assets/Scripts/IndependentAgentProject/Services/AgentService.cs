@@ -41,6 +41,7 @@ namespace Services
 
         public event UnityAction<string, string> OnObserve;
         public event UnityAction<string, string, int> OnMonitorTarget;
+        public event UnityAction<string, string, int> OnGetMonitorRecords;
 
         public event UnityAction<string, bool, float> OnMoveAgent;
         public event Action<string, string, int, float, float> OnFollowTarget;
@@ -76,6 +77,7 @@ namespace Services
 
             MessageDistributer.Instance.Subscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Subscribe<AgentMonitorTargetRequest>(this.OnAgentMonitorTarget);
+            MessageDistributer.Instance.Subscribe<AgentGetMonitorRecordsRequest>(this.OnAgentGetMonitorRecords);
 
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Subscribe<AgentFollowTargetRequest>(this.OnAgentFollowTarget);
@@ -107,6 +109,7 @@ namespace Services
 
             MessageDistributer.Instance.Unsubscribe<AgentObserveRequest>(this.OnAgentObserve);
             MessageDistributer.Instance.Unsubscribe<AgentMonitorTargetRequest>(this.OnAgentMonitorTarget);
+            MessageDistributer.Instance.Unsubscribe<AgentGetMonitorRecordsRequest>(this.OnAgentGetMonitorRecords);
 
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Unsubscribe<AgentFollowTargetRequest>(this.OnAgentFollowTarget);
@@ -605,6 +608,11 @@ namespace Services
         {
             Debug.LogFormat($"OnAgentMonitorTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex}");
             this.OnMonitorTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex);
+        }
+        void OnAgentGetMonitorRecords(object sender, AgentGetMonitorRecordsRequest request)
+        {
+            Debug.LogFormat($"OnAgentGetMonitorRecords::Agent:{request.Agent} RequestId:{request.RequestId} MonitorIndex:{request.MonitorIndex}");
+            this.OnGetMonitorRecords?.Invoke(request.Agent, request.RequestId, request.MonitorIndex);
         }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
