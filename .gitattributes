@@ -1,2 +1,16 @@
+# 文本文件统一按 UTF-8 处理，避免跨平台/工具链编码不一致
+* text=auto
+
+*.cs     text diff=csharp
+*.py     text diff=python
+*.md     text diff=markdown
+*.proto  text
+*.json   text
+*.txt    text
+*.yml    text
+*.yaml   text
+*.cmd    text eol=crlf
+*.bat    text eol=crlf
+
 # Src/ShootingEditor2D/Library/ArtifactDB filter=lfs diff=lfs merge=lfs -text
 # Src/ShootingEditor2D/Library/PackageCache/com.unity.burst@1.6.6/.Runtime/hostmac/lld filter=lfs diff=lfs merge=lfs -text

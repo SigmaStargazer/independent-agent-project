@@ -1,0 +1,166 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor.U2D.Path.GUIFramework;
+using UnityEngine;
+
+namespace IndependentAgentProject
+{
+    public class RuntimeInfoRenderer
+    {
+        public string RenderActionSequenceRuntime(ActionSequenceRuntime actionSequenceRuntime, List<SceneObjBase> sceneObjs)
+        {
+            if (actionSequenceRuntime == null || actionSequenceRuntime.ActionSequence.Count == 0)
+            {
+                return "无";
+            }
+
+            string actionSequenceText = "";
+            actionSequenceText += $"## 动作序列状态: {actionSequenceRuntime.State}" +
+                $"\n## 动作序列详情: ";
+            for (int i = 0; i < actionSequenceRuntime.ActionRuntimeLog.Count; i++)
+            {
+                var actionRuntime = actionSequenceRuntime.ActionRuntimeLog[i];
+                actionSequenceText += $"\n{i}.{RenderActionRuntime(actionRuntime, sceneObjs)} ";
+            }
+            return actionSequenceText;
+        }
+
+        public string RenderActionRuntime(ActionRuntime actionRuntime, List<SceneObjBase> sceneObjs)
+        {
+            if (actionRuntime == null)
+            {
+                return "无";
+            }
+            string text =$"动作名:{actionRuntime.ActionName}\n" +
+                $"结束条件:{(string.IsNullOrEmpty(actionRuntime.CompleteCondition) ? "无" : actionRuntime.CompleteCondition)}\n" +
+                $"动作状态:{actionRuntime.State}\n";
+
+            if (actionRuntime.TargetFollowing != null)
+            {
+                int index = sceneObjs.IndexOf(actionRuntime.TargetFollowing);
+
+                if (index >= 0)
+                {
+                    text += $"跟随目标:{index}. {actionRuntime.TargetFollowing.Name}";
+                }
+                else
+                {
+                    text += $"跟随目标:{actionRuntime.TargetFollowing.Name}(目前不在视线内)";
+                }
+            }
+            return text;
+        }
+
+        public string RenderObserveRuntimeSummary(List<ObserveRuntime> observeRuntimes, List<SceneObjBase> sceneObjs)
+        {
+            if (observeRuntimes.Count == 0)
+            {
+                return "无";
+            }
+
+            List<string> infos = new();
+            int num = 1;
+            foreach (var runtime in observeRuntimes)
+            {
+                if (runtime.Target == null)
+                    continue;
+                
+                int index = sceneObjs.IndexOf(runtime.Target);
+                if (index >= 0)
+                {
+                    var curTime = Time.time;
+                    var elapsed = curTime - runtime.LastChangeTime;
+                    var observeTime = curTime - runtime.ObserveStartTime;
+                    infos.Add($"观察目标[{num}]\n" +
+                        $"对象: {index}. {runtime.TargetName}\n" +
+                        $"观察时长:{observeTime:F1}秒\n" +
+                        $"最后状态: {runtime.LastStateName}\n" +
+                        $"最后变化: {elapsed:F1}秒前\n" +
+                        $"状态变化次数:{runtime.StateChangeNum}次\n" +
+                        $"未读记录: {runtime.UnreadCount}条\n" +
+                        $"存储记录: {runtime.Records.Count}条");
+                }
+                else
+                {
+                    infos.Add($"观察目标[{num}]:\n" +
+                        $"对象: {runtime.TargetName}(目前不在视线内)");
+                }
+                num++;
+            }
+            return $"目前正对{observeRuntimes.Count}个目标进行持续观察\n" +
+                string.Join("\n\n", infos);
+        }
+
+        public string RenderObserveTargetRuntime(ObserveRuntime runtime)
+        {
+            var curTime = Time.time;
+            var elapsed = curTime - runtime.LastChangeTime;
+            string elapsedKey = runtime.StateChangeNum == 0 ? $"距离开始观察" : $"距离上次状态改变";
+            var observeTime = curTime - runtime.ObserveStartTime;
+            string text =
+                $"[观察记录]\n" +
+                $"对象:{runtime.TargetName}\n" +
+                $"观察时长:{observeTime:F1}秒\n" +
+                $"最后状态:{runtime.LastStateName}\n" +
+                $"{elapsedKey}:{elapsed:F1}秒前\n" +
+                $"存储记录: {runtime.Records.Count}条\n\n";
+            // 2. 逐条记录拼接
+            int idx = 1;
+            foreach (string record in runtime.Records)
+            {
+                text += $"==========记录{idx}==========\n";
+                text += record;
+                text += "\n\n";
+                idx++;
+            }
+            return text;
+        }
+
+        public string RenderTimerSummary(List<TimerRuntime> timerRuntimes)
+        {
+            if (timerRuntimes.Count == 0)
+            {
+                return "无";
+            }
+
+            List<string> lines = new();
+            foreach (var timer in timerRuntimes)
+            {
+                string repeatText = timer.TimerRepeat ? "是" : "否";
+                lines.Add(
+                    $"timer_id:{timer.TimerId}\n" +
+                    $"名称:{timer.TimerName}\n" +
+                    $"剩余:{timer.RemainingSeconds:F1}秒\n" +
+                    $"重复:{repeatText}"
+                );
+            }
+
+            return string.Join("\n\n", lines);
+        }
+
+        public string RenderTimerListDetail(List<TimerRuntime> timerRuntimes)
+        {
+            if (timerRuntimes.Count == 0)
+            {
+                return "[定时器列表] 当前没有进行中的定时器";
+            }
+
+            List<string> lines = new() { "[定时器列表]" };
+            int index = 1;
+            foreach (var timer in timerRuntimes)
+            {
+                string repeatText = timer.TimerRepeat ? "是" : "否";
+                lines.Add(
+                    $"{index}. 定时器id:{timer.TimerId}\n" +
+                    $"名称:{timer.TimerName}\n" +
+                    $"描述:{timer.TimerDescription}\n" +
+                    $"剩余:{timer.RemainingSeconds:F1}秒\n" +
+                    $"重复:{repeatText}"
+                );
+                index++;
+            }
+
+            return string.Join("\n\n", lines);
+        }
+    }
+}

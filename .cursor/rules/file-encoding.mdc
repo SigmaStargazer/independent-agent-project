@@ -1,0 +1,19 @@
+---
+description: 文本文件必须使用 UTF-8，避免中文乱码
+alwaysApply: true
+---
+
+# 文件编码（UTF-8）
+
+本仓库含大量中文文案（Unity C#、Python、文档）。**禁止**以 GBK/GB2312/系统默认 ANSI 编码读写或保存源文件。
+
+## 写入要求
+
+- 所有 `.cs`、`.py`、`.md`、`.proto` 等文本文件一律 **UTF-8**（C# 用 **UTF-8 无 BOM**）。
+- 编辑含中文的文件时，**整文件重写**或确保补丁后中文仍可读；若发现 `��`、`` 等替换字符或乱码，立即用正确 UTF-8 中文修复，勿在乱码字符串上继续改。
+- 不要用会改变编码的外部工具批量替换；优先用 Cursor/VS Code 保存（已配置 `files.encoding: utf8`）。
+
+## 参考
+
+- 仓库根目录 `.editorconfig` 已声明 `charset = utf-8`
+- 工作区 `.vscode/settings.json` 已关闭 `files.autoGuessEncoding`（Windows 下避免误猜 GBK）

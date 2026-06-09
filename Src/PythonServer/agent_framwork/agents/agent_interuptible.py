@@ -79,6 +79,9 @@ tools = [
         base_tools.start_action_sequence_cmd,
         base_tools.continue_action_sequence_cmd,
         # base_tools.stop_action_sequence_cmd,
+        base_tools.set_timer_cmd,
+        base_tools.get_timer_list_cmd,
+        base_tools.remove_timer_cmd,
         # base_tools.add_alarm,
         #  base_tools.get_alarm_list,
         #  base_tools.remove_alarm

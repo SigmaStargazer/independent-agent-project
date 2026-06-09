@@ -747,6 +747,142 @@ async def input_cmd(
         return f"[{agent}]输入异常: {e}"
     finally:
         TOOL_WAITERS.pop(request_id, None)
+
+@tool
+async def set_timer_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    timer_name: str,
+    delay_seconds: float,
+    timer_description: str = "无描述",
+    timer_repeat: bool = False,
+) -> str:
+    """设置一个倒计时定时器。
+
+    定时器到期后，系统会主动发送反馈消息通知你。
+
+    使用场景推荐:
+    - 当你需要在若干秒后提醒自己做事时，可以使用此工具。
+    - 当你需要周期性重复提醒时，可将 timer_repeat 设为 True。
+
+    Args:
+        timer_name(str): 定时器名称，用于区分不同定时器
+        delay_seconds(float): 延迟秒数，定时器将在该秒数后触发
+        timer_description(str): 定时器描述，到期通知中会包含此信息
+        timer_repeat(bool): 是否重复触发。True 表示到期后按相同间隔重复
+
+    Return:
+        str: 定时器设置结果，通常包含 timer_id
+    """
+    if delay_seconds <= 0:
+        return f"[{agent}]延迟秒数必须大于0"
+    if not timer_name.strip():
+        return f"[{agent}]定时器名称不能为空"
+
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentSetTimerRequest()
+        request.agent = agent
+        request.request_id = request_id
+        request.timer_name = timer_name
+        request.delay_seconds = delay_seconds
+        request.timer_description = timer_description
+        request.timer_repeat = timer_repeat
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] set_timer_cmd 发起请求 {request_id}")
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]设置定时器超时"
+    except Exception as e:
+        return f"[{agent}]设置定时器异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+@tool
+async def get_timer_list_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
+) -> str:
+    """获取当前所有定时器列表。
+
+    使用场景:
+    - 当你想查看自己设置了哪些定时器，或需要获取 timer_id 以便删除时。
+
+    Return:
+        str: 定时器列表
+    """
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentGetTimerListRequest()
+        request.agent = agent
+        request.request_id = request_id
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] get_timer_list_cmd 发起请求 {request_id}")
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]获取定时器列表超时"
+    except Exception as e:
+        return f"[{agent}]获取定时器列表异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+@tool
+async def remove_timer_cmd(
+    agent: Annotated[str, InjectedState("name")], 
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    timer_id: int,
+) -> str:
+    """删除指定定时器。
+
+    使用场景:
+    - 当你不再需要某个定时器，或想取消尚未触发的倒计时时。
+
+    Args:
+        timer_id(int): 定时器id，可通过 get_timer_list_cmd 获取
+
+    Return:
+        str: 删除结果
+    """
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentRemoveTimerRequest()
+        request.agent = agent
+        request.request_id = request_id
+        request.timer_id = timer_id
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] remove_timer_cmd 发起请求 {request_id}")
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]删除定时器超时"
+    except Exception as e:
+        return f"[{agent}]删除定时器异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+
+
+
 # endregion
 
 @tool

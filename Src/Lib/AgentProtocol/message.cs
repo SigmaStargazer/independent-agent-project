@@ -354,6 +354,15 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(26)]
         public AgentStopActionSequenceRequest agentStopActionSequenceRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(27)]
+        public AgentSetTimerRequest agentSetTimerRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(28)]
+        public AgentGetTimerListRequest agentGetTimerListRequest { get; set; }
+
+        [global::ProtoBuf.ProtoMember(29)]
+        public AgentRemoveTimerRequest agentRemoveTimerRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -960,6 +969,74 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
         [global::System.ComponentModel.DefaultValue("")]
         public string RequestId { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentSetTimerRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"timer_name")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string TimerName { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(4, Name = @"delay_seconds")]
+        public float DelaySeconds { get; set; }
+
+        [global::ProtoBuf.ProtoMember(5, Name = @"timer_description")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string TimerDescription { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(6, Name = @"timer_repeat")]
+        public bool TimerRepeat { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentGetTimerListRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentRemoveTimerRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"timer_id")]
+        public int TimerId { get; set; }
 
     }
 

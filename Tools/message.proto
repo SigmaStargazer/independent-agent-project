@@ -193,6 +193,10 @@ message NetMessageRequest{
 	AgentStartActionSequenceRequest agentStartActionSequenceRequest = 24;
 	AgentContinueActionSequenceRequest agentContinueActionSequenceRequest = 25;
 	AgentStopActionSequenceRequest agentStopActionSequenceRequest = 26;
+
+	AgentSetTimerRequest agentSetTimerRequest = 27;
+	AgentGetTimerListRequest agentGetTimerListRequest = 28;
+	AgentRemoveTimerRequest agentRemoveTimerRequest = 29;
 }
 
 message NetMessageResponse{
@@ -434,5 +438,31 @@ message AgentContinueActionSequenceRequest {
 message AgentStopActionSequenceRequest {
 	string agent = 1;
 	string request_id = 2;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  6. 定时器
+//
+////////////////////////////////////////////////////////////////
+
+message AgentSetTimerRequest {
+	string agent = 1;
+	string request_id = 2;
+	string timer_name = 3;
+	float delay_seconds = 4;
+	string timer_description = 5;
+	bool timer_repeat = 6;
+}
+
+message AgentGetTimerListRequest {
+	string agent = 1;
+	string request_id = 2;
+}
+
+message AgentRemoveTimerRequest {
+	string agent = 1;
+	string request_id = 2;
+	int32 timer_id = 3;
 }
 

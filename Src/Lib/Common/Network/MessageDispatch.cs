@@ -53,6 +53,10 @@ namespace Network
             if (message.agentStartActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStartActionSequenceRequest); }
             if (message.agentContinueActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentContinueActionSequenceRequest); }
             if (message.agentStopActionSequenceRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentStopActionSequenceRequest); }
+
+            if (message.agentSetTimerRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentSetTimerRequest); }
+            if (message.agentGetTimerListRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentGetTimerListRequest); }
+            if (message.agentRemoveTimerRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentRemoveTimerRequest); }
         }
     }
 }

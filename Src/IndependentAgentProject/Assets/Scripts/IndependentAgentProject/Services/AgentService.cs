@@ -54,6 +54,10 @@ namespace Services
         public event UnityAction<string, string> OnStartActionSequence;
         public event UnityAction<string, string> OnContinueActionSequence;
         public event UnityAction<string, string> OnStopActionSequence;
+
+        public event Action<string, string, string, float, string, bool> OnSetTimer;
+        public event UnityAction<string, string> OnGetTimerList;
+        public event UnityAction<string, string, int> OnRemoveTimer;
         Queue<NetMessage> pendingMessages = new Queue<NetMessage>();
         bool connected = false; // 连接完成
         bool connecting = false; // 正在尝试连接
@@ -90,6 +94,10 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentStartActionSequenceRequest>(this.OnAgentStartActionSequence);
             MessageDistributer.Instance.Subscribe<AgentContinueActionSequenceRequest>(this.OnAgentContinueActionSequence);
             MessageDistributer.Instance.Subscribe<AgentStopActionSequenceRequest>(this.OnAgentStopActionSequence);
+
+            MessageDistributer.Instance.Subscribe<AgentSetTimerRequest>(this.OnAgentSetTimer);
+            MessageDistributer.Instance.Subscribe<AgentGetTimerListRequest>(this.OnAgentGetTimerList);
+            MessageDistributer.Instance.Subscribe<AgentRemoveTimerRequest>(this.OnAgentRemoveTimer);
         }
 
         public void Dispose()
@@ -122,6 +130,10 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentStartActionSequenceRequest>(this.OnAgentStartActionSequence);
             MessageDistributer.Instance.Unsubscribe<AgentContinueActionSequenceRequest>(this.OnAgentContinueActionSequence);
             MessageDistributer.Instance.Unsubscribe<AgentStopActionSequenceRequest>(this.OnAgentStopActionSequence);
+
+            MessageDistributer.Instance.Unsubscribe<AgentSetTimerRequest>(this.OnAgentSetTimer);
+            MessageDistributer.Instance.Unsubscribe<AgentGetTimerListRequest>(this.OnAgentGetTimerList);
+            MessageDistributer.Instance.Unsubscribe<AgentRemoveTimerRequest>(this.OnAgentRemoveTimer);
             AgentClient.Instance.OnConnect -= OnGameServerConnect;
             AgentClient.Instance.OnDisconnect -= OnGameServerDisconnect;
         }
@@ -667,6 +679,25 @@ namespace Services
         {
             Debug.LogFormat("OnAgentStopActionSequence::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
             this.OnStopActionSequence?.Invoke(request.Agent, request.RequestId);
+        }
+
+        void OnAgentSetTimer(object sender, AgentSetTimerRequest request)
+        {
+            Debug.LogFormat("OnAgentSetTimer::Agent:{0} RequestId:{1} TimerName:{2} DelaySeconds:{3} TimerDescription:{4} TimerRepeat:{5}",
+                request.Agent, request.RequestId, request.TimerName, request.DelaySeconds, request.TimerDescription, request.TimerRepeat);
+            this.OnSetTimer?.Invoke(request.Agent, request.RequestId, request.TimerName, request.DelaySeconds, request.TimerDescription, request.TimerRepeat);
+        }
+
+        void OnAgentGetTimerList(object sender, AgentGetTimerListRequest request)
+        {
+            Debug.LogFormat("OnAgentGetTimerList::Agent:{0} RequestId:{1}", request.Agent, request.RequestId);
+            this.OnGetTimerList?.Invoke(request.Agent, request.RequestId);
+        }
+
+        void OnAgentRemoveTimer(object sender, AgentRemoveTimerRequest request)
+        {
+            Debug.LogFormat("OnAgentRemoveTimer::Agent:{0} RequestId:{1} TimerId:{2}", request.Agent, request.RequestId, request.TimerId);
+            this.OnRemoveTimer?.Invoke(request.Agent, request.RequestId, request.TimerId);
         }
 
         #endregion

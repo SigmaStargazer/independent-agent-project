@@ -41,6 +41,10 @@ namespace IndependentAgentProject
             AgentService.Instance.OnStartActionSequence += this.StartActionSequence;
             AgentService.Instance.OnContinueActionSequence += this.ContinueActionSequence;
             AgentService.Instance.OnStopActionSequence += this.StopActionSequence;
+
+            AgentService.Instance.OnSetTimer += this.SetTimer;
+            AgentService.Instance.OnGetTimerList += this.GetTimerList;
+            AgentService.Instance.OnRemoveTimer += this.RemoveTimer;
         }
 
         void OnDisable()
@@ -59,13 +63,17 @@ namespace IndependentAgentProject
             AgentService.Instance.OnStartActionSequence -= this.StartActionSequence;
             AgentService.Instance.OnContinueActionSequence -= this.ContinueActionSequence;
             AgentService.Instance.OnStopActionSequence -= this.StopActionSequence;
+
+            AgentService.Instance.OnSetTimer -= this.SetTimer;
+            AgentService.Instance.OnGetTimerList -= this.GetTimerList;
+            AgentService.Instance.OnRemoveTimer -= this.RemoveTimer;
         }
         void OnDestroy()
         {
             mAgents.Clear();
         }
 
-        #region ×¢²áÓë×¢ÏúÂß¼­
+        #region æ³¨å†Œä¸Žæ³¨é”€é€»è¾‘
 
         public void Register(AIPlayer agent)
         {
@@ -85,7 +93,7 @@ namespace IndependentAgentProject
 
         #endregion
 
-        #region ½ÓÊÕAgentÖ¸ÁîÂß¼­
+        #region æŽ¥æ”¶AgentæŒ‡ä»¤é€»è¾‘
         private void StopAction(string agent, string requestId, string actionType)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
@@ -155,7 +163,7 @@ namespace IndependentAgentProject
         }
         #endregion
 
-        #region ActionSequenceÏà¹Ø
+        #region ActionSequenceç›¸å…³
         private void PlanActionSequence(string agent, List<ActionStep> actionSequence, string requestId)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
@@ -184,6 +192,32 @@ namespace IndependentAgentProject
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
                 agentObj.StopActionSequence(requestId);
+            }
+        }
+        #endregion
+
+        #region å®šæ—¶å™¨ç›¸å…³
+        private void SetTimer(string agent, string requestId, string timerName, float delaySeconds, string timerDescription, bool timerRepeat)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.SetTimer(requestId, timerName, delaySeconds, timerDescription, timerRepeat);
+            }
+        }
+
+        private void GetTimerList(string agent, string requestId)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.GetTimerList(requestId);
+            }
+        }
+
+        private void RemoveTimer(string agent, string requestId, int timerId)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.RemoveTimer(requestId, timerId);
             }
         }
         #endregion

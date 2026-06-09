@@ -30,6 +30,8 @@ namespace IndependentAgentProject
         private ActionSequenceRuntime mCurActionSequenceRuntime;
         private ActionSequenceRuntime mPlanningActionSequenceRuntime;
         private ConditionEvaluator mConditionEvaluator;
+        private readonly List<TimerRuntime> mTimerRuntimes = new();
+        private int mNextTimerId = 0;
         // 用于检查撞击场景对象时停止
         private HashSet<SceneObjBase> mTouchingObjs = new HashSet<SceneObjBase>();
 
@@ -84,6 +86,8 @@ namespace IndependentAgentProject
                 }
             }
 
+            this.UpdateTimers();
+
             mCurState?.OnUpdate(this);
         }
 
@@ -113,6 +117,7 @@ namespace IndependentAgentProject
                 AgentManager.Instance.UnRegister(this);
 
             SceneObjManager.OnSceneObjCreated -= OnSceneObjCreated;
+            mTimerRuntimes.Clear();
         }
 
         private void OnSceneObjCreated(SceneObjBase obj)
@@ -225,17 +230,22 @@ namespace IndependentAgentProject
             string speed_x_str = speedDirX == "" ? $"{Mathf.Abs(velocity.x)}m/s" : $"方向{speedDirX} {Mathf.Abs(velocity.x)}m/s";
             string speed_y_str = speedDirY == "" ? $"{Mathf.Abs(velocity.y)}m/s" : $"方向{speedDirY} {Mathf.Abs(velocity.y)}m/s";
 
-            var actionInfoRenderer = new ActionRuntimeInfoRenderer();
+            var actionInfoRenderer = new RuntimeInfoRenderer();
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
 
             string ObserveTargetsInfo = includeObserveTagerts ?
                 $"# 持续观察中的目标:\n{actionInfoRenderer.RenderObserveRuntimeSummary(this.mObserveRuntimes, sceneObjs)}\n"
                 : "";
 
+            string timerInfo = includeObserveTagerts ?
+                $"# 进行中的定时器:\n{actionInfoRenderer.RenderTimerSummary(this.mTimerRuntimes)}\n"
+                : "";
+
             // 拼接返回字符串
             string selfStateInfo = $"# 状态:{this.GetStateName()}\n" +
                 $"# 横向速度:{speed_x_str}\n# 纵向速度:{speed_y_str}\n" +
                 $"{ObserveTargetsInfo}" +
+                $"{timerInfo}" +
                 $"# 计划中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mPlanningActionSequenceRuntime, sceneObjs)}\n" +
                 $"# 进行中的动作序列:\n{actionInfoRenderer.RenderActionSequenceRuntime(this.mCurActionSequenceRuntime, sceneObjs)}\n" +
                 $"# 进行中的动作:\n{actionInfoRenderer.RenderActionRuntime(this.mCurActionRuntime, sceneObjs)}\n";
@@ -537,7 +547,7 @@ namespace IndependentAgentProject
             }
             // 1. 获取记录消息
             ObserveRuntime runtime = mObserveRuntimes[monitorIndex - 1];
-            var actionInfoRenderer = new ActionRuntimeInfoRenderer();
+            var actionInfoRenderer = new RuntimeInfoRenderer();
             string text = actionInfoRenderer.RenderObserveTargetRuntime(runtime);
             // 2. 发送消息
             AgentService.Instance.SendToolResultMessage(
@@ -705,6 +715,128 @@ namespace IndependentAgentProject
             AgentService.Instance.SendToolResultMessage(this.Name, "TextInput", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
+
+        public void SetTimer(string requestId, string timerName, float delaySeconds, string timerDescription, bool timerRepeat)
+        {
+            if (delaySeconds <= 0f)
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "SetTimer",
+                    requestId,
+                    "[设置定时器失败] 延迟秒数必须大于0"
+                );
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(timerName))
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "SetTimer",
+                    requestId,
+                    "[设置定时器失败] 定时器名称不能为空"
+                );
+                return;
+            }
+
+            var runtime = new TimerRuntime
+            {
+                TimerId = mNextTimerId++,
+                TimerName = timerName,
+                TimerDescription = string.IsNullOrWhiteSpace(timerDescription) ? "无描述" : timerDescription,
+                DelaySeconds = delaySeconds,
+                TimerRepeat = timerRepeat,
+                StartTime = Time.time,
+                TriggerTime = Time.time + delaySeconds
+            };
+            mTimerRuntimes.Add(runtime);
+
+            string repeatText = timerRepeat ? "是" : "否";
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "SetTimer",
+                requestId,
+                $"[设置定时器结果]\n" +
+                $"定时器id:{runtime.TimerId}\n" +
+                $"名称:{runtime.TimerName}\n" +
+                $"描述:{runtime.TimerDescription}\n" +
+                $"将在{delaySeconds:F1}秒后触发\n" +
+                $"重复:{repeatText}"
+            );
+        }
+
+        public void GetTimerList(string requestId)
+        {
+            var actionInfoRenderer = new RuntimeInfoRenderer();
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "GetTimerList",
+                requestId,
+                actionInfoRenderer.RenderTimerListDetail(this.mTimerRuntimes)
+            );
+        }
+
+        public void RemoveTimer(string requestId, int timerId)
+        {
+            int index = mTimerRuntimes.FindIndex(timer => timer.TimerId == timerId);
+            if (index < 0)
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "RemoveTimer",
+                    requestId,
+                    $"[删除定时器失败] 定时器id:{timerId} 不存在"
+                );
+                return;
+            }
+
+            var removedTimer = mTimerRuntimes[index];
+            mTimerRuntimes.RemoveAt(index);
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "RemoveTimer",
+                requestId,
+                $"[删除定时器结果] 已删除:: 定时器id:{removedTimer.TimerId} 名称:{removedTimer.TimerName}"
+            );
+        }
+
+        private void UpdateTimers()
+        {
+            if (mTimerRuntimes.Count == 0)
+            {
+                return;
+            }
+
+            float curTime = Time.time;
+            for (int i = mTimerRuntimes.Count - 1; i >= 0; i--)
+            {
+                var timer = mTimerRuntimes[i];
+                if (curTime < timer.TriggerTime)
+                {
+                    continue;
+                }
+
+                string repeatHint = timer.TimerRepeat ? "，将按相同间隔重复触发" : "";
+                this.SendFeedbackToAgent(
+                    $"[定时器到期]\n" +
+                    $"定时器id:{timer.TimerId}\n" +
+                    $"名称:{timer.TimerName}\n" +
+                    $"描述:{timer.TimerDescription}{repeatHint}"
+                );
+
+                if (timer.TimerRepeat)
+                {
+                    timer.StartTime = curTime;
+                    timer.TriggerTime = curTime + timer.DelaySeconds;
+                }
+                else
+                {
+                    mTimerRuntimes.RemoveAt(i);
+                }
+            }
+        }
+
         #endregion
 
         #region ActionSequence相关
