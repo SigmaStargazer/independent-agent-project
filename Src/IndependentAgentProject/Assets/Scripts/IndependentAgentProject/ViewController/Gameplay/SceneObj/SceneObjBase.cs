@@ -94,9 +94,9 @@ namespace IndependentAgentProject
 
         protected virtual void OnDisable()
         {
+            OnObjectDisabled?.Invoke(this, StateName, "Disappearance");
             if (SceneObjManager.Instance != null)
                 SceneObjManager.Instance.UnRegister(this);
-            OnObjectDisabled?.Invoke(this, StateName, "Disappearance");
         }
 
         /// <summary>

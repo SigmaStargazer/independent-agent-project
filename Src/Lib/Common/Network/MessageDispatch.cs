@@ -43,6 +43,7 @@ namespace Network
 
             if (message.agentMoveRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentMoveRequest); }
             if (message.agentFollowTargetRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentFollowTargetRequest);}
+            if (message.agentGetWorldEventLogRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentGetWorldEventLogRequest); }
 
             if (message.agentInteractRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentInteractRequest); }
             if (message.agentSelectRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentSelectRequest); }

@@ -406,10 +406,18 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 
 | 资源 | 路径 |
 |------|------|
+| **版本开发文档（需求→PRD→方案）** | **`DevDocs/`**（说明见 `DevDocs/README.md`） |
 | 工具开发 | `Doc/Agent工具开发流程.md` |
 | ActionSequence | `Doc/ActionSequence开发流程.md` |
 | 存档方案 | `Doc/存档方案.md` |
 | Cursor Skill | `.cursor/skills/develop-agent-tool/`（PythonServer 工作区副本：`Src/PythonServer/.cursor/skills/`） |
+
+### DevDocs 协作约定
+
+1. 每个小版本在 `DevDocs/vX.Y/` 建目录；**你**把需求放在 `requirements/`。
+2. Agent **先读 requirements**，在同目录生成 `PRD.md`、`solution.md`，**等你确认后再开发**。
+3. `Doc/` 放跨版本技术指南；`DevDocs/` 放按版本归档的需求与方案。
+4. 模板与流程细节：`.cursor/rules/dev-docs-workflow.mdc`、`DevDocs/_template/`。
 
 **Skill 用法**：Agent 聊天输入 `/develop-agent-tool` 或 `@develop-agent-tool`；找不到时检查工作区根目录并重载窗口。
 
@@ -420,6 +428,18 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 3. 协议只认 `Tools/message.proto`；`Src/Lib/proto/` 完全不用管
 4. 与用户交流默认简体中文
 5. 不主动 git commit / push，除非用户明确要求
+
+### 开发纪律
+
+**事件过滤 / 状态判断类逻辑必须先做完整场景枚举**：
+
+当需要实现「哪些事件应该写入、哪些应该跳过」等过滤逻辑时，**禁止**直接写代码。必须：
+
+1. **枚举所有触发路径**，逐一标注期望行为，形成表格（触发场景 → 期望 → 理由）。
+2. **验证过滤条件对每条路径的判定结果**，确认无遗漏。
+3. **方案经用户确认后才写代码**。
+
+违反此纪律曾导致 v0.20.10 开发事故：用「是否曾消失过」过滤首次 Appearance，遗漏了「新角色动态入场」也是首次 Appearance 的场景，导致新入场事件被错误跳过。
 
 ---
 

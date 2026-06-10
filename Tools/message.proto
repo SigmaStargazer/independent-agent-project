@@ -197,6 +197,7 @@ message NetMessageRequest{
 	AgentSetTimerRequest agentSetTimerRequest = 27;
 	AgentGetTimerListRequest agentGetTimerListRequest = 28;
 	AgentRemoveTimerRequest agentRemoveTimerRequest = 29;
+	AgentGetWorldEventLogRequest agentGetWorldEventLogRequest = 30;
 }
 
 message NetMessageResponse{
@@ -464,5 +465,10 @@ message AgentRemoveTimerRequest {
 	string agent = 1;
 	string request_id = 2;
 	int32 timer_id = 3;
+}
+
+message AgentGetWorldEventLogRequest {
+	string agent = 1;
+	string request_id = 2;
 }
 

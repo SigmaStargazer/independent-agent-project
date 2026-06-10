@@ -27,6 +27,11 @@ namespace IndependentAgentProject
         private ActionRuntime mCurActionRuntime;
         private List<ObserveRuntime> mObserveRuntimes = new();
 
+        private const int MaxWorldEvents = 100;
+        private readonly Queue<WorldEventRecord> mWorldEventLog = new();
+        private readonly Dictionary<SceneObjBase, Action<SceneObjBase, string, string>> mWorldEventHandlers = new();
+        private bool mWorldEventLogReady = false;
+
         private ActionSequenceRuntime mCurActionSequenceRuntime;
         private ActionSequenceRuntime mPlanningActionSequenceRuntime;
         private ConditionEvaluator mConditionEvaluator;
@@ -96,11 +101,8 @@ namespace IndependentAgentProject
             base.OnEnable();
             if (AgentManager.Instance != null)
                 AgentManager.Instance.Register(this);
-            // 把加入ActionSequenceRuntime.AddSceneObj的方法，注册到委托SceneObjManager.OnSceneObjCreated
-            // 当SceneObjBase创建时，调用SceneObjManager.Register，触发委托OnSceneObjCreated
             SceneObjManager.OnSceneObjCreated += OnSceneObjCreated;
 
-            // 当Agent后于SceneObjBase创建时，确保所有SceneObj被存入ActionSequenceRuntime.sceneObjsSnap中
             if (SceneObjManager.Instance != null)
             {
                 foreach (var sceneObj in SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject))
@@ -108,6 +110,15 @@ namespace IndependentAgentProject
                     OnSceneObjCreated(sceneObj);
                 }
             }
+
+            mWorldEventLogReady = false;
+            StartCoroutine(EnableWorldEventLogNextFrame());
+        }
+
+        private IEnumerator EnableWorldEventLogNextFrame()
+        {
+            yield return null;
+            mWorldEventLogReady = true;
         }
 
         protected override void OnDisable()
@@ -118,12 +129,131 @@ namespace IndependentAgentProject
 
             SceneObjManager.OnSceneObjCreated -= OnSceneObjCreated;
             mTimerRuntimes.Clear();
+            ClearWorldEventLog();
         }
 
         private void OnSceneObjCreated(SceneObjBase obj)
         {
             mCurActionSequenceRuntime?.AddSceneObj(obj);
             mPlanningActionSequenceRuntime?.AddSceneObj(obj);
+            RegisterWorldEventListener(obj);
+        }
+
+        public override void ChangeState(string stateName)
+        {
+            string oldState = GetStateName();
+            base.ChangeState(stateName);
+            if (!string.IsNullOrEmpty(oldState) && oldState != stateName)
+                AppendWorldEventForSelf(oldState, stateName);
+        }
+
+        /// <summary>
+        /// OnDisable时清空WorldEventLog
+        /// </summary>
+        private void ClearWorldEventLog()
+        {
+            foreach (var kv in this.mWorldEventHandlers.ToList())
+                UnregisterWorldEventListener(kv.Key);
+            this.mWorldEventHandlers.Clear();
+            this.mWorldEventLog.Clear();
+            this.mWorldEventLogReady = false;
+        }
+
+        /// <summary>
+        /// 当场景新增场景对象时，注册监听WorldEvent
+        /// </summary>
+        /// <param name="obj"></param>
+        private void RegisterWorldEventListener(SceneObjBase obj)
+        {
+            if (obj == null || obj.gameObject == this.gameObject || this.mWorldEventHandlers.ContainsKey(obj))
+                return;
+
+            Action<SceneObjBase, string, string> handler = (o, oldState, newState) =>
+            {
+                if (!mWorldEventLogReady)
+                    return;
+
+                AppendWorldEventForSceneObj(o, oldState, newState);
+
+                if (newState == "Disappearance")
+                    UnregisterWorldEventListener(o);
+            };
+
+            mWorldEventHandlers[obj] = handler;
+            obj.OnStateChanged += handler;
+            obj.OnObjectEnabled += handler;
+            obj.OnObjectDisabled += handler;
+        }
+
+        private void UnregisterWorldEventListener(SceneObjBase obj)
+        {
+            if (obj == null || !mWorldEventHandlers.TryGetValue(obj, out var handler))
+                return;
+
+            obj.OnStateChanged -= handler;
+            obj.OnObjectEnabled -= handler;
+            obj.OnObjectDisabled -= handler;
+            mWorldEventHandlers.Remove(obj);
+        }
+
+        /// <summary>
+        /// 把场景中其他对象的状态变化，记录为世界事件
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="oldState"></param>
+        /// <param name="newState"></param>
+        private void AppendWorldEventForSceneObj(SceneObjBase obj, string oldState, string newState)
+        {
+            if (SceneObjManager.Instance == null)
+                return;
+
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+            var renderer = new RuntimeInfoRenderer();
+            string label = renderer.FormatSceneObjLabel(obj, sceneObjs);
+            string msg = renderer.BuildSceneObjEventMsg(obj, oldState, newState, sceneObjs);
+
+            AppendWorldEvent(label, oldState, newState, msg);
+        }
+
+        /// <summary>
+        /// 把自身状态变化，记录为世界事件
+        /// </summary>
+        /// <param name="oldState"></param>
+        /// <param name="newState"></param>
+        private void AppendWorldEventForSelf(string oldState, string newState)
+        {
+            var renderer = new RuntimeInfoRenderer();
+            string msg = renderer.BuildSelfEventMsg(Name, oldState, newState);
+
+            AppendWorldEvent(Name, oldState, newState, msg);
+        }
+
+        private void AppendWorldEvent(string objectName, string oldState, string newState, string msg)
+        {
+            var record = new WorldEventRecord
+            {
+                Time = Time.time,
+                ObjectName = objectName,
+                OldState = oldState,
+                NewState = newState,
+                EventText = CreateMessageText(msg, includeObserveTagerts: false)
+            };
+            mWorldEventLog.Enqueue(record);
+            while (mWorldEventLog.Count > MaxWorldEvents)
+                mWorldEventLog.Dequeue();
+        }
+
+        public void GetWorldEventLog(string requestId)
+        {
+            var renderer = new RuntimeInfoRenderer();
+            string text = renderer.RenderWorldEventLog(mWorldEventLog);
+
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "GetWorldEventLog",
+                requestId,
+                text
+            );
         }
 
         #region FSM Hook

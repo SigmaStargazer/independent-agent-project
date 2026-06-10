@@ -31,6 +31,7 @@ namespace IndependentAgentProject
             AgentService.Instance.OnObserve += this.Observe;
             AgentService.Instance.OnMonitorTarget += this.MonitorTarget;
             AgentService.Instance.OnGetMonitorRecords += this.GetMonitorRecords;
+            AgentService.Instance.OnGetWorldEventLog += this.GetWorldEventLog;
             AgentService.Instance.OnMoveAgent += this.Move;
             AgentService.Instance.OnFollowTarget += this.FollowTarget;
             AgentService.Instance.OnInteract += this.Interact;
@@ -53,6 +54,7 @@ namespace IndependentAgentProject
             AgentService.Instance.OnObserve -= this.Observe;
             AgentService.Instance.OnMonitorTarget -= this.MonitorTarget;
             AgentService.Instance.OnGetMonitorRecords -= this.GetMonitorRecords;
+            AgentService.Instance.OnGetWorldEventLog -= this.GetWorldEventLog;
             AgentService.Instance.OnMoveAgent -= this.Move;
             AgentService.Instance.OnFollowTarget -= this.FollowTarget;
             AgentService.Instance.OnInteract -= this.Interact;
@@ -120,6 +122,13 @@ namespace IndependentAgentProject
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
                 agentObj.GetMonitorRecords(requestId, monitorIndex);
+            }
+        }
+        private void GetWorldEventLog(string agent, string requestId)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.GetWorldEventLog(requestId);
             }
         }
 

@@ -551,6 +551,49 @@ async def get_monitor_records_cmd(
         TOOL_WAITERS.pop(request_id, None)
 
 @tool
+async def get_world_event_log_cmd(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+) -> str:
+    """获取世界事件日志。
+
+    使用场景:
+    - 需要按统一时间线查看多个场景对象（含自身）的状态变化时。
+    - 用于发现跨物体对象的事件关联、尚未 Monitor 的对象的重要变化。
+
+    与 GetMonitorRecords 的区别:
+    - GetMonitorRecords 面向已 Monitor 的单个目标，记录更深、容量更大。
+    - GetWorldEventLog 面向全局广度，容量有限（约 100 条），但覆盖场景中所有能看到的物体。
+
+    注意:
+    - 每条记录含发生时刻的环境快照，全量拉取可能较长，请按需调用。
+
+    Return:
+        str: 按时间正序（旧→新）排列的世界事件记录文本。
+    """
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    TOOL_WAITERS[request_id] = fut
+
+    try:
+        request = message_pb2.AgentGetWorldEventLogRequest()
+        request.agent = agent
+        request.request_id = request_id
+
+        await AgentServerNetMessage().broadcast_message(request)
+        print(f"[{agent}] get_world_event_log_cmd 发起请求 {request_id}")
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]获取世界事件记录超时"
+    except Exception as e:
+        return f"[{agent}]获取世界事件记录异常:{e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
+
+@tool
 async def move_cmd(
     agent: Annotated[str, InjectedState("name")], 
     tool_call_id: Annotated[str, InjectedToolCallId],

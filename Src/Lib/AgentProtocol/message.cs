@@ -363,6 +363,9 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(29)]
         public AgentRemoveTimerRequest agentRemoveTimerRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(30)]
+        public AgentGetWorldEventLogRequest agentGetWorldEventLogRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -1037,6 +1040,23 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(3, Name = @"timer_id")]
         public int TimerId { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentGetWorldEventLogRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
 
     }
 

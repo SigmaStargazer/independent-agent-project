@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 
@@ -104,7 +105,6 @@ namespace IndependentAgentProject
                 $"最后状态:{runtime.LastStateName}\n" +
                 $"{elapsedKey}:{elapsed:F1}秒前\n" +
                 $"存储记录: {runtime.Records.Count}条\n\n";
-            // 2. 逐条记录拼接
             int idx = 1;
             foreach (string record in runtime.Records)
             {
@@ -162,5 +162,114 @@ namespace IndependentAgentProject
 
             return string.Join("\n\n", lines);
         }
+
+        #region WorldEventLog 渲染
+
+        public string FormatSceneObjLabel(SceneObjBase obj, List<SceneObjBase> sceneObjs)
+        {
+            if (obj == null)
+                return "Unknown";
+
+            int index = sceneObjs.IndexOf(obj);
+            if (index >= 0)
+                return $"{index}. {obj.Name}";
+
+            return $"{obj.Name}(目前不在环境列表内)";
+        }
+
+        public string BuildIndexChangeNotice(SceneObjBase obj, string newState, List<SceneObjBase> sceneObjs)
+        {
+            if (obj == null)
+                return string.Empty;
+
+            if (newState == "Appearance")
+            {
+                int index = sceneObjs.IndexOf(obj);
+                if (index < 0)
+                    return "[索引变化]\n新出现物体: 无法解析索引";
+
+                return $"[索引变化]\n新出现物体: {index}. {obj.Name}（加入环境列表）\n其余物体索引未变";
+            }
+
+            if (newState == "Disappearance")
+            {
+                int removedIndex = sceneObjs.IndexOf(obj);
+                if (removedIndex < 0)
+                    return $"[索引变化]\n消失物体: {obj.Name}（已从环境列表移除）";
+
+                var lines = new List<string>
+                {
+                    "[索引变化]",
+                    $"消失物体: {removedIndex}. {obj.Name}（已从环境列表移除）"
+                };
+
+                if (removedIndex + 1 >= sceneObjs.Count)
+                {
+                    lines.Add("无其余物体索引变化");
+                }
+                else
+                {
+                    lines.Add("以下物体索引前移:");
+                    for (int i = removedIndex + 1; i < sceneObjs.Count; i++)
+                        lines.Add($"  原 {i}. {sceneObjs[i].Name} -> 现 {i - 1}. {sceneObjs[i].Name}");
+                }
+
+                return string.Join("\n", lines);
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 构建场景对象世界事件的 msg 正文（不含 CreateMessageText 包裹）
+        /// </summary>
+        public string BuildSceneObjEventMsg(SceneObjBase obj, string oldState, string newState, List<SceneObjBase> sceneObjs)
+        {
+            string label = FormatSceneObjLabel(obj, sceneObjs);
+            string msg = $"[世界事件]对象:{label} 状态:{oldState} -> {newState}";
+
+            if (newState == "Appearance" || newState == "Disappearance")
+            {
+                string notice = BuildIndexChangeNotice(obj, newState, sceneObjs);
+                if (!string.IsNullOrEmpty(notice))
+                    msg += "\n\n" + notice;
+            }
+
+            return msg;
+        }
+
+        /// <summary>
+        /// 构建 Agent 自身世界事件的 msg 正文（不含 CreateMessageText 包裹）
+        /// </summary>
+        public string BuildSelfEventMsg(string agentName, string oldState, string newState)
+        {
+            return $"[世界事件]对象:{agentName} 状态:{oldState} -> {newState}";
+        }
+
+        /// <summary>
+        /// 渲染完整的世界事件日志输出文本
+        /// </summary>
+        public string RenderWorldEventLog(Queue<WorldEventRecord> worldEventLog)
+        {
+            float now = Time.time;
+            var sb = new StringBuilder();
+            sb.AppendLine("[世界事件记录]");
+            sb.AppendLine($"总记录数: {worldEventLog.Count}");
+
+            int idx = 1;
+            foreach (var record in worldEventLog)
+            {
+                float elapsed = now - record.Time;
+                sb.AppendLine();
+                sb.AppendLine($"==========事件{idx}==========");
+                sb.AppendLine($"时间: {elapsed:F1}秒前");
+                sb.AppendLine(record.EventText);
+                idx++;
+            }
+
+            return sb.ToString();
+        }
+
+        #endregion
     }
 }

@@ -907,7 +907,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cb50e8e80890bf47a419800b7dba583, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mFirstLevelName: Level0
+  mFirstLevelName: Level2
   mAgentName: "\u5C0F\u660E"
   mAgentDesc: "\u662F\u4E00\u4E2A\u5E2E\u52A9\u673A\u5668\u4EBA"
   mNewGameWarmimhPanel: {fileID: 834311704}

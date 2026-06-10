@@ -70,6 +70,7 @@ tools = [
         base_tools.observe_cmd,
         base_tools.monitor_target_cmd,
         base_tools.get_monitor_records_cmd,
+        base_tools.get_world_event_log_cmd,
         base_tools.move_cmd,
         base_tools.follow_target_cmd,
         base_tools.interact_cmd,
