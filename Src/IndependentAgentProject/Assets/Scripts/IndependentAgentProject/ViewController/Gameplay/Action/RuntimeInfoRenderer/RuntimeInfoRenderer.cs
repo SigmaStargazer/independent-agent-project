@@ -44,10 +44,10 @@ namespace IndependentAgentProject
                 {
                     text += $"跟随目标:{index}. {actionRuntime.TargetFollowing.Name}";
                 }
-                else
-                {
-                    text += $"跟随目标:{actionRuntime.TargetFollowing.Name}(目前不在视线内)";
-                }
+            else
+            {
+                text += $"跟随目标:{actionRuntime.TargetName ?? actionRuntime.TargetFollowing?.Name ?? "未知目标"}（已消失）";
+            }
             }
             return text;
         }
@@ -81,30 +81,43 @@ namespace IndependentAgentProject
                         $"未读记录: {runtime.UnreadCount}条\n" +
                         $"存储记录: {runtime.Records.Count}条");
                 }
-                else
-                {
-                    infos.Add($"观察目标[{num}]:\n" +
-                        $"对象: {runtime.TargetName}(目前不在视线内)");
-                }
+            else
+            {
+                infos.Add($"观察目标[{num}]:\n" +
+                    $"对象: {runtime.TargetName}（已消失）");
+            }
                 num++;
             }
             return $"目前正对{observeRuntimes.Count}个目标进行持续观察\n" +
                 string.Join("\n\n", infos);
         }
 
-        public string RenderObserveTargetRuntime(ObserveRuntime runtime)
+        public string RenderObserveTargetRuntime(ObserveRuntime runtime, List<SceneObjBase> sceneObjs)
         {
             var curTime = Time.time;
             var elapsed = curTime - runtime.LastChangeTime;
             string elapsedKey = runtime.StateChangeNum == 0 ? $"距离开始观察" : $"距离上次状态改变";
             var observeTime = curTime - runtime.ObserveStartTime;
+
+            string targetLabel;
+            if (runtime.Target != null)
+            {
+                int index = sceneObjs.IndexOf(runtime.Target);
+                targetLabel = index >= 0 ? $"{index}. {runtime.TargetName}" : runtime.TargetName;
+            }
+            else
+            {
+                targetLabel = runtime.TargetName;
+            }
+
             string text =
                 $"[观察记录]\n" +
-                $"对象:{runtime.TargetName}\n" +
+                $"对象:{targetLabel}\n" +
                 $"观察时长:{observeTime:F1}秒\n" +
                 $"最后状态:{runtime.LastStateName}\n" +
                 $"{elapsedKey}:{elapsed:F1}秒前\n" +
-                $"存储记录: {runtime.Records.Count}条\n\n";
+                $"存储记录: {runtime.Records.Count}条\n" +
+                $"注意: 同一目标在不同记录中的编号可能因其他物体出现/消失而发生改变，编号变化不代表观察目标改变\n\n";
             int idx = 1;
             foreach (string record in runtime.Records)
             {

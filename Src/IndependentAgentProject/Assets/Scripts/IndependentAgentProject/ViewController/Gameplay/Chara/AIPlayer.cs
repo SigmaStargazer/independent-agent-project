@@ -643,6 +643,12 @@ namespace IndependentAgentProject
                     // 3.更新状态
                     runtime.LastStateName = newState;
                     runtime.LastChangeTime = curTime;
+
+                    // 4. 目标消失时，结束该路观察并发 Feedback（含历史记录）
+                    if (newState == "Disappearance")
+                    {
+                        HandleObserveTargetDisappeared(runtime, obj);
+                    }
                 };
             target.OnStateChanged += runtime.StateChangedHandler;
             target.OnObjectEnabled += runtime.StateChangedHandler;
@@ -678,7 +684,8 @@ namespace IndependentAgentProject
             // 1. 获取记录消息
             ObserveRuntime runtime = mObserveRuntimes[monitorIndex - 1];
             var actionInfoRenderer = new RuntimeInfoRenderer();
-            string text = actionInfoRenderer.RenderObserveTargetRuntime(runtime);
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+            string text = actionInfoRenderer.RenderObserveTargetRuntime(runtime, sceneObjs);
             // 2. 发送消息
             AgentService.Instance.SendToolResultMessage(
                 Name,
@@ -688,6 +695,43 @@ namespace IndependentAgentProject
             );
             // 4. 重置未读记录数
             runtime.UnreadCount = 0;
+        }
+
+        /// <summary>
+        /// 观察目标消失时的处理：输出历史观察记录、移除 ObserveRuntime、取消监听、发送 Feedback
+        /// </summary>
+        private void HandleObserveTargetDisappeared(ObserveRuntime runtime, SceneObjBase obj)
+        {
+            // 1. 取消事件监听
+            if (runtime.Target != null && runtime.StateChangedHandler != null)
+            {
+                runtime.Target.OnStateChanged -= runtime.StateChangedHandler;
+                runtime.Target.OnObjectEnabled -= runtime.StateChangedHandler;
+                runtime.Target.OnObjectDisabled -= runtime.StateChangedHandler;
+            }
+
+            // 2. 获取消失前编号（OnObjectDisabled 在 UnRegister 之前触发，此时 sceneObjs 仍含该对象）
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+            int index = sceneObjs.IndexOf(obj);
+            string targetLabel = index >= 0 ? $"{index}. {runtime.TargetName}" : runtime.TargetName;
+
+            // 3. 渲染该目标迄今所有观察记录（含刚写入的 Disappearance Record）
+            var renderer = new RuntimeInfoRenderer();
+            string observeRecordsDetail = renderer.RenderObserveTargetRuntime(runtime, sceneObjs);
+
+            // 4. 从 mObserveRuntimes 中移除
+            mObserveRuntimes.Remove(runtime);
+
+            // 5. 发送 Feedback（Feedback 本身即打断，无需额外 forceInterrupt 参数）
+            string feedbackMsg =
+                $"[持续观察中断]\n" +
+                $"原因: 观察目标已从场景中消失\n" +
+                $"对象: {targetLabel}\n" +
+                $"说明: 该目标的持续观察任务已自动结束，注意力已释放\n\n" +
+                $"==========观察记录汇总==========\n" +
+                observeRecordsDetail;
+
+            SendFeedbackToAgent(feedbackMsg, forceInterrupt: false, includeObserveTagerts: true);
         }
 
         /// <summary>
@@ -771,10 +815,26 @@ namespace IndependentAgentProject
                 ActionName = "FollowTarget",
                 State = ActionState.Doing,
                 TargetFollowing = target,
+                TargetName = target.Name,
                 Result = new ActionResult()
             };
             this.mCurActionRuntime.ErrorConditionFunc = () =>
             {
+                // 目标消失检测
+                if (this.TargetFollowing == null || !this.TargetFollowing.gameObject.activeInHierarchy)
+                {
+                    if (this.mCurActionRuntime.Result == null)
+                        this.mCurActionRuntime.Result = new ActionResult();
+
+                    this.mCurActionRuntime.Result.Message =
+                        $"[跟随中断]\n" +
+                        $"原因: 跟随目标已从场景中消失\n" +
+                        $"对象: {this.mCurActionRuntime.TargetName ?? "未知目标"}\n" +
+                        $"说明: 跟随任务已结束";
+
+                    return true;
+                }
+
                 // 碰撞判断
                 foreach (var obj in this.mTouchingObjs)
                 {
@@ -802,6 +862,57 @@ namespace IndependentAgentProject
                 requestId,
                 $"[跟随结果]开始跟随:{objectIndex}. {target.Name}"
             );
+        }
+
+        public override void OnFollowFixedUpdate()
+        {
+            if (TargetFollowing == null)
+            {
+                // 目标消失：走 Failed 路径
+                if (mCurActionRuntime != null && mCurActionRuntime.State == ActionState.Doing)
+                {
+                    mCurActionRuntime.State = ActionState.Failed;
+                    mCurActionRuntime.Result ??= new ActionResult();
+                    mCurActionRuntime.Result.Message =
+                        $"[跟随中断]\n" +
+                        $"原因: 跟随目标已从场景中消失\n" +
+                        $"对象: {mCurActionRuntime.TargetName ?? "未知目标"}\n" +
+                        $"说明: 跟随任务已结束";
+
+                    var finishedRuntime = mCurActionRuntime;
+                    mCurActionRuntime = null;
+                    TargetFollowing = null;
+                    ChangeState("Idle");
+                    OnActionFinished(finishedRuntime);
+                }
+                else
+                {
+                    TargetFollowing = null;
+                    ChangeState("Idle");
+                }
+                return;
+            }
+
+            float delta = TargetFollowing.transform.position.x - transform.position.x;
+            float distance = Mathf.Abs(delta);
+            if (distance > FollowMaxDistance)
+            {
+                float dir = Mathf.Sign(delta);
+                TurnBack(dir);
+                mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
+            }
+            else if (distance < FollowMinDistance)
+            {
+                float dir = -Mathf.Sign(delta);
+                TurnBack(dir);
+                mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
+            }
+            else
+            {
+                float dir = Mathf.Sign(delta);
+                TurnBack(dir);
+                mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
+            }
         }
 
         /// <summary>

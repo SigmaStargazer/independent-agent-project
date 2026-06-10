@@ -12,26 +12,27 @@ namespace IndependentAgentProject
         public Func<bool> CompleteConditionFunc;
         public Func<bool> ErrorConditionFunc;
 
-        // ¶¯×÷¿ªÊ¼Î»ÖÃ
+        // åŠ¨ä½œå¼€å§‹ä½ç½®
         public Vector2 StartPostion;
-        // ¶¯×÷ÆÚ¼äÎ»ÒÆ
+        // åŠ¨ä½œæœŸé—´ä½ç§»
         public float Displacement = 0;
-        // ¶¯×÷¼ÆÊ±
+        // åŠ¨ä½œè®¡æ—¶
         public float ActionTime = 0;
         public string StartEnv = "";
         public string EndEnv = "";
 
-        // ¸úËæ¶¯×÷²ÎÊı
+        // è·ŸéšåŠ¨ä½œå‚æ•°
         public SceneObjBase TargetFollowing;
+        public string TargetName;
 
-        // ¶¯×÷¿ªÊ¼Ê±½Ó´¥µÄÎïÌå¼¯ºÏ
+        // åŠ¨ä½œå¼€å§‹æ—¶æ¥è§¦çš„ç‰©ä½“é›†åˆ
         public HashSet<SceneObjBase> StartTouchingObjs = new HashSet<SceneObjBase>();
-        // Ô¤¼Æ¶¯×÷¹ı³ÌÖĞÔÊĞí½Ó´¥µÄÎïÌå¼¯ºÏ
+        // é¢„è®¡åŠ¨ä½œè¿‡ç¨‹ä¸­å…è®¸æ¥è§¦çš„ç‰©ä½“é›†åˆ
         public HashSet<SceneObjBase> AllowedContactObjs = new HashSet<SceneObjBase>();
 
-        // ÓÃÓÚ¿¨×¡¼ì²â
-        public float LastCheckPosX; // ÉÏÒ»´Î¼ì²éµÄ X ×ø±ê
-        public float StuckTime = 0f; // ³ÖĞø¿¨×¡µÄÊ±¼ä
+        // ç”¨äºå¡ä½æ£€æµ‹
+        public float LastCheckPosX; // ä¸Šä¸€æ¬¡æ£€æŸ¥çš„ X åæ ‡
+        public float StuckTime = 0f; // æŒç»­å¡ä½çš„æ—¶é—´
 
         public ActionResult Result;
     }
@@ -39,6 +40,6 @@ namespace IndependentAgentProject
     public class ActionResult
     {
         //public bool Success = true;
-        public string Message;   // ¸ø Agent ÓÃµÄ×ÔÈ»ÓïÑÔÃèÊö
+        public string Message;   // ç»™ Agent ç”¨çš„è‡ªç„¶è¯­è¨€æè¿°
     }
 }
