@@ -49,6 +49,7 @@ async def communicate_to_agent(sender: Annotated[str, InjectedState("name")],rec
         return f"收信人[{recipient}]不存在！"
     
 
+@tool
 async def communicate_to_user(agent: Annotated[str, InjectedState("name")], message: str) -> str:
     """向用户发送一则消息
     Args:

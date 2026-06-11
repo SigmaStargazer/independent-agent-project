@@ -3,6 +3,7 @@ import asyncio
 import uuid
 import os
 import time
+from datetime import datetime
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
@@ -28,11 +29,23 @@ from agent_framwork.base.timed_message import TimedMessage
 
 from agent_framwork.tools import base_tools
 from agent_framwork.systems.time_system import TimeSystem
+from agent_framwork.utils.prompt_utils import (
+    trim_messages_by_token,
+    estimate_system_prompt_tokens,
+    get_tools_token_count,
+)
 
 from tools.perf_tool import aperf_print
 
 from dotenv import load_dotenv
 load_dotenv()
+
+# ===== Prompt 保存与上下文裁剪配置 =====
+PROMPT_SAVE_ENABLED = os.getenv("PROMPT_SAVE_ENABLED", "false").lower() == "true"
+PROMPT_SAVE_DIR = os.path.normpath(os.path.join(
+    os.path.dirname(__file__), "..", "..",
+    os.getenv("PROMPT_SAVE_DIR", "logs/prompts")
+))
 
 # # 千问
 # model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -217,17 +230,34 @@ async def chatbot(state: State):
     mem_to_save = state['mem_to_save']
 
     cur_time = await TimeSystem().aget_current_time()
-    prompt = await prompt_template.ainvoke({"messages": state['messages'],
-                                     "name": state['name'],
-                                     "curtime": cur_time,
-                                     "mem_summary": state['mem_summary'],
-                                     "mem_fact": state['mem_fact'],
-                                     "mem_episode": state['mem_episode']})
-    # 测试：打印prompt
-    print(f"====prompt开始====") 
-    for message in prompt.messages:
-        message.pretty_print()
-    print(f"====prompt结束====") 
+
+    # 动态上下文裁剪
+    system_vars = {
+        "name": state['name'],
+        "curtime": cur_time,
+        "mem_summary": state['mem_summary'],
+        "mem_fact": state['mem_fact'],
+        "mem_episode": state['mem_episode']
+    }
+    system_tokens = await estimate_system_prompt_tokens(prompt_template, system_vars)
+    tools_tokens = get_tools_token_count(tools)
+    trimmed_messages = trim_messages_by_token(
+        messages=state['messages'],
+        system_prompt_tokens=system_tokens,
+        tools_token_count=tools_tokens,
+    )
+
+    prompt = await prompt_template.ainvoke({
+        "messages": trimmed_messages,
+        **system_vars
+    })
+
+    # [开发模式] 终端打印 prompt
+    if PROMPT_SAVE_ENABLED:
+        print(f"====prompt开始====") 
+        for message in prompt.messages:
+            message.pretty_print()
+        print(f"====prompt结束====") 
 
     await aperf_print(f"[{name}]模型输出开始")
     response = await llm_with_tools.ainvoke(prompt)
@@ -297,10 +327,51 @@ async def save_memory(state: State):
     await memory_manager.save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
     await aperf_print(f"[{name}]存储记忆任务启动，后台进行中")
 
+    # Prompt 保存：用全量 messages 重新渲染完整 prompt 并写入文件
+    if PROMPT_SAVE_ENABLED:
+        await _save_prompt_log(state, curtime)
+
     return {
         "mem_to_save": "",
         "logged_tool_call_ids": []
         }
+
+
+async def _save_prompt_log(state: State, curtime):
+    """将本轮完整 prompt 写入文件"""
+    name = state['name']
+
+    # 用全量 state['messages'] 重新渲染完整 prompt
+    cur_time_str = await TimeSystem().aget_current_time()
+    prompt = await prompt_template.ainvoke({
+        "messages": state['messages'],
+        "name": state['name'],
+        "curtime": cur_time_str,
+        "mem_summary": state['mem_summary'],
+        "mem_fact": state['mem_fact'],
+        "mem_episode": state['mem_episode']
+    })
+
+    # 拼接 pretty_repr 文本
+    content = ""
+    for msg in prompt.messages:
+        content += msg.pretty_repr() + "\n\n"
+
+    # 使用实际时间作为文件名
+    now = datetime.now()
+    filename = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+    save_dir = os.path.join(PROMPT_SAVE_DIR, name)
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 同一秒内多次推理时追加毫秒后缀
+    filepath = os.path.join(save_dir, filename + ".log")
+    if os.path.exists(filepath):
+        filename += f"_{now.microsecond // 1000:03d}"
+        filepath = os.path.join(save_dir, filename + ".log")
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
 
 # 条件
 def route_chatbot(state: State) -> Literal["tools", "save_memory"]:

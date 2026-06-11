@@ -1,6 +1,6 @@
 # PRD — v0.20.11 MonitorTarget / FollowTarget 目标消失异常停止
 
-> **状态**：待确认
+> **状态**：已确认
 > **对应需求**：`requirements/MonitorTarget与FollowTarget目标消失处理.md`
 > **最后更新**：2026-06-10
 

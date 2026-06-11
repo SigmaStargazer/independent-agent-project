@@ -418,6 +418,11 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 2. Agent **先读 requirements**，在同目录生成 `PRD.md`、`solution.md`，**等你确认后再开发**。
 3. `Doc/` 放跨版本技术指南；`DevDocs/` 放按版本归档的需求与方案。
 4. 模板与流程细节：`.cursor/rules/dev-docs-workflow.mdc`、`DevDocs/_template/`。
+5. **文档状态必须随开发环节同步更新**：
+   - PRD：`待确认` → `已确认`（用户确认后）
+   - 方案：`待确认` → `已确认`（用户确认后） → `已实现`（验收通过后）
+   - 每次更新状态时同步更新「最后更新」日期
+   - 完整规则见 `DevDocs/README.md`
 
 **Skill 用法**：Agent 聊天输入 `/develop-agent-tool` 或 `@develop-agent-tool`；找不到时检查工作区根目录并重载窗口。
 
@@ -441,6 +446,33 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 
 违反此纪律曾导致 v0.20.10 开发事故：用「是否曾消失过」过滤首次 Appearance，遗漏了「新角色动态入场」也是首次 Appearance 的场景，导致新入场事件被错误跳过。
 
+**修复 / 变更方案必须先确认再执行**：
+
+运行时发现 bug 或需要修复时，**禁止**未经用户确认直接修改代码。必须：
+
+1. **分析根因**，提出修复方案（含回滚方案）。
+2. **等待用户确认**后再执行。
+3. 修复完成后更新相关文档状态。
+
+违反此纪律曾导致 v0.20.12 开发事故：发现 `get_input_schema` 报错后，未与用户确认即引入 `from langchain_core.tools import BaseTool` 依赖，影响后续文件拆分需求；正确修复方式应为给 `communicate_to_user` 补齐 `@tool` 装饰器。
+
 ---
 
 *扩展架构、新增 Flow Step 或改动记忆/打断语义时，请同步更新本文件。*
+
+---
+
+## 九、开发事故记录
+
+### 2026-06-11 v0.20.12 `get_input_schema` 报错
+
+**严重程度**：中（运行时报错，未影响数据）
+
+**事故描述**：`prompt_utils.py` 的 `get_tools_token_count` 对 `tools` 列表中每个元素调用 `.get_input_schema()`，但 `base_tools.py` 中 `communicate_to_user` 缺少 `@tool` 装饰器，是普通 `async function` 而非 `BaseTool` 实例，导致运行时报 `'function' object has no attribute 'get_input_schema'`。
+
+**流程违规**：发现问题后，Agent 未与用户确认修复方案即直接修改代码，引入了 `from langchain_core.tools import BaseTool` 依赖和 inspect 签名解析逻辑。用户指出应遵守"确认后再改"的流程，且该依赖会影响后续文件拆分；正确修复方式应为给 `communicate_to_user` 补齐 `@tool` 装饰器。
+
+**教训**：
+1. **修复方案必须与用户确认后再执行**，尤其涉及新增依赖或架构决策时。
+2. 工具列表中的所有元素应为同一类型（`BaseTool`），不一致时应修复源头而非下游兼容。
+3. 发现遗漏的装饰器时，应补齐装饰器而非绕过。

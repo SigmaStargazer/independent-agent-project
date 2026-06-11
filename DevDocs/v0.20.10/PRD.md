@@ -1,6 +1,6 @@
 # PRD — v0.20.10 WorldEventLog 世界事件日志
 
-> **状态**：已确认 / 已实现  
+> **状态**：已确认  
 > **对应需求**：`requirements/WorldEventLog 系统需求文档.docx`  
 > **最后更新**：2026-06-10
 
