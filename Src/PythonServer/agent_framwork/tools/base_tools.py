@@ -50,23 +50,39 @@ async def communicate_to_agent(sender: Annotated[str, InjectedState("name")],rec
     
 
 @tool
-async def communicate_to_user(agent: Annotated[str, InjectedState("name")], message: str) -> str:
+async def communicate_to_user(
+    agent: Annotated[str, InjectedState("name")],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    message: str
+) -> str:
     """向用户发送一则消息
     Args:
         message(str): 你想要发送的消息
+    Return:
+        str: 消息发送结果
     """
-    from network.servers import AgentServerNetMessage
-    from network import message_pb2
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    TOOL_WAITERS[request_id] = fut
+
     try:
         request = message_pb2.AgentSendMessageRequest()
         request.agent = agent
+        request.request_id = request_id
         request.ai_message = message
+
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]向用户发送消息成功: {message}")
-        return f"你向用户发送了一则消息: {message}"
+        print(f"[{agent}] communicate_to_user 发起请求 {request_id}")
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]向用户发送消息超时"
     except Exception as e:
-        print(f"[{agent}]向用户发送消息失败: {message}, {e}")
-        return f"你向用户发送消息失败: {e}"
+        return f"[{agent}]向用户发送消息异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 # endregion
 
 # region Agent动作工具
@@ -614,24 +630,34 @@ async def move_cmd(
         direction(str): 方向，填left或者right
         distance(float): 距离
     Return:
-        str: 移动是否开始。注意：移动结果将通过新的消息另行通知。
+        str: 移动是否已开始。注意：移动完成结果将通过新的消息另行通知。
     """
     if direction not in ["left", "right"]:
         return "方向错误，请填left或者right"
-    from network.servers import AgentServerNetMessage
-    from network import message_pb2
+
+    request_id = tool_call_id
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    TOOL_WAITERS[request_id] = fut
 
     try:
         request = message_pb2.AgentMoveRequest()
         request.agent = agent
+        request.request_id = request_id
         request.is_right = direction == "right"
         request.distance = distance
 
         await AgentServerNetMessage().broadcast_message(request)
-        print(f"[{agent}]尝试向{direction}移动了{distance}距离。待移动完成后，你将收到移动完成的消息。")
-        return f"[{agent}]尝试向{direction}移动了{distance}距离。待移动完成后，你将收到移动完成的消息。"
+        print(f"[{agent}] move_cmd 发起请求 {request_id}")
+        result = await asyncio.wait_for(fut, timeout=TOOL_TIMEOUT)
+        return f"{result}"
+    except asyncio.TimeoutError:
+        return f"[{agent}]移动未开始，超时"
     except Exception as e:
-        return f"移动失败: {e}"
+        return f"[{agent}]移动异常: {e}"
+    finally:
+        TOOL_WAITERS.pop(request_id, None)
 
 @tool
 async def follow_target_cmd(

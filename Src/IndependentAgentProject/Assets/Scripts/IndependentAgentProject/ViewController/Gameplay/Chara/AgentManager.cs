@@ -28,6 +28,7 @@ namespace IndependentAgentProject
         void OnEnable()
         {
             AgentService.Instance.OnStopAction += this.StopAction;
+            AgentService.Instance.OnGetAgentMessage += this.OnGetAgentMessage;
             AgentService.Instance.OnObserve += this.Observe;
             AgentService.Instance.OnMonitorTarget += this.MonitorTarget;
             AgentService.Instance.OnGetMonitorRecords += this.GetMonitorRecords;
@@ -51,6 +52,7 @@ namespace IndependentAgentProject
         void OnDisable()
         {
             AgentService.Instance.OnStopAction -= this.StopAction;
+            AgentService.Instance.OnGetAgentMessage -= this.OnGetAgentMessage;
             AgentService.Instance.OnObserve -= this.Observe;
             AgentService.Instance.OnMonitorTarget -= this.MonitorTarget;
             AgentService.Instance.OnGetMonitorRecords -= this.GetMonitorRecords;
@@ -96,6 +98,13 @@ namespace IndependentAgentProject
         #endregion
 
         #region 接收Agent指令逻辑
+        private void OnGetAgentMessage(string agent, string requestId, string message)
+        {
+            if (mAgents.TryGetValue(agent, out var agentObj))
+            {
+                agentObj.OnGetAgentMessage(requestId, message);
+            }
+        }
         private void StopAction(string agent, string requestId, string actionType)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
@@ -132,11 +141,11 @@ namespace IndependentAgentProject
             }
         }
 
-        private void Move(string agent, bool isRight, float distance)
+        private void Move(string agent, string requestId, bool isRight, float distance)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.Move(isRight, distance);
+                agentObj.Move(requestId, isRight, distance);
             }
         }
         private void FollowTarget(string agent, string requestId, int objectIndex, float minDistance, float maxDistance)

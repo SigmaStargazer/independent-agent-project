@@ -82,7 +82,7 @@ namespace IndependentAgentProject
                 if (player != null)
                     playerName = player.Name;
                 else
-                    playerName = "ÏµÍ³¹ÜÀíÔ±";
+                    playerName = "ç³»ç»Ÿç®¡ç†å‘˜";
                 string messageText = $"{playerName}: {text}";
                 AppendMessage(messageText);
                 agent.SendMessageToAgent(messageText);
@@ -91,9 +91,9 @@ namespace IndependentAgentProject
             }
             this.Close();
         }
-        private void OnGetAgentMessage(string agent, string ai_message)
+        private void OnGetAgentMessage(string agent, string requestId, string message)
         {
-            this.AppendMessage($"{agent}: {ai_message}");
+            this.AppendMessage($"{agent}: {message}");
         }
 
         private void AppendMessage(string msg)
@@ -103,20 +103,20 @@ namespace IndependentAgentProject
             if (!string.IsNullOrEmpty(historyMessageText.text))
                 historyMessageText.text += "\n";
             historyMessageText.text += msg;
-            // ½«ÀúÊ·ÏûÏ¢µÄ¹ö¶¯Ìõ¹ö¶¯µ½×îµ×²¿
+            // å°†å†å²æ¶ˆæ¯çš„æ»šåŠ¨æ¡æ»šåŠ¨åˆ°æœ€åº•éƒ¨
             if (shouldScroll)
                 StartCoroutine(ScrollToBottomNextFrame());
         }
 
         private System.Collections.IEnumerator ScrollToBottomNextFrame()
         {
-            yield return null; // µÈ´ıÒ»Ö¡£¬ÈÃ Layout ¸üĞÂÍê³É
+            yield return null; // ç­‰å¾…ä¸€å¸§ï¼Œè®© Layout æ›´æ–°å®Œæˆ
             Canvas.ForceUpdateCanvases();
             historyScrollRect.verticalNormalizedPosition = 0f;
         }
 
         /// <summary>
-        /// ÅĞ¶ÏÊÇ·ñĞèÒª¹ö¶¯
+        /// åˆ¤æ–­æ˜¯å¦éœ€è¦æ»šåŠ¨
         /// </summary>
         /// <returns></returns>
         private bool IsScrolledToBottom()

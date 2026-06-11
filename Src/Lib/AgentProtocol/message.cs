@@ -717,7 +717,11 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
-        [global::ProtoBuf.ProtoMember(2, Name = @"ai_message")]
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"ai_message")]
         [global::System.ComponentModel.DefaultValue("")]
         public string AiMessage { get; set; } = "";
 
@@ -812,10 +816,14 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string Agent { get; set; } = "";
 
-        [global::ProtoBuf.ProtoMember(2, Name = @"is_right")]
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"is_right")]
         public bool IsRight { get; set; }
 
-        [global::ProtoBuf.ProtoMember(3, Name = @"distance")]
+        [global::ProtoBuf.ProtoMember(4, Name = @"distance")]
         public float Distance { get; set; }
 
     }

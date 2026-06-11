@@ -1,4 +1,4 @@
-﻿using FrameworkDesign;
+using FrameworkDesign;
 using IndependentAgentProject;
 using Newtonsoft.Json;
 using Services;
@@ -545,6 +545,19 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
+        /// Agent向用户发消息（RPC回调）
+        /// </summary>
+        public void OnGetAgentMessage(string requestId, string message)
+        {
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "SendMessage",
+                requestId,
+                $"[消息发送结果]已向用户发送消息"
+            );
+        }
+
+        /// <summary>
         /// 观察场景
         /// </summary>
         public void Observe(string requestId)
@@ -740,12 +753,11 @@ namespace IndependentAgentProject
         /// <param name="moveRight"></param>
         /// <param name="distance"></param>
         /// 
-        public void Move(bool moveRight, float distance)
+        public void Move(string requestId, bool moveRight, float distance)
         {
             this.StopMovement();
             this.moveRight = moveRight;
             float startX = transform.position.x;
-            //this.moveDistance = distance;
             mCurActionRuntime = new ActionRuntime
             {
                 ActionName = "Move",
@@ -789,6 +801,14 @@ namespace IndependentAgentProject
             foreach (var obj in mTouchingObjs)
                 this.mCurActionRuntime.StartTouchingObjs.Add(obj);
             ChangeState("Move");
+
+            string directionText = moveRight ? "右" : "左";
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "Move",
+                requestId,
+                $"[移动开始]方向:{directionText}，距离:{distance:F1}米。移动完成后你将收到通知。"
+            );
         }
 
         public void FollowTarget(string requestId, int objectIndex, float minDistance, float maxDistance)

@@ -339,7 +339,8 @@ message SendToolResultMessageRequest {
 // 智能体向用户发消息
 message AgentSendMessageRequest {
 	string agent = 1;
-	string ai_message = 2;
+	string request_id = 2;
+	string ai_message = 3;
 }
 
 message AgentStopActionRequest {
@@ -380,8 +381,9 @@ message AgentGetMonitorRecordsRequest {
 // 向指定方向移动指定距离
 message AgentMoveRequest {
 	string agent = 1;
-	bool is_right = 2;
-	float distance = 3;
+	string request_id = 2;
+	bool is_right = 3;
+	float distance = 4;
 }
 
 message AgentFollowTargetRequest {

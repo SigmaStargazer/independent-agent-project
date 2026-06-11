@@ -40,38 +40,38 @@ namespace IndependentAgentProject
 
         public void OnClickSendMessage()
         {
-            // ·¢ËÍÏûÏ¢
+            // å‘é€æ¶ˆæ¯
             if (messageInputField != null && !string.IsNullOrEmpty(messageInputField.text) && chara != null)
             {
                 string userMessage = messageInputField.text;
-                chara.SendMessageToAgent($"ÓÃ»§: {userMessage}");
-                //// »ñÈ¡»·¾³ĞÅÏ¢
+                chara.SendMessageToAgent($"ç”¨æˆ·: {userMessage}");
+                //// è·å–ç¯å¢ƒä¿¡æ¯
                 //List<Dictionary<string, object>> devicesInfo = new List<Dictionary<string, object>>();
                 //string devicesInfoDesc = "";
                 //(devicesInfo, devicesInfoDesc) = chara.GetDevicesInfo();
 
-                //// »ñÈ¡ÊäÈë¿òµÄÄÚÈİ
+                //// è·å–è¾“å…¥æ¡†çš„å†…å®¹
                 //string userMessage = messageInputField.text;
 
-                //// Æ´½Ó
-                //string messageToSend = $"{devicesInfoDesc}\n\nÓÃ»§ÏòÄã·¢ËÍÁËÒ»ÔòÏûÏ¢: {userMessage}";
+                //// æ‹¼æ¥
+                //string messageToSend = $"{devicesInfoDesc}\n\nç”¨æˆ·å‘ä½ å‘é€äº†ä¸€åˆ™æ¶ˆæ¯: {userMessage}";
 
-                //// ·¢ËÍ¸øĞ¡Ã÷
-                //AgentService.Instance.SendUserMessage("Ğ¡Ã÷", messageToSend);
+                //// å‘é€ç»™å°æ˜
+                //AgentService.Instance.SendUserMessage("å°æ˜", messageToSend);
 
-                // Çå¿ÕÊäÈë¿ò
+                // æ¸…ç©ºè¾“å…¥æ¡†
                 messageInputField.text = "";
 
-                //Debug.Log($"ÒÑ·¢ËÍÏûÏ¢¸øĞ¡Ã÷: {messageToSend}");
+                //Debug.Log($"å·²å‘é€æ¶ˆæ¯ç»™å°æ˜: {messageToSend}");
             }
             else
             {
-                Debug.LogWarning("ÊäÈë¿òÎ´°ó¶¨/ÄÚÈİÎª¿Õ/charaÎª¿Õ£¡");
+                Debug.LogWarning("è¾“å…¥æ¡†æœªç»‘å®š/å†…å®¹ä¸ºç©º/charaä¸ºç©ºï¼");
             }
         }
-        private void OnGetAgentMessage(string agent, string ai_message)
+        private void OnGetAgentMessage(string agent, string requestId, string message)
         {
-            aiMessageText.text = $"{agent}: {ai_message}";
+            aiMessageText.text = $"{agent}: {message}";
         }
 
 

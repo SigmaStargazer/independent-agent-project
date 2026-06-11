@@ -36,7 +36,7 @@ namespace Services
         public event UnityAction<bool, string> OnRestoreMemory;
         public event UnityAction<bool, string> OnDeleteCurrentMemory;
 
-        public event UnityAction<string, string> OnGetAgentMessage;
+        public event UnityAction<string, string, string> OnGetAgentMessage;
         public event UnityAction<string, string, string> OnStopAction;
 
         public event UnityAction<string, string> OnObserve;
@@ -44,7 +44,7 @@ namespace Services
         public event UnityAction<string, string, int> OnGetMonitorRecords;
         public event UnityAction<string, string> OnGetWorldEventLog;
 
-        public event UnityAction<string, bool, float> OnMoveAgent;
+        public event UnityAction<string, string, bool, float> OnMoveAgent;
         public event Action<string, string, int, float, float> OnFollowTarget;
 
         public event UnityAction<string, string> OnInteract;
@@ -604,8 +604,8 @@ namespace Services
         }
         void OnAgentMessageGet(object sender, AgentSendMessageRequest request)
         {
-            Debug.LogFormat("OnAgentMessageGet::Agent:{0} AiMessage:{1}", request.Agent, request.AiMessage);
-            this.OnGetAgentMessage?.Invoke(request.Agent, request.AiMessage);
+            Debug.LogFormat("OnAgentMessageGet::Agent:{0} RequestId:{1} AiMessage:{2}", request.Agent, request.RequestId, request.AiMessage);
+            this.OnGetAgentMessage?.Invoke(request.Agent, request.RequestId, request.AiMessage);
         }
 
         void OnAgentStopAction(object sender, AgentStopActionRequest response)
@@ -637,8 +637,8 @@ namespace Services
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)
         {
-            Debug.LogFormat("OnAgentMove::Agent:{0} IsRight:{1} Distance:{2}", request.Agent, request.IsRight, request.Distance);
-            this.OnMoveAgent?.Invoke(request.Agent, request.IsRight, request.Distance);
+            Debug.LogFormat("OnAgentMove::Agent:{0} RequestId:{1} IsRight:{2} Distance:{3}", request.Agent, request.RequestId, request.IsRight, request.Distance);
+            this.OnMoveAgent?.Invoke(request.Agent, request.RequestId, request.IsRight, request.Distance);
         }
         void OnAgentFollowTarget(object sender, AgentFollowTargetRequest request)
         {
