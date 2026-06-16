@@ -366,6 +366,9 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(30)]
         public AgentGetWorldEventLogRequest agentGetWorldEventLogRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(31)]
+        public AgentExportSkillsRequest agentExportSkillsRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -398,6 +401,9 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(8)]
         public MemoryDeleteCurrentResponse memoryDeleteCurrentResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(9)]
+        public AgentExportSkillsResponse agentExportSkillsResponse { get; set; }
 
     }
 
@@ -622,6 +628,38 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
         [global::System.ComponentModel.DefaultValue("")]
         public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentExportSkillsRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"name")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Name { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentExportSkillsResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"skill_count")]
+        public int SkillCount { get; set; }
 
     }
 

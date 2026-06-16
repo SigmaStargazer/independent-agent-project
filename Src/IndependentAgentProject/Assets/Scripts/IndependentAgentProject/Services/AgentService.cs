@@ -1,4 +1,4 @@
-﻿using Common;
+using Common;
 //using Models;
 using Network;
 using ProtoBuf;
@@ -35,6 +35,9 @@ namespace Services
         public event UnityAction<bool, string> OnBackupMemory;
         public event UnityAction<bool, string> OnRestoreMemory;
         public event UnityAction<bool, string> OnDeleteCurrentMemory;
+
+        // v0.21.0 训练场：技能导出 (success, errormsg, skillCount)
+        public event UnityAction<bool, string, int> OnAgentExportSkills;
 
         public event UnityAction<string, string, string> OnGetAgentMessage;
         public event UnityAction<string, string, string> OnStopAction;
@@ -76,6 +79,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Subscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Subscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
+            MessageDistributer.Instance.Subscribe<AgentExportSkillsResponse>(this.OnAgentExportSkillsResponse_);
 
             MessageDistributer.Instance.Subscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Subscribe<AgentStopActionRequest>(this.OnAgentStopAction);
@@ -113,6 +117,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<MemoryBackupResponse>(this.OnMemoryBackup);
             MessageDistributer.Instance.Unsubscribe<MemoryRestoreResponse>(this.OnMemoryRestore);
             MessageDistributer.Instance.Unsubscribe<MemoryDeleteCurrentResponse>(this.OnMemoryDeleteCurrent);
+            MessageDistributer.Instance.Unsubscribe<AgentExportSkillsResponse>(this.OnAgentExportSkillsResponse_);
 
             MessageDistributer.Instance.Unsubscribe<AgentSendMessageRequest>(this.OnAgentMessageGet);
             MessageDistributer.Instance.Unsubscribe<AgentStopActionRequest>(this.OnAgentStopAction);
@@ -261,6 +266,10 @@ namespace Services
                 else if (message.Request.memoryDeleteCurrentRequest != null)
                 {
                     OnDeleteCurrentMemory?.Invoke(false, error);
+                }
+                else if (message.Request.agentExportSkillsRequest != null)
+                {
+                    OnAgentExportSkills?.Invoke(false, error, 0);
                 }
             }
             return true;
@@ -506,6 +515,43 @@ namespace Services
         }
 
         #endregion 记忆备份与恢复
+
+        #region 技能导出（v0.21.0 训练场）
+
+        /// <summary>
+        /// 请求 Python 端把指定 Agent 的全部技能导出为 YAML 文件，
+        /// 落到 Src/PythonServer/db/default_skills/exports/&lt;name&gt;_&lt;ts&gt;.yaml。
+        /// 客户端不接收文件内容，仅在 OnAgentExportSkills 中得到 success / errormsg / skillCount。
+        /// </summary>
+        public void SendAgentExportSkills(string name)
+        {
+            Debug.LogFormat("AgentExportSkillsRequest::name:{0}", name);
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.agentExportSkillsRequest = new AgentExportSkillsRequest();
+            message.Request.agentExportSkillsRequest.Name = name;
+
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                pendingMessages.Enqueue(message);
+                if (!this.connected && !this.connecting)
+                {
+                    this.ConnectToServer();
+                }
+            }
+        }
+
+        void OnAgentExportSkillsResponse_(object sender, AgentExportSkillsResponse response)
+        {
+            Debug.LogFormat("OnAgentExportSkills::Success:{0} SkillCount:{1} [{2}]", response.Success, response.SkillCount, response.Errormsg);
+            this.OnAgentExportSkills?.Invoke(response.Success, response.Errormsg, response.SkillCount);
+        }
+
+        #endregion 技能导出
 
 
         public void SendUserMessage(string agent, string userMessage, bool forceInterrupt = false)

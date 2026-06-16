@@ -4,10 +4,14 @@ namespace IndependentAgentProject
 {
     public class SceneConfig : MonoBehaviour
     {
-        [Header("³¡¾°Ãû³Æ")]
+        [Header("åœºæ™¯åç§°")]
         public string SceneDisplayName;
+        [Header("åœºæ™¯æè¿°")]
         [TextArea]
         public string Description;
+        [Header("åœºæ™¯ç±»å‹")]
+        public SceneType SceneType = SceneType.Level;
+
 
         private void Awake()
         {
@@ -15,6 +19,7 @@ namespace IndependentAgentProject
             {
                 DisplayName = SceneDisplayName,
                 Description = Description,
+                SceneType = SceneType
             });
         }
     }

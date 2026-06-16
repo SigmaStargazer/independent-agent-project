@@ -839,6 +839,7 @@ dependencies = [
     { name = "protobuf" },
     { name = "psutil" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -852,6 +853,7 @@ requires-dist = [
     { name = "protobuf", specifier = "==3.20.3" },
     { name = "psutil", specifier = ">=7.2.1" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]

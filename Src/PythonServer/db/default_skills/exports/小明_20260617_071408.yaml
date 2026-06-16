@@ -1,0 +1,27 @@
+skills:
+- name: 走到目标旁交互
+  description: 走到某个可交互物体附近并与之交互
+  content: '当需要与场景中的某个物体进行交互时，先移动到目标物体附近，再触发交互动作。
+
+    根据目标所处的环境（平地/高处）选择不同的接近方式。
+
+    '
+  source: default
+  templates:
+  - name: 平地接近
+    description: 当目标在平地上、可直接走过去时
+    action_sequence_template:
+    - action: Move
+      params:
+        target: '{target_name}'
+        condition: object[0].distance < 1.5
+    - action: Interact
+      params:
+        target: '{target_name}'
+    usage_notes: '- {target_name} 替换为目标物体在场景中的实际名称
+
+      - condition 中的距离阈值可按目标尺寸适当调整（默认 1.5）
+
+      - 如果中途目标移动，Move 会自动追踪
+
+      '

@@ -2,27 +2,23 @@ import os
 import asyncio
 from datetime import datetime
 from uuid import uuid4
-import gc # 引入垃圾回收
 import copy
 import shutil
 from contextlib import asynccontextmanager
 
 from graphiti_core import Graphiti
-from graphiti_core.driver.kuzu_driver import KuzuDriver # kuzu配置
+from graphiti_core.driver.kuzu_driver import KuzuDriver
 
 from graphiti_core.nodes import EntityNode, EpisodeType
 from graphiti_core.search import search_config_recipes
 
 from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
 from graphiti_core.llm_client.config import LLMConfig
-from graphiti_core.embedder.openai import OpenAIEmbedder, OpenAIEmbedderConfig
-from graphiti_core.cross_encoder.openai_reranker_client import OpenAIRerankerClient
 
-from memory_system.safe_batch_embedder import SafeBatchOpenAIEmbedder
-from memory_system.safe_batch_reranker import SafeBatchOpenAIReranker
+from db_conn import DBConnectionService
+from embedder import EmbedderService
 
 from agent_framwork.base.singleton import singleton
-import kuzu
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -31,24 +27,10 @@ mem_model_api_base = os.getenv("MEMORY_API_BASE")
 mem_model_api_key = os.getenv("MEMORY_API_KEY")
 mem_model_name = os.getenv("MEMORY_MODEL")
 
-embedding_model_base = os.getenv("EMBEDDING_API_BASE")
-embedding_model_key = os.getenv("EMBEDDING_API_KEY")
-embedding_model_name = os.getenv("EMBEDDING_MODEL")
-
-reranker_model_base = os.getenv("RERANKER_API_BASE")
-reranker_model_key = os.getenv("RERANKER_API_KEY")
-reranker_model_name = os.getenv("RERANKER_MODEL")
-
-# 数据库名
-db_root = "db"
-db_name = "graphiti"
-
 QUEUE_SIZE = int(os.getenv("MEMORY_QUEUE_SIZE", 1000))
 
 class _SharedKuzuDriver(KuzuDriver):
     def __init__(self, db_instance, conn_instance):
-        # 1. 屏蔽父类初始化，防止重复打开文件
-        # 2. 注入全局 DB 和 局部 Conn
         self.db = db_instance
         self.client = conn_instance
 
@@ -61,63 +43,25 @@ class MemoryManager:
             )
         self._initialized = False
         self._init_lock = None
-        self._kuzu_db = None       # 全局
         self._kuzu_driver = None
-        self.conn = None
-        self.graphiti = None # graphiti
-        self._embedder = None
-        self._reranker = None
+        self.graphiti = None
 
-        # 异步队列与 Worker 控制 
         self._memory_queue = asyncio.Queue(maxsize=QUEUE_SIZE)
         self._worker_task = None
 
-        # 记忆备份相关
         self._backup_root = "db/backups"
         self._max_backup_slots = int(os.getenv("MAX_BACKUP_SLOTS", 10))
         self._backup_lock = asyncio.Lock()
 
-
-        # ----------------------------
-        # 冻结门
-        # ----------------------------
-        self._freeze = False
-        self._active_ops = 0
-        self._active_cond = asyncio.Condition()
-
-        # ----------------------------
-        # 写入互斥锁
-        # ----------------------------
         self._graph_write_lock = asyncio.Lock()
-
-    async def _begin_memory_op(self):
-        async with self._active_cond:
-            while self._freeze:
-                await self._active_cond.wait()
-            self._active_ops += 1
-
-    async def _end_memory_op(self):
-        async with self._active_cond:
-            self._active_ops -= 1
-            if self._active_ops == 0:
-                self._active_cond.notify_all()
-
-    async def _begin_memory_op_internal(self):
-        async with self._active_cond:
-            self._active_ops += 1
 
     @asynccontextmanager
     async def memory_access(self):
         """
-        Memory API 访问门：
-        - backup期间会阻塞
-        - 已进入的操作允许执行完
+        Memory API 访问门：薄转发到 DBConnectionService.access()
         """
-        await self._begin_memory_op()
-        try:
+        async with DBConnectionService().access():
             yield
-        finally:
-            await self._end_memory_op()
 
     async def initialize(self):
         if self._initialized: return self
@@ -126,106 +70,34 @@ class MemoryManager:
         async with self._init_lock:
             if self._initialized: return self
 
-            # # 0. 清理 WAL 文件（必须在 Database() 之前）
-            # wal_path = os.path.join(db_root, f"{db_name}.wal")
-            # try:
-            #     if os.path.exists(wal_path):
-            #         os.remove(wal_path)
-            #         print(f"🧹 [MemorySystem] 已删除 WAL 文件: {wal_path}")
-            # except Exception as e:
-            #     print(f"⚠️ [MemorySystem] 删除 WAL 失败: {e}")
-            #     raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
-            
-            # 1. 初始化所有依赖组件
-            self._embedder = SafeBatchOpenAIEmbedder(
-                config=OpenAIEmbedderConfig(
-                    api_key=embedding_model_key, 
-                    embedding_model=embedding_model_name,
-                    base_url=embedding_model_base
-                ),
-                max_batch_size=10
-            )
+            # 1. 确保底层 service 已初始化（幂等）
+            await DBConnectionService().initialize()
+            await EmbedderService().initialize()
+            dbsvc = DBConnectionService()
+            embedder = EmbedderService().get_embedder()
+            reranker = EmbedderService().get_reranker()
 
-            self._reranker = SafeBatchOpenAIReranker(
-                config=LLMConfig(
-                    api_key=reranker_model_key, 
-                    model=reranker_model_name,
-                    base_url=reranker_model_base
-                ),
-                max_batch_size=10
-            )
-
-            # 2. 安全打开数据库
-            print("💾 [MemorySystem] 正在挂载全局数据库...")
-            db_path = os.path.join(db_root, f"{db_name}.kuzu")
-            wal_path = os.path.join(db_root, f"{db_name}.wal")
-            db_exists = os.path.exists(db_path)
-            opened = False
-            try:
-                self._kuzu_db = kuzu.Database(db_path)
-                opened = True
-            except Exception as e:
-                print("⚠️ [MemorySystem] 数据库打开失败，尝试清理 WAL:", e)
-                if os.path.exists(wal_path):
-                    try:
-                        os.remove(wal_path)
-                        print(f"🧹 [MemorySystem] 已删除 WAL 文件: {wal_path}")
-                    except Exception as e:
-                        print(f"⚠️ [MemorySystem] 删除 WAL 失败: {e}")
-                        raise RuntimeError(f"WAL 删除失败，数据库可能处于脏状态: {wal_path}")
-            # 再尝试一次打开
-            if not opened:
-                try:
-                    self._kuzu_db = kuzu.Database(db_path)
-                    print("✅ [MemorySystem] 数据库已通过 clean start 打开")
-                except Exception as retry_err:
-                    print("❌ [MemorySystem] clean start 仍失败:", retry_err)
-                    raise retry_err
-            
-            # 3. 首次建索引 (内部封装，外部无感)
-            self.conn = kuzu.AsyncConnection(self._kuzu_db)
-            # self.conn = kuzu.AsyncConnection(self._kuzu_db, max_concurrent_queries=1)
-
-            # 4. 判断 schema 是否存在
-            schema_initialized = False
-            if db_exists:
-                try:
-                    result = await self.conn.execute("CALL show_tables() RETURN *")
-                    schema_initialized = any(True for _ in result.rows_as_dict())
-                except Exception:
-                    schema_initialized = False
-            is_new_db = not schema_initialized
-            
-            # 5. 加载 FTS 扩展 
-            try:
-                # 第一次运行需要联网下载，之后本地加载
-                await self._ensure_fts_loaded()
-            except Exception as e:
-                print(f"❌ FTS 加载失败: {e}")
-                raise e
-
-            # 6. 组装 Graphiti
-            self._kuzu_driver = _SharedKuzuDriver(self._kuzu_db, self.conn)
+            # 2. 组装 Graphiti（基于 service 提供的 db/conn）
+            self._kuzu_driver = _SharedKuzuDriver(dbsvc.get_db(), dbsvc.get_conn())
             print("🏗️ [MemorySystem] 正在检查/创建表结构 (Schema)...")
             try:
-                # 这一步会执行 CREATE NODE TABLE IF NOT EXISTS ...
                 self._kuzu_driver.setup_schema()
             except Exception as e:
                 print(f"⚠️ Schema setup warning (可忽略): {e}")
             self.graphiti = Graphiti(
                 graph_driver=self._kuzu_driver,
                 llm_client=OpenAIGenericClient(config=self._llm_config),
-                embedder=self._embedder,
-                cross_encoder=self._reranker
+                embedder=embedder,
+                cross_encoder=reranker
             )
-            # 7. 确保 FTS 索引完整（Kuzu 不支持 IF NOT EXISTS，且只允许单写事务）
-            await self._ensure_fts_indexes(is_new_db=is_new_db)
-            
+            # 3. 确保 FTS 索引完整
+            await self._ensure_fts_indexes(is_new_db=dbsvc.is_new_db)
+
             self._initialized = True
-            # 8. 启动记忆存储 Worker
+            # 4. 启动记忆存储 Worker
             if self._worker_task is None or self._worker_task.done():
-                self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker") 
-                print("✅ [MemorySystem] 记忆存储 Worker 已启动") 
+                self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker")
+                print("✅ [MemorySystem] 记忆存储 Worker 已启动")
         return self
 
     async def _ensure_fts_indexes(self, is_new_db: bool):
@@ -244,45 +116,17 @@ class MemoryManager:
                 else:
                     raise
 
-    async def _ensure_fts_loaded(self):
-        """
-        幂等加载 FTS 扩展
-        """
-        try:
-            result = await self.conn.execute("CALL SHOW_LOADED_EXTENSIONS() RETURN *")
-            rows = result.rows_as_dict()
-            loaded = set()
-            for row in rows:
-                # 兼容所有列名
-                for v in row.values():
-                    if isinstance(v, str):
-                        loaded.add(v.upper())
-
-            if "FTS" not in loaded:
-                print("[MemorySystem] installing FTS...")
-                try:
-                    await self.conn.execute("INSTALL FTS")
-                except Exception as e:
-                    # 已安装时可能报错
-                    print("[MemorySystem] INSTALL FTS warning:", e)
-                await self.conn.execute("LOAD EXTENSION FTS")
-                print("✅ [MemorySystem] FTS 扩展已加载")
-            else:
-                print("ℹ️ [MemorySystem] FTS 已存在，跳过加载")
-        except Exception as e:
-            print("❌ FTS 检查/加载失败:", e)
-            raise
-
     async def _memory_worker(self):
         """
         记忆存储 Worker
         """
         print("[MemWorker] started")
+        dbsvc = DBConnectionService()
         while True:
             try:
                 name, memory, curtime = await self._memory_queue.get()
-                # 提前占 active_ops
-                await self._begin_memory_op_internal()
+                # 提前占 active_ops（worker 已经被串行化，无需 wait freeze）
+                await dbsvc.begin_op_internal()
                 try:
                     await asyncio.wait_for(
                         self._save_memory(
@@ -299,14 +143,13 @@ class MemoryManager:
                 except Exception as e:
                     print("[MemWorker] save failed:",e)
                 finally:
-                    await self._end_memory_op()
+                    await dbsvc.end_op()
                     self._memory_queue.task_done()
             except asyncio.CancelledError:
                 print("[MemWorker] cancelled")
                 break
             except Exception as e:
                 print("[MemWorker] unexpected error:",e)
-                # 防止 crash loop
                 await asyncio.sleep(1)
                 continue
 
@@ -329,7 +172,7 @@ class MemoryManager:
                 created_at=create_time,  # type: ignore
                 summary=summary,
             )
-            await my_entity.generate_name_embedding(self._embedder)
+            await my_entity.generate_name_embedding(EmbedderService().get_embedder())
             # 保存实体节点
             await my_entity.save(self.graphiti.driver)
 
@@ -360,7 +203,7 @@ class MemoryManager:
             RETURN n
             """
             try:
-                response = await self.conn.execute(cypher)
+                response = await DBConnectionService().get_conn().execute(cypher)
                 for row in response.rows_as_dict():
                     summary = row['n']['summary']
                     break
@@ -457,9 +300,8 @@ class MemoryManager:
                 raise
 
     async def _wait_if_frozen(self):
-        async with self._active_cond:
-            while self._freeze:
-                await self._active_cond.wait()
+        """已不用，保留薄实现以避免外部还有调用"""
+        await DBConnectionService().wait_idle() if False else None
 
     async def save_memory(self, name: str, memory: str, curtime: datetime):
         """
@@ -472,17 +314,17 @@ class MemoryManager:
         if not self._initialized:
             print("[MemoryManager] not initialized")
             return
-        # backup期间禁止入队
-        await self._wait_if_frozen()
-        try:
-            await asyncio.wait_for(
-                self._memory_queue.put((name,memory,curtime)),
-                timeout=2
-            )
-        except asyncio.TimeoutError:
-            print("[MemoryManager] queue full timeout:",name)
-        except Exception as e:
-            print("[MemoryManager] enqueue failed:",e)
+        # backup期间禁止入队（dbsvc.access 会阻塞 freeze 状态）
+        async with DBConnectionService().access():
+            try:
+                await asyncio.wait_for(
+                    self._memory_queue.put((name,memory,curtime)),
+                    timeout=2
+                )
+            except asyncio.TimeoutError:
+                print("[MemoryManager] queue full timeout:",name)
+            except Exception as e:
+                print("[MemoryManager] enqueue failed:",e)
 
     async def search_fact_memory(self, name: str, query: str, limit: int = 1):
         """
@@ -596,7 +438,7 @@ class MemoryManager:
             # 检索episodes的实际内容
             mem_episode = ""
             try:
-                response = await self.conn.execute(query)
+                response = await DBConnectionService().get_conn().execute(query)
                 for row in response.rows_as_dict():
                     memory = row['n']
                     mem_episode += f"情景: \"{memory['content']}\"\n"
@@ -652,17 +494,13 @@ class MemoryManager:
             if slot_id < 0 or slot_id >= self._max_backup_slots:
                 raise ValueError(f"slot_id应在[0, {self._max_backup_slots-1}]范围内")
             print(f"[MemoryManager][记忆备份开始] slot={slot_id}")
-            was_initialized = self._initialized # 记录数据库开始时是否启动，决定改方法结束后是否要启动
+            dbsvc = DBConnectionService()
+            was_initialized = self._initialized
             try:
                 if self._initialized:
-                    # =========================================
-                    # 1) freeze memory access
-                    # =========================================
-                    async with self._active_cond:
-                        self._freeze = True
-                    # --------------------------------------------------
-                    # 2) 如果系统正在运行，尝试 flush
-                    # --------------------------------------------------
+                    # 1) freeze
+                    await dbsvc.freeze()
+                    # 2) flush 队列（尽力而为）
                     try:
                         print(f"[MemoryManager] flush记忆队列中(timeout={flush_timeout}s)")
                         flushed = await self.wait_memory_flush(timeout=flush_timeout)
@@ -670,33 +508,24 @@ class MemoryManager:
                             print("[MemoryManager] flush超时，备份将包含未刷新的WAL")
                     except Exception as e:
                         print(f"[MemoryManager] flush失败，备份将继续: {e}")
-                    # =========================================
-                    # 3)等待所有 active op 退出
-                    # =========================================
-                    async with self._active_cond:
-                        while self._active_ops > 0:
-                            await self._active_cond.wait()
-                    # =========================================
+                    # 3) 等所有进行中的 access 退出
+                    await dbsvc.wait_idle()
                     # 4) checkpoint
-                    # =========================================
                     try:
                         print(f"[MemoryManager] checkpoint开始")
-                        await self.conn.execute("CHECKPOINT")
-                        # 强制清理 Python 引用
-                        gc.collect()
+                        await dbsvc.get_conn().execute("CHECKPOINT")
                     except Exception as e:
                         print(f"[MemoryManager] checkpoint失败，备份将继续: {e}")
-                    # =========================================
-                    # 5) 完全关闭数据库
-                    # =========================================
-                    result =await self._close()
+                    # 5) 关闭自身（Worker / graphiti / driver）
+                    await self._close()
+                    # 6) 关闭底层 DB（释放文件锁）
+                    await dbsvc.close()
                 else:
                     print("[MemoryManager] 未初始化，备份将继续")
-                # --------------------------------------------------
-                # 6) 准备 slot
-                # --------------------------------------------------
-                db_file = os.path.join(db_root,f"{db_name}.kuzu")
-                wal_file = os.path.join(db_root,f"{db_name}.wal")
+
+                # 7) 准备 slot
+                db_file = dbsvc.db_path
+                wal_file = dbsvc.wal_path
                 if not os.path.exists(db_file):
                     raise RuntimeError(f"无法执行存档：当前没有可保存的数据（数据库尚未创建）")
 
@@ -707,30 +536,30 @@ class MemoryManager:
                     print("[MemoryManager][覆盖已有备份]", f"slot={slot_id}")
                     shutil.rmtree(slot_path)
                 os.makedirs(slot_path)
-                # --------------------------------------------------
-                # 7) 复制 db + wal
-                # --------------------------------------------------
+
+                # 8) 复制 db + wal
                 try:
                     if os.path.exists(db_file):
-                        shutil.copy2(db_file, os.path.join(slot_path, f"{db_name}.kuzu"))
+                        shutil.copy2(db_file, os.path.join(slot_path, os.path.basename(db_file)))
                     if os.path.exists(wal_file):
-                        shutil.copy2(wal_file, os.path.join(slot_path, f"{db_name}.wal"))
+                        shutil.copy2(wal_file, os.path.join(slot_path, os.path.basename(wal_file)))
                     print("[MemoryManager][记忆备份完成]", f"slot={slot_id}")
                 except Exception as e:
                     print("[MemoryManager][记忆备份失败]", f"slot={slot_id}:", e)
                     raise
-                # # --------------------------------------------------
-                # # 8) 如果未初始化，则再初始化
-                # # --------------------------------------------------
-                # if not self._initialized:
-                #     await self.initialize()
             finally:
-                async with self._active_cond:
-                    self._freeze = False
-                    self._active_cond.notify_all()
+                # 解 freeze（如果 dbsvc 还在）
+                if dbsvc.is_initialized:
+                    await dbsvc.unfreeze()
+                # 重新 init（dbsvc + memory）
                 if was_initialized and not self._initialized:
                     try:
+                        await dbsvc.initialize()
                         await self.initialize()
+                        # ASM 也需要重建（schema 检测）
+                        from action_skill_system.action_skill_manager import ActionSkillManager
+                        ActionSkillManager().reset_for_reinitialize()
+                        await ActionSkillManager().initialize()
                     except Exception as e:
                         print("[MemoryManager] backup后自动恢复失败:", e)
                         raise
@@ -753,30 +582,33 @@ class MemoryManager:
         async with self._backup_lock:
             print(f"[MemoryManager] 开始读档 slot={slot_id}")
             slot_path = os.path.join(self._backup_root,f"slot_{slot_id}")
-            # 如果备份目录不存在，则报错
             if not os.path.exists(slot_path):
                 raise RuntimeError(f"slot {slot_id} 不存在")
 
             await self.close()
+            dbsvc = DBConnectionService()
+            await dbsvc.close()
 
-            db_file = os.path.join(db_root,f"{db_name}.kuzu")
-            wal_file = os.path.join(db_root,f"{db_name}.wal")
+            db_file = dbsvc.db_path
+            wal_file = dbsvc.wal_path
 
             try:
-                # 删除当前的数据库文件和WAL文件
                 if os.path.exists(db_file):
                     os.remove(db_file)
                 if os.path.exists(wal_file):
                     os.remove(wal_file)
-                # 复制备份的数据库文件和WAL文件
-                shutil.copy2(os.path.join(slot_path,f"{db_name}.kuzu"),db_file)
-                backup_wal = os.path.join(slot_path,f"{db_name}.wal")
+                shutil.copy2(os.path.join(slot_path, os.path.basename(db_file)), db_file)
+                backup_wal = os.path.join(slot_path, os.path.basename(wal_file))
                 if os.path.exists(backup_wal):
-                    shutil.copy2(backup_wal,wal_file)
+                    shutil.copy2(backup_wal, wal_file)
             except Exception as e:
                 print(f"[MemoryManager][记忆读档失败] slot={slot_id}: {e}")
                 raise
+            await dbsvc.initialize()
             await self.initialize()
+            from action_skill_system.action_skill_manager import ActionSkillManager
+            ActionSkillManager().reset_for_reinitialize()
+            await ActionSkillManager().initialize()
             print(f"[MemoryManager] 读档完成 slot={slot_id}")
 
     async def list_used_slots(self) -> list[int]:
@@ -787,6 +619,7 @@ class MemoryManager:
         """
         os.makedirs(self._backup_root, exist_ok=True)
         used_slots = []
+        dbsvc_db_basename = os.path.basename(DBConnectionService().db_path)
         for name in os.listdir(self._backup_root):
             if not name.startswith("slot_"):
                 continue
@@ -798,7 +631,7 @@ class MemoryManager:
             if 0 <= slot_id < self._max_backup_slots:
                 slot_path = os.path.join(self._backup_root, name)
                 # 必须包含数据库文件才算有效
-                db_file = os.path.join(slot_path,f"{db_name}.kuzu")
+                db_file = os.path.join(slot_path, dbsvc_db_basename)
                 if os.path.exists(db_file):
                     used_slots.append(slot_id)
         used_slots.sort()
@@ -842,11 +675,13 @@ class MemoryManager:
         """
         async with self._backup_lock:
             print("[MemoryManager] 删除当前记忆开始")
-            # 1. 停止记忆系统
-            result = await self.close()
+            dbsvc = DBConnectionService()
+            # 1. 关 MM + dbsvc
+            await self.close()
+            await dbsvc.close()
             # 2. 删除数据库文件和WAL文件
-            db_file = os.path.join(db_root,f"{db_name}.kuzu")
-            wal_file = os.path.join(db_root,f"{db_name}.wal")
+            db_file = dbsvc.db_path
+            wal_file = dbsvc.wal_path
 
             try:
                 if os.path.exists(db_file):
@@ -863,30 +698,30 @@ class MemoryManager:
                 raise
 
             # 3. 重新初始化
-            result = await self.initialize()
+            await dbsvc.initialize()
+            await self.initialize()
+            from action_skill_system.action_skill_manager import ActionSkillManager
+            ActionSkillManager().reset_for_reinitialize()
+            await ActionSkillManager().initialize()
             print("[MemoryManager] 删除当前记忆完成")
 
         return True
 
     async def close(self):
-        """显式关闭资源，释放 Kuzu 文件锁"""
-
+        """显式关闭 MemoryManager 自身资源（worker / graphiti / driver）。
+        不会关闭底层 DBConnectionService — 那个由调用方在需要时单独 close。
+        """
         if not self._initialized:
             return
         try:
-            async with self._active_cond:
-                self._freeze = True
-                while self._active_ops > 0:
-                    await self._active_cond.wait()
-            result = await self._close()
-        finally:
-            async with self._active_cond:
-                self._freeze = False
-                self._active_cond.notify_all()
+            # 让进行中的 access 自然退出（freeze + wait_idle 由调用方 backup_memory 负责）
+            await self._close()
+        except Exception as e:
+            print(f"⚠️ MemoryManager.close 出错: {e}")
 
     async def _close(self):
         self._initialized = False
-        print("🛑 [1/4] 正在清除记忆任务队列worker")
+        print("🛑 [MM 1/2] 正在清除记忆任务队列worker")
         if self._worker_task:
             try:
                 await asyncio.wait_for(self._memory_queue.join(),timeout=30.0)
@@ -900,34 +735,12 @@ class MemoryManager:
                 pass
             self._worker_task = None
 
-        print("🛑 [2/4] 正在关闭连接池...")
+        print("🛑 [MM 2/2] 正在释放 graphiti / driver 引用...")
         try:
-            # 1. 显式关闭 AsyncConnection (这会停止后台线程池)
-            if self.conn:
-                if hasattr(self.conn, 'close'):
-                    result = self.conn.close() # 这一步至关重要，它会等待线程结束
-                    if asyncio.iscoroutine(result):
-                        await result
-            
-            # 2. 切断引用链 (让引用计数归零)
-            self.conn = None
-            
-            # 如果 kuzu_driver 持有 db，也要手动切断
             if self._kuzu_driver:
-                self._kuzu_driver.db = None # 释放 Database 对象引用
+                self._kuzu_driver.db = None
                 self._kuzu_driver = None
-            
             self.graphiti = None
-            self._kuzu_db = None 
-
-            # 3. 【核心绝招】强制垃圾回收
-            # Python 的 GC 是懒惰的，必须手动踢一脚
-            # 只有 Database 对象被 GC 销毁，文件锁才会释放
-            gc.collect()
-            await asyncio.sleep(0.5)  # ★ 让 C++ 层事务真正释放
-            gc.collect()              # ★ 二次回收，确保析构链完整
-            print("✅ [3/4] Python 对象引用已清理")
-            print("✅ [4/4] 垃圾回收完成，数据库锁应已释放")
-            
+            print("✅ [MM] 自身资源已释放")
         except Exception as e:
-            print(f"⚠️ 关闭资源时出错: {e}")
+            print(f"⚠️ MemoryManager 关闭资源时出错: {e}")

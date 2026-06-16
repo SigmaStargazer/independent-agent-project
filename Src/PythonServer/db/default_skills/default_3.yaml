@@ -1,0 +1,37 @@
+# Action Skill 默认技能配置
+# ----------------------------------------------------------------------
+# 用途：新 Agent 创建时由 main.handle_agent_create_request 注入到 Kuzu。
+# 加载顺序（见 default_skill_loader.load_default_skills）：
+#   1. db/default_skills/<group_id>.yaml  （按 Agent 定制，可选）
+#   2. db/default_skills/default.yaml     （兜底，本文件）
+#
+# 编辑规则：
+# - 字段定义详见 DevDocs/v0.21.0/PRD.md 4.1 / 4.5
+# - 导入时 source 会被强制改为 "default"，无需在此设置
+# - action_sequence_template 为 List[dict]，参数用 {占位符} 表示
+#
+# 训练流程：
+#   ① 在训练场让 Agent 学技能 → AgentExportSkills 写到 exports/<name>_<ts>.yaml
+#   ② 开发者筛选/调整后改名为 default.yaml 或 <group_id>.yaml 移到本目录
+
+skills:
+  - name: 走到目标旁交互
+    description: 走到某个可交互物体附近并与之交互
+    content: |
+      当需要与场景中的某个物体进行交互时，先移动到目标物体附近，再触发交互动作。
+      根据目标所处的环境（平地/高处）选择不同的接近方式。
+    templates:
+      - name: 平地接近
+        description: 当目标在平地上、可直接走过去时
+        action_sequence_template:
+          - action: Move
+            params:
+              target: "{target_name}"
+              condition: "object[0].distance < 1.5"
+          - action: Interact
+            params:
+              target: "{target_name}"
+        usage_notes: |
+          - {target_name} 替换为目标物体在场景中的实际名称
+          - condition 中的距离阈值可按目标尺寸适当调整（默认 1.5）
+          - 如果中途目标移动，Move 会自动追踪

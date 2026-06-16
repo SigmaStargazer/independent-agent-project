@@ -1,6 +1,8 @@
 import sys
 import os
+import re
 import asyncio
+from datetime import datetime
 
 from network.servers import AgentServerNetMessage, TOOL_WAITERS
 from network import message_pb2
@@ -8,6 +10,9 @@ from network import message_pb2
 from agent_framwork.managers.agent_manager import AgentManager
 from agent_framwork.systems.time_system import TimeSystem
 from memory_system.memory_manager import MemoryManager
+from action_skill_system import ActionSkillManager, load_default_skills
+from db_conn import DBConnectionService
+from embedder import EmbedderService
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -40,6 +45,26 @@ async def handle_agent_create_request(msg, context):
             summary=desc,
             create_time=cur_time
             )
+        # ===== 注入默认技能（PRD v0.21.0 §4.5） =====
+        # 失败仅打印日志，不回滚 Agent 创建——技能注入是辅助功能
+        try:
+            group_id = name.encode('utf-8').hex()
+            default_skills = load_default_skills(group_id=group_id)
+            cur_time_str = await TimeSystem().aget_current_time(to_str=True)
+            for skill_data in default_skills:
+                try:
+                    await ActionSkillManager().create_skill_from_dict(
+                        group_id=group_id,
+                        skill_data=skill_data,
+                        curtime=cur_time_str,
+                    )
+                except Exception as inner_e:
+                    print(f"[main] 默认技能 '{skill_data.get('name','?')}' 注入失败: {inner_e}")
+            if default_skills:
+                print(f"[main] 已为 Agent '{name}' 注入 {len(default_skills)} 个默认技能")
+        except Exception as e:
+            print(f"[main] 默认技能注入失败（Agent 创建已完成）: {e}")
+
         response.success = True
         await context['server'].send_message(response, context)
     except Exception as e:
@@ -230,6 +255,45 @@ async def handle_memory_delete_request(msg, context):
         print(f"删除当前记忆失败: {str(e)}")
     await context['server'].send_message(response,context)
 
+
+@server.on_message(message_pb2.AgentExportSkillsRequest)
+async def handle_agent_export_skills_request(msg, context):
+    """导出指定 Agent 的全部技能为 YAML 文件，落到 db/default_skills/exports/。
+
+    客户端只关心 success / errormsg / skill_count；具体文件名由服务端决定，
+    开发者训练完到该目录挑选文件即可。
+    """
+    name = msg.name
+    response = message_pb2.AgentExportSkillsResponse()
+    try:
+        if not name:
+            raise ValueError("AgentExportSkillsRequest.name 不能为空")
+        group_id = name.encode("utf-8").hex()
+        yaml_text = await ActionSkillManager().export_skills_yaml(group_id)
+        skills = await ActionSkillManager().get_all_skills(group_id)
+
+        export_dir = os.path.join(
+            os.path.dirname(__file__), "db", "default_skills", "exports"
+        )
+        os.makedirs(export_dir, exist_ok=True)
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # 仅保留中文 / 英文数字 / 下划线 / 横线
+        safe_name = re.sub(r"[^\w\u4e00-\u9fa5\-]", "_", name) or "agent"
+        file_path = os.path.join(export_dir, f"{safe_name}_{ts}.yaml")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(yaml_text)
+
+        response.success = True
+        response.skill_count = len(skills)
+        print(f"[main] 已导出 Agent '{name}' 的 {len(skills)} 个技能到 {file_path}")
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        response.skill_count = 0
+        print(f"[main] 导出 Agent '{name}' 技能失败: {e}")
+    await context['server'].send_message(response, context)
+
 # ======================
 # 启动服务器
 # ======================
@@ -240,9 +304,16 @@ async def other_tasks():
 
 async def main():
     # 1. 在这里全局执行一次初始化
-    print("正在初始化 MemoryManager...")
-    await MemoryManager().initialize()
-    print("MemoryManager 初始化完成。")
+    print("正在初始化基础设施...")
+    await DBConnectionService().initialize()
+    await EmbedderService().initialize()
+
+    print("正在初始化业务模块...")
+    await asyncio.gather(
+        MemoryManager().initialize(),
+        ActionSkillManager().initialize(),
+    )
+    print("MemoryManager / ActionSkillManager 初始化完成。")
 
     # 也可以在这里初始化 TimeSystem，如果需要的话
     await TimeSystem().aset_time(year=2016, month=1, day=1)

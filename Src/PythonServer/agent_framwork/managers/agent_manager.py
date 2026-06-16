@@ -7,6 +7,7 @@ from agent_framwork.base.singleton import singleton
 from agent_framwork.agents.agent_interuptible import Agent
 
 from memory_system.memory_manager import MemoryManager
+from db_conn import DBConnectionService
 
 @singleton
 class AgentManager:
@@ -40,7 +41,7 @@ class AgentManager:
         cypher = f"""
 MATCH (n: Entity {{group_id: '{group_id}'}})
 RETURN n"""
-        result = await MemoryManager().conn.execute(cypher)
+        result = await DBConnectionService().get_conn().execute(cypher)
         if result.has_next():
             error_msg = f"[Agent Manager]创建Agent失败: Agent {name} 已存在"
             print(error_msg)
@@ -80,7 +81,7 @@ RETURN n
 LIMIT 1
 """
 
-        result = await MemoryManager().conn.execute(cypher)
+        result = await DBConnectionService().get_conn().execute(cypher)
         if not result.has_next():
             error_msg = f"[Agent Manager]加载Agent失败: Agent {name} 不存在"
             print(error_msg)
@@ -105,7 +106,7 @@ LIMIT 1
         WHERE n.group_id IS NOT NULL
         RETURN DISTINCT n.group_id as group_id"""
 
-        response = await MemoryManager().conn.execute(cypher)
+        response = await DBConnectionService().get_conn().execute(cypher)
         agent_names = []
         for row in response.rows_as_dict():
             group_id = row['group_id']

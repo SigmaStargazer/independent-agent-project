@@ -2,12 +2,11 @@ from graphiti_core.embedder.openai import OpenAIEmbedder
 
 class SafeBatchOpenAIEmbedder(OpenAIEmbedder):
     """
-    限制单次上传至DashScope Embedding模型的文档数量，防止报错
+    限制单次上传至 DashScope Embedding 模型的文档数量，防止报错
     """
     def __init__(self, config=None, max_batch_size: int = 10, **kwargs):
-            # 初始化父类
-            super().__init__(config=config, **kwargs)
-            self._max_batch_size = max_batch_size
+        super().__init__(config=config, **kwargs)
+        self._max_batch_size = max_batch_size
 
     async def create_batch(self, input_data_list: list[str]) -> list[list[float]]:
         if not input_data_list:
@@ -21,7 +20,6 @@ class SafeBatchOpenAIEmbedder(OpenAIEmbedder):
 
         for i in range(0, total, self._max_batch_size):
             chunk = input_data_list[i : i + self._max_batch_size]
-            # 调用父类（Graphiti 原生）的 create_batch 发送真实请求
             r = await super().create_batch(chunk)
             results.extend(r)
 

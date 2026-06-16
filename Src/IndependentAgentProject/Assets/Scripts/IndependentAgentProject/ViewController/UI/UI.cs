@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using FrameworkDesign;
 using IndependentAgentProject;
 using Services;
@@ -19,6 +19,7 @@ namespace IndependentAgentProject
 
         public GameObject PanelMenu;
         public GameObject PanelGameOver;
+        public GameObject PanelTrainingBtns;
         private void Awake()
         {
             this.SceneName = SceneManager.GetActiveScene().name;
@@ -27,6 +28,8 @@ namespace IndependentAgentProject
         }
         private void Start()
         {
+            PanelTrainingBtns.SetActive(SceneInfo.IsTraining);
+
             this.RegisterEvent<GameOverEvent>(e =>
             {
                 PanelGameOver.SetActive(true);

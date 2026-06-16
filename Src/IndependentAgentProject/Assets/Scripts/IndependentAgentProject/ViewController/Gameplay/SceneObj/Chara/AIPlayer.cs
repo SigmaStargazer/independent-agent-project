@@ -294,9 +294,9 @@ namespace IndependentAgentProject
                 {
                     // 暂停ActionSequence
                     mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
-                    // 发送取消信息
+                    // 发送取消信息（追加动作序列回顾提示）
                     string result = finishedActionRuntime.Result.Message;
-                    this.SendFeedbackToAgent($"[动作序列执行中断]{result}");
+                    this.SendFeedbackToAgent($"[动作序列执行中断]{result}{ACTION_SEQUENCE_REVIEW_PROMPT}");
 
                 }
                     return;
@@ -444,6 +444,21 @@ namespace IndependentAgentProject
             Debug.Log($"已发送消息给{this.Name}: {text}");
         }
 
+        // 动作序列回顾提示文本（动作序列完成或中断时追加到反馈消息末尾，引导 Agent 复盘技能）
+        private const string ACTION_SEQUENCE_REVIEW_PROMPT =
+@"
+
+<动作序列回顾>
+你刚刚完成或中止了一次动作序列执行。请回顾这次经验：
+- 如果这是一个新的行为模式，值得未来复用 → 调用 create_action_skill 总结为技能
+- 如果已有类似技能但这次发现了新的使用场景 → 调用 add_action_skill_template 添加新模板
+- 如果已有类似模板但这次发现了改进点 → 调用 refine_action_skill 精进
+- 如果只是简单常规操作，不值得记住 → 无需操作
+
+中止的序列也值得总结——分析失败原因并精进模板可能避免下次失败。
+保存时请将具体参数替换为描述性占位符，以便未来复用。
+</动作序列回顾>";
+
         public void SendFeedbackToAgent(string feedback, bool forceInterrupt = false, bool includeObserveTagerts = true)
         {
             string text = this.CreateMessageText(feedback, includeObserveTagerts);
@@ -490,6 +505,25 @@ namespace IndependentAgentProject
             }
             ChangeState("Idle");
             return success;
+        }
+
+        /// <summary>
+        /// 反馈：被陷阱传送回最近的 CheckPoint。
+        /// 1. StopMovement(true) 中止当前 Action / ActionSequence
+        /// 2. 走 PlayerBase.ReturnToCheckPoint 完成位置 + 速度归零 + Idle
+        /// 3. 给 Agent 发反馈（feedback 自带打断语义，下一轮 LLM 立即重新决策）
+        /// </summary>
+        public override void ReturnToCheckPoint(SceneObjBase sceneObj)
+        {
+            StopMovement(stopActionSequence: true);
+
+            base.ReturnToCheckPoint(sceneObj);
+            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+
+            string sceneObjName = sceneObj.Name;
+            int index = sceneObjs.IndexOf(sceneObj);
+
+            this.SendFeedbackToAgent($"[返回检查点]你触碰到: {index}. {sceneObjName}。已被传送回最近的检查点。当前动作序列已中断。");
         }
 
         public void StopAction(string requestId, string actionType)
@@ -1627,7 +1661,7 @@ namespace IndependentAgentProject
                     actionSequenceLog += $"--- 动作[{i}]结束环境 ---\n{actionRuntime.EndEnv}\n";
                 }
 
-                string messageToSend = $"[动作序列执行结果] 动作序列已执行完成！\n<动作序列日志>{actionSequenceLog}<\\动作序列日志>";
+                string messageToSend = $"[动作序列执行结果] 动作序列已执行完成！\n<动作序列日志>{actionSequenceLog}<\\动作序列日志>{ACTION_SEQUENCE_REVIEW_PROMPT}";
 
                 // 发送完成反馈
                 this.SendFeedbackToAgent(messageToSend);

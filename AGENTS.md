@@ -247,7 +247,16 @@ Unity 反馈消息通常带完整环境快照（`<你的状态>` `<环境>` 等�
 **路径**：`Src/PythonServer/memory_system/memory_manager.py`  
 **单例**：`MemoryManager()`，在 `main.py` 启动时 `await initialize()`。
 
-基于 **Graphiti**（图记忆框架）+ **Kuzu**（嵌入式图数据库），独立配置 LLM / Embedding / Reranker（`.env` 中 `MEMORY_*`、`EMBEDDING_*`、`RERANKER_*`）。
+基于 **Graphiti**（图记忆框架）+ **Kuzu**（嵌入式图数据库），独立配置 LLM（`.env` 中 `MEMORY_*`）。Embedding/Reranker 与 Kuzu 连接均**不再由 MM 直接持有**，分别从 `EmbedderService` 与 `DBConnectionService` 取（详见 §3.0）。
+
+### 3.0 底层基础设施（v0.21.0 hotfix 引入）
+
+| 单例 | 文件 | 职责 |
+|------|------|------|
+| `DBConnectionService` | `db_conn/db_connection_service.py` | Kuzu Database / AsyncConnection 生命周期、FTS 加载、冻结门（`access()` / `freeze()` / `wait_idle()`）、文件路径 |
+| `EmbedderService` | `embedder/embedder_service.py` | `SafeBatchOpenAIEmbedder` / `SafeBatchOpenAIReranker`（基于 `.env` 中 `EMBEDDING_*` / `RERANKER_*` 配置） |
+
+启动顺序由 `main.py` 编排：`DBConnectionService` → `EmbedderService` → `asyncio.gather(MemoryManager.initialize, ActionSkillManager.initialize)`。`MemoryManager` 与 `ActionSkillManager` 是**平级业务模块**，不再有相互的初始化依赖。所有 Cypher 都通过 `DBConnectionService().get_conn().execute(...)` 取连接，不在业务模块内部存 `self.conn` / `self._conn` 引用，从根本上避免 close 时引用残留导致的文件锁不释放问题。
 
 ### 3.1 记忆模型
 
@@ -381,7 +390,10 @@ save_memory(name, memory, curtime)        # 图节点 save_memory 调用
 | 入口 | `main.py` | TCP 服务、生命周期/记忆/用户消息/工具回调 |
 | Agent 图 | `agent_framwork/agents/agent_interuptible.py` | LangGraph、Agent 类、tools 列表 |
 | Agent 池 | `agent_framwork/managers/agent_manager.py` | 创建/加载/启停/广播消息 |
-| 记忆 | `memory_system/memory_manager.py` | Graphiti/Kuzu、RAG、备份 |
+| 记忆 | `memory_system/memory_manager.py` | Graphiti、记忆 RAG、备份/恢复编排 |
+| 技能 | `action_skill_system/action_skill_manager.py` | ActionSkill / ActionSequenceTemplate CRUD + RAG |
+| **DB 连接** | `db_conn/db_connection_service.py` | Kuzu Database / Conn / FTS / 冻结门（v0.21.0 引入） |
+| **Embedder** | `embedder/embedder_service.py` | 共享 OpenAI Embedder / Reranker（v0.21.0 引入） |
 | 工具 | `agent_framwork/tools/base_tools.py` | LangChain 工具实现 |
 | 网络 | `network/servers.py` | `AgentServerNetMessage`、`TOOL_WAITERS` |
 | Unity 身体 | `AIPlayer.cs` | 工具执行、环境反馈 |
@@ -433,6 +445,7 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 3. 协议只认 `Tools/message.proto`；`Src/Lib/proto/` 完全不用管
 4. 与用户交流默认简体中文
 5. 不主动 git commit / push，除非用户明确要求
+6. **`agent_framwork/` 不放业务代码**：`agent_framwork` 的设计目标是可复用到不同项目的通用框架。业务逻辑（如特定技能系统、特定工具实现等）应放在独立目录（如 `action_skill_system/`）中，通过接口与框架对接。后续会逐步将 `agent_framwork` 中已有的业务代码解耦分出。
 
 ### 开发纪律
 
@@ -456,6 +469,32 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 
 违反此纪律曾导致 v0.20.12 开发事故：发现 `get_input_schema` 报错后，未与用户确认即引入 `from langchain_core.tools import BaseTool` 依赖，影响后续文件拆分需求；正确修复方式应为给 `communicate_to_user` 补齐 `@tool` 装饰器。
 
+**第三方库参数 / API 必须先实测再写入代码**：
+
+调用、扩展或调整任何第三方库（LangChain、Graphiti、Kuzu、protobuf、openai 客户端等）的接口、构造函数参数、字段名时，**禁止**凭记忆或类比直接写代码。必须：
+
+1. **实测确认**参数名、字段名、返回类型——通过 `inspect.signature` / `model_fields` / `dir()` / 官方文档 / 直接实例化 一种以上手段。
+2. **改动前 + 改动后**至少各跑一次最小可验证片段（如能 `import` 并实例化、字段值符合预期），通过后再交付。
+3. 把验证片段及其输出贴在回复里，使用户可复核。
+
+违反此纪律曾导致 v0.21.0 hotfix 开发事故：为 `ChatOpenAI` 加超时时按 OpenAI Python SDK 习惯写成 `timeout=`，但 `langchain_openai` 实际暴露的字段是 `request_timeout=`，运行时构造直接报参数不存在，需二次修复。
+
+**可自测的功能必须自测完成后再提交验收**：
+
+当开发的功能不依赖 Unity 客户端联调即可测试时（如纯 Python 侧的增删改查、数据处理、记忆系统等），**必须在开发完成后自行编写并运行测试**，确认核心功能正常后再提交给用户验收。禁止未经自测直接交付。
+
+1. 开发前评估：该功能是否可以在不启动 Unity 的情况下测试？
+2. 如果可以：开发完成后编写测试脚本并执行，确保通过后再告知用户可验收。
+3. 如果必须联调：明确告知用户哪些功能需要联调才能验证。
+
+**Agent 是游戏世界中的角色，不是聊天机器人**：
+
+Agent 生活在虚拟游戏世界中，以角色身份行动和思考，不是在执行聊天机器人的工具调用。开发与 Agent 相关的功能时（工具函数、prompt、记忆系统等），必须遵循：
+
+1. **工具描述文风角色化**：不要写得像冰冷的 API 文档。工具是角色大脑内的基础功能——"回想技能"而非"查询数据库"、"遗忘"而非"删除"、"总结为技能"而非"保存记录"。
+2. **不暴露内部实现细节**：Agent 不需要知道 UUID、数据库主键、内部数据结构。用人类可读的名称标识事物（如 `template_name` 而非 `template_id`）。
+3. **参数设计直觉化**：参数命名和含义应贴近角色的思维方式，而非程序员的思维。
+
 ---
 
 *扩展架构、新增 Flow Step 或改动记忆/打断语义时，请同步更新本文件。*
@@ -476,3 +515,19 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 1. **修复方案必须与用户确认后再执行**，尤其涉及新增依赖或架构决策时。
 2. 工具列表中的所有元素应为同一类型（`BaseTool`），不一致时应修复源头而非下游兼容。
 3. 发现遗漏的装饰器时，应补齐装饰器而非绕过。
+
+### 2026-06-16 v0.21.0 hotfix `ChatOpenAI` 超时参数名错误
+
+**严重程度**：低（构造期立即可见，未影响线上数据）
+
+**事故描述**：为定位 LLM 调用 hang 的问题，需要给 `ChatOpenAI` 加超时与重试。Agent 凭 OpenAI Python SDK 的常见写法直接写成 `timeout=120, max_retries=1`，未实测验证 `langchain_openai` 当前版本的实际字段名。用户随即指出"`ChatOpenAI` 没有 `timeout` 这个参数"，Agent 才用 `model_fields` 实测，确认字段为 `request_timeout`，二次修复后通过。
+
+**流程违规**：
+- 改动**前**未跑 `inspect`/`model_fields` 验证参数名。
+- 改动**后**未实例化跑通即交付。
+- 既往"修复方案先确认再执行"纪律虽然要求过，但仍未覆盖"第三方库参数实测"这一具体动作。
+
+**教训**：
+1. 调第三方库的构造函数/方法签名时，**默认不可信记忆**——必须 `inspect.signature` / `model_fields` / 实例化 至少一种实测。
+2. 改动前后都要有"最小可验证片段"，并在回复里贴出验证输出。
+3. 已新增「第三方库参数 / API 必须先实测再写入代码」纪律条款，参见上文 §开发纪律。

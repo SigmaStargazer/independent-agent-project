@@ -1,0 +1,53 @@
+skills:
+- name: 走到目标旁交互
+  description: 走到某个可交互物体附近并与之交互
+  content: '当需要与场景中的某个物体进行交互时，先移动到目标物体附近，再触发交互动作。
+
+    根据目标所处的环境（平地/高处）选择不同的接近方式。
+
+    '
+  source: default
+  templates:
+  - name: 平地接近
+    description: 当目标在平地上、可直接走过去时
+    action_sequence_template:
+    - action: Move
+      params:
+        target: '{target_name}'
+        condition: object[0].distance < 1.5
+    - action: Interact
+      params:
+        target: '{target_name}'
+    usage_notes: '- {target_name} 替换为目标物体在场景中的实际名称
+
+      - condition 中的距离阈值可按目标尺寸适当调整（默认 1.5）
+
+      - 如果中途目标移动，Move 会自动追踪
+
+      '
+- name: 移动到检查点
+  description: 向右侧的检查点移动并触碰它以记录重生位置
+  content: 该技能用于移动到最近的右侧检查点。首先观察检查点的位置，然后向右移动直到到达检查点附近并与之交互（触碰）。适用于需要记录重生位置的场景。
+  source: learned
+  templates:
+  - name: 向右移动到检查点
+    description: 当检查点在右侧且可以直接走过去时使用此模板
+    action_sequence_template:
+    - action: move
+      direction: right
+      condition: canInteract == true && nearestInteractableIndex == {checkpoint_index}
+      allowed_contact_obj_ids: []
+    - action: interact
+    usage_notes: 需要先通过observe确认检查点的序号。将{checkpoint_index}替换为实际的检查点物体序号。注意路径上是否有陷阱等障碍物。
+  - name: 跨越陷阱到达检查点
+    description: 当检查点在右侧但路径上有陷阱等障碍物，需要借助移动平台跨越时使用此模板
+    action_sequence_template:
+    - action: move
+      direction: right
+      condition: canInteract == true && nearestInteractableIndex == {platform_index}
+      allowed_contact_obj_ids: []
+    - action: interact
+    - action: wait
+      condition: canInteract == true && nearestInteractableIndex == {checkpoint_index}
+    - action: interact
+    usage_notes: 需要先通过observe确认移动平台和检查点的序号。将{platform_index}替换为移动平台的物体序号，{checkpoint_index}替换为目标检查点的物体序号。在平台上等待时需注意平台运动轨迹，确保到达检查点附近时再交互。

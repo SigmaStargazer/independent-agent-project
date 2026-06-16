@@ -34,6 +34,7 @@ from agent_framwork.utils.prompt_utils import (
     estimate_system_prompt_tokens,
     get_tools_token_count,
 )
+from agent.tools import SKILL_TOOLS
 
 from tools.perf_tool import aperf_print
 
@@ -60,13 +61,17 @@ PROMPT_SAVE_DIR = os.path.normpath(os.path.join(
 model_api_base = os.getenv("AGENT_API_BASE")
 model_api_key = os.getenv("AGENT_API_KEY")
 model_name = os.getenv("AGENT_MODEL")
+model_timeout = float(os.getenv("AGENT_LLM_TIMEOUT", "120"))
+model_max_retries = int(os.getenv("AGENT_LLM_MAX_RETRIES", "1"))
 
 model = ChatOpenAI(
         model_name = model_name,
         openai_api_base = model_api_base,
         openai_api_key = model_api_key,
         streaming = False,
-        verbose = True
+        verbose = True,
+        request_timeout = model_timeout,
+        max_retries = model_max_retries,
     )
 output_parser = StrOutputParser()
 
@@ -99,7 +104,7 @@ tools = [
         # base_tools.add_alarm,
         #  base_tools.get_alarm_list,
         #  base_tools.remove_alarm
-        ]
+        ] + SKILL_TOOLS
 
 # # # 测试工具列表
 # tools = [
@@ -147,6 +152,15 @@ system_template = """{mem_summary}
 {mem_episode}
 </回想>
 
+<动作技能记忆>
+{mem_skill_index}
+
+当你觉得当前场景匹配某个技能时，先调用 load_action_skill 回想完整细节，
+选择最合适的模板，将参数替换为当前场景的具体值，
+通过 plan_action_sequence 一次性执行。如果没有匹配的技能，则照常自主规划。
+如果索引中没有匹配的，可以调用 list_action_skills 回顾完整技能列表。
+</动作技能记忆>
+
 <规则>
 你会不断从周围环境获取信息，你需要自主决定是否需要做出响应、下一步行动是什么，但请注意：
 1）你的直接回复不会被任何人看到，也不会对外界产生任何影响，只有你自己能看见！只作为你的心理活动。
@@ -181,34 +195,56 @@ class State(TypedDict):
     mem_summary: str # 检索到的agent简介
     mem_fact: str # 检索到的事实记忆
     mem_episode: str # 检索到的情景记忆
+    mem_skill_index: str # 动作技能记忆索引（RAG 注入 system prompt）
     mem_to_save: str # 待存储的记忆
     logged_tool_call_ids: list[str] # 用于记忆工具调用时，去重tool_message中重试的部分
 
 # 定义节点
 async def search_memory(state: State):
     """
-    根据用户问题，检索事实记忆和情景记忆
+    根据用户问题，并发检索事实记忆、情景记忆、动作技能记忆索引
     """
     name = state['name']
     query = state['messages'][-1].content
     # group_id = state['group_id']
     limit = 1 # 检索的记忆数量
+    skill_top_n = int(os.getenv("SKILL_INDEX_TOP_N", "10"))
 
-    mem_summary = ""
-    mem_fact = ""
-    mem_episode = ""
-    
     await aperf_print(f"[{name}]加载agent简介开始")
     mem_summary = await memory_manager.load_agent_summary(name=state['name'])
     await aperf_print(f"[{name}]加载agent简介完成")
 
-    await aperf_print(f"[{name}]rag事实记忆开始")
-    mem_fact = await memory_manager.search_fact_memory(name=state['name'], query=query, limit=limit)
-    await aperf_print(f"[{name}]rag事实记忆完成")
+    # 并发：事实记忆 + 情景记忆 + 动作技能索引
+    from action_skill_system.action_skill_manager import ActionSkillManager
+    group_id = state['name'].encode('utf-8').hex()
 
-    await aperf_print(f"[{name}]rag情景记忆开始")
-    mem_episode = await memory_manager.search_episode_memory(name=state['name'], query=query, limit=limit)
-    await aperf_print(f"[{name}]rag情景记忆完成")
+    async def _fact():
+        await aperf_print(f"[{name}]rag事实记忆开始")
+        r = await memory_manager.search_fact_memory(name=state['name'], query=query, limit=limit)
+        await aperf_print(f"[{name}]rag事实记忆完成")
+        return r
+
+    async def _episode():
+        await aperf_print(f"[{name}]rag情景记忆开始")
+        r = await memory_manager.search_episode_memory(name=state['name'], query=query, limit=limit)
+        await aperf_print(f"[{name}]rag情景记忆完成")
+        return r
+
+    async def _skill_index():
+        await aperf_print(f"[{name}]rag动作技能索引开始")
+        try:
+            r = await ActionSkillManager().get_skill_index(
+                group_id=group_id, query=query, top_n=skill_top_n
+            )
+        except Exception as e:
+            print(f"[{name}] 动作技能索引检索失败：{e}")
+            r = ""
+        await aperf_print(f"[{name}]rag动作技能索引完成")
+        return r
+
+    mem_fact, mem_episode, mem_skill_index = await asyncio.gather(
+        _fact(), _episode(), _skill_index()
+    )
 
     # 需要存储接收到的用户信息
     await aperf_print(f"[{name}]缓存输入记忆开始")
@@ -216,12 +252,13 @@ async def search_memory(state: State):
     mem_to_save = query
     mem_to_save += f"\n[{cur_time}]我开始注意到上述信息"
     await aperf_print(f"[{name}]缓存输入记忆完成")
-    
+
     # print(mem_to_save) # 测试
     return {
         "mem_summary": mem_summary,
-        "mem_fact": mem_fact, 
+        "mem_fact": mem_fact,
         "mem_episode": mem_episode,
+        "mem_skill_index": mem_skill_index,
         "mem_to_save": mem_to_save
     }
 
@@ -237,7 +274,8 @@ async def chatbot(state: State):
         "curtime": cur_time,
         "mem_summary": state['mem_summary'],
         "mem_fact": state['mem_fact'],
-        "mem_episode": state['mem_episode']
+        "mem_episode": state['mem_episode'],
+        "mem_skill_index": state.get('mem_skill_index', '') or "（暂无掌握的技能）"
     }
     system_tokens = await estimate_system_prompt_tokens(prompt_template, system_vars)
     tools_tokens = get_tools_token_count(tools)
@@ -349,7 +387,8 @@ async def _save_prompt_log(state: State, curtime):
         "curtime": cur_time_str,
         "mem_summary": state['mem_summary'],
         "mem_fact": state['mem_fact'],
-        "mem_episode": state['mem_episode']
+        "mem_episode": state['mem_episode'],
+        "mem_skill_index": state.get('mem_skill_index', '') or "（暂无掌握的技能）"
     })
 
     # 拼接 pretty_repr 文本
@@ -475,6 +514,7 @@ class Agent:
             "mem_summary": old_values.get("mem_summary", ""),
             "mem_fact": old_values.get("mem_fact", ""),
             "mem_episode": old_values.get("mem_episode", ""),
+            "mem_skill_index": old_values.get("mem_skill_index", ""),
             "mem_to_save": mem_to_save,
             "logged_tool_call_ids": old_values.get("logged_tool_call_ids", [])
         }

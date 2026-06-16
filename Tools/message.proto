@@ -198,6 +198,8 @@ message NetMessageRequest{
 	AgentGetTimerListRequest agentGetTimerListRequest = 28;
 	AgentRemoveTimerRequest agentRemoveTimerRequest = 29;
 	AgentGetWorldEventLogRequest agentGetWorldEventLogRequest = 30;
+	
+	AgentExportSkillsRequest agentExportSkillsRequest = 31;
 }
 
 message NetMessageResponse{
@@ -209,6 +211,8 @@ message NetMessageResponse{
 	MemoryBackupResponse memoryBackupResponse = 6;
 	MemoryRestoreResponse memoryRestoreResponse = 7;
 	MemoryDeleteCurrentResponse memoryDeleteCurrentResponse = 8;
+	
+	AgentExportSkillsResponse agentExportSkillsResponse = 9;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -296,6 +300,21 @@ message MemoryDeleteCurrentRequest {
 message MemoryDeleteCurrentResponse {
 	bool success = 1;
 	string errormsg = 2;
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  动作技能导出（v0.21.0 训练场）
+//
+////////////////////////////////////////////////////////////////
+message AgentExportSkillsRequest {
+	string name = 1;
+}
+
+message AgentExportSkillsResponse {
+	bool success = 1;
+	string errormsg = 2;
+	int32 skill_count = 3;
 }
 
 ////////////////////////////////////////////////////////////////
