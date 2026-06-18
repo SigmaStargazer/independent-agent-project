@@ -1,0 +1,47 @@
+skills:
+- name: 走到目标旁交互
+  description: 走到某个可交互物体附近并与之交互
+  content: '当需要与场景中的某个物体进行交互时，先移动到目标物体附近，再触发交互动作。
+
+    根据目标所处的环境（平地/高处）选择不同的接近方式。
+
+    '
+  source: default
+  templates:
+  - name: 平地接近
+    description: 当目标在平地上、可直接走过去时
+    action_sequence_template:
+    - action: Move
+      params:
+        target: '{target_name}'
+        condition: object[0].distance < 1.5
+    - action: Interact
+      params:
+        target: '{target_name}'
+    usage_notes: '- {target_name} 替换为目标物体在场景中的实际名称
+
+      - condition 中的距离阈值可按目标尺寸适当调整（默认 1.5）
+
+      - 如果中途目标移动，Move 会自动追踪
+
+      '
+- name: 利用移动平台越过陷阱
+  description: 等待移动平台到来，站上去让它带你安全越过陷阱区域
+  content: 当场景中存在陷阱和移动平台时，可以先等待平台移动到身边，站上平台后让它带你越过陷阱，从而避免触碰陷阱被传送回检查点。核心思路是利用平台的往复运动作为安全通道。
+  source: learned
+  templates:
+  - name: 等平台上板过陷阱
+    description: 当移动平台在陷阱范围内往复运动时，等待平台靠近后站上去，由平台带到陷阱另一侧安全区域
+    action_sequence_template:
+    - action: wait
+      condition: canInteract == true && nearestInteractableIndex == {platform_index}
+    - action: interact
+    - action: wait
+      condition: myself.Position.x > {trap_end_x}
+    usage_notes: '- {platform_index} 替换为移动平台在场景中的序号
+
+      - {trap_end_x} 替换为陷阱区域结束的x坐标（即陷阱最右侧位置）
+
+      - 上平台前确保平台确实能带你越过陷阱
+
+      - 如果平台运动范围不够，可能需要中途跳下'

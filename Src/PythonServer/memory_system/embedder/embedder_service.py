@@ -21,8 +21,8 @@ from graphiti_core.embedder.openai import OpenAIEmbedderConfig
 from graphiti_core.llm_client.config import LLMConfig
 
 from agent_framwork.base.singleton import singleton
-from embedder.safe_batch_embedder import SafeBatchOpenAIEmbedder
-from embedder.safe_batch_reranker import SafeBatchOpenAIReranker
+from .safe_batch_embedder import SafeBatchOpenAIEmbedder
+from .safe_batch_reranker import SafeBatchOpenAIReranker
 
 load_dotenv()
 

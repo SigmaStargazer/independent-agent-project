@@ -6,6 +6,6 @@ FTS 扩展加载、文件路径配置以及业务模块共用的"冻结门"（fr
 业务模块（MemoryManager、ActionSkillManager 等）通过 service 取连接，不再各自持有引用，
 从根本上避免文件锁残留。
 """
-from db_conn.db_connection_service import DBConnectionService
+from .db_connection_service import DBConnectionService
 
 __all__ = ["DBConnectionService"]

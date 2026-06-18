@@ -9,9 +9,9 @@
 业务模块（MemoryManager、ActionSkillManager 等）通过 EmbedderService 取共享实例，
 避免在各模块内重复实例化、配置漂移。
 """
-from embedder.safe_batch_embedder import SafeBatchOpenAIEmbedder
-from embedder.safe_batch_reranker import SafeBatchOpenAIReranker
-from embedder.embedder_service import EmbedderService
+from .safe_batch_embedder import SafeBatchOpenAIEmbedder
+from .safe_batch_reranker import SafeBatchOpenAIReranker
+from .embedder_service import EmbedderService
 
 __all__ = [
     "SafeBatchOpenAIEmbedder",

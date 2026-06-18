@@ -15,8 +15,9 @@ from graphiti_core.search import search_config_recipes
 from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
 from graphiti_core.llm_client.config import LLMConfig
 
-from db_conn import DBConnectionService
-from embedder import EmbedderService
+from memory_system.action_skill_system import ActionSkillManager
+from memory_system.db_conn import DBConnectionService
+from memory_system.embedder import EmbedderService
 
 from agent_framwork.base.singleton import singleton
 
@@ -54,6 +55,16 @@ class MemoryManager:
         self._backup_lock = asyncio.Lock()
 
         self._graph_write_lock = asyncio.Lock()
+        self._action_skill = None
+
+    @property
+    def action_skill(self):
+        if self._action_skill is None:
+            self._action_skill = ActionSkillManager()
+        return self._action_skill
+
+    def _reset_subsystems_for_reinitialize(self):
+        self.action_skill.reset_for_reinitialize()
 
     @asynccontextmanager
     async def memory_access(self):
@@ -93,11 +104,15 @@ class MemoryManager:
             # 3. 确保 FTS 索引完整
             await self._ensure_fts_indexes(is_new_db=dbsvc.is_new_db)
 
-            self._initialized = True
             # 4. 启动记忆存储 Worker
             if self._worker_task is None or self._worker_task.done():
                 self._worker_task = asyncio.create_task(self._memory_worker(),name="memory_worker")
                 print("✅ [MemorySystem] 记忆存储 Worker 已启动")
+
+            # 5. 初始化程序性记忆子系统
+            await self.action_skill.initialize()
+
+            self._initialized = True
         return self
 
     async def _ensure_fts_indexes(self, is_new_db: bool):
@@ -554,12 +569,9 @@ class MemoryManager:
                 # 重新 init（dbsvc + memory）
                 if was_initialized and not self._initialized:
                     try:
+                        self._reset_subsystems_for_reinitialize()
                         await dbsvc.initialize()
                         await self.initialize()
-                        # ASM 也需要重建（schema 检测）
-                        from action_skill_system.action_skill_manager import ActionSkillManager
-                        ActionSkillManager().reset_for_reinitialize()
-                        await ActionSkillManager().initialize()
                     except Exception as e:
                         print("[MemoryManager] backup后自动恢复失败:", e)
                         raise
@@ -604,11 +616,9 @@ class MemoryManager:
             except Exception as e:
                 print(f"[MemoryManager][记忆读档失败] slot={slot_id}: {e}")
                 raise
+            self._reset_subsystems_for_reinitialize()
             await dbsvc.initialize()
             await self.initialize()
-            from action_skill_system.action_skill_manager import ActionSkillManager
-            ActionSkillManager().reset_for_reinitialize()
-            await ActionSkillManager().initialize()
             print(f"[MemoryManager] 读档完成 slot={slot_id}")
 
     async def list_used_slots(self) -> list[int]:
@@ -698,11 +708,9 @@ class MemoryManager:
                 raise
 
             # 3. 重新初始化
+            self._reset_subsystems_for_reinitialize()
             await dbsvc.initialize()
             await self.initialize()
-            from action_skill_system.action_skill_manager import ActionSkillManager
-            ActionSkillManager().reset_for_reinitialize()
-            await ActionSkillManager().initialize()
             print("[MemoryManager] 删除当前记忆完成")
 
         return True

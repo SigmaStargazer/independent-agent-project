@@ -7,7 +7,7 @@ from agent_framwork.base.singleton import singleton
 from agent_framwork.agents.agent_interuptible import Agent
 
 from memory_system.memory_manager import MemoryManager
-from db_conn import DBConnectionService
+from memory_system.db_conn import DBConnectionService
 
 @singleton
 class AgentManager:

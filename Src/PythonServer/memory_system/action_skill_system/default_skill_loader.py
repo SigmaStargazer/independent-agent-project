@@ -14,9 +14,9 @@ import os
 from typing import List
 
 
-# ../db/default_skills 相对于本文件 (action_skill_system/default_skill_loader.py)
+# ../../db/default_skills 相对于本文件 (memory_system/action_skill_system/default_skill_loader.py)
 DEFAULT_SKILLS_DIR = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), "..", "db", "default_skills"
+    os.path.dirname(__file__), "..", "..", "db", "default_skills"
 ))
 
 

@@ -9,10 +9,8 @@ from network import message_pb2
 
 from agent_framwork.managers.agent_manager import AgentManager
 from agent_framwork.systems.time_system import TimeSystem
-from memory_system.memory_manager import MemoryManager
-from action_skill_system import ActionSkillManager, load_default_skills
-from db_conn import DBConnectionService
-from embedder import EmbedderService
+from memory_system import MemoryManager
+from memory_system.action_skill_system import load_default_skills
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -53,7 +51,7 @@ async def handle_agent_create_request(msg, context):
             cur_time_str = await TimeSystem().aget_current_time(to_str=True)
             for skill_data in default_skills:
                 try:
-                    await ActionSkillManager().create_skill_from_dict(
+                    await MemoryManager().action_skill.create_skill_from_dict(
                         group_id=group_id,
                         skill_data=skill_data,
                         curtime=cur_time_str,
@@ -269,8 +267,8 @@ async def handle_agent_export_skills_request(msg, context):
         if not name:
             raise ValueError("AgentExportSkillsRequest.name 不能为空")
         group_id = name.encode("utf-8").hex()
-        yaml_text = await ActionSkillManager().export_skills_yaml(group_id)
-        skills = await ActionSkillManager().get_all_skills(group_id)
+        yaml_text = await MemoryManager().action_skill.export_skills_yaml(group_id)
+        skills = await MemoryManager().action_skill.get_all_skills(group_id)
 
         export_dir = os.path.join(
             os.path.dirname(__file__), "db", "default_skills", "exports"
@@ -304,16 +302,9 @@ async def other_tasks():
 
 async def main():
     # 1. 在这里全局执行一次初始化
-    print("正在初始化基础设施...")
-    await DBConnectionService().initialize()
-    await EmbedderService().initialize()
-
-    print("正在初始化业务模块...")
-    await asyncio.gather(
-        MemoryManager().initialize(),
-        ActionSkillManager().initialize(),
-    )
-    print("MemoryManager / ActionSkillManager 初始化完成。")
+    print("正在初始化记忆系统...")
+    await MemoryManager().initialize()
+    print("MemoryManager 初始化完成。")
 
     # 也可以在这里初始化 TimeSystem，如果需要的话
     await TimeSystem().aset_time(year=2016, month=1, day=1)

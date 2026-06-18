@@ -15,8 +15,8 @@ from typing import Annotated, List, Optional
 from langchain_core.tools import tool
 from langgraph.prebuilt import InjectedState
 
-from action_skill_system.skill_model import ActionSkill, ActionSequenceTemplate
-from action_skill_system.action_skill_manager import ActionSkillManager
+from memory_system import MemoryManager
+from memory_system.action_skill_system.skill_model import ActionSkill, ActionSequenceTemplate
 from agent_framwork.systems.time_system import TimeSystem
 
 
@@ -102,7 +102,7 @@ async def create_action_skill(
         templates=[tmpl],
     )
     try:
-        await ActionSkillManager().create_skill(group_id, skill, curtime)
+        await MemoryManager().action_skill.create_skill(group_id, skill, curtime)
     except ValueError as e:
         return f"创建技能失败：{e}"
     except Exception as e:
@@ -154,7 +154,7 @@ async def add_action_skill_template(
         usage_notes=usage_notes,
     )
     try:
-        await ActionSkillManager().add_template(group_id, skill_name, tmpl, curtime)
+        await MemoryManager().action_skill.add_template(group_id, skill_name, tmpl, curtime)
     except ValueError as e:
         return f"添加模板失败：{e}"
     except Exception as e:
@@ -183,7 +183,7 @@ async def load_action_skill(
     """
     group_id = _name_to_group_id(agent)
     try:
-        skill = await ActionSkillManager().get_skill(group_id, skill_name)
+        skill = await MemoryManager().action_skill.get_skill(group_id, skill_name)
     except Exception as e:
         return f"回想技能时发生异常：{e}"
     if skill is None:
@@ -224,7 +224,7 @@ async def list_action_skills(
     """
     group_id = _name_to_group_id(agent)
     try:
-        text = await ActionSkillManager().get_skill_list(group_id)
+        text = await MemoryManager().action_skill.get_skill_list(group_id)
     except Exception as e:
         return f"回顾技能列表时发生异常：{e}"
     return text
@@ -272,7 +272,7 @@ async def refine_action_skill(
     group_id = _name_to_group_id(agent)
     curtime = await _curtime_str()
     try:
-        await ActionSkillManager().refine_skill(
+        await MemoryManager().action_skill.refine_skill(
             group_id=group_id,
             skill_name=skill_name,
             curtime=curtime,
@@ -315,7 +315,7 @@ async def delete_action_skill(
     """
     group_id = _name_to_group_id(agent)
     try:
-        await ActionSkillManager().delete_skill(group_id, skill_name)
+        await MemoryManager().action_skill.delete_skill(group_id, skill_name)
     except ValueError as e:
         return f"遗忘技能失败：{e}"
     except Exception as e:
@@ -348,7 +348,7 @@ async def delete_action_skill_template(
     """
     group_id = _name_to_group_id(agent)
     try:
-        result = await ActionSkillManager().delete_template(
+        result = await MemoryManager().action_skill.delete_template(
             group_id, skill_name, template_name
         )
     except ValueError as e:

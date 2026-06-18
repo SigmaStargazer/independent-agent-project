@@ -14,12 +14,12 @@ import asyncio
 import json
 import math
 import traceback
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from agent_framwork.base.singleton import singleton
-from action_skill_system.skill_model import ActionSkill, ActionSequenceTemplate
-from db_conn import DBConnectionService
-from embedder import EmbedderService
+from .skill_model import ActionSkill, ActionSequenceTemplate
+from memory_system.db_conn import DBConnectionService
+from memory_system.embedder import EmbedderService
 
 
 # 余弦相似度（手动实现以避免 numpy 依赖）
@@ -588,43 +588,60 @@ class ActionSkillManager:
         self,
         group_id: str,
         query: str = "",
-        top_n: int = 10,
+        top_n: int = 5,
     ) -> str:
-        """返回注入 system prompt 的技能索引文本。
+        """返回注入 system prompt 的动作序列模板索引文本。
 
         策略：
-        - 总技能数 ≤ top_n：跳过 RAG 全量返回
-        - 总技能数 > top_n：按 query 做 embedding，按模板分数对技能 max 取最大值，按分排序取 top_n
+        - 总模板数 ≤ top_n：跳过 RAG 全量返回
+        - 总模板数 > top_n：按 query 做 embedding，按模板 description 分数排序取 top_n
         - 不设最低阈值
         """
         skills = await self.get_all_skills(group_id)
         if not skills:
             return ""
 
-        if len(skills) <= top_n or not query:
-            ranked = skills
+        pairs = [(sk, tmpl) for sk in skills for tmpl in sk.templates]
+        if not pairs:
+            return ""
+
+        if len(pairs) <= top_n or not query:
+            ranked = pairs
         else:
             query_emb = await self._embed(query)
             if not query_emb:
-                # embedder 不可用，退化为前 top_n 个
-                ranked = skills[:top_n]
+                ranked = pairs[:top_n]
             else:
                 scored = []
-                for sk in skills:
-                    if not sk.templates:
-                        scored.append((sk, 0.0))
-                        continue
-                    best = 0.0
-                    for t in sk.templates:
-                        if t.description_embedding:
-                            sc = _cosine_similarity(query_emb, t.description_embedding)
-                            if sc > best:
-                                best = sc
-                    scored.append((sk, best))
+                for sk, tmpl in pairs:
+                    score = 0.0
+                    if tmpl.description_embedding:
+                        score = _cosine_similarity(query_emb, tmpl.description_embedding)
+                    scored.append(((sk, tmpl), score))
                 scored.sort(key=lambda x: x[1], reverse=True)
-                ranked = [sk for sk, _ in scored[:top_n]]
+                ranked = [pair for pair, _ in scored[:top_n]]
 
-        return self._format_index(ranked)
+        return self._format_template_index(ranked)
+
+    @staticmethod
+    def _format_template_index(
+        pairs: List[Tuple[ActionSkill, ActionSequenceTemplate]]
+    ) -> str:
+        if not pairs:
+            return ""
+        lines = []
+        for i, (sk, tmpl) in enumerate(pairs, 1):
+            lines.append(f"{i}. 模板：{tmpl.name}")
+            lines.append(f"   适用：{tmpl.description}")
+            if tmpl.action_sequence_template:
+                lines.append("   动作序列：")
+                for step in tmpl.action_sequence_template:
+                    lines.append(f"     - {json.dumps(step, ensure_ascii=False)}")
+            if tmpl.usage_notes:
+                lines.append(f"   使用注意：{tmpl.usage_notes}")
+            lines.append(f"   所属技能：[{sk.name}] {sk.description}")
+            lines.append("")
+        return "\n".join(lines).rstrip()
 
     @staticmethod
     def _format_index(skills: List[ActionSkill]) -> str:

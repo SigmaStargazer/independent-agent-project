@@ -155,10 +155,11 @@ system_template = """{mem_summary}
 <动作技能记忆>
 {mem_skill_index}
 
-当你觉得当前场景匹配某个技能时，先调用 load_action_skill 回想完整细节，
-选择最合适的模板，将参数替换为当前场景的具体值，
-通过 plan_action_sequence 一次性执行。如果没有匹配的技能，则照常自主规划。
-如果索引中没有匹配的，可以调用 list_action_skills 回顾完整技能列表。
+以上是当前可能用到的动作序列模板。如果其中某个模板与当前场景匹配，
+把参数（如占位符、对象序号、距离阈值等）替换为当前场景的实际值，
+直接调用 plan_action_sequence 一次性执行，无需先 load_action_skill。
+如果不太匹配或想知道你掌握的全部技能，可以用 list_action_skills 查阅完整列表，
+用 load_action_skill 拉取某个技能的所有模板。
 </动作技能记忆>
 
 <规则>
@@ -208,14 +209,13 @@ async def search_memory(state: State):
     query = state['messages'][-1].content
     # group_id = state['group_id']
     limit = 1 # 检索的记忆数量
-    skill_top_n = int(os.getenv("SKILL_INDEX_TOP_N", "10"))
+    skill_top_n = int(os.getenv("SKILL_INDEX_TOP_N", "5"))
 
     await aperf_print(f"[{name}]加载agent简介开始")
     mem_summary = await memory_manager.load_agent_summary(name=state['name'])
     await aperf_print(f"[{name}]加载agent简介完成")
 
     # 并发：事实记忆 + 情景记忆 + 动作技能索引
-    from action_skill_system.action_skill_manager import ActionSkillManager
     group_id = state['name'].encode('utf-8').hex()
 
     async def _fact():
@@ -233,7 +233,7 @@ async def search_memory(state: State):
     async def _skill_index():
         await aperf_print(f"[{name}]rag动作技能索引开始")
         try:
-            r = await ActionSkillManager().get_skill_index(
+            r = await MemoryManager().action_skill.get_skill_index(
                 group_id=group_id, query=query, top_n=skill_top_n
             )
         except Exception as e:

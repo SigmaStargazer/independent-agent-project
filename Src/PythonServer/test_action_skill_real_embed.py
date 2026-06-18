@@ -20,22 +20,37 @@ import asyncio
 import os
 import sys
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 sys.path.insert(0, os.path.dirname(__file__))
 
 from memory_system.memory_manager import MemoryManager
-from action_skill_system.action_skill_manager import ActionSkillManager
-from action_skill_system.skill_model import ActionSkill, ActionSequenceTemplate
+from memory_system.action_skill_system.skill_model import ActionSkill, ActionSequenceTemplate
 
 
 GROUP_ID = "real_embed_test"
 CURTIME = "2026-06-13 17:00"
 
 
+def _first_template_block(index_text: str) -> str:
+    lines = index_text.split("\n")
+    block = []
+    for line in lines:
+        if line.startswith("2."):
+            break
+        if line.strip():
+            block.append(line)
+    return "\n".join(block)
+
+
 async def main():
     print("===== 初始化 MemoryManager（含真实 embedder） =====")
     mm = MemoryManager()
     await mm.initialize()
-    mgr = ActionSkillManager()
+    mgr = mm.action_skill
 
     # 防止重复运行残留：先清空我们自己的 group_id 下的技能
     print("\n=== 清理上轮残留 ===")
@@ -113,29 +128,29 @@ async def main():
     print("\n=== T25 真实 RAG 召回（query='浮板'） ===")
     idx = await mgr.get_skill_index(GROUP_ID, query="我看到一块浮板", top_n=2)
     print(idx)
-    first_line = next((l for l in idx.split("\n") if l.startswith("1.")), "")
-    if "过河" in first_line:
+    first_block = _first_template_block(idx)
+    if "所属技能：[过河]" in first_block:
         print("✓ '浮板' 查询召回 '过河' 排第 1")
     else:
-        print(f"⚠ '过河' 没排第 1：{first_line}")
+        print(f"⚠ '过河' 没排第 1：{first_block}")
 
     print("\n=== T25 真实 RAG 召回（query='敌人'） ===")
     idx = await mgr.get_skill_index(GROUP_ID, query="前面有一个敌人", top_n=2)
     print(idx)
-    first_line = next((l for l in idx.split("\n") if l.startswith("1.")), "")
-    if "打怪" in first_line:
+    first_block = _first_template_block(idx)
+    if "所属技能：[打怪]" in first_block:
         print("✓ '敌人' 查询召回 '打怪' 排第 1")
     else:
-        print(f"⚠ '打怪' 没排第 1：{first_line}")
+        print(f"⚠ '打怪' 没排第 1：{first_block}")
 
     print("\n=== T25 真实 RAG 召回（query='宝箱'） ===")
     idx = await mgr.get_skill_index(GROUP_ID, query="眼前出现一个宝箱", top_n=2)
     print(idx)
-    first_line = next((l for l in idx.split("\n") if l.startswith("1.")), "")
-    if "开宝箱" in first_line:
+    first_block = _first_template_block(idx)
+    if "所属技能：[开宝箱]" in first_block:
         print("✓ '宝箱' 查询召回 '开宝箱' 排第 1")
     else:
-        print(f"⚠ '开宝箱' 没排第 1：{first_line}")
+        print(f"⚠ '开宝箱' 没排第 1：{first_block}")
 
     print("\n=== 清理测试技能 ===")
     for sd in skills_data:
