@@ -477,6 +477,7 @@ async def monitor_target_cmd(
     agent: Annotated[str, InjectedState("name")],
     tool_call_id: Annotated[str, InjectedToolCallId],
     object_index: int,
+    object_name: str,
 ) -> str:
     """持续观察类动作-持续观察一个目标物体。
 
@@ -488,12 +489,15 @@ async def monitor_target_cmd(
 
     使用场景推荐:
     - 当你需要持续观察一个目标物体，以发现其状态变化的方式、运动轨迹等规律时，可以使用此工具。
+    - object_index 与 object_name 必须来自同一条最近观察结果；如果不确定目标是否仍对应，请先重新观察。
 
     限制:
     由于注意力有限，你最多只能同时持续观察3个目标。
+    Unity 会用 object_name 校验 object_index 当前指向的目标，校验失败时不会开始观察。
 
     Args:
         object_index(int): 目标物体编号
+        object_name(str): 目标物体名称，必须与该编号在最近观察结果中的名称一致
     Return:
         str: 持续观察目标物体是否开始
     """
@@ -509,6 +513,7 @@ async def monitor_target_cmd(
         request.agent = agent
         request.request_id = request_id
         request.object_index = object_index
+        request.object_name = object_name
 
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}] monitor_object_cmd 发起请求 {request_id}")
@@ -664,14 +669,18 @@ async def follow_target_cmd(
     agent: Annotated[str, InjectedState("name")],
     tool_call_id: Annotated[str, InjectedToolCallId],
     object_index: int,
+    object_name: str,
     min_distance: float = 0,
     max_distance: float = 2,
 ) -> str:
     """
     持续行动类动作-持续跟随目标。
 
+    object_index 与 object_name 必须来自同一条最近观察结果；object_name 会在 Unity 中校验 object_index 当前指向的目标，校验失败时不会开始跟随。
+
     Args:
-        object_index(int)
+        object_index(int): 目标物体编号
+        object_name(str): 目标物体名称，必须与该编号在最近观察结果中的名称一致
         min_distance(float)
         max_distance(float)
     Return:
@@ -689,6 +698,7 @@ async def follow_target_cmd(
         request.agent = agent
         request.request_id = request_id
         request.object_index = object_index
+        request.object_name = object_name
         request.min_distance = min_distance
         request.max_distance = max_distance
 

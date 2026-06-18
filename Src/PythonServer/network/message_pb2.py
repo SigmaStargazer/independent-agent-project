@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='SkillBridge.Message',
   syntax='proto3',
-  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"I\n\tNUserInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x06player\x18\x02 \x01(\x0b\x32 .SkillBridge.Message.NPlayerInfo\"R\n\x0bNPlayerInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x37\n\ncharacters\x18\x02 \x03(\x0b\x32#.SkillBridge.Message.NCharacterInfo\"\xeb\x01\n\x0eNCharacterInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03tid\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x31\n\x04type\x18\x04 \x01(\x0e\x32#.SkillBridge.Message.CHARACTER_TYPE\x12\x33\n\x05\x63lass\x18\x05 \x01(\x0e\x32$.SkillBridge.Message.CHARACTER_CLASS\x12\r\n\x05level\x18\x06 \x01(\x05\x12\r\n\x05mapId\x18\x07 \x01(\x05\x12,\n\x06\x65ntity\x18\x08 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"+\n\x08NVector3\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x87\x01\n\x07NEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\x30\n\tdirection\x18\x03 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\r\n\x05speed\x18\x04 \x01(\x05\"y\n\x0bNEntitySync\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x05\x65vent\x18\x02 \x01(\x0e\x32!.SkillBridge.Message.ENTITY_EVENT\x12,\n\x06\x65ntity\x18\x03 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"\xac\x02\n\nActionStep\x12\x11\n\tcondition\x18\x01 \x01(\t\x12/\n\x04wait\x18\x02 \x01(\x0b\x32\x1f.SkillBridge.Message.WaitActionH\x00\x12/\n\x04move\x18\x03 \x01(\x0b\x32\x1f.SkillBridge.Message.MoveActionH\x00\x12\x37\n\x08interact\x18\x04 \x01(\x0b\x32#.SkillBridge.Message.InteractActionH\x00\x12\x33\n\x06select\x18\x05 \x01(\x0b\x32!.SkillBridge.Message.SelectActionH\x00\x12\x31\n\x05input\x18\x06 \x01(\x0b\x32 .SkillBridge.Message.InputActionH\x00\x42\x08\n\x06\x61\x63tion\"\x0c\n\nWaitAction\"\x8d\x01\n\nMoveAction\x12<\n\tdirection\x18\x01 \x01(\x0e\x32).SkillBridge.Message.MoveAction.Direction\x12\x1f\n\x17\x61llowed_contact_obj_ids\x18\x02 \x03(\x05\" \n\tDirection\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\"\x10\n\x0eInteractAction\"!\n\x0cSelectAction\x12\x11\n\tselection\x18\x01 \x01(\x05\"!\n\x0bInputAction\x12\x12\n\ninput_text\x18\x01 \x01(\t\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\x9a\x13\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12?\n\x10\x61gentLoadRequest\x18\x02 \x01(\x0b\x32%.SkillBridge.Message.AgentLoadRequest\x12\x41\n\x11sceneStartRequest\x18\x03 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12?\n\x10sceneStopRequest\x18\x04 \x01(\x0b\x32%.SkillBridge.Message.SceneStopRequest\x12I\n\x15\x61gentInterruptRequest\x18\x05 \x01(\x0b\x32*.SkillBridge.Message.AgentInterruptRequest\x12\x45\n\x13memoryBackupRequest\x18\x06 \x01(\x0b\x32(.SkillBridge.Message.MemoryBackupRequest\x12G\n\x14memoryRestoreRequest\x18\x07 \x01(\x0b\x32).SkillBridge.Message.MemoryRestoreRequest\x12S\n\x1amemoryDeleteCurrentRequest\x18\x08 \x01(\x0b\x32/.SkillBridge.Message.MemoryDeleteCurrentRequest\x12K\n\x16userSendMessageRequest\x18\t \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12M\n\x17userSendFeedbackRequest\x18\n \x01(\x0b\x32,.SkillBridge.Message.UserSendFeedbackRequest\x12Q\n\x19userSendMessageAllRequest\x18\x0b \x01(\x0b\x32..SkillBridge.Message.UserSendMessageAllRequest\x12W\n\x1csendToolResultMessageRequest\x18\x0c \x01(\x0b\x32\x31.SkillBridge.Message.SendToolResultMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\r \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\x12K\n\x16\x61gentStopActionRequest\x18\x0e \x01(\x0b\x32+.SkillBridge.Message.AgentStopActionRequest\x12\x45\n\x13\x61gentObserveRequest\x18\x0f \x01(\x0b\x32(.SkillBridge.Message.AgentObserveRequest\x12Q\n\x19\x61gentMonitorTargetRequest\x18\x10 \x01(\x0b\x32..SkillBridge.Message.AgentMonitorTargetRequest\x12Y\n\x1d\x61gentGetMonitorRecordsRequest\x18\x11 \x01(\x0b\x32\x32.SkillBridge.Message.AgentGetMonitorRecordsRequest\x12?\n\x10\x61gentMoveRequest\x18\x12 \x01(\x0b\x32%.SkillBridge.Message.AgentMoveRequest\x12O\n\x18\x61gentFollowTargetRequest\x18\x13 \x01(\x0b\x32-.SkillBridge.Message.AgentFollowTargetRequest\x12G\n\x14\x61gentInteractRequest\x18\x14 \x01(\x0b\x32).SkillBridge.Message.AgentInteractRequest\x12\x43\n\x12\x61gentSelectRequest\x18\x15 \x01(\x0b\x32\'.SkillBridge.Message.AgentSelectRequest\x12\x41\n\x11\x61gentInputRequest\x18\x16 \x01(\x0b\x32&.SkillBridge.Message.AgentInputRequest\x12[\n\x1e\x61gentPlanActionSequenceRequest\x18\x17 \x01(\x0b\x32\x33.SkillBridge.Message.AgentPlanActionSequenceRequest\x12]\n\x1f\x61gentStartActionSequenceRequest\x18\x18 \x01(\x0b\x32\x34.SkillBridge.Message.AgentStartActionSequenceRequest\x12\x63\n\"agentContinueActionSequenceRequest\x18\x19 \x01(\x0b\x32\x37.SkillBridge.Message.AgentContinueActionSequenceRequest\x12[\n\x1e\x61gentStopActionSequenceRequest\x18\x1a \x01(\x0b\x32\x33.SkillBridge.Message.AgentStopActionSequenceRequest\x12G\n\x14\x61gentSetTimerRequest\x18\x1b \x01(\x0b\x32).SkillBridge.Message.AgentSetTimerRequest\x12O\n\x18\x61gentGetTimerListRequest\x18\x1c \x01(\x0b\x32-.SkillBridge.Message.AgentGetTimerListRequest\x12M\n\x17\x61gentRemoveTimerRequest\x18\x1d \x01(\x0b\x32,.SkillBridge.Message.AgentRemoveTimerRequest\x12W\n\x1c\x61gentGetWorldEventLogRequest\x18\x1e \x01(\x0b\x32\x31.SkillBridge.Message.AgentGetWorldEventLogRequest\x12O\n\x18\x61gentExportSkillsRequest\x18\x1f \x01(\x0b\x32-.SkillBridge.Message.AgentExportSkillsRequest\"\xb1\x05\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x41\n\x11\x61gentLoadResponse\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.AgentLoadResponse\x12\x43\n\x12sceneStartResponse\x18\x03 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\x12\x41\n\x11sceneStopResponse\x18\x04 \x01(\x0b\x32&.SkillBridge.Message.SceneStopResponse\x12K\n\x16\x61gentInterruptResponse\x18\x05 \x01(\x0b\x32+.SkillBridge.Message.AgentInterruptResponse\x12G\n\x14memoryBackupResponse\x18\x06 \x01(\x0b\x32).SkillBridge.Message.MemoryBackupResponse\x12I\n\x15memoryRestoreResponse\x18\x07 \x01(\x0b\x32*.SkillBridge.Message.MemoryRestoreResponse\x12U\n\x1bmemoryDeleteCurrentResponse\x18\x08 \x01(\x0b\x32\x30.SkillBridge.Message.MemoryDeleteCurrentResponse\x12Q\n\x19\x61gentExportSkillsResponse\x18\t \x01(\x0b\x32..SkillBridge.Message.AgentExportSkillsResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10\x41gentLoadRequest\"K\n\x11\x41gentLoadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0b\x61gent_names\x18\x02 \x03(\t\x12\x10\n\x08\x65rrormsg\x18\x03 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10SceneStopRequest\"6\n\x11SceneStopResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x15\x41gentInterruptRequest\x12\x0e\n\x06reason\x18\x01 \x01(\t\";\n\x16\x41gentInterruptResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"&\n\x13MemoryBackupRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\"9\n\x14MemoryBackupResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x14MemoryRestoreRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\":\n\x15MemoryRestoreResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x1c\n\x1aMemoryDeleteCurrentRequest\"@\n\x1bMemoryDeleteCurrentResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"(\n\x18\x41gentExportSkillsRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"S\n\x19\x41gentExportSkillsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\x12\x13\n\x0bskill_count\x18\x03 \x01(\x05\"V\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"X\n\x17UserSendFeedbackRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x15\n\ruser_feedback\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"J\n\x19UserSendMessageAllRequest\x12\x14\n\x0cuser_message\x18\x01 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x02 \x01(\x08\"d\n\x1cSendToolResultMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x11\n\ttool_name\x18\x02 \x01(\t\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0e\n\x06result\x18\x04 \x01(\t\"P\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\nai_message\x18\x03 \x01(\t\"P\n\x16\x41gentStopActionRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x13\n\x0b\x61\x63tion_type\x18\x03 \x01(\t\"8\n\x13\x41gentObserveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"T\n\x19\x41gentMonitorTargetRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x14\n\x0cobject_index\x18\x03 \x01(\x05\"Y\n\x1d\x41gentGetMonitorRecordsRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x15\n\rmonitor_index\x18\x03 \x01(\x05\"Y\n\x10\x41gentMoveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x10\n\x08is_right\x18\x03 \x01(\x08\x12\x10\n\x08\x64istance\x18\x04 \x01(\x02\"\x7f\n\x18\x41gentFollowTargetRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x14\n\x0cobject_index\x18\x03 \x01(\x05\x12\x14\n\x0cmin_distance\x18\x04 \x01(\x02\x12\x14\n\x0cmax_distance\x18\x05 \x01(\x02\"9\n\x14\x41gentInteractRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"J\n\x12\x41gentSelectRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x11\n\tselection\x18\x03 \x01(\x05\"J\n\x11\x41gentInputRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ninput_text\x18\x03 \x01(\t\"}\n\x1e\x41gentPlanActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x38\n\x0f\x61\x63tion_sequence\x18\x03 \x03(\x0b\x32\x1f.SkillBridge.Message.ActionStep\"D\n\x1f\x41gentStartActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"G\n\"AgentContinueActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"C\n\x1e\x41gentStopActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"\x95\x01\n\x14\x41gentSetTimerRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ntimer_name\x18\x03 \x01(\t\x12\x15\n\rdelay_seconds\x18\x04 \x01(\x02\x12\x19\n\x11timer_description\x18\x05 \x01(\t\x12\x14\n\x0ctimer_repeat\x18\x06 \x01(\x08\"=\n\x18\x41gentGetTimerListRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"N\n\x17\x41gentRemoveTimerRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x10\n\x08timer_id\x18\x03 \x01(\x05\"A\n\x1c\x41gentGetWorldEventLogRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01*2\n\x0e\x43HARACTER_TYPE\x12\n\n\x06Player\x10\x00\x12\x07\n\x03NPC\x10\x01\x12\x0b\n\x07Monster\x10\x02*@\n\x0f\x43HARACTER_CLASS\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07WARRIOR\x10\x01\x12\n\n\x06WIZARD\x10\x02\x12\n\n\x06\x41RCHER\x10\x03*%\n\x0f\x43HARACTER_STATE\x12\x08\n\x04IDLE\x10\x00\x12\x08\n\x04MOVE\x10\x01*]\n\x0c\x45NTITY_EVENT\x12\x0c\n\x08\x45VT_NONE\x10\x00\x12\x0c\n\x08\x45VT_IDLE\x10\x01\x12\x10\n\x0c\x45VT_MOVE_FWD\x10\x02\x12\x11\n\rEVT_MOVE_BACK\x10\x03\x12\x0c\n\x08\x45VT_JUMP\x10\x04* \n\tDIRECTION\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
+  serialized_pb=_b('\n\rmessage.proto\x12\x13SkillBridge.Message\"I\n\tNUserInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x06player\x18\x02 \x01(\x0b\x32 .SkillBridge.Message.NPlayerInfo\"R\n\x0bNPlayerInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x37\n\ncharacters\x18\x02 \x03(\x0b\x32#.SkillBridge.Message.NCharacterInfo\"\xeb\x01\n\x0eNCharacterInfo\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0b\n\x03tid\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x31\n\x04type\x18\x04 \x01(\x0e\x32#.SkillBridge.Message.CHARACTER_TYPE\x12\x33\n\x05\x63lass\x18\x05 \x01(\x0e\x32$.SkillBridge.Message.CHARACTER_CLASS\x12\r\n\x05level\x18\x06 \x01(\x05\x12\r\n\x05mapId\x18\x07 \x01(\x05\x12,\n\x06\x65ntity\x18\x08 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"+\n\x08NVector3\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x87\x01\n\x07NEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\x30\n\tdirection\x18\x03 \x01(\x0b\x32\x1d.SkillBridge.Message.NVector3\x12\r\n\x05speed\x18\x04 \x01(\x05\"y\n\x0bNEntitySync\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x30\n\x05\x65vent\x18\x02 \x01(\x0e\x32!.SkillBridge.Message.ENTITY_EVENT\x12,\n\x06\x65ntity\x18\x03 \x01(\x0b\x32\x1c.SkillBridge.Message.NEntity\"\xac\x02\n\nActionStep\x12\x11\n\tcondition\x18\x01 \x01(\t\x12/\n\x04wait\x18\x02 \x01(\x0b\x32\x1f.SkillBridge.Message.WaitActionH\x00\x12/\n\x04move\x18\x03 \x01(\x0b\x32\x1f.SkillBridge.Message.MoveActionH\x00\x12\x37\n\x08interact\x18\x04 \x01(\x0b\x32#.SkillBridge.Message.InteractActionH\x00\x12\x33\n\x06select\x18\x05 \x01(\x0b\x32!.SkillBridge.Message.SelectActionH\x00\x12\x31\n\x05input\x18\x06 \x01(\x0b\x32 .SkillBridge.Message.InputActionH\x00\x42\x08\n\x06\x61\x63tion\"\x0c\n\nWaitAction\"\x8d\x01\n\nMoveAction\x12<\n\tdirection\x18\x01 \x01(\x0e\x32).SkillBridge.Message.MoveAction.Direction\x12\x1f\n\x17\x61llowed_contact_obj_ids\x18\x02 \x03(\x05\" \n\tDirection\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\"\x10\n\x0eInteractAction\"!\n\x0cSelectAction\x12\x11\n\tselection\x18\x01 \x01(\x05\"!\n\x0bInputAction\x12\x12\n\ninput_text\x18\x01 \x01(\t\"\x80\x01\n\nNetMessage\x12\x37\n\x07Request\x18\x01 \x01(\x0b\x32&.SkillBridge.Message.NetMessageRequest\x12\x39\n\x08Response\x18\x02 \x01(\x0b\x32\'.SkillBridge.Message.NetMessageResponse\"\x9a\x13\n\x11NetMessageRequest\x12\x43\n\x12\x61gentCreateRequest\x18\x01 \x01(\x0b\x32\'.SkillBridge.Message.AgentCreateRequest\x12?\n\x10\x61gentLoadRequest\x18\x02 \x01(\x0b\x32%.SkillBridge.Message.AgentLoadRequest\x12\x41\n\x11sceneStartRequest\x18\x03 \x01(\x0b\x32&.SkillBridge.Message.SceneStartRequest\x12?\n\x10sceneStopRequest\x18\x04 \x01(\x0b\x32%.SkillBridge.Message.SceneStopRequest\x12I\n\x15\x61gentInterruptRequest\x18\x05 \x01(\x0b\x32*.SkillBridge.Message.AgentInterruptRequest\x12\x45\n\x13memoryBackupRequest\x18\x06 \x01(\x0b\x32(.SkillBridge.Message.MemoryBackupRequest\x12G\n\x14memoryRestoreRequest\x18\x07 \x01(\x0b\x32).SkillBridge.Message.MemoryRestoreRequest\x12S\n\x1amemoryDeleteCurrentRequest\x18\x08 \x01(\x0b\x32/.SkillBridge.Message.MemoryDeleteCurrentRequest\x12K\n\x16userSendMessageRequest\x18\t \x01(\x0b\x32+.SkillBridge.Message.UserSendMessageRequest\x12M\n\x17userSendFeedbackRequest\x18\n \x01(\x0b\x32,.SkillBridge.Message.UserSendFeedbackRequest\x12Q\n\x19userSendMessageAllRequest\x18\x0b \x01(\x0b\x32..SkillBridge.Message.UserSendMessageAllRequest\x12W\n\x1csendToolResultMessageRequest\x18\x0c \x01(\x0b\x32\x31.SkillBridge.Message.SendToolResultMessageRequest\x12M\n\x17\x61gentSendMessageRequest\x18\r \x01(\x0b\x32,.SkillBridge.Message.AgentSendMessageRequest\x12K\n\x16\x61gentStopActionRequest\x18\x0e \x01(\x0b\x32+.SkillBridge.Message.AgentStopActionRequest\x12\x45\n\x13\x61gentObserveRequest\x18\x0f \x01(\x0b\x32(.SkillBridge.Message.AgentObserveRequest\x12Q\n\x19\x61gentMonitorTargetRequest\x18\x10 \x01(\x0b\x32..SkillBridge.Message.AgentMonitorTargetRequest\x12Y\n\x1d\x61gentGetMonitorRecordsRequest\x18\x11 \x01(\x0b\x32\x32.SkillBridge.Message.AgentGetMonitorRecordsRequest\x12?\n\x10\x61gentMoveRequest\x18\x12 \x01(\x0b\x32%.SkillBridge.Message.AgentMoveRequest\x12O\n\x18\x61gentFollowTargetRequest\x18\x13 \x01(\x0b\x32-.SkillBridge.Message.AgentFollowTargetRequest\x12G\n\x14\x61gentInteractRequest\x18\x14 \x01(\x0b\x32).SkillBridge.Message.AgentInteractRequest\x12\x43\n\x12\x61gentSelectRequest\x18\x15 \x01(\x0b\x32\'.SkillBridge.Message.AgentSelectRequest\x12\x41\n\x11\x61gentInputRequest\x18\x16 \x01(\x0b\x32&.SkillBridge.Message.AgentInputRequest\x12[\n\x1e\x61gentPlanActionSequenceRequest\x18\x17 \x01(\x0b\x32\x33.SkillBridge.Message.AgentPlanActionSequenceRequest\x12]\n\x1f\x61gentStartActionSequenceRequest\x18\x18 \x01(\x0b\x32\x34.SkillBridge.Message.AgentStartActionSequenceRequest\x12\x63\n\"agentContinueActionSequenceRequest\x18\x19 \x01(\x0b\x32\x37.SkillBridge.Message.AgentContinueActionSequenceRequest\x12[\n\x1e\x61gentStopActionSequenceRequest\x18\x1a \x01(\x0b\x32\x33.SkillBridge.Message.AgentStopActionSequenceRequest\x12G\n\x14\x61gentSetTimerRequest\x18\x1b \x01(\x0b\x32).SkillBridge.Message.AgentSetTimerRequest\x12O\n\x18\x61gentGetTimerListRequest\x18\x1c \x01(\x0b\x32-.SkillBridge.Message.AgentGetTimerListRequest\x12M\n\x17\x61gentRemoveTimerRequest\x18\x1d \x01(\x0b\x32,.SkillBridge.Message.AgentRemoveTimerRequest\x12W\n\x1c\x61gentGetWorldEventLogRequest\x18\x1e \x01(\x0b\x32\x31.SkillBridge.Message.AgentGetWorldEventLogRequest\x12O\n\x18\x61gentExportSkillsRequest\x18\x1f \x01(\x0b\x32-.SkillBridge.Message.AgentExportSkillsRequest\"\xb1\x05\n\x12NetMessageResponse\x12\x45\n\x13\x61gentCreateResponse\x18\x01 \x01(\x0b\x32(.SkillBridge.Message.AgentCreateResponse\x12\x41\n\x11\x61gentLoadResponse\x18\x02 \x01(\x0b\x32&.SkillBridge.Message.AgentLoadResponse\x12\x43\n\x12sceneStartResponse\x18\x03 \x01(\x0b\x32\'.SkillBridge.Message.SceneStartResponse\x12\x41\n\x11sceneStopResponse\x18\x04 \x01(\x0b\x32&.SkillBridge.Message.SceneStopResponse\x12K\n\x16\x61gentInterruptResponse\x18\x05 \x01(\x0b\x32+.SkillBridge.Message.AgentInterruptResponse\x12G\n\x14memoryBackupResponse\x18\x06 \x01(\x0b\x32).SkillBridge.Message.MemoryBackupResponse\x12I\n\x15memoryRestoreResponse\x18\x07 \x01(\x0b\x32*.SkillBridge.Message.MemoryRestoreResponse\x12U\n\x1bmemoryDeleteCurrentResponse\x18\x08 \x01(\x0b\x32\x30.SkillBridge.Message.MemoryDeleteCurrentResponse\x12Q\n\x19\x61gentExportSkillsResponse\x18\t \x01(\x0b\x32..SkillBridge.Message.AgentExportSkillsResponse\"0\n\x12\x41gentCreateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x02 \x01(\t\"8\n\x13\x41gentCreateResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10\x41gentLoadRequest\"K\n\x11\x41gentLoadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0b\x61gent_names\x18\x02 \x03(\t\x12\x10\n\x08\x65rrormsg\x18\x03 \x01(\t\"#\n\x11SceneStartRequest\x12\x0e\n\x06map_id\x18\x01 \x01(\x05\"7\n\x12SceneStartResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x12\n\x10SceneStopRequest\"6\n\x11SceneStopResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x15\x41gentInterruptRequest\x12\x0e\n\x06reason\x18\x01 \x01(\t\";\n\x16\x41gentInterruptResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"&\n\x13MemoryBackupRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\"9\n\x14MemoryBackupResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\'\n\x14MemoryRestoreRequest\x12\x0f\n\x07slot_id\x18\x01 \x01(\x05\":\n\x15MemoryRestoreResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"\x1c\n\x1aMemoryDeleteCurrentRequest\"@\n\x1bMemoryDeleteCurrentResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\"(\n\x18\x41gentExportSkillsRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"S\n\x19\x41gentExportSkillsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08\x65rrormsg\x18\x02 \x01(\t\x12\x13\n\x0bskill_count\x18\x03 \x01(\x05\"V\n\x16UserSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"X\n\x17UserSendFeedbackRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x15\n\ruser_feedback\x18\x02 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x03 \x01(\x08\"J\n\x19UserSendMessageAllRequest\x12\x14\n\x0cuser_message\x18\x01 \x01(\t\x12\x17\n\x0f\x66orce_interrupt\x18\x02 \x01(\x08\"d\n\x1cSendToolResultMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x11\n\ttool_name\x18\x02 \x01(\t\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0e\n\x06result\x18\x04 \x01(\t\"P\n\x17\x41gentSendMessageRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\nai_message\x18\x03 \x01(\t\"P\n\x16\x41gentStopActionRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x13\n\x0b\x61\x63tion_type\x18\x03 \x01(\t\"8\n\x13\x41gentObserveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"i\n\x19\x41gentMonitorTargetRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x14\n\x0cobject_index\x18\x03 \x01(\x05\x12\x13\n\x0bobject_name\x18\x04 \x01(\t\"Y\n\x1d\x41gentGetMonitorRecordsRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x15\n\rmonitor_index\x18\x03 \x01(\x05\"Y\n\x10\x41gentMoveRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x10\n\x08is_right\x18\x03 \x01(\x08\x12\x10\n\x08\x64istance\x18\x04 \x01(\x02\"\x94\x01\n\x18\x41gentFollowTargetRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x14\n\x0cobject_index\x18\x03 \x01(\x05\x12\x13\n\x0bobject_name\x18\x04 \x01(\t\x12\x14\n\x0cmin_distance\x18\x05 \x01(\x02\x12\x14\n\x0cmax_distance\x18\x06 \x01(\x02\"9\n\x14\x41gentInteractRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"J\n\x12\x41gentSelectRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x11\n\tselection\x18\x03 \x01(\x05\"J\n\x11\x41gentInputRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ninput_text\x18\x03 \x01(\t\"}\n\x1e\x41gentPlanActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x38\n\x0f\x61\x63tion_sequence\x18\x03 \x03(\x0b\x32\x1f.SkillBridge.Message.ActionStep\"D\n\x1f\x41gentStartActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"G\n\"AgentContinueActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"C\n\x1e\x41gentStopActionSequenceRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"\x95\x01\n\x14\x41gentSetTimerRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x12\n\ntimer_name\x18\x03 \x01(\t\x12\x15\n\rdelay_seconds\x18\x04 \x01(\x02\x12\x19\n\x11timer_description\x18\x05 \x01(\t\x12\x14\n\x0ctimer_repeat\x18\x06 \x01(\x08\"=\n\x18\x41gentGetTimerListRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\"N\n\x17\x41gentRemoveTimerRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x10\n\x08timer_id\x18\x03 \x01(\x05\"A\n\x1c\x41gentGetWorldEventLogRequest\x12\r\n\x05\x61gent\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t*!\n\x06RESULT\x12\x0b\n\x07SUCCESS\x10\x00\x12\n\n\x06\x46\x41ILED\x10\x01*2\n\x0e\x43HARACTER_TYPE\x12\n\n\x06Player\x10\x00\x12\x07\n\x03NPC\x10\x01\x12\x0b\n\x07Monster\x10\x02*@\n\x0f\x43HARACTER_CLASS\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07WARRIOR\x10\x01\x12\n\n\x06WIZARD\x10\x02\x12\n\n\x06\x41RCHER\x10\x03*%\n\x0f\x43HARACTER_STATE\x12\x08\n\x04IDLE\x10\x00\x12\x08\n\x04MOVE\x10\x01*]\n\x0c\x45NTITY_EVENT\x12\x0c\n\x08\x45VT_NONE\x10\x00\x12\x0c\n\x08\x45VT_IDLE\x10\x01\x12\x10\n\x0c\x45VT_MOVE_FWD\x10\x02\x12\x11\n\rEVT_MOVE_BACK\x10\x03\x12\x0c\n\x08\x45VT_JUMP\x10\x04* \n\tDIRECTION\x12\x08\n\x04LEFT\x10\x00\x12\t\n\x05RIGHT\x10\x01\x42\x1c\x90\x01\x00\xf8\x01\x01\xaa\x02\x13SkillBridge.Messageb\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -41,8 +41,8 @@ _RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7361,
-  serialized_end=7394,
+  serialized_start=7404,
+  serialized_end=7437,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT)
 
@@ -68,8 +68,8 @@ _CHARACTER_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7396,
-  serialized_end=7446,
+  serialized_start=7439,
+  serialized_end=7489,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_TYPE)
 
@@ -99,8 +99,8 @@ _CHARACTER_CLASS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7448,
-  serialized_end=7512,
+  serialized_start=7491,
+  serialized_end=7555,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_CLASS)
 
@@ -122,8 +122,8 @@ _CHARACTER_STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7514,
-  serialized_end=7551,
+  serialized_start=7557,
+  serialized_end=7594,
 )
 _sym_db.RegisterEnumDescriptor(_CHARACTER_STATE)
 
@@ -157,8 +157,8 @@ _ENTITY_EVENT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7553,
-  serialized_end=7646,
+  serialized_start=7596,
+  serialized_end=7689,
 )
 _sym_db.RegisterEnumDescriptor(_ENTITY_EVENT)
 
@@ -180,8 +180,8 @@ _DIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7648,
-  serialized_end=7680,
+  serialized_start=7691,
+  serialized_end=7723,
 )
 _sym_db.RegisterEnumDescriptor(_DIRECTION)
 
@@ -2068,6 +2068,13 @@ _AGENTMONITORTARGETREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='object_name', full_name='SkillBridge.Message.AgentMonitorTargetRequest.object_name', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -2081,7 +2088,7 @@ _AGENTMONITORTARGETREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=6052,
-  serialized_end=6136,
+  serialized_end=6157,
 )
 
 
@@ -2125,8 +2132,8 @@ _AGENTGETMONITORRECORDSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6138,
-  serialized_end=6227,
+  serialized_start=6159,
+  serialized_end=6248,
 )
 
 
@@ -2177,8 +2184,8 @@ _AGENTMOVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6229,
-  serialized_end=6318,
+  serialized_start=6250,
+  serialized_end=6339,
 )
 
 
@@ -2211,15 +2218,22 @@ _AGENTFOLLOWTARGETREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='min_distance', full_name='SkillBridge.Message.AgentFollowTargetRequest.min_distance', index=3,
-      number=4, type=2, cpp_type=6, label=1,
+      name='object_name', full_name='SkillBridge.Message.AgentFollowTargetRequest.object_name', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='min_distance', full_name='SkillBridge.Message.AgentFollowTargetRequest.min_distance', index=4,
+      number=5, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='max_distance', full_name='SkillBridge.Message.AgentFollowTargetRequest.max_distance', index=4,
-      number=5, type=2, cpp_type=6, label=1,
+      name='max_distance', full_name='SkillBridge.Message.AgentFollowTargetRequest.max_distance', index=5,
+      number=6, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -2236,8 +2250,8 @@ _AGENTFOLLOWTARGETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6320,
-  serialized_end=6447,
+  serialized_start=6342,
+  serialized_end=6490,
 )
 
 
@@ -2274,8 +2288,8 @@ _AGENTINTERACTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6449,
-  serialized_end=6506,
+  serialized_start=6492,
+  serialized_end=6549,
 )
 
 
@@ -2319,8 +2333,8 @@ _AGENTSELECTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6508,
-  serialized_end=6582,
+  serialized_start=6551,
+  serialized_end=6625,
 )
 
 
@@ -2364,8 +2378,8 @@ _AGENTINPUTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6584,
-  serialized_end=6658,
+  serialized_start=6627,
+  serialized_end=6701,
 )
 
 
@@ -2409,8 +2423,8 @@ _AGENTPLANACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6660,
-  serialized_end=6785,
+  serialized_start=6703,
+  serialized_end=6828,
 )
 
 
@@ -2447,8 +2461,8 @@ _AGENTSTARTACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6787,
-  serialized_end=6855,
+  serialized_start=6830,
+  serialized_end=6898,
 )
 
 
@@ -2485,8 +2499,8 @@ _AGENTCONTINUEACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6857,
-  serialized_end=6928,
+  serialized_start=6900,
+  serialized_end=6971,
 )
 
 
@@ -2523,8 +2537,8 @@ _AGENTSTOPACTIONSEQUENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6930,
-  serialized_end=6997,
+  serialized_start=6973,
+  serialized_end=7040,
 )
 
 
@@ -2589,8 +2603,8 @@ _AGENTSETTIMERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7000,
-  serialized_end=7149,
+  serialized_start=7043,
+  serialized_end=7192,
 )
 
 
@@ -2627,8 +2641,8 @@ _AGENTGETTIMERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7151,
-  serialized_end=7212,
+  serialized_start=7194,
+  serialized_end=7255,
 )
 
 
@@ -2672,8 +2686,8 @@ _AGENTREMOVETIMERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7214,
-  serialized_end=7292,
+  serialized_start=7257,
+  serialized_end=7335,
 )
 
 
@@ -2710,8 +2724,8 @@ _AGENTGETWORLDEVENTLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7294,
-  serialized_end=7359,
+  serialized_start=7337,
+  serialized_end=7402,
 )
 
 _NUSERINFO.fields_by_name['player'].message_type = _NPLAYERINFO

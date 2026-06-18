@@ -119,11 +119,11 @@ namespace IndependentAgentProject
                 agentObj.Observe(requestId);
             }
         }
-        private void MonitorTarget(string agent, string requestId, int objectIndex)
+        private void MonitorTarget(string agent, string requestId, int objectIndex, string objectName)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.MonitorTarget(requestId, objectIndex);
+                agentObj.MonitorTarget(requestId, objectIndex, objectName);
             }
         }
         private void GetMonitorRecords(string agent, string requestId, int monitorIndex)
@@ -148,11 +148,11 @@ namespace IndependentAgentProject
                 agentObj.Move(requestId, isRight, distance);
             }
         }
-        private void FollowTarget(string agent, string requestId, int objectIndex, float minDistance, float maxDistance)
+        private void FollowTarget(string agent, string requestId, int objectIndex, string objectName, float minDistance, float maxDistance)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.FollowTarget(requestId, objectIndex, minDistance, maxDistance);
+                agentObj.FollowTarget(requestId, objectIndex, objectName, minDistance, maxDistance);
             }
         }
 

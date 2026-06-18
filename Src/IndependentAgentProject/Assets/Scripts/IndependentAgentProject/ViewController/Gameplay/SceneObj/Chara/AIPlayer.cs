@@ -616,7 +616,12 @@ namespace IndependentAgentProject
         /// <param name="requestId"></param>
         /// <param name="objectIndex"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public void MonitorTarget(string requestId, int objectIndex)
+        private bool IsSceneObjectNameMatched(SceneObjBase target, string expectedName)
+        {
+            return string.Equals(target?.Name?.Trim(), expectedName?.Trim(), StringComparison.Ordinal);
+        }
+
+        public void MonitorTarget(string requestId, int objectIndex, string objectName)
         {
             // 1. 判断观察目标数量过多
             if (mObserveRuntimes.Count >= 3)
@@ -641,8 +646,19 @@ namespace IndependentAgentProject
                 );
                 return;
             }
-            // 3. 判断目标是否已持续观察
+            // 3. 校验目标名称是否匹配
             SceneObjBase target = sceneObjs[objectIndex];
+            if (!IsSceneObjectNameMatched(target, objectName))
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "MonitorTarget",
+                    requestId,
+                    $"[持续观察失败] 目标校验失败：物体[{objectIndex}]当前是\"{target.Name}\"，不是你指定的\"{objectName}\"。请重新观察当前环境后再选择目标。"
+                );
+                return;
+            }
+            // 4. 判断目标是否已持续观察
             if (mObserveRuntimes.Any(r => r.Target == target))
             {
                 AgentService.Instance.SendToolResultMessage(
@@ -653,7 +669,7 @@ namespace IndependentAgentProject
                 );
                 return;
             }
-            // 4， 创建持续观察任务
+            // 5， 创建持续观察任务
             var curTime = Time.time;
             var runtime = new ObserveRuntime
             {
@@ -664,7 +680,7 @@ namespace IndependentAgentProject
                 State = ActionState.Doing,
                 LastChangeTime = curTime
             };
-            // 5. 回调函数注册
+            // 6. 回调函数注册
             runtime.StateChangedHandler = (obj, oldState, newState) =>
                 {
                     // 0.更新状态变化次数
@@ -700,7 +716,7 @@ namespace IndependentAgentProject
             target.OnStateChanged += runtime.StateChangedHandler;
             target.OnObjectEnabled += runtime.StateChangedHandler;
             target.OnObjectDisabled += runtime.StateChangedHandler;
-            // 6. 添加初始记录
+            // 7. 添加初始记录
             string initRecord = this.CreateMessageText($"[持续观察开始]\n" +
                 $"目标:{target.Name}\n" +
                 $"初始状态:{target.GetStateName()}",
@@ -708,12 +724,12 @@ namespace IndependentAgentProject
             runtime.Records.Enqueue(initRecord);
             runtime.UnreadCount++;
             mObserveRuntimes.Add(runtime);
-            // 7. 返回持续观察开始反馈
+            // 8. 返回持续观察开始反馈
             AgentService.Instance.SendToolResultMessage(
                 Name,
                 "MonitorTarget",
                 requestId,
-                $"[持续观察结果]开始持续观察目标:{target.Name}"
+                $"[持续观察结果]开始持续观察目标:{objectIndex}. {target.Name}"
             );
         }
         public void GetMonitorRecords(string requestId, int monitorIndex)
@@ -845,7 +861,7 @@ namespace IndependentAgentProject
             );
         }
 
-        public void FollowTarget(string requestId, int objectIndex, float minDistance, float maxDistance)
+        public void FollowTarget(string requestId, int objectIndex, string objectName, float minDistance, float maxDistance)
         {
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
             if (objectIndex < 0 || objectIndex >= sceneObjs.Count)
@@ -859,8 +875,19 @@ namespace IndependentAgentProject
                 return;
             }
 
-            this.StopMovement();
             SceneObjBase target = sceneObjs[objectIndex];
+            if (!IsSceneObjectNameMatched(target, objectName))
+            {
+                AgentService.Instance.SendToolResultMessage(
+                    Name,
+                    "FollowTarget",
+                    requestId,
+                    $"[跟随结果]失败！目标校验失败：物体[{objectIndex}]当前是\"{target.Name}\"，不是你指定的\"{objectName}\"。请重新观察当前环境后再选择目标。"
+                );
+                return;
+            }
+
+            this.StopMovement();
             TargetFollowing = target;
             FollowMinDistance = minDistance;
             FollowMaxDistance = maxDistance;

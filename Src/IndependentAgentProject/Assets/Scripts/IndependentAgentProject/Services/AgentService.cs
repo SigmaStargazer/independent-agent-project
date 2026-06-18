@@ -43,12 +43,12 @@ namespace Services
         public event UnityAction<string, string, string> OnStopAction;
 
         public event UnityAction<string, string> OnObserve;
-        public event UnityAction<string, string, int> OnMonitorTarget;
+        public event UnityAction<string, string, int, string> OnMonitorTarget;
         public event UnityAction<string, string, int> OnGetMonitorRecords;
         public event UnityAction<string, string> OnGetWorldEventLog;
 
         public event UnityAction<string, string, bool, float> OnMoveAgent;
-        public event Action<string, string, int, float, float> OnFollowTarget;
+        public event Action<string, string, int, string, float, float> OnFollowTarget;
 
         public event UnityAction<string, string> OnInteract;
         public event UnityAction<string, int, string> OnSelect;
@@ -667,8 +667,8 @@ namespace Services
         }
         void OnAgentMonitorTarget(object sender, AgentMonitorTargetRequest request)
         {
-            Debug.LogFormat($"OnAgentMonitorTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex}");
-            this.OnMonitorTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex);
+            Debug.LogFormat($"OnAgentMonitorTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex} ObjectName:{request.ObjectName}");
+            this.OnMonitorTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex, request.ObjectName);
         }
         void OnAgentGetMonitorRecords(object sender, AgentGetMonitorRecordsRequest request)
         {
@@ -688,8 +688,8 @@ namespace Services
         }
         void OnAgentFollowTarget(object sender, AgentFollowTargetRequest request)
         {
-            Debug.LogFormat($"OnAgentFollowTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex} MinDistance:{request.MinDistance} MaxDistance:{request.MaxDistance}");
-            this.OnFollowTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex, request.MinDistance, request.MaxDistance);
+            Debug.LogFormat($"OnAgentFollowTarget::Agent:{request.Agent} RequestId:{request.RequestId} ObjectIndex:{request.ObjectIndex} ObjectName:{request.ObjectName} MinDistance:{request.MinDistance} MaxDistance:{request.MaxDistance}");
+            this.OnFollowTarget?.Invoke(request.Agent, request.RequestId, request.ObjectIndex, request.ObjectName, request.MinDistance, request.MaxDistance);
         }
 
         #region 交互

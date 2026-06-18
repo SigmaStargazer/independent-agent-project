@@ -383,6 +383,7 @@ message AgentMonitorTargetRequest {
 	string agent = 1;
 	string request_id = 2;
 	int32 object_index = 3;
+	string object_name = 4;
 }
 
 message AgentGetMonitorRecordsRequest {
@@ -409,8 +410,9 @@ message AgentFollowTargetRequest {
 	string agent = 1;
 	string request_id = 2;
     int32 object_index = 3;
-    float min_distance = 4;
-    float max_distance = 5;
+    string object_name = 4;
+    float min_distance = 5;
+    float max_distance = 6;
 }
 
 ////////////////////////////////////////////////////////////////

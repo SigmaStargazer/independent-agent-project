@@ -821,6 +821,10 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(3, Name = @"object_index")]
         public int ObjectIndex { get; set; }
 
+        [global::ProtoBuf.ProtoMember(4, Name = @"object_name")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string ObjectName { get; set; } = "";
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -884,10 +888,14 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(3, Name = @"object_index")]
         public int ObjectIndex { get; set; }
 
-        [global::ProtoBuf.ProtoMember(4, Name = @"min_distance")]
+        [global::ProtoBuf.ProtoMember(4, Name = @"object_name")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string ObjectName { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(5, Name = @"min_distance")]
         public float MinDistance { get; set; }
 
-        [global::ProtoBuf.ProtoMember(5, Name = @"max_distance")]
+        [global::ProtoBuf.ProtoMember(6, Name = @"max_distance")]
         public float MaxDistance { get; set; }
 
     }
