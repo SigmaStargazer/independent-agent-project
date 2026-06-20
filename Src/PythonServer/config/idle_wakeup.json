@@ -1,0 +1,9 @@
+{
+  "enabled": false,
+  "delay_min_seconds": 120,
+  "delay_max_seconds": 300,
+  "summary_max_events": 3,
+  "summary_timeout_seconds": 5,
+  "ignore_self_events": true,
+  "message_template": "你已经空闲了一段时间，可以稍微留意一下周围。\n{world_event_summary}\n如果没有值得行动或交流的事情，可以继续保持当前状态。"
+}

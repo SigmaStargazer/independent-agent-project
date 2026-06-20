@@ -369,6 +369,9 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(31)]
         public AgentExportSkillsRequest agentExportSkillsRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(32)]
+        public AgentGetWorldEventSummaryRequest agentGetWorldEventSummaryRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -1111,6 +1114,29 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
         [global::System.ComponentModel.DefaultValue("")]
         public string RequestId { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class AgentGetWorldEventSummaryRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"agent")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Agent { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"request_id")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string RequestId { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"max_events")]
+        public int MaxEvents { get; set; }
+
+        [global::ProtoBuf.ProtoMember(4, Name = @"ignore_self_events")]
+        public bool IgnoreSelfEvents { get; set; }
 
     }
 

@@ -32,6 +32,8 @@ namespace IndependentAgentProject
                 new LoadAgentStep(),
 
                 new LoadSceneStep(this.TargetScene),
+
+                new StartAgentStep(1),
             };
         }
     }

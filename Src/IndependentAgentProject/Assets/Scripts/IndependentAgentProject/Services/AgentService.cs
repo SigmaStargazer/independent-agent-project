@@ -46,6 +46,7 @@ namespace Services
         public event UnityAction<string, string, int, string> OnMonitorTarget;
         public event UnityAction<string, string, int> OnGetMonitorRecords;
         public event UnityAction<string, string> OnGetWorldEventLog;
+        public event Action<string, string, int, bool> OnGetWorldEventSummary;
 
         public event UnityAction<string, string, bool, float> OnMoveAgent;
         public event Action<string, string, int, string, float, float> OnFollowTarget;
@@ -88,6 +89,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentMonitorTargetRequest>(this.OnAgentMonitorTarget);
             MessageDistributer.Instance.Subscribe<AgentGetMonitorRecordsRequest>(this.OnAgentGetMonitorRecords);
             MessageDistributer.Instance.Subscribe<AgentGetWorldEventLogRequest>(this.OnAgentGetWorldEventLog);
+            MessageDistributer.Instance.Subscribe<AgentGetWorldEventSummaryRequest>(this.OnAgentGetWorldEventSummary);
 
             MessageDistributer.Instance.Subscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Subscribe<AgentFollowTargetRequest>(this.OnAgentFollowTarget);
@@ -126,6 +128,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentMonitorTargetRequest>(this.OnAgentMonitorTarget);
             MessageDistributer.Instance.Unsubscribe<AgentGetMonitorRecordsRequest>(this.OnAgentGetMonitorRecords);
             MessageDistributer.Instance.Unsubscribe<AgentGetWorldEventLogRequest>(this.OnAgentGetWorldEventLog);
+            MessageDistributer.Instance.Unsubscribe<AgentGetWorldEventSummaryRequest>(this.OnAgentGetWorldEventSummary);
 
             MessageDistributer.Instance.Unsubscribe<AgentMoveRequest>(this.OnAgentMove);
             MessageDistributer.Instance.Unsubscribe<AgentFollowTargetRequest>(this.OnAgentFollowTarget);
@@ -679,6 +682,12 @@ namespace Services
         {
             Debug.LogFormat($"OnAgentGetWorldEventLog::Agent:{request.Agent} RequestId:{request.RequestId}");
             this.OnGetWorldEventLog?.Invoke(request.Agent, request.RequestId);
+        }
+
+        void OnAgentGetWorldEventSummary(object sender, AgentGetWorldEventSummaryRequest request)
+        {
+            Debug.LogFormat($"OnAgentGetWorldEventSummary::Agent:{request.Agent} RequestId:{request.RequestId} MaxEvents:{request.MaxEvents} IgnoreSelfEvents:{request.IgnoreSelfEvents}");
+            this.OnGetWorldEventSummary?.Invoke(request.Agent, request.RequestId, request.MaxEvents, request.IgnoreSelfEvents);
         }
         // 移动
        void OnAgentMove(object sender, AgentMoveRequest request)

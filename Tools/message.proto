@@ -200,6 +200,7 @@ message NetMessageRequest{
 	AgentGetWorldEventLogRequest agentGetWorldEventLogRequest = 30;
 	
 	AgentExportSkillsRequest agentExportSkillsRequest = 31;
+	AgentGetWorldEventSummaryRequest agentGetWorldEventSummaryRequest = 32;
 }
 
 message NetMessageResponse{
@@ -493,5 +494,12 @@ message AgentRemoveTimerRequest {
 message AgentGetWorldEventLogRequest {
 	string agent = 1;
 	string request_id = 2;
+}
+
+message AgentGetWorldEventSummaryRequest {
+	string agent = 1;
+	string request_id = 2;
+	int32 max_events = 3;
+	bool ignore_self_events = 4;
 }
 

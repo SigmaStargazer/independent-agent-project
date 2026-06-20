@@ -256,6 +256,43 @@ namespace IndependentAgentProject
             );
         }
 
+        public void GetWorldEventSummary(string requestId, int maxEvents, bool ignoreSelfEvents)
+        {
+            int limit = Mathf.Max(1, maxEvents);
+            float now = Time.time;
+            var filteredRecords = mWorldEventLog
+                .Where(record => !(ignoreSelfEvents && record.ObjectName == Name))
+                .ToList();
+            var records = filteredRecords
+                .Skip(Mathf.Max(0, filteredRecords.Count - limit))
+                .ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("[世界事件摘要]");
+            sb.AppendLine($"最近事件数: {records.Count}");
+
+            if (records.Count == 0)
+            {
+                sb.AppendLine("最近没有值得注意的世界事件。");
+            }
+            else
+            {
+                for (int i = 0; i < records.Count; i++)
+                {
+                    var record = records[i];
+                    float elapsed = now - record.Time;
+                    sb.AppendLine($"{i + 1}. {elapsed:F1}秒前，{record.ObjectName}: {record.OldState} -> {record.NewState}");
+                }
+            }
+
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                "GetWorldEventSummary",
+                requestId,
+                sb.ToString()
+            );
+        }
+
         #region FSM Hook
         public override void OnDeadEnter()
         {

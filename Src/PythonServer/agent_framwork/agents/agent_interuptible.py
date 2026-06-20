@@ -3,6 +3,8 @@ import asyncio
 import uuid
 import os
 import time
+import json
+import random
 from datetime import datetime
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -23,6 +25,8 @@ from langgraph.checkpoint.memory import MemorySaver
 
 from memory_system.memory_manager import MemoryManager
 from agent_framwork.base.timed_message import TimedMessage
+from network.servers import AgentServerNetMessage, TOOL_WAITERS
+from network import message_pb2
 
 # from graphiti_core.nodes import EpisodeType
 # from graphiti_core.search import search_config_recipes
@@ -47,6 +51,55 @@ PROMPT_SAVE_DIR = os.path.normpath(os.path.join(
     os.path.dirname(__file__), "..", "..",
     os.getenv("PROMPT_SAVE_DIR", "logs/prompts")
 ))
+
+IDLE_WAKEUP_CONFIG_PATH = os.path.normpath(os.path.join(
+    os.path.dirname(__file__), "..", "..",
+    "config", "idle_wakeup.json"
+))
+DEFAULT_IDLE_WAKEUP_CONFIG = {
+    "enabled": True,
+    "delay_min_seconds": 120,
+    "delay_max_seconds": 300,
+    "summary_max_events": 3,
+    "summary_timeout_seconds": 5,
+    "ignore_self_events": True,
+    "message_template": "你已经空闲了一段时间，可以稍微留意一下周围。\n{world_event_summary}\n如果没有值得行动或交流的事情，可以继续保持当前状态。"
+}
+
+
+def load_idle_wakeup_config() -> dict:
+    config = DEFAULT_IDLE_WAKEUP_CONFIG.copy()
+    try:
+        with open(IDLE_WAKEUP_CONFIG_PATH, "r", encoding="utf-8") as f:
+            loaded = json.load(f)
+        if isinstance(loaded, dict):
+            config.update(loaded)
+    except FileNotFoundError:
+        print(f"[IdleWakeup] 配置文件不存在，使用默认配置: {IDLE_WAKEUP_CONFIG_PATH}")
+    except Exception as e:
+        print(f"[IdleWakeup] 读取配置失败，使用默认配置: {e}")
+
+    min_delay = float(config.get("delay_min_seconds", config.get("min_delay_seconds", 120)))
+    max_delay = float(config.get("delay_max_seconds", config.get("max_delay_seconds", 300)))
+    if min_delay <= 0:
+        min_delay = 120
+    if max_delay < min_delay:
+        max_delay = min_delay
+
+    summary_max_events = int(config.get("summary_max_events", config.get("max_world_events", 3)))
+    summary_timeout = float(config.get("summary_timeout_seconds", config.get("rpc_timeout_seconds", 5)))
+
+    config["enabled"] = bool(config.get("enabled", True))
+    config["min_delay_seconds"] = min_delay
+    config["max_delay_seconds"] = max_delay
+    config["max_world_events"] = max(0, summary_max_events)
+    config["ignore_self_events"] = bool(config.get("ignore_self_events", True))
+    config["rpc_timeout_seconds"] = max(1.0, summary_timeout)
+    config["message_template"] = str(config.get("message_template") or DEFAULT_IDLE_WAKEUP_CONFIG["message_template"])
+    return config
+
+
+IDLE_WAKEUP_CONFIG = load_idle_wakeup_config()
 
 # # 千问
 # model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -487,6 +540,9 @@ class Agent:
         self._invoke_task: asyncio.Task | None = None
         self._runtime_lock = asyncio.Lock()
         self._message_lock = asyncio.Lock()
+        self._idle_wakeup_task: asyncio.Task | None = None
+        self._idle_wakeup_seq = 0
+        self._is_graph_running = False
 
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
@@ -519,6 +575,99 @@ class Agent:
             "logged_tool_call_ids": old_values.get("logged_tool_call_ids", [])
         }
 
+    def _is_idle_wakeup_enabled(self) -> bool:
+        return bool(IDLE_WAKEUP_CONFIG.get("enabled", True))
+
+    def _can_schedule_idle_wakeup(self) -> bool:
+        return (
+            self._is_idle_wakeup_enabled()
+            and self._running
+            and not self._is_graph_running
+            and not self._interrupt_event.is_set()
+            and self.message_queue.empty()
+            and self.feedback_queue.empty()
+        )
+
+    def _cancel_idle_wakeup(self):
+        print(f"[{self.name}] cancel idle wakeup")
+        self._idle_wakeup_seq += 1
+        task = self._idle_wakeup_task
+        self._idle_wakeup_task = None
+        if task and not task.done():
+            task.cancel()
+
+    def _schedule_idle_wakeup(self):
+        self._cancel_idle_wakeup()
+        if not self._can_schedule_idle_wakeup():
+            return
+
+        min_delay = IDLE_WAKEUP_CONFIG["min_delay_seconds"]
+        max_delay = IDLE_WAKEUP_CONFIG["max_delay_seconds"]
+        delay = random.uniform(min_delay, max_delay)
+        seq = self._idle_wakeup_seq
+        self._idle_wakeup_task = asyncio.create_task(self._idle_wakeup_after_delay(seq, delay))
+        print(f"[{self.name}] idle wakeup scheduled in {delay:.1f}s")
+
+    async def _idle_wakeup_after_delay(self, seq: int, delay: float):
+        try:
+            await asyncio.sleep(delay)
+            if seq != self._idle_wakeup_seq or not self._can_schedule_idle_wakeup():
+                return
+
+            summary = await self._request_world_event_summary()
+            if seq != self._idle_wakeup_seq or not self._can_schedule_idle_wakeup():
+                return
+
+            await self._enqueue_idle_wakeup_message(summary)
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            print(f"[{self.name}] idle wakeup error: {e}")
+
+    async def _request_world_event_summary(self) -> str:
+        max_events = IDLE_WAKEUP_CONFIG["max_world_events"]
+        if max_events <= 0:
+            return ""
+
+        request_id = f"idle_wakeup:{self.name}:{uuid.uuid4()}"
+        loop = asyncio.get_running_loop()
+        fut = loop.create_future()
+        TOOL_WAITERS[request_id] = fut
+        try:
+            request = message_pb2.AgentGetWorldEventSummaryRequest()
+            request.agent = self.name
+            request.request_id = request_id
+            request.max_events = max_events
+            request.ignore_self_events = IDLE_WAKEUP_CONFIG["ignore_self_events"]
+
+            await AgentServerNetMessage().broadcast_message(request)
+            timeout = IDLE_WAKEUP_CONFIG["rpc_timeout_seconds"]
+            result = await asyncio.wait_for(fut, timeout=timeout)
+            return f"{result}"
+        except asyncio.TimeoutError:
+            return "[世界事件摘要]\n暂时没有获取到周围变化。"
+        except Exception as e:
+            return f"[世界事件摘要]\n获取周围变化时遇到异常：{e}"
+        finally:
+            TOOL_WAITERS.pop(request_id, None)
+
+    async def _enqueue_idle_wakeup_message(self, world_event_summary: str):
+        async with self._message_lock:
+            if not self._can_schedule_idle_wakeup():
+                return
+
+            real_time = time.time()
+            virtual_time = await TimeSystem().aget_current_time(to_str=True)
+            template = IDLE_WAKEUP_CONFIG["message_template"]
+            message = template.format(world_event_summary=world_event_summary.strip())
+            if virtual_time != "未启动":
+                message = f"[{virtual_time}]" + message
+
+            print(f"[{self.name}]Idle wakeup message: {message}")
+            await self.message_queue.put(TimedMessage(timestamp=real_time, content=message))
+            self._idle_wakeup_seq += 1
+            self._idle_wakeup_task = None
+
     async def astart(self):
         async with self._runtime_lock:
             if self._running:
@@ -541,6 +690,7 @@ class Agent:
             # self._interrupt_memory_saved = False
 
             print(f"[{self.name}] processing started")
+            self._schedule_idle_wakeup()
             # snapshot = await self.graph.aget_state(self.config)
             # has_checkpoint = (
             #     snapshot is not None 
@@ -556,6 +706,7 @@ class Agent:
         await self._asend_message(feedback, is_feedback=True, force_interrupt=force_interrupt)
 
     async def _asend_message(self, message: str, is_feedback: bool = False, force_interrupt: bool = False):
+        self._cancel_idle_wakeup()
         # =========================
         # 0. 记录消息时间
         # =========================
@@ -715,33 +866,38 @@ class Agent:
 
                 # =========================
                 # 4. invoke loop
-                # =========================               
-                while not self._interrupt_event.is_set():
-                    try:
-                        self._invoke_task = asyncio.create_task(
-                            self.graph.ainvoke(input_state,self.config)
-                        )
-                        # ainvoke 已正式开始
-                        response = await self._invoke_task
-                        self.runtime_state["focus_state"] = False # 正常完成了一轮对话，关闭专注状态
-                        output = response["messages"][-1].content
-                        print(f"[{self.name}]Response: {output}")
-                        break # 成功则跳出重试，回到最外层等待新消息
-                    except asyncio.CancelledError:# self._invoke_task = asyncio.create_task时，报CancelledError
-                        # interrupt cancel
-                        if self._interrupt_event.is_set():# 进入打断流程时，break，不抛出异常
-                            break
-                        raise# 错误时，抛出异常
-                    except Exception as e:
-                        print(f"[{self.name}]Error occurred: {e}")
-                        
-                        # ⭐ 核心：触发 LangGraph 的 Checkpoint 恢复机制
-                        # 将输入置为 None，下次循环 ainvoke 时会直接从中断的 LLM 节点继续跑
-                        input_state = None 
-                        
-                        await asyncio.sleep(2) # 遇到网络错误，歇2秒再试
-                    finally:
-                        self._invoke_task = None
+                # =========================
+                self._is_graph_running = True
+                try:
+                    while not self._interrupt_event.is_set():
+                        try:
+                            self._invoke_task = asyncio.create_task(
+                                self.graph.ainvoke(input_state,self.config)
+                            )
+                            # ainvoke 已正式开始
+                            response = await self._invoke_task
+                            self.runtime_state["focus_state"] = False # 正常完成了一轮对话，关闭专注状态
+                            output = response["messages"][-1].content
+                            print(f"[{self.name}]Response: {output}")
+                            break # 成功则跳出重试，回到最外层等待新消息
+                        except asyncio.CancelledError:# self._invoke_task = asyncio.create_task时，报CancelledError
+                            # interrupt cancel
+                            if self._interrupt_event.is_set():# 进入打断流程时，break，不抛出异常
+                                break
+                            raise# 错误时，抛出异常
+                        except Exception as e:
+                            print(f"[{self.name}]Error occurred: {e}")
+
+                            # ⭐ 核心：触发 LangGraph 的 Checkpoint 恢复机制
+                            # 将输入置为 None，下次循环 ainvoke 时会直接从中断的 LLM 节点继续跑
+                            input_state = None
+
+                            await asyncio.sleep(2) # 遇到网络错误，歇2秒再试
+                        finally:
+                            self._invoke_task = None
+                finally:
+                    self._is_graph_running = False
+                    self._schedule_idle_wakeup()
                         
         finally:
             self._running = False
@@ -793,6 +949,7 @@ class Agent:
             if not self._running:
                 return
             print(f"[{self.name}] interrupt requested")
+            self._cancel_idle_wakeup()
 
             # =========================
             # 1. 中断运行
@@ -926,6 +1083,7 @@ class Agent:
         """
         async with self._runtime_lock:
             print(f"[{self.name}] finish requested")
+            self._cancel_idle_wakeup()
             self._running = False
             # =========================
             # 1. interrupt runtime
