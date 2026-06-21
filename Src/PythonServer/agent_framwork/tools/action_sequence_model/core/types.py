@@ -27,7 +27,7 @@ CONDITION_VARIABLES = {
         name="objects",
         desc="场景中其他物体的数据的列表。是一个List[sceneObj]。",
         kind=AccessKind.LIST,
-        members={"Position", "Velocity", "State"},
+        members={"Position", "LeftPosition", "RightPosition", "Velocity", "State"},
     ),
     "displacement": ConditionVariable(
         name="displacement",
@@ -66,10 +66,12 @@ CONDITION_DESC = f"""移动结束条件（DynamicExpresso 表达式）。# 可�
 {_get_conditions_desc()}
 
 # sceneObj类的属性：
-Position: 物体当前位置。是一个Vector2对象。
+Position: 物体当前位置。是一个Vector2对象。非范围物体可用；范围物体禁止使用，应改用LeftPosition或RightPosition。
+LeftPosition: 物体左边界位置。是一个Vector2对象。非范围物体等同Position。
+RightPosition: 物体右边界位置。是一个Vector2对象。非范围物体等同Position。
 Velocity: 物体当前速度。是一个Vector2对象。
 State: 物体当前状态，如'Idle'、'Move'等。
 
-# 示例：displacement >= 10 && myself.state == 'Move'"""
+# 示例：displacement >= 10 && myself.State == 'Move'"""
 
 # 示例：displacement.x >= 10 && myself.state == 'Move'"""

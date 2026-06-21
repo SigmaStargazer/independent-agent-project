@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace IndependentAgentProject
@@ -7,6 +5,8 @@ namespace IndependentAgentProject
     public class SceneObjExprView
     {
         public Vector2 Position { get; set; }
+        public Vector2 LeftPosition { get; set; }
+        public Vector2 RightPosition { get; set; }
         public Vector2 Velocity { get; set; }
         public string State { get; set; }
     }
@@ -21,15 +21,21 @@ namespace IndependentAgentProject
             Vector3 pos3 = sceneObj.transform.position;
             view.Position = new Vector2(pos3.x, pos3.y);
 
-            // Velocity: 组件来源
-            var rb = sceneObj.GetComponent<Rigidbody2D>();
-            if (rb != null)
-                view.Velocity = rb.velocity;
+            if (sceneObj.UseRangeDirection && sceneObj.RangeCollider != null)
+            {
+                Bounds bounds = sceneObj.RangeCollider.bounds;
+                view.LeftPosition = new Vector2(bounds.min.x, bounds.center.y);
+                view.RightPosition = new Vector2(bounds.max.x, bounds.center.y);
+            }
             else
-                view.Velocity = Vector2.zero;
+            {
+                view.LeftPosition = view.Position;
+                view.RightPosition = view.Position;
+            }
 
-            // State: 统一状态来源
-            view.State = sceneObj.StateName;  // 假设你有统一状态机字段
+            var rb = sceneObj.GetComponent<Rigidbody2D>();
+            view.Velocity = rb != null ? rb.velocity : Vector2.zero;
+            view.State = sceneObj.StateName;
 
             return view;
         }

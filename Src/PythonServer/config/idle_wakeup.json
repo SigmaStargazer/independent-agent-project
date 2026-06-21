@@ -1,5 +1,5 @@
 {
-  "enabled": false,
+  "enabled": true,
   "delay_min_seconds": 120,
   "delay_max_seconds": 300,
   "summary_max_events": 3,

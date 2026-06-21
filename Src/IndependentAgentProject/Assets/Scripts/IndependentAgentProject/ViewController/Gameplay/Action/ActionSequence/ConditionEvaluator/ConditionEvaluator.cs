@@ -62,6 +62,14 @@ namespace IndependentAgentProject
                             continue;
                         }
 
+                        semanticCheck = ValidateRangeObjectPositionReference(step.Condition, context);
+                        if (semanticCheck != null)
+                        {
+                            results.Add(semanticCheck);
+                            index++;
+                            continue;
+                        }
+
                         bool ok = mInterpreter.Eval<bool>(step.Condition);
                         result.Status = ok ? ConditionEvalStatus.True : ConditionEvalStatus.False;
                     }
@@ -117,6 +125,38 @@ namespace IndependentAgentProject
             mInterpreter.SetVariable("actionTime", context.ActionTime);
             mInterpreter.SetVariable("canInteract", context.CanInteract);
             mInterpreter.SetVariable("nearestInteractableIndex", context.NearestInteractableIndex);
+        }
+
+        private ConditionEvalResult ValidateRangeObjectPositionReference(string condition, ConditionContext context)
+        {
+            if (string.IsNullOrWhiteSpace(condition))
+                return null;
+
+            var matches = Regex.Matches(condition, @"objects\[(\d+)\]\.Position\b");
+            foreach (Match match in matches)
+            {
+                int objIndex = int.Parse(match.Groups[1].Value);
+                if (objIndex < 0 || objIndex >= context.ObjectsSrc.Count)
+                {
+                    return new ConditionEvalResult
+                    {
+                        Status = ConditionEvalStatus.Error,
+                        ErrorMessage = $"objects[{objIndex}].Position引用了不存在的objects[{objIndex}]"
+                    };
+                }
+
+                var obj = context.ObjectsSrc[objIndex];
+                if (obj.UseRangeDirection && obj.RangeCollider != null)
+                {
+                    return new ConditionEvalResult
+                    {
+                        Status = ConditionEvalStatus.Error,
+                        ErrorMessage = $"objects[{objIndex}]({obj.Name}) 是范围物体，不能使用 Position 判断位置；请改用 objects[{objIndex}].LeftPosition 或 objects[{objIndex}].RightPosition。"
+                    };
+                }
+            }
+
+            return null;
         }
 
         private ConditionEvalResult ValidateNearestInteractableIndexReference(string condition, ConditionContext context)

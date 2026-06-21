@@ -1,0 +1,77 @@
+skills:
+- name: 走到目标旁交互
+  description: 走到某个可交互物体附近并与之交互
+  content: '当需要与场景中的某个物体进行交互时，先移动到目标物体附近，再触发交互动作。
+
+    根据目标所处的环境（平地/高处）选择不同的接近方式。
+
+    '
+  source: default
+  templates:
+  - name: 平地接近
+    description: 当目标在平地上、可直接走过去时
+    action_sequence_template:
+    - action: Move
+      params:
+        target: '{target_name}'
+        condition: object[0].distance < 1.5
+    - action: Interact
+      params:
+        target: '{target_name}'
+    usage_notes: '- {target_name} 替换为目标物体在场景中的实际名称
+
+      - condition 中的距离阈值可按目标尺寸适当调整（默认 1.5）
+
+      - 如果中途目标移动，Move 会自动追踪
+
+      '
+- name: 借助浮板渡过陷阱
+  description: 利用自动移动的平台（浮板）渡过陷阱区域。适用于场景中有往复运动的平台和陷阱的组合。
+  content: 核心思路：先在陷阱边缘等待浮板停靠，然后跳上浮板，随浮板移动到对面后下来。关键步骤：1) 移动到陷阱边缘（不进入陷阱）；2) 等待浮板在近侧停稳（State==Idle）；3)
+    跳上浮板（移动1.5m，允许接触浮板）；4) 等待浮板开始移动（State==Move）；5) 等待浮板到达远侧停稳（State==Idle）；6) 从浮板上下来（移动2m）。
+  source: learned
+  templates:
+  - name: 从左到右渡过
+    description: 当玩家在陷阱左侧、需要借助浮板到达右侧时使用。
+    action_sequence_template:
+    - action: wait
+      condition: objects[3].State == "Idle"
+    - action: move
+      direction: right
+      condition: displacement >= 4.3
+      allowed_contact_obj_ids: []
+    - action: wait
+      condition: objects[3].State == "Idle"
+    - action: move
+      direction: right
+      condition: displacement >= 1.5
+      allowed_contact_obj_ids:
+      - 3
+    - action: wait
+      condition: objects[3].State == "Move"
+    - action: wait
+      condition: objects[3].State == "Idle"
+    - action: move
+      direction: right
+      condition: displacement >= 2
+      allowed_contact_obj_ids: []
+    usage_notes: 浮板周期约11.8秒（左停3秒→右移2.9秒→右停3秒→左移2.9秒）。从右侧回左侧时方向改为left。需要确保从安全位置出发先移动到陷阱边缘再上浮板。
+  - name: 从右到左渡过
+    description: 当玩家在陷阱右侧、需要借助浮板回到左侧时使用。
+    action_sequence_template:
+    - action: wait
+      condition: objects[3].State == "Idle"
+    - action: move
+      direction: left
+      condition: displacement >= 1.5
+      allowed_contact_obj_ids:
+      - 3
+    - action: wait
+      condition: objects[3].State == "Move"
+    - action: wait
+      condition: objects[3].State == "Idle"
+    - action: move
+      direction: left
+      condition: displacement >= 2
+      allowed_contact_obj_ids: []
+    usage_notes: 适用于已经在陷阱右侧的情况。直接上浮板→等移动→等停→下来即可。不需要先移动到陷阱边缘。

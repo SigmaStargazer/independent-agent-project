@@ -676,13 +676,16 @@ async def follow_target_cmd(
     """
     持续行动类动作-持续跟随目标。
 
+    使用后，你会进入持续跟随状态：系统会持续观察目标与你的横向距离，并移动你自己，尽量让距离保持在min_distance到max_distance之间。
+    该动作适合长期跟随正在移动的角色或物体。它不是一次性移动到某个地点，也不是由多个阶段组成、需要等待条件和完成条件的动作序列。
+
     object_index 与 object_name 必须来自同一条最近观察结果；object_name 会在 Unity 中校验 object_index 当前指向的目标，校验失败时不会开始跟随。
 
     Args:
         object_index(int): 目标物体编号
         object_name(str): 目标物体名称，必须与该编号在最近观察结果中的名称一致
-        min_distance(float)
-        max_distance(float)
+        min_distance(float): 希望保持的最小横向距离
+        max_distance(float): 希望保持的最大横向距离
     Return:
         str: 持续跟随目标是否开始
     """

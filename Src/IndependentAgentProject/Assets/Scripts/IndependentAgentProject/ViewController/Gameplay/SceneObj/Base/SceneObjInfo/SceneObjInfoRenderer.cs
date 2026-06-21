@@ -1,40 +1,32 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace IndependentAgentProject
 {
     public class SceneObjInfoRenderer
     {
-        /// <summary>
-        /// äÖÈ¾³¡¾°ÀïËùÓĞ³¡¾°¶ÔÏóĞÅÏ¢
-        /// </summary>
-        /// <param name="sceneObjsInfo"></param>
-        /// <param name="interactableObjInfo"></param>
-        /// <returns></returns>
         public string Render(List<SceneObjInfoModel> sceneObjsInfo, SceneObjInfoModel interactableObjInfo)
         {
             string sceneObjsInfoDesc = "";
 
             if (sceneObjsInfo.Count > 0)
             {
-                sceneObjsInfoDesc = "# ÄãµÄÖÜÎ§ÓĞ:";
-                // 1.±éÀú³¡¾°¶ÔÏóĞÅÏ¢
+                sceneObjsInfoDesc = "# ä½ çš„å‘¨å›´æœ‰:";
+                // 1.éå†åœºæ™¯å¯¹è±¡ä¿¡æ¯
                 for (int i = 0; i < sceneObjsInfo.Count; i++)
                 {
                     string sceneObjInfoDesc = $"\n{i}. {this.RenderSceneObj(sceneObjsInfo[i])}";
                     sceneObjsInfoDesc += sceneObjInfoDesc;
                 }
 
-                // 2.»ñÈ¡¿É½»»¥¶ÔÏóĞÅÏ¢
-                string interactableObjDesc = "\n\n# ¿ÉÑ¡Ôñ½»»¥:\n";
+                // 2.è·å–å¯äº¤äº’å¯¹è±¡ä¿¡æ¯
+                string interactableObjDesc = "\n\n# å¯é€‰æ‹©äº¤äº’:\n";
                 if (interactableObjInfo != null)
                 {
                     interactableObjDesc += $"{this.RenderSceneObj(interactableObjInfo)}";
                 }
                 else
                 {
-                    interactableObjDesc += "Éí±ßÎŞ¿É½»»¥¶ÔÏó";
+                    interactableObjDesc += "èº«è¾¹æ— å¯äº¤äº’å¯¹è±¡";
                 }
                 sceneObjsInfoDesc += interactableObjDesc;
             }
@@ -43,7 +35,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// äÖÈ¾µ¥¸ö³¡¾°¶ÔÏóĞÅÏ¢
+        /// æ¸²æŸ“å•ä¸ªåœºæ™¯å¯¹è±¡ä¿¡æ¯
         /// </summary>
         /// <param name="sceneObjInfo"></param>
         /// <returns></returns>
@@ -52,31 +44,31 @@ namespace IndependentAgentProject
             string sceneObjInfoDesc = "";
             if (sceneObjInfo != null)
             {
-                string speedXStr = sceneObjInfo.SpeedX <= 0.01f ? $"0m/s" : $"·½Ïò{sceneObjInfo.SpeedDirX} {sceneObjInfo.SpeedX}m/s";
-                string speedYStr = sceneObjInfo.SpeedY <= 0.01f ? $"0m/s" : $"·½Ïò{sceneObjInfo.SpeedDirY} {sceneObjInfo.SpeedDirY}m/s";
-                string faceDirectionStr = !string.IsNullOrEmpty(sceneObjInfo.FaceDirection) ? faceDirectionStr = $"³¯Ïò:{sceneObjInfo.FaceDirection}\n" : "";
-                // ·½Î»
+                string speedXStr = sceneObjInfo.SpeedX <= 0.01f ? $"0m/s" : $"æ–¹å‘{sceneObjInfo.SpeedDirX} {sceneObjInfo.SpeedX}m/s";
+                string speedYStr = sceneObjInfo.SpeedY <= 0.01f ? $"0m/s" : $"æ–¹å‘{sceneObjInfo.SpeedDirY} {sceneObjInfo.SpeedDirY}m/s";
+                string faceDirectionStr = !string.IsNullOrEmpty(sceneObjInfo.FaceDirection) ? $"æœå‘:{sceneObjInfo.FaceDirection}\n" : "";
+                // æ–¹ä½
                 string directionStr;
                 if (sceneObjInfo.IsRangeDirection)
                 {
                     directionStr =
-                        $"·¶Î§: ´ÓÄãµÄ {sceneObjInfo.RangeLeftDirection}·½Ïò{sceneObjInfo.RangeLeftDistance}m " +
-                        $"µ½ÄãµÄ {sceneObjInfo.RangeRightDirection}·½Ïò{sceneObjInfo.RangeRightDistance}m ·¶Î§";
+                        $"èŒƒå›´: å·¦è¾¹ç•Œåœ¨ä½ çš„ {sceneObjInfo.RangeLeftDirection}æ–¹å‘ {sceneObjInfo.RangeLeftDistance:F2}mï¼Œ" +
+                        $"å³è¾¹ç•Œåœ¨ä½ çš„ {sceneObjInfo.RangeRightDirection}æ–¹å‘ {sceneObjInfo.RangeRightDistance:F2}m";
                 }
                 else
                 {
-                    directionStr = $"·½Î»:ÔÚÄãµÄ {sceneObjInfo.Direction}·½Ïò {sceneObjInfo.Distance}m Î»ÖÃ";
+                    directionStr = $"æ–¹ä½:åœ¨ä½ çš„ {sceneObjInfo.Direction}æ–¹å‘ {sceneObjInfo.Distance:F2}m ä½ç½®";
                 }
 
                 sceneObjInfoDesc = $"{sceneObjInfo.Name}: {sceneObjInfo.Desc}\n" +
-                    $"×´Ì¬:{sceneObjInfo.State}\n" +
+                    $"çŠ¶æ€:{sceneObjInfo.State}\n" +
                     $"{directionStr}\n" +
                     $"{faceDirectionStr}" +
-                    $"ºáÏòËÙ¶È:{speedXStr}\n×İÏòËÙ¶È:{speedYStr}";
+                    $"æ¨ªå‘é€Ÿåº¦:{speedXStr}\nçºµå‘é€Ÿåº¦:{speedYStr}";
             }
             else
             {
-                sceneObjInfoDesc = "ÎïÌåÒÑÏûÊ§";
+                sceneObjInfoDesc = "ç‰©ä½“å·²æ¶ˆå¤±";
             }
             return sceneObjInfoDesc;
         }
