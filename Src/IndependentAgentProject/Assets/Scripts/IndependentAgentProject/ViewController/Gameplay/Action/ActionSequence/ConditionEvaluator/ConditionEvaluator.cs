@@ -54,7 +54,23 @@ namespace IndependentAgentProject
 
                     try
                     {
-                        var semanticCheck = ValidateNearestInteractableIndexReference(step.Condition, context);
+                        var semanticCheck = ValidateSingleQuotedStringLiteral(step.Condition);
+                        if (semanticCheck != null)
+                        {
+                            results.Add(semanticCheck);
+                            index++;
+                            continue;
+                        }
+
+                        semanticCheck = ValidateVector2UppercaseMember(step.Condition);
+                        if (semanticCheck != null)
+                        {
+                            results.Add(semanticCheck);
+                            index++;
+                            continue;
+                        }
+
+                        semanticCheck = ValidateNearestInteractableIndexReference(step.Condition, context);
                         if (semanticCheck != null)
                         {
                             results.Add(semanticCheck);
@@ -103,6 +119,14 @@ namespace IndependentAgentProject
 
             try
             {
+                var semanticCheck = ValidateSingleQuotedStringLiteral(step.Condition);
+                if (semanticCheck != null)
+                    return semanticCheck;
+
+                semanticCheck = ValidateVector2UppercaseMember(step.Condition);
+                if (semanticCheck != null)
+                    return semanticCheck;
+
                 bool ok = mInterpreter.Eval<bool>(step.Condition);
                 result.Status = ok ? ConditionEvalStatus.True : ConditionEvalStatus.False;
             }
@@ -125,6 +149,40 @@ namespace IndependentAgentProject
             mInterpreter.SetVariable("actionTime", context.ActionTime);
             mInterpreter.SetVariable("canInteract", context.CanInteract);
             mInterpreter.SetVariable("nearestInteractableIndex", context.NearestInteractableIndex);
+        }
+
+        private ConditionEvalResult ValidateSingleQuotedStringLiteral(string condition)
+        {
+            if (string.IsNullOrWhiteSpace(condition))
+                return null;
+
+            var match = Regex.Match(condition, @"'[^'\\]*(?:\\.[^'\\]*)*'");
+            if (!match.Success)
+                return null;
+
+            return new ConditionEvalResult
+            {
+                Status = ConditionEvalStatus.Error,
+                ErrorMessage = $"condition 中的字符串必须使用双引号，不能使用单引号；请将 {match.Value} 改为双引号字符串。"
+            };
+        }
+
+        private ConditionEvalResult ValidateVector2UppercaseMember(string condition)
+        {
+            if (string.IsNullOrWhiteSpace(condition))
+                return null;
+
+            var match = Regex.Match(condition, @"\.(X|Y)\b");
+            if (!match.Success)
+                return null;
+
+            string upperName = match.Groups[1].Value;
+            string lowerName = upperName.ToLowerInvariant();
+            return new ConditionEvalResult
+            {
+                Status = ConditionEvalStatus.Error,
+                ErrorMessage = $"condition 中 Vector2 坐标字段必须使用小写 .x / .y；请将 .{upperName} 改为 .{lowerName}。"
+            };
         }
 
         private ConditionEvalResult ValidateRangeObjectPositionReference(string condition, ConditionContext context)

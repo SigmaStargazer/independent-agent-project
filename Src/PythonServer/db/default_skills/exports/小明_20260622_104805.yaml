@@ -1,0 +1,82 @@
+skills:
+- name: 走到目标旁交互
+  description: 走到某个可交互物体附近并与之交互
+  content: '当需要与场景中的某个物体进行交互时，先移动到目标物体附近，再触发交互动作。
+
+    根据目标所处的环境（平地/高处）选择不同的接近方式。
+
+    '
+  source: default
+  templates:
+  - name: 平地接近
+    description: 当目标在平地上、可直接走过去时
+    action_sequence_template:
+    - action: Move
+      params:
+        target: '{target_name}'
+        condition: object[0].distance < 1.5
+    - action: Interact
+      params:
+        target: '{target_name}'
+    step_explanations: []
+    usage_notes: '- {target_name} 替换为目标物体在场景中的实际名称
+
+      - condition 中的距离阈值可按目标尺寸适当调整（默认 1.5）
+
+      - 如果中途目标移动，Move 会自动追踪
+
+      '
+- name: 借助移动平台渡越陷阱
+  description: 借助自动往复移动的平台来渡过陷阱区域。适用于平台在陷阱上方往复运动、且陷阱与平台边界重合的场景。
+  content: 核心思路：站在平台上时，平台相对于自身的位置不会改变，因此不能用位置条件判断是否到达对岸。必须使用平台的状态变化（Idle→Move→Idle）来判断平台已完成一次移动。策略：1)等平台在出发侧停稳；2)走上平台深处；3)等平台开始移动；4)等平台停下（已到对岸）；5)走下平台。
+  source: refined
+  templates:
+  - name: 标准渡越
+    description: 从一侧借助平台渡到另一侧。等待平台在出发侧停稳后走上平台，用状态变化判断到达对岸，然后走下平台。参数说明：platform_index=平台序号,
+      platform_left_threshold=出发侧左边界阈值, direction=方向, offset=深入距离, exit_threshold=安全位置,
+      trap_index=陷阱序号
+    action_sequence_template:
+    - action: wait
+      condition: objects[0].State == "Idle" && objects[0].LeftPosition.x < 0
+    - action: move
+      direction: right
+      condition: myself.Position.x >= objects[0].RightPosition.x - 0
+      allowed_contact_obj_ids:
+      - 0
+      - 0
+    - action: wait
+      condition: objects[0].State == "Move"
+    - action: wait
+      condition: objects[0].State == "Idle"
+    - action: move
+      direction: right
+      condition: myself.Position.x > 0
+      allowed_contact_obj_ids:
+      - 0
+    step_explanations:
+    - step_index: 0
+      action_reason: 等待平台在出发侧停稳
+      parameter_reason: objects[0]替换为平台序号，LeftPosition.x阈值替换为出发侧左边界最大值
+      condition_reason: 平台必须Idle且在出发侧
+      adjustment_hint: 阈值设为出发侧左边界最大值加余量
+    - step_index: 1
+      action_reason: 走上平台深处确保站稳
+      parameter_reason: direction替换为方向，offset替换为深入距离
+      condition_reason: 走到平台右边缘附近，比走左边缘更稳定
+      adjustment_hint: 用RightPosition.x-0.5确保深入平台内部
+    - step_index: 2
+      action_reason: 等待平台开始移动
+      parameter_reason: objects[0]替换为平台序号
+      condition_reason: 站在平台上位置相对不变，必须用状态变化
+      adjustment_hint: 这是关键步骤
+    - step_index: 3
+      action_reason: 等待平台停下，此时已到对岸
+      parameter_reason: objects[0]替换为平台序号
+      condition_reason: 平台完成一次移动
+      adjustment_hint: 如停在中途需额外判断
+    - step_index: 4
+      action_reason: 走下平台到安全区域
+      parameter_reason: direction替换为方向，exit_threshold替换为安全位置，allowed_contact_obj_ids替换为陷阱序号
+      condition_reason: 走到远离陷阱的安全位置
+      adjustment_hint: exit_threshold应大于陷阱远边界
+    usage_notes: 1.关键：站在平台上时位置相对不变，必须用状态变化判断到达对岸。2.陷阱和平台边界重合时allowed_contact_obj_ids需含陷阱序号。3.走上平台要走到深处避免被甩下，建议用RightPosition.x-0.5。4.方向参数：向右为right，向左为left。

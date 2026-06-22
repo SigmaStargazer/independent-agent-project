@@ -135,13 +135,19 @@ async def plan_action_sequence_cmd(
     ]
     ) -> str:
     """规划一串连续的动作。
-    后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列
+    后续经过对动作序列进行校验、确认执行后，才会开始执行动作序列。
+
+    condition 是 DynamicExpresso 表达式。状态字符串必须使用双引号，例如 objects[1].State == "GreenLight"。
+    Vector2 坐标只能使用小写 .x / .y，例如 objects[1].LeftPosition.x，禁止写 .X / .Y。
+    禁止写 objects[1].State == 'GreenLight'，单引号字符串会导致 Unity 表达式解析失败。
+    当通过结构化工具参数传入 action_sequence 时，condition 是字符串字段；包含状态字符串时应保持内层双引号正确转义。
+
     举例：
     1) (假如信号灯的序号为1)在信号灯变绿后，立刻向右走2米。
     action_sequence = [
         {
             "action": "wait",
-            "condition": "objects[1].State == 'GreenLight'"
+            "condition": "objects[1].State == \"GreenLight\""
         },
         {
             "action": "move",
@@ -846,11 +852,13 @@ async def set_timer_cmd(
 
     使用场景推荐:
     - 当你需要在若干秒后提醒自己做事时，可以使用此工具。
-    - 当你需要周期性重复提醒时，可将 timer_repeat 设为 True。
+    - 当你需要低频周期性重复提醒时，可将 timer_repeat 设为 True。
+    - 重复计时器会反复发送反馈并打断你的思考和行动，因此 timer_repeat=True 时 delay_seconds 必须至少为 120 秒。
+    - 不要用几秒级重复计时器轮询环境变化；需要观察环境变化时，应优先使用观察、动作序列或持续观察类机制。
 
     Args:
         timer_name(str): 定时器名称，用于区分不同定时器
-        delay_seconds(float): 延迟秒数，定时器将在该秒数后触发
+        delay_seconds(float): 延迟秒数，定时器将在该秒数后触发；timer_repeat=True 时必须至少为120秒
         timer_description(str): 定时器描述，到期通知中会包含此信息
         timer_repeat(bool): 是否重复触发。True 表示到期后按相同间隔重复
 
@@ -859,6 +867,8 @@ async def set_timer_cmd(
     """
     if delay_seconds <= 0:
         return f"[{agent}]延迟秒数必须大于0"
+    if timer_repeat and delay_seconds < 120:
+        return f"[{agent}]重复定时器的间隔必须至少为120秒；过短的重复提醒会不断打断你的思考和行动。如果只需要短时间后提醒一次，请将timer_repeat设为False。"
     if not timer_name.strip():
         return f"[{agent}]定时器名称不能为空"
 

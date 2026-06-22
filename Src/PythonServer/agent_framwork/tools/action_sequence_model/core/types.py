@@ -70,8 +70,10 @@ Position: 物体当前位置。是一个Vector2对象。非范围物体可用；
 LeftPosition: 物体左边界位置。是一个Vector2对象。非范围物体等同Position。
 RightPosition: 物体右边界位置。是一个Vector2对象。非范围物体等同Position。
 Velocity: 物体当前速度。是一个Vector2对象。
-State: 物体当前状态，如'Idle'、'Move'等。
+Vector2对象只能访问小写坐标字段 .x / .y，禁止使用大写 .X / .Y。
+State: 物体当前状态，如 "Idle"、"Move" 等。DynamicExpresso 中字符串必须使用双引号，禁止使用单引号。
 
-# 示例：displacement >= 10 && myself.State == 'Move'"""
-
-# 示例：displacement.x >= 10 && myself.state == 'Move'"""
+# 正确示例：displacement >= 10 && myself.State == "Move"
+# 正确示例：objects[1].State == "Idle" && objects[1].LeftPosition.x < 8
+# 错误示例：myself.State == 'Move'
+# 错误示例：objects[1].LeftPosition.X < 8"""

@@ -16,7 +16,12 @@ from langchain_core.tools import tool
 from langgraph.prebuilt import InjectedState
 
 from memory_system import MemoryManager
-from memory_system.action_skill_system.skill_model import ActionSkill, ActionSequenceTemplate
+from memory_system.action_skill_system.skill_model import (
+    ActionSkill,
+    ActionSequenceTemplate,
+    normalize_step_explanations,
+    step_explanations_to_dicts,
+)
 from agent_framwork.systems.time_system import TimeSystem
 
 
@@ -44,6 +49,23 @@ def _parse_action_sequence(raw: str) -> List[dict]:
     return data
 
 
+def _parse_step_explanations(raw: str, step_count: int):
+    """把 Agent 传入的逐步解释 JSON 字符串解析为强类型列表。"""
+    if not raw or not raw.strip():
+        raise ValueError("step_explanations 不能为空，必须逐步解释每一个 action")
+    try:
+        data = json.loads(raw)
+    except Exception as e:
+        raise ValueError(f"step_explanations 不是合法 JSON：{e}")
+    return normalize_step_explanations(data, step_count, require_complete=True)
+
+
+def _format_step_explanations(explanations) -> str:
+    if not explanations:
+        return "[]"
+    return json.dumps(step_explanations_to_dicts(explanations), ensure_ascii=False)
+
+
 async def _curtime_str() -> str:
     """虚拟时间字符串，与 MemoryManager.save_memory 对齐。"""
     return await TimeSystem().aget_current_time(to_str=True)
@@ -61,6 +83,7 @@ async def create_action_skill(
     template_name: str,
     template_description: str,
     action_sequence_template: str,
+    step_explanations: str,
     usage_notes: str,
 ) -> str:
     """将一种新的行为模式总结为技能，同时记录下第一个使用场景的动作序列模板。
@@ -75,6 +98,7 @@ async def create_action_skill(
         template_name(str): 首个动作序列模板的名称，例如"近岸上浮板"
         template_description(str): 首个模板的描述（说明该模板适用的具体场景）
         action_sequence_template(str): 首个模板的动作序列模板（JSON 数组字符串，参数用 {占位符} 表示）
+        step_explanations(str): 逐步解释 JSON 数组，必须与动作序列步骤一一对应。每项包含 step_index、action_reason、parameter_reason、condition_reason、adjustment_hint
         usage_notes(str): 使用注意事项（场合、填参注意、过往经验总结）
 
     Returns:
@@ -82,6 +106,7 @@ async def create_action_skill(
     """
     try:
         seq = _parse_action_sequence(action_sequence_template)
+        explanations = _parse_step_explanations(step_explanations, len(seq))
     except ValueError as e:
         return f"创建技能失败：{e}"
 
@@ -92,6 +117,7 @@ async def create_action_skill(
         name=template_name,
         description=template_description,
         action_sequence_template=seq,
+        step_explanations=explanations,
         usage_notes=usage_notes,
     )
     skill = ActionSkill(
@@ -124,6 +150,7 @@ async def add_action_skill_template(
     template_name: str,
     template_description: str,
     action_sequence_template: str,
+    step_explanations: str,
     usage_notes: str,
 ) -> str:
     """为你已经掌握的某个技能，添加一个新的使用场景下的动作序列模板。
@@ -135,6 +162,7 @@ async def add_action_skill_template(
         template_name(str): 新模板的名称（同一技能下不可重复）
         template_description(str): 新模板的描述
         action_sequence_template(str): 新模板的动作序列模板（JSON 数组字符串）
+        step_explanations(str): 逐步解释 JSON 数组，必须与动作序列步骤一一对应
         usage_notes(str): 使用注意事项
 
     Returns:
@@ -142,6 +170,7 @@ async def add_action_skill_template(
     """
     try:
         seq = _parse_action_sequence(action_sequence_template)
+        explanations = _parse_step_explanations(step_explanations, len(seq))
     except ValueError as e:
         return f"添加模板失败：{e}"
 
@@ -151,6 +180,7 @@ async def add_action_skill_template(
         name=template_name,
         description=template_description,
         action_sequence_template=seq,
+        step_explanations=explanations,
         usage_notes=usage_notes,
     )
     try:
@@ -203,6 +233,7 @@ async def load_action_skill(
         lines.append(
             "  动作序列模板：" + json.dumps(t.action_sequence_template, ensure_ascii=False)
         )
+        lines.append("  逐步解释：" + _format_step_explanations(t.step_explanations))
         lines.append(f"  使用注意：{t.usage_notes}")
     return "\n".join(lines)
 
@@ -242,6 +273,7 @@ async def refine_action_skill(
     new_content: str = "",
     new_template_description: str = "",
     new_template: str = "",
+    new_step_explanations: str = "",
     new_usage_notes: str = "",
 ) -> str:
     """根据实践经验精进已有技能的某个方面。
@@ -257,15 +289,34 @@ async def refine_action_skill(
         new_content(str): 更新后的技能详细说明（可选）
         new_template_description(str): 更新后的模板描述（可选）
         new_template(str): 精进后的动作序列模板（JSON 数组字符串，可选）
+        new_step_explanations(str): 精进后的逐步解释 JSON 数组；如果更新了动作序列，也必须同步更新逐步解释
         new_usage_notes(str): 更新后的使用注意事项（可选）
 
     Returns:
         str: 精进结果说明
     """
     new_seq: Optional[List[dict]] = None
+    new_explanations = None
     if new_template:
+        if not new_step_explanations:
+            return "精进技能失败：更新动作序列时必须同步提供 new_step_explanations"
         try:
             new_seq = _parse_action_sequence(new_template)
+        except ValueError as e:
+            return f"精进技能失败：{e}"
+    if new_step_explanations:
+        try:
+            step_count = len(new_seq) if new_seq is not None else 0
+            if step_count == 0 and not new_template:
+                existing_skill = await MemoryManager().action_skill.get_skill(
+                    _name_to_group_id(agent), skill_name
+                )
+                if existing_skill and template_name:
+                    for tmpl in existing_skill.templates:
+                        if tmpl.name == template_name:
+                            step_count = len(tmpl.action_sequence_template)
+                            break
+            new_explanations = _parse_step_explanations(new_step_explanations, step_count)
         except ValueError as e:
             return f"精进技能失败：{e}"
 
@@ -280,6 +331,7 @@ async def refine_action_skill(
             new_content=new_content,
             new_template_description=new_template_description,
             new_template=new_seq,
+            new_step_explanations=new_explanations,
             new_usage_notes=new_usage_notes,
         )
     except ValueError as e:

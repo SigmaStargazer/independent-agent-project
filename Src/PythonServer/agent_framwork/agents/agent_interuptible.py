@@ -262,7 +262,7 @@ async def search_memory(state: State):
     query = state['messages'][-1].content
     # group_id = state['group_id']
     limit = 1 # 检索的记忆数量
-    skill_top_n = int(os.getenv("SKILL_INDEX_TOP_N", "5"))
+    skill_top_n = int(os.getenv("SKILL_INDEX_TOP_N", "3"))
 
     await aperf_print(f"[{name}]加载agent简介开始")
     mem_summary = await memory_manager.load_agent_summary(name=state['name'])
@@ -553,7 +553,7 @@ class Agent:
 
         print(f"[{self.name}]Agent is created.")
 
-    def _initialize_resume_state(self,
+    async def _initialize_resume_state(self,
         old_values: dict,
         messages: list,
         interrupt_reason: str | None = None
@@ -562,6 +562,13 @@ class Agent:
 
         if interrupt_reason:
             mem_to_save += (f"\n[系统] 当前思考被中断：{interrupt_reason}")
+
+        mem_to_save = await memory_manager.compress_memory_text(
+            name=self.name,
+            memory=mem_to_save,
+            curtime=await TimeSystem().aget_current_time(to_str=True),
+            unfinished=True,
+        )
 
         self._resume_state = {
             "messages": messages,
@@ -1018,7 +1025,7 @@ class Agent:
             # =========================
             # 5. 创建 resume state
             # =========================
-            self._initialize_resume_state(old_values=old_values, messages=messages, interrupt_reason=reason)
+            await self._initialize_resume_state(old_values=old_values, messages=messages, interrupt_reason=reason)
             # =========================
             # 6. fork 新 lineage
             # =========================
@@ -1105,6 +1112,7 @@ class Agent:
                     )
                 except asyncio.TimeoutError:
                     print(f"[{self.name}] finish timeout")
+            await self._save_interrupt_memory("Agent 结束运行，保存未完成的阶段性经历")
             # =========================
             # 2. clear queues
             # =========================

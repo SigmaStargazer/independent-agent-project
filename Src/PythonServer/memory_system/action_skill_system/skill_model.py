@@ -10,13 +10,96 @@ Action Skill 经验学习系统的数据模型。
 - ActionSkill 主键 uuid，业务唯一 (name, group_id)
 - ActionSequenceTemplate 主键 uuid，外键 skill_uuid，业务唯一 (name, skill_uuid)
 """
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import asdict, dataclass, field
+from typing import Any, List
+import json
 import uuid as _uuid
 
 
 def _new_uuid() -> str:
     return _uuid.uuid4().hex
+
+
+@dataclass
+class ActionSequenceStepExplanation:
+    """动作序列中单个 step 的逐步解释。"""
+
+    step_index: int = 0
+    action_reason: str = ""
+    parameter_reason: str = ""
+    condition_reason: str = ""
+    adjustment_hint: str = ""
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def _parse_step_explanations_raw(raw: Any) -> list:
+    if raw is None or raw == "":
+        return []
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except Exception as e:
+            raise ValueError(f"step_explanations 不是合法 JSON：{e}") from e
+    if not isinstance(raw, list):
+        raise ValueError("step_explanations 必须是数组")
+    return raw
+
+
+def normalize_step_explanations(
+    raw: Any,
+    step_count: int,
+    require_complete: bool = False,
+) -> List[ActionSequenceStepExplanation]:
+    """把 I/O 边界的 dict / JSON 归一化为强类型解释列表。"""
+    data = _parse_step_explanations_raw(raw)
+    if not data:
+        if require_complete and step_count > 0:
+            raise ValueError("step_explanations 不能为空，且必须与动作序列步骤一一对应")
+        return []
+
+    explanations: List[ActionSequenceStepExplanation] = []
+    seen_indices = set()
+    for item in data:
+        if isinstance(item, ActionSequenceStepExplanation):
+            explanation = item
+        elif isinstance(item, dict):
+            explanation = ActionSequenceStepExplanation(
+                step_index=int(item.get("step_index", 0)),
+                action_reason=str(item.get("action_reason", "") or ""),
+                parameter_reason=str(item.get("parameter_reason", "") or ""),
+                condition_reason=str(item.get("condition_reason", "") or ""),
+                adjustment_hint=str(item.get("adjustment_hint", "") or ""),
+            )
+        else:
+            raise ValueError("step_explanations 的每一项必须是对象")
+
+        if explanation.step_index < 0 or explanation.step_index >= step_count:
+            raise ValueError(
+                f"step_explanations[{explanation.step_index}] 超出动作序列范围 0..{step_count - 1}"
+            )
+        if explanation.step_index in seen_indices:
+            raise ValueError(f"step_explanations 中 step_index={explanation.step_index} 重复")
+        seen_indices.add(explanation.step_index)
+        explanations.append(explanation)
+
+    explanations.sort(key=lambda x: x.step_index)
+    if require_complete:
+        expected = set(range(step_count))
+        if seen_indices != expected:
+            missing = sorted(expected - seen_indices)
+            raise ValueError(
+                "step_explanations 必须与 action_sequence_template 长度完全一致；"
+                f"缺少 step_index={missing}"
+            )
+    return explanations
+
+
+def step_explanations_to_dicts(
+    explanations: List[ActionSequenceStepExplanation],
+) -> List[dict]:
+    return [item.to_dict() for item in explanations]
 
 
 @dataclass
@@ -33,9 +116,20 @@ class ActionSequenceTemplate:
     description: str = ""                         # 简短描述（用于 RAG 索引匹配）
     description_embedding: List[float] = field(default_factory=list)  # description 的向量
     action_sequence_template: List[dict] = field(default_factory=list)  # 含参数占位符的动作序列
+    step_explanations: List[ActionSequenceStepExplanation] = field(default_factory=list)
     usage_notes: str = ""                         # 使用注意事项（场合、填参经验等）
     created_at: str = ""                          # 创建时间（虚拟时间字符串）
     updated_at: str = ""                          # 最后修改时间（虚拟时间字符串）
+
+    def __post_init__(self):
+        self.step_explanations = normalize_step_explanations(
+            self.step_explanations,
+            len(self.action_sequence_template),
+            require_complete=False,
+        )
+
+    def step_explanations_dicts(self) -> List[dict]:
+        return step_explanations_to_dicts(self.step_explanations)
 
     def to_summary_dict(self) -> dict:
         """用于 list_action_skills 等需要摘要的场景。"""
@@ -50,6 +144,7 @@ class ActionSequenceTemplate:
             "name": self.name,
             "description": self.description,
             "action_sequence_template": self.action_sequence_template,
+            "step_explanations": self.step_explanations_dicts(),
             "usage_notes": self.usage_notes,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -61,6 +156,7 @@ class ActionSequenceTemplate:
             "name": self.name,
             "description": self.description,
             "action_sequence_template": self.action_sequence_template,
+            "step_explanations": self.step_explanations_dicts(),
             "usage_notes": self.usage_notes,
         }
 
@@ -80,7 +176,7 @@ class ActionSkill:
     templates: List[ActionSequenceTemplate] = field(default_factory=list)
 
     def to_index_dict(self) -> dict:
-        """用于注入 system prompt 的技能索引（轻量）。"""
+        """用于注入 system prompt 的技能索引。"""
         return {
             "name": self.name,
             "description": self.description,

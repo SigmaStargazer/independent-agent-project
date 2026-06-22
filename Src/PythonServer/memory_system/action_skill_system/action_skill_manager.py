@@ -17,7 +17,11 @@ import traceback
 from typing import List, Optional, Tuple
 
 from agent_framwork.base.singleton import singleton
-from .skill_model import ActionSkill, ActionSequenceTemplate
+from .skill_model import (
+    ActionSkill,
+    ActionSequenceTemplate,
+    normalize_step_explanations,
+)
 from memory_system.db_conn import DBConnectionService
 from memory_system.embedder import EmbedderService
 
@@ -88,7 +92,7 @@ class ActionSkillManager:
         need_rebuild = False
         try:
             probe = await self._conn().execute(
-                "MATCH (t:ActionSequenceTemplate) RETURN t.`description` AS d LIMIT 1"
+                "MATCH (t:ActionSequenceTemplate) RETURN t.`description` AS d, t.step_explanations AS se LIMIT 1"
             )
             list(probe.rows_as_dict())
         except Exception:
@@ -133,6 +137,7 @@ class ActionSkillManager:
             `description` STRING,
             `description_embedding` DOUBLE[],
             action_sequence_template STRING,
+            step_explanations STRING,
             usage_notes STRING,
             created_at STRING,
             updated_at STRING,
@@ -265,6 +270,12 @@ class ActionSkillManager:
                     f"模板名 '{tmpl.name}' 在该技能下已存在，请换一个名称"
                 )
 
+        tmpl.step_explanations = normalize_step_explanations(
+            tmpl.step_explanations,
+            len(tmpl.action_sequence_template),
+            require_complete=bool(tmpl.step_explanations),
+        )
+
         if not tmpl.description_embedding:
             tmpl.description_embedding = await self._embed(tmpl.description)
         tmpl.created_at = tmpl.created_at or curtime
@@ -274,13 +285,14 @@ class ActionSkillManager:
             "CREATE (t:ActionSequenceTemplate {uuid: $uuid, skill_uuid: $sid, "
             "name: $name, group_id: $gid, "
             "`description`: $description, `description_embedding`: $emb, "
-            "action_sequence_template: $seq, usage_notes: $notes, "
-            "created_at: $created_at, updated_at: $updated_at})",
+            "action_sequence_template: $seq, step_explanations: $step_explanations, "
+            "usage_notes: $notes, created_at: $created_at, updated_at: $updated_at})",
             {
                 "uuid": tmpl.uuid, "sid": tmpl.skill_uuid, "name": tmpl.name,
                 "gid": tmpl.group_id, "description": tmpl.description,
                 "emb": tmpl.description_embedding,
                 "seq": json.dumps(tmpl.action_sequence_template, ensure_ascii=False),
+                "step_explanations": json.dumps(tmpl.step_explanations_dicts(), ensure_ascii=False),
                 "notes": tmpl.usage_notes,
                 "created_at": tmpl.created_at, "updated_at": curtime,
             },
@@ -318,6 +330,11 @@ class ActionSkillManager:
                 name=t.get("name", ""),
                 description=t.get("description", ""),
                 action_sequence_template=seq,
+                step_explanations=normalize_step_explanations(
+                    t.get("step_explanations", []) or [],
+                    len(seq),
+                    require_complete=bool(t.get("step_explanations")),
+                ),
                 usage_notes=t.get("usage_notes", ""),
             ))
         skill = ActionSkill(
@@ -361,6 +378,7 @@ class ActionSkillManager:
         new_content: str = "",
         new_template_description: str = "",
         new_template: Optional[List[dict]] = None,
+        new_step_explanations: Optional[list] = None,
         new_usage_notes: str = "",
     ) -> None:
         """精进技能。任何字段变化都使 ActionSkill.version + 1，并更新 updated_at。
@@ -392,9 +410,27 @@ class ActionSkillManager:
                     raise ValueError(
                         f"模板 '{template_name}' 在技能 '{skill_name}' 下不存在"
                     )
-                if new_template_description or new_template is not None or new_usage_notes:
+                if (
+                    new_template_description
+                    or new_template is not None
+                    or new_step_explanations is not None
+                    or new_usage_notes
+                ):
                     set_parts = []
                     params = {"uuid": tmpl_uuid, "ut": curtime}
+                    existing_seq = None
+                    if new_step_explanations is not None and new_template is None:
+                        result = await self._conn().execute(
+                            "MATCH (t:ActionSequenceTemplate) WHERE t.uuid = $uuid "
+                            "RETURN t.action_sequence_template AS seq LIMIT 1",
+                            {"uuid": tmpl_uuid},
+                        )
+                        for row in result.rows_as_dict():
+                            try:
+                                existing_seq = json.loads(row.get("seq", "") or "[]")
+                            except Exception:
+                                existing_seq = []
+                            break
                     if new_template_description:
                         set_parts.append("t.`description` = $description")
                         set_parts.append("t.`description_embedding` = $emb")
@@ -403,6 +439,18 @@ class ActionSkillManager:
                     if new_template is not None:
                         set_parts.append("t.action_sequence_template = $seq")
                         params["seq"] = json.dumps(new_template, ensure_ascii=False)
+                    if new_step_explanations is not None:
+                        step_count = len(new_template if new_template is not None else (existing_seq or []))
+                        normalized_explanations = normalize_step_explanations(
+                            new_step_explanations,
+                            step_count,
+                            require_complete=True,
+                        )
+                        set_parts.append("t.step_explanations = $step_explanations")
+                        params["step_explanations"] = json.dumps(
+                            [item.to_dict() for item in normalized_explanations],
+                            ensure_ascii=False,
+                        )
                     if new_usage_notes:
                         set_parts.append("t.usage_notes = $notes")
                         params["notes"] = new_usage_notes
@@ -519,6 +567,15 @@ class ActionSkillManager:
             seq = json.loads(seq_str) if seq_str else []
         except Exception:
             seq = []
+        step_explanations_str = row.get("step_explanations", "") or ""
+        try:
+            step_explanations = normalize_step_explanations(
+                step_explanations_str,
+                len(seq),
+                require_complete=False,
+            )
+        except Exception:
+            step_explanations = []
         emb = row.get("description_embedding") or []
         return ActionSequenceTemplate(
             uuid=row.get("uuid", ""),
@@ -528,6 +585,7 @@ class ActionSkillManager:
             description=row.get("description", "") or "",
             description_embedding=list(emb) if emb else [],
             action_sequence_template=seq,
+            step_explanations=step_explanations,
             usage_notes=row.get("usage_notes", "") or "",
             created_at=row.get("created_at", "") or "",
             updated_at=row.get("updated_at", "") or "",
@@ -540,8 +598,9 @@ class ActionSkillManager:
             "RETURN t.uuid AS uuid, t.skill_uuid AS skill_uuid, "
             "t.name AS name, t.group_id AS group_id, "
             "t.`description` AS description, t.`description_embedding` AS description_embedding, "
-            "t.action_sequence_template AS action_sequence_template, "
-            "t.usage_notes AS usage_notes, "
+                "t.action_sequence_template AS action_sequence_template, "
+                "t.step_explanations AS step_explanations, "
+                "t.usage_notes AS usage_notes, "
             "t.created_at AS created_at, t.updated_at AS updated_at"
         )
         result = await self._conn().execute(cypher, {"uuid": skill_uuid})
@@ -635,8 +694,22 @@ class ActionSkillManager:
             lines.append(f"   适用：{tmpl.description}")
             if tmpl.action_sequence_template:
                 lines.append("   动作序列：")
-                for step in tmpl.action_sequence_template:
+                explanations_by_index = {
+                    item.step_index: item for item in tmpl.step_explanations
+                }
+                for step_index, step in enumerate(tmpl.action_sequence_template):
                     lines.append(f"     - {json.dumps(step, ensure_ascii=False)}")
+                    explanation = explanations_by_index.get(step_index)
+                    if explanation:
+                        lines.append("       这一步为什么这样做：")
+                        if explanation.action_reason:
+                            lines.append(f"         行动理由：{explanation.action_reason}")
+                        if explanation.parameter_reason:
+                            lines.append(f"         参数依据：{explanation.parameter_reason}")
+                        if explanation.condition_reason:
+                            lines.append(f"         结束条件依据：{explanation.condition_reason}")
+                        if explanation.adjustment_hint:
+                            lines.append(f"         变通提示：{explanation.adjustment_hint}")
             if tmpl.usage_notes:
                 lines.append(f"   使用注意：{tmpl.usage_notes}")
             lines.append(f"   所属技能：[{sk.name}] {sk.description}")

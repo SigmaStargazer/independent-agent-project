@@ -18,6 +18,14 @@ FORBIDDEN_PATTERNS = [
 
 IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
+SINGLE_QUOTED_STRING_LITERAL_RE = re.compile(
+    r"'[^'\\]*(?:\\.[^'\\]*)*'"
+)
+
+VECTOR2_UPPER_MEMBER_RE = re.compile(
+    r"\.(X|Y)\b"
+)
+
 STRING_LITERAL_RE = re.compile(
     r"""
     (?:'[^'\\]*(?:\\.[^'\\]*)*')

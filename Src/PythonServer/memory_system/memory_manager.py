@@ -14,12 +14,15 @@ from graphiti_core.search import search_config_recipes
 
 from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
 from graphiti_core.llm_client.config import LLMConfig
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from memory_system.action_skill_system import ActionSkillManager
 from memory_system.db_conn import DBConnectionService
 from memory_system.embedder import EmbedderService
 
 from agent_framwork.base.singleton import singleton
+from agent_framwork.utils.prompt_utils import estimate_tokens
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -29,6 +32,13 @@ mem_model_api_key = os.getenv("MEMORY_API_KEY")
 mem_model_name = os.getenv("MEMORY_MODEL")
 
 QUEUE_SIZE = int(os.getenv("MEMORY_QUEUE_SIZE", 1000))
+MEMORY_COMPRESS_ENABLED = os.getenv("MEMORY_COMPRESS_ENABLED", "true").lower() == "true"
+MEMORY_COMPRESS_TRIGGER_TOKENS = int(os.getenv("MEMORY_COMPRESS_TRIGGER_TOKENS", "12000"))
+MEMORY_COMPRESS_TARGET_TOKENS = int(os.getenv("MEMORY_COMPRESS_TARGET_TOKENS", "3000"))
+MEMORY_COMPRESS_INPUT_TOKENS = int(os.getenv("MEMORY_COMPRESS_INPUT_TOKENS", "20000"))
+MEMORY_COMPRESS_FALLBACK_CHARS = int(os.getenv("MEMORY_COMPRESS_FALLBACK_CHARS", "6000"))
+MEMORY_COMPRESS_TIMEOUT = float(os.getenv("MEMORY_COMPRESS_TIMEOUT", "60"))
+MEMORY_COMPRESS_MAX_RETRIES = int(os.getenv("MEMORY_COMPRESS_MAX_RETRIES", "1"))
 
 class _SharedKuzuDriver(KuzuDriver):
     def __init__(self, db_instance, conn_instance):
@@ -42,6 +52,15 @@ class MemoryManager:
                 api_key=mem_model_api_key, model=mem_model_name,
                 small_model=mem_model_name, base_url=mem_model_api_base
             )
+        self._compress_model = ChatOpenAI(
+            model=mem_model_name,
+            api_key=mem_model_api_key,
+            base_url=mem_model_api_base,
+            request_timeout=MEMORY_COMPRESS_TIMEOUT,
+            max_retries=MEMORY_COMPRESS_MAX_RETRIES,
+            max_tokens=MEMORY_COMPRESS_TARGET_TOKENS,
+            temperature=0,
+        )
         self._initialized = False
         self._init_lock = None
         self._kuzu_driver = None
@@ -251,6 +270,106 @@ class MemoryManager:
                 wait_result
             )
 
+    @staticmethod
+    def _truncate_to_token_budget(text: str, max_tokens: int) -> str:
+        if not text or estimate_tokens(text) <= max_tokens:
+            return text
+        max_chars = max(1000, max_tokens * 2)
+        head_chars = max_chars // 2
+        tail_chars = max_chars - head_chars
+        return (
+            text[:head_chars]
+            + "\n...[中间有一段重复或过长的原始经历被省略，用于避免压缩输入超长]...\n"
+            + text[-tail_chars:]
+        )
+
+    @staticmethod
+    def _fallback_diary_memory(memory: str) -> str:
+        if len(memory) <= MEMORY_COMPRESS_FALLBACK_CHARS:
+            return memory
+        half = max(500, MEMORY_COMPRESS_FALLBACK_CHARS // 2)
+        return (
+            "# 这段时间的经历（本地兜底压缩）\n"
+            "压缩模型暂时不可用，因此我只保留了这段经历的开头和结尾。\n\n"
+            "## 开始时发生的事\n"
+            f"{memory[:half]}\n\n"
+            "## 后来发生的事\n"
+            f"{memory[-half:]}"
+        )
+
+    async def compress_memory_text(
+        self,
+        name: str,
+        memory: str,
+        curtime: datetime | str,
+        unfinished: bool = False,
+    ) -> str:
+        tokens = estimate_tokens(memory)
+        if not MEMORY_COMPRESS_ENABLED or tokens <= MEMORY_COMPRESS_TRIGGER_TOKENS:
+            print(
+                f"[MemoryManager][{name}] memory length tokens={tokens}, "
+                f"chars={len(memory)}, compress=False"
+            )
+            return memory
+
+        print(
+            f"[MemoryManager][{name}] memory length tokens={tokens}, "
+            f"chars={len(memory)}, compress=True"
+        )
+        safe_memory = self._truncate_to_token_budget(memory, MEMORY_COMPRESS_INPUT_TOKENS)
+        status_line = "这段经历尚未结束。" if unfinished else "这段经历已经进入阶段性记录。"
+        system_prompt = (
+            "你是游戏世界中角色的长期记忆整理器。"
+            "你的任务不是写任务报告，也不是只总结经验结论，而是把冗长原始记录压缩成角色自己的情景日记式记忆。"
+            "必须保留时间线、场景细节、观察、心理活动、行动、工具调用、外界反馈、成功失败与未完成事项。"
+            "可以删除重复环境快照、重复工具日志和没有信息增量的冗余文本。"
+            "使用第一人称，中文输出。"
+        )
+        user_prompt = f"""请把下面原始经历压缩成情景日记式记忆。
+
+要求：
+- {status_line}
+- 不要只输出抽象经验条目。
+- 尽量按发生顺序写清楚我看到了什么、想了什么、做了什么、外界如何反馈。
+- 如果有尚未完成的意图，必须保留。
+- 最后可以保留少量从经历中自然得到的经验。
+
+建议结构：
+# 这段时间的经历
+## 时间与场景
+## 经历时间线
+## 重要细节
+## 当前未完成的事
+## 从这段经历自然得到的经验
+
+角色名：{name}
+记录时间：{curtime}
+
+原始经历：
+{safe_memory}
+"""
+        try:
+            response = await self._compress_model.ainvoke([
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=user_prompt),
+            ])
+            compressed = response.content.strip() if isinstance(response.content, str) else str(response.content)
+            if not compressed:
+                raise ValueError("压缩结果为空")
+            if estimate_tokens(compressed) > MEMORY_COMPRESS_TARGET_TOKENS * 1.5:
+                compressed = self._truncate_to_token_budget(
+                    compressed,
+                    int(MEMORY_COMPRESS_TARGET_TOKENS * 1.5),
+                )
+            print(
+                f"[MemoryManager][{name}] compressed memory tokens={estimate_tokens(compressed)}, "
+                f"chars={len(compressed)}"
+            )
+            return compressed
+        except Exception as e:
+            print(f"[MemoryManager][{name}] memory compress failed: {e}")
+            return self._fallback_diary_memory(memory)
+
     async def _save_memory_impl(
         self, 
         name: str, 
@@ -260,14 +379,18 @@ class MemoryManager:
         ):
         group_id = name.encode('utf-8').hex()
         try:
-            # 限制记忆长度，避免报错
-            MAX_CHARS_PER_EPISODE = 8000
-            if len(memory) > MAX_CHARS_PER_EPISODE:
+            memory = await self.compress_memory_text(
+                name=name,
+                memory=memory,
+                curtime=curtime,
+                unfinished=False,
+            )
+            if len(memory) > MEMORY_COMPRESS_FALLBACK_CHARS * 2:
                 print(
-                    f"[MemoryManager][{name}] memory too large "
-                    f"({len(memory)} chars), truncating to {MAX_CHARS_PER_EPISODE}"
+                    f"[MemoryManager][{name}] compressed memory still large "
+                    f"({len(memory)} chars), fallback truncating"
                 )
-                memory = memory[:MAX_CHARS_PER_EPISODE]
+                memory = self._fallback_diary_memory(memory)
 
             async with self._graph_write_lock:
                 for i in range(3):
