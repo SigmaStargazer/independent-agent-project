@@ -696,13 +696,15 @@ namespace IndependentAgentProject
                 return;
             }
             // 4. 判断目标是否已持续观察
-            if (mObserveRuntimes.Any(r => r.Target == target))
+            var existedIdx = mObserveRuntimes.FindIndex(r => r.Target == target);
+            if (existedIdx >= 0)
             {
+                int existedDisplayIdx = existedIdx + 1;
                 AgentService.Instance.SendToolResultMessage(
                     Name,
                     "MonitorTarget",
                     requestId,
-                    $"[持续观察结果]对象:{objectIndex}. {target.Name} 已在观察中"
+                    $"[持续观察结果] 你已经在持续观察 \"{target.Name}\"（持续观察目标[{existedDisplayIdx}]），无需重复挂上视线。要查看它的详细变化记录，调用 get_monitor_records 时填入持续观察目标序号 {existedDisplayIdx} 即可。"
                 );
                 return;
             }
@@ -761,28 +763,32 @@ namespace IndependentAgentProject
             runtime.Records.Enqueue(initRecord);
             runtime.UnreadCount++;
             mObserveRuntimes.Add(runtime);
-            // 8. 返回持续观察开始反馈
+            // 8. 返回持续观察开始反馈（角色化文案 + 明确告知持续观察目标序号）
+            int monitorTargetIndex = mObserveRuntimes.Count;
             AgentService.Instance.SendToolResultMessage(
                 Name,
                 "MonitorTarget",
                 requestId,
-                $"[持续观察结果]开始持续观察目标:{objectIndex}. {target.Name}"
+                $"[持续观察结果] 你已经把视线挂在了 \"{target.Name}\" 身上。" +
+                $"这是你目前的第 {monitorTargetIndex} 个持续观察目标（持续观察目标[{monitorTargetIndex}]）。" +
+                $"今后想回顾它的详细变化记录时，调用 get_monitor_records 并填入持续观察目标序号 {monitorTargetIndex} 即可。"
             );
         }
-        public void GetMonitorRecords(string requestId, int monitorIndex)
+        public void GetMonitorRecords(string requestId, int monitorTargetIndex)
         {
-            if (monitorIndex < 1 || monitorIndex > mObserveRuntimes.Count)
+            if (monitorTargetIndex < 1 || monitorTargetIndex > mObserveRuntimes.Count)
             {
                 AgentService.Instance.SendToolResultMessage(
                     Name,
                     "GetMonitorRecords",
                     requestId,
-                    $"[获取观察记录失败] monitor[{monitorIndex}]不存在"
+                    $"[获取观察记录失败] 持续观察目标[{monitorTargetIndex}] 不存在。请先在自我状态中查看「持续观察中的目标」列表，" +
+                    $"再用列表里那个目标对应的持续观察目标序号重新调用。"
                 );
                 return;
             }
             // 1. 获取记录消息
-            ObserveRuntime runtime = mObserveRuntimes[monitorIndex - 1];
+            ObserveRuntime runtime = mObserveRuntimes[monitorTargetIndex - 1];
             var actionInfoRenderer = new RuntimeInfoRenderer();
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
             string text = actionInfoRenderer.RenderObserveTargetRuntime(runtime, sceneObjs);

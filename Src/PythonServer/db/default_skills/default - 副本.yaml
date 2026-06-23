@@ -1,0 +1,101 @@
+skills:
+- name: 走到目标旁交互
+  description: 走到某个可交互物体附近并按下交互键
+  content: |-
+    当需要与场景中的某个物体进行交互时，先走到它身边，等"可交互且最近可交互目标就是它"成立后再触发交互。
+    适合放在平地上、能直接走过去的目标。
+  source: default
+  templates:
+  - name: 平地接近后交互
+    description: 目标在平地上、可直接走过去时使用：先走到目标旁触发可交互，再 interact。
+    action_sequence_template:
+    - action: move
+      direction: "{direction}"
+      condition: canInteract == true && nearestInteractableIndex == {target_index}
+      allowed_contact_obj_ids: []
+    - action: interact
+    step_explanations:
+    - step_index: 0
+      action_reason: 用 move 把自己挪到目标身边，触发"可交互"的距离阈值
+      parameter_reason: |
+        - {direction}：根据目标在自己左侧还是右侧填 "left" 或 "right"
+        - {target_index}：当前观察结果里这个交互目标的序号（objects[i] 的 i）
+        - allowed_contact_obj_ids 填 []，因为这段路上不期望与其他物体发生碰撞
+      condition_reason: 用 canInteract && nearestInteractableIndex == 目标序号 判断"已经走到位且最近可交互目标确实是目标本身"
+      adjustment_hint: 如果途中可能撞上其他能挡路的物体，把它们的序号加进 allowed_contact_obj_ids
+    - step_index: 1
+      action_reason: 在可交互状态下按下交互
+      parameter_reason: interact 没有参数
+      condition_reason: interact 不需要 condition
+      adjustment_hint: 如果交互对象会弹出选项，需要在后面再追加 select 步骤
+    usage_notes: |
+      使用条件：目标在平地上、可以直接靠近。
+      参数填法：{direction} 根据目标相对自己的方位选 left/right；{target_index} 取当前观察里该交互目标的序号。
+      如果中途需要避开陷阱等危险物体，请重新规划，不要直接套用本模板。
+- name: 借助移动平台渡越陷阱
+  description: 借助自动往复移动的平台来渡过陷阱区域。适用于平台在陷阱上方往复运动、且陷阱与平台边界重合的场景。
+  content: |-
+    核心思路：站在平台上时，平台相对于自身的位置不会改变，因此不能用位置条件判断是否到达对岸。
+    必须使用平台的状态变化（Idle→Move→Idle）来判断平台已完成一次移动。
+    策略：1) 等平台在出发侧停稳；2) 走上平台深处；3) 等平台开始移动；4) 等平台停下（已到对岸）；5) 走下平台。
+  source: default
+  templates:
+  - name: 单向渡越（标准）
+    description: 从一侧借助平台渡到另一侧。等平台在出发侧停稳后走上平台，用状态变化判断到达对岸，再走下平台。
+    action_sequence_template:
+    - action: wait
+      condition: objects[{platform_index}].State == "Idle" && objects[{platform_index}].LeftPosition.x < {platform_left_threshold}
+    - action: move
+      direction: "{direction}"
+      condition: myself.Position.x >= objects[{platform_index}].RightPosition.x - {offset}
+      allowed_contact_obj_ids:
+      - "{platform_index}"
+      - "{trap_index}"
+    - action: wait
+      condition: objects[{platform_index}].State == "Move"
+    - action: wait
+      condition: objects[{platform_index}].State == "Idle"
+    - action: move
+      direction: "{direction}"
+      condition: myself.Position.x > {exit_threshold}
+      allowed_contact_obj_ids:
+      - "{trap_index}"
+    step_explanations:
+    - step_index: 0
+      action_reason: 先等平台在出发侧停稳，再上平台，避免被甩下
+      parameter_reason: |
+        - {platform_index}：当前观察中浮板的序号（objects[i] 的 i）
+        - {platform_left_threshold}：出发侧左边界的阈值，平台 LeftPosition.x 小于该值才算"在出发侧"
+      condition_reason: Idle 表示平台停稳；LeftPosition.x < 阈值 表示平台目前停在出发侧
+      adjustment_hint: 出发侧在右、目标侧在左时，需要把 LeftPosition.x < 阈值 改成 RightPosition.x > 阈值
+    - step_index: 1
+      action_reason: 走上平台深处而不是仅靠边，避免平台一动就把自己甩下
+      parameter_reason: |
+        - {direction}：朝目标侧的方向，"left" 或 "right"
+        - {offset}：远离平台远端的距离余量，常用 0.5 表示踩到 RightPosition.x - 0.5
+        - allowed_contact_obj_ids：填平台与陷阱的序号，允许接触它们而不视为撞击
+      condition_reason: 用 myself.Position.x 与平台远端 RightPosition.x 比较，确认自己已踩到平台深处
+      adjustment_hint: 反向时把 RightPosition.x 改成 LeftPosition.x，并相应反向加减 offset
+    - step_index: 2
+      action_reason: 等平台开始移动，确认平台已经载着自己出发
+      parameter_reason: "{platform_index} 同上：观察中浮板的序号"
+      condition_reason: 站在平台上时位置相对不变，必须用状态变化判断"已经在动"
+      adjustment_hint: 这是关键步骤，缺少这一步可能把途中误判为到达
+    - step_index: 3
+      action_reason: 等平台停下，意味着这次移动结束，自己已抵达对岸
+      parameter_reason: "{platform_index} 同上"
+      condition_reason: Move→Idle 的状态切换是"到达对岸"的可靠信号
+      adjustment_hint: 如果平台在中途也会停顿，需要额外手段确认确实是到达对岸而非半程停靠
+    - step_index: 4
+      action_reason: 走下平台、远离陷阱到达安全位置
+      parameter_reason: |
+        - {direction}：与第二步保持同方向
+        - {exit_threshold}：安全位置的 x 阈值，应大于陷阱在该侧的远边界
+        - allowed_contact_obj_ids：保留陷阱序号，避免边界处接触陷阱被误判为撞击中断
+      condition_reason: 用 myself.Position.x 与安全位置阈值比较，确认已经离开危险区
+      adjustment_hint: 反向渡越时阈值改为"小于安全位置 x"，并对应调整 direction
+    usage_notes: |
+      - 核心：站在平台上位置相对不变，必须用平台 State 的 Idle→Move→Idle 判断到达对岸，不要用位置条件。
+      - 陷阱和平台边界重合时，allowed_contact_obj_ids 必须含陷阱序号，否则一接触就会被判为撞击中断。
+      - 走上平台时务必踩到深处（如 RightPosition.x - 0.5），不要只到边缘。
+      - 反向渡越（从右到左）时，把 direction 改成 "left"，并把所有 RightPosition.x 与 LeftPosition.x、阈值方向同步翻转。

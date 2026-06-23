@@ -72,23 +72,24 @@ namespace IndependentAgentProject
                     var curTime = Time.time;
                     var elapsed = curTime - runtime.LastChangeTime;
                     var observeTime = curTime - runtime.ObserveStartTime;
-                    infos.Add($"观察目标[{num}]\n" +
+                    infos.Add($"持续观察目标[{num}]\n" +
                         $"对象: {index}. {runtime.TargetName}\n" +
                         $"观察时长:{observeTime:F1}秒\n" +
                         $"最后状态: {runtime.LastStateName}\n" +
                         $"最后变化: {elapsed:F1}秒前\n" +
                         $"状态变化次数:{runtime.StateChangeNum}次\n" +
                         $"未读记录: {runtime.UnreadCount}条\n" +
-                        $"存储记录: {runtime.Records.Count}条");
+                        $"存储记录: {runtime.Records.Count}条\n" +
+                        $"想回顾它的详细变化记录时，请调用 get_monitor_records 并填入持续观察目标序号 {num}");
                 }
             else
             {
-                infos.Add($"观察目标[{num}]:\n" +
+                infos.Add($"持续观察目标[{num}]:\n" +
                     $"对象: {runtime.TargetName}（已消失）");
             }
                 num++;
             }
-            return $"目前正对{observeRuntimes.Count}个目标进行持续观察\n" +
+            return $"你目前正在持续观察 {observeRuntimes.Count} 个目标\n" +
                 string.Join("\n\n", infos);
         }
 

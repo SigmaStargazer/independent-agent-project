@@ -107,7 +107,14 @@ class ActionSequenceTemplate:
     """某个 ActionSkill 下的一个具体动作序列模板。
 
     一个 ActionSkill 可对应多个 ActionSequenceTemplate（1:N），
-    每个模板代表一个特定使用场景下的动作序列模板（含参数占位符）。
+    每个模板代表一个特定使用场景下的动作序列模板。
+
+    v0.21.6：`action_sequence_template` 是「参数化动作序列模板蓝图」，
+    允许在字符串字段中内联 `{snake_case}` 占位符（如 `"{direction}"`、`"{platform_index}"`）。
+    模板保存时使用宽松校验（参见 agent.tools.skill_tools._parse_action_sequence_template），
+    真正执行 `plan_action_sequence_cmd` 时会强校验，拒绝未替换的占位符。
+    占位符的语义解释写在 `step_explanations.parameter_reason` 与 `usage_notes` 中，
+    不再单独维护 `template_parameters` 字段。
     """
     uuid: str = field(default_factory=_new_uuid)
     skill_uuid: str = ""
@@ -115,9 +122,9 @@ class ActionSequenceTemplate:
     group_id: str = ""
     description: str = ""                         # 简短描述（用于 RAG 索引匹配）
     description_embedding: List[float] = field(default_factory=list)  # description 的向量
-    action_sequence_template: List[dict] = field(default_factory=list)  # 含参数占位符的动作序列
+    action_sequence_template: List[dict] = field(default_factory=list)  # 含内联 {占位符} 的动作序列蓝图
     step_explanations: List[ActionSequenceStepExplanation] = field(default_factory=list)
-    usage_notes: str = ""                         # 使用注意事项（场合、填参经验等）
+    usage_notes: str = ""                         # 使用注意事项（场合、占位符填参经验等）
     created_at: str = ""                          # 创建时间（虚拟时间字符串）
     updated_at: str = ""                          # 最后修改时间（虚拟时间字符串）
 

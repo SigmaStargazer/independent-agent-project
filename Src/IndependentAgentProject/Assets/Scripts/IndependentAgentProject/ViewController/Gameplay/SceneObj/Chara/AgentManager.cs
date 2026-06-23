@@ -128,11 +128,11 @@ namespace IndependentAgentProject
                 agentObj.MonitorTarget(requestId, objectIndex, objectName);
             }
         }
-        private void GetMonitorRecords(string agent, string requestId, int monitorIndex)
+        private void GetMonitorRecords(string agent, string requestId, int monitorTargetIndex)
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.GetMonitorRecords(requestId, monitorIndex);
+                agentObj.GetMonitorRecords(requestId, monitorTargetIndex);
             }
         }
         private void GetWorldEventLog(string agent, string requestId)

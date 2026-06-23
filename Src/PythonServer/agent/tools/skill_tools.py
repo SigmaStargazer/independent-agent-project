@@ -6,11 +6,17 @@
 - 参数使用 skill_name / template_name，不暴露 uuid
 - 失败时返回描述性错误字符串（不抛异常），便于 LLM 自主决策
 - 写操作内部从 TimeSystem 取虚拟时间作为 created_at / updated_at
+
+ActionSkill 模板参数化（v0.21.6）：
+- action_sequence_template 是「参数化动作序列模板蓝图」，允许内联 `{snake_case}` 占位符
+- 模板保存时使用宽松校验（允许占位符）；真正执行 plan_action_sequence_cmd 时会强校验，拒绝未替换占位符
+- 参数解释靠 step_explanations.parameter_reason 与 usage_notes，不引入独立 template_parameters 字段
 """
 from __future__ import annotations
 
 import json
-from typing import Annotated, List, Optional
+import re
+from typing import Annotated, Any, List, Optional
 
 from langchain_core.tools import tool
 from langgraph.prebuilt import InjectedState
@@ -23,6 +29,49 @@ from memory_system.action_skill_system.skill_model import (
     step_explanations_to_dicts,
 )
 from agent_framwork.systems.time_system import TimeSystem
+from agent_framwork.tools.action_sequence_model.model.action_sequence import (
+    get_known_action_names,
+)
+
+
+# ----------------------------------------------------------------------
+# 内部工具：占位符语法
+# ----------------------------------------------------------------------
+# 合法占位符：{snake_case_name}，仅允许 a-z / 0-9 / _，必须以小写字母开头
+PLACEHOLDER_RE = re.compile(r"\{([^{}]*)\}")
+VALID_PLACEHOLDER_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+
+
+def _scan_placeholders(value: Any, path: str, errors: List[str]) -> List[str]:
+    """递归扫描所有字符串中的占位符；遇到非法格式写入 errors。返回所有发现的合法占位符名。"""
+    found: List[str] = []
+    if isinstance(value, str):
+        for m in PLACEHOLDER_RE.finditer(value):
+            name = m.group(1)
+            if not VALID_PLACEHOLDER_NAME_RE.match(name):
+                errors.append(
+                    f"{path}: 占位符 '{{{name}}}' 非法，必须满足 {{snake_case}}（小写字母开头，仅含 a-z/0-9/_）"
+                )
+                continue
+            found.append(name)
+    elif isinstance(value, list):
+        for i, item in enumerate(value):
+            found.extend(_scan_placeholders(item, f"{path}[{i}]", errors))
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            found.extend(_scan_placeholders(v, f"{path}.{k}", errors))
+    return found
+
+
+def _contains_placeholder(value: Any) -> bool:
+    """是否包含至少一个 {placeholder}（任意格式都算）。"""
+    if isinstance(value, str):
+        return bool(PLACEHOLDER_RE.search(value))
+    if isinstance(value, list):
+        return any(_contains_placeholder(v) for v in value)
+    if isinstance(value, dict):
+        return any(_contains_placeholder(v) for v in value.values())
+    return False
 
 
 # ----------------------------------------------------------------------
@@ -33,8 +82,16 @@ def _name_to_group_id(name: str) -> str:
     return (name or "").encode("utf-8").hex()
 
 
-def _parse_action_sequence(raw: str) -> List[dict]:
-    """把 Agent 传入的 JSON 字符串解析为 List[dict]；失败抛 ValueError。"""
+def _parse_action_sequence_template(raw: str) -> List[dict]:
+    """把 Agent 传入的「参数化动作序列模板蓝图」JSON 字符串解析为 List[dict]；失败抛 ValueError。
+
+    校验策略（宽松）：
+    - 必须是合法 JSON 数组；
+    - 每个 step 必须是 dict，且包含字符串字段 `action`；
+    - `action` 本身不能是占位符（动作类型不能参数化）；
+    - `action` 必须是 ActionStep Union 自动派生的合法名称之一；
+    - 其它字段允许内联 `{snake_case}` 占位符，不在此处做完整 Pydantic 校验。
+    """
     if not raw or not raw.strip():
         return []
     try:
@@ -42,10 +99,40 @@ def _parse_action_sequence(raw: str) -> List[dict]:
     except Exception as e:
         raise ValueError(
             f"action_sequence_template 不是合法 JSON：{e}。"
-            f"应为形如 [{{\"action\":\"Move\",\"params\":{{...}}}}, ...] 的数组"
+            "应为形如 [{\"action\":\"move\",\"direction\":\"{direction}\",...}] 的数组；"
+            "占位符必须写在字符串里（如 \"{direction}\"），不能写成裸 {direction}"
         )
     if not isinstance(data, list):
         raise ValueError("action_sequence_template 必须是 JSON 数组")
+
+    known_actions = get_known_action_names()
+    errors: List[str] = []
+
+    for i, step in enumerate(data):
+        if not isinstance(step, dict):
+            errors.append(f"step[{i}] 必须是对象（dict）")
+            continue
+        action = step.get("action")
+        if action is None or action == "":
+            errors.append(f"step[{i}].action 不能为空")
+            continue
+        if not isinstance(action, str):
+            errors.append(f"step[{i}].action 必须是字符串")
+            continue
+        if _contains_placeholder(action):
+            errors.append(
+                f"step[{i}].action 不允许使用占位符；动作类型必须是 {sorted(known_actions)} 之一"
+            )
+            continue
+        if action not in known_actions:
+            errors.append(
+                f"step[{i}].action='{action}' 不是合法动作类型；合法动作：{sorted(known_actions)}"
+            )
+            continue
+        _scan_placeholders(step, f"step[{i}]", errors)
+
+    if errors:
+        raise ValueError("；".join(errors))
     return data
 
 
@@ -91,21 +178,28 @@ async def create_action_skill(
     当你完成或中止了一次值得复用的动作序列后，可以用这个工具把它沉淀为可日后调用的技能。
     技能下至少需要一个动作序列模板。
 
+    重要：action_sequence_template 是「参数化动作序列模板蓝图」。
+    - 凡是不同场景下需要调整的字段（如目标编号、阈值、方向等），都应写成 `{snake_case}` 占位符，例如 `"{target_interactable_index}"`、`"{direction}"`、`"{exit_threshold}"`。
+    - 占位符必须出现在 JSON 字符串里，不能写成裸的 `{direction}`（必须是 `"{direction}"`），不允许中文或大写、空格。
+    - 真正执行动作序列时（plan_action_sequence_cmd），必须先把所有占位符替换成当前场景的真实值；保留任何 `{...}` 都会被拒绝。
+    - 每个占位符在 step_explanations.parameter_reason / usage_notes 中要说明含义、如何确定取值。
+    - action 字段本身不能是占位符；动作类型必须是合法的动作之一（wait / move / interact / select / input 等，由系统从 ActionStep 自动推导）。
+
     Args:
         skill_name(str): 技能的名称，例如"乘坐移动平台"
         description(str): 技能的简短描述（用于日后识别这个技能适用的场景）
         content(str): 技能的详细说明（介绍该技能的核心思路、关键步骤）
         template_name(str): 首个动作序列模板的名称，例如"近岸上浮板"
         template_description(str): 首个模板的描述（说明该模板适用的具体场景）
-        action_sequence_template(str): 首个模板的动作序列模板（JSON 数组字符串，参数用 {占位符} 表示）
-        step_explanations(str): 逐步解释 JSON 数组，必须与动作序列步骤一一对应。每项包含 step_index、action_reason、parameter_reason、condition_reason、adjustment_hint
-        usage_notes(str): 使用注意事项（场合、填参注意、过往经验总结）
+        action_sequence_template(str): 首个模板的动作序列模板（JSON 数组字符串，参数用 `"{snake_case}"` 占位符表示）
+        step_explanations(str): 逐步解释 JSON 数组，必须与动作序列步骤一一对应。每项包含 step_index、action_reason、parameter_reason（要解释清楚每个占位符的含义和取值依据）、condition_reason、adjustment_hint
+        usage_notes(str): 使用注意事项（场合、占位符填参经验、过往复用经验）
 
     Returns:
         str: 创建结果说明
     """
     try:
-        seq = _parse_action_sequence(action_sequence_template)
+        seq = _parse_action_sequence_template(action_sequence_template)
         explanations = _parse_step_explanations(step_explanations, len(seq))
     except ValueError as e:
         return f"创建技能失败：{e}"
@@ -157,19 +251,24 @@ async def add_action_skill_template(
 
     当你发现已有技能在某个新场景下需要不同的动作序列时使用。
 
+    重要：action_sequence_template 是「参数化动作序列模板蓝图」（同 create_action_skill 的规则）：
+    - 不同场景下需要调整的字段写成 `"{snake_case}"` 占位符（如 `"{platform_index}"`、`"{exit_threshold}"`）；
+    - 占位符必须包在字符串里；
+    - 真正执行动作序列时必须先替换全部占位符。
+
     Args:
         skill_name(str): 已经掌握的技能名称
         template_name(str): 新模板的名称（同一技能下不可重复）
         template_description(str): 新模板的描述
-        action_sequence_template(str): 新模板的动作序列模板（JSON 数组字符串）
-        step_explanations(str): 逐步解释 JSON 数组，必须与动作序列步骤一一对应
-        usage_notes(str): 使用注意事项
+        action_sequence_template(str): 新模板的动作序列模板（JSON 数组字符串，参数用 `"{snake_case}"` 占位符表示）
+        step_explanations(str): 逐步解释 JSON 数组，必须与动作序列步骤一一对应；要在 parameter_reason 中解释每个占位符
+        usage_notes(str): 使用注意事项（含占位符填参经验）
 
     Returns:
         str: 操作结果说明
     """
     try:
-        seq = _parse_action_sequence(action_sequence_template)
+        seq = _parse_action_sequence_template(action_sequence_template)
         explanations = _parse_step_explanations(step_explanations, len(seq))
     except ValueError as e:
         return f"添加模板失败：{e}"
@@ -282,13 +381,15 @@ async def refine_action_skill(
     template_name 非空：精进该模板的描述 / 动作序列 / 使用注意事项（按非空字段更新）。
     任何字段被精进，技能 version 都会 +1，新动作序列直接覆盖旧的（不保留历史版本）。
 
+    重要：new_template 同样是「参数化动作序列模板蓝图」，需要使用 `"{snake_case}"` 占位符（参见 create_action_skill 规则）。
+
     Args:
         skill_name(str): 要精进的技能名称
         reason(str): 精进原因（写在自己的记忆里供日后回看）
         template_name(str): 要精进的模板名称（留空表示仅精进技能层）
         new_content(str): 更新后的技能详细说明（可选）
         new_template_description(str): 更新后的模板描述（可选）
-        new_template(str): 精进后的动作序列模板（JSON 数组字符串，可选）
+        new_template(str): 精进后的动作序列模板（JSON 数组字符串，使用 `"{snake_case}"` 占位符；可选）
         new_step_explanations(str): 精进后的逐步解释 JSON 数组；如果更新了动作序列，也必须同步更新逐步解释
         new_usage_notes(str): 更新后的使用注意事项（可选）
 
@@ -301,7 +402,7 @@ async def refine_action_skill(
         if not new_step_explanations:
             return "精进技能失败：更新动作序列时必须同步提供 new_step_explanations"
         try:
-            new_seq = _parse_action_sequence(new_template)
+            new_seq = _parse_action_sequence_template(new_template)
         except ValueError as e:
             return f"精进技能失败：{e}"
     if new_step_explanations:

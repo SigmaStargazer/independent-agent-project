@@ -390,7 +390,7 @@ message AgentMonitorTargetRequest {
 message AgentGetMonitorRecordsRequest {
 	string agent = 1;
 	string request_id = 2;
-	int32 monitor_index = 3;
+	int32 monitor_target_index = 3;
 }
 
 ////////////////////////////////////////////////////////////////

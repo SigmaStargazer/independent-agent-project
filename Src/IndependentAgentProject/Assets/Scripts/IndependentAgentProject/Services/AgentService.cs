@@ -675,8 +675,8 @@ namespace Services
         }
         void OnAgentGetMonitorRecords(object sender, AgentGetMonitorRecordsRequest request)
         {
-            Debug.LogFormat($"OnAgentGetMonitorRecords::Agent:{request.Agent} RequestId:{request.RequestId} MonitorIndex:{request.MonitorIndex}");
-            this.OnGetMonitorRecords?.Invoke(request.Agent, request.RequestId, request.MonitorIndex);
+            Debug.LogFormat($"OnAgentGetMonitorRecords::Agent:{request.Agent} RequestId:{request.RequestId} MonitorTargetIndex:{request.MonitorTargetIndex}");
+            this.OnGetMonitorRecords?.Invoke(request.Agent, request.RequestId, request.MonitorTargetIndex);
         }
         void OnAgentGetWorldEventLog(object sender, AgentGetWorldEventLogRequest request)
         {

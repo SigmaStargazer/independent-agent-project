@@ -693,7 +693,7 @@ class ActionSkillManager:
             lines.append(f"{i}. 模板：{tmpl.name}")
             lines.append(f"   适用：{tmpl.description}")
             if tmpl.action_sequence_template:
-                lines.append("   动作序列：")
+                lines.append("   动作序列模板蓝图（含 {占位符}，复用前必须替换为真实值再交给 plan_action_sequence 执行）：")
                 explanations_by_index = {
                     item.step_index: item for item in tmpl.step_explanations
                 }
@@ -705,7 +705,7 @@ class ActionSkillManager:
                         if explanation.action_reason:
                             lines.append(f"         行动理由：{explanation.action_reason}")
                         if explanation.parameter_reason:
-                            lines.append(f"         参数依据：{explanation.parameter_reason}")
+                            lines.append(f"         参数依据（含占位符含义与取值）：{explanation.parameter_reason}")
                         if explanation.condition_reason:
                             lines.append(f"         结束条件依据：{explanation.condition_reason}")
                         if explanation.adjustment_hint:

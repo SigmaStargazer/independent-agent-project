@@ -1,4 +1,5 @@
 import asyncio
+import re
 import uuid
 from typing import Annotated, List
 from pydantic import Field
@@ -30,6 +31,46 @@ from network import message_pb2
 # https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode.inject_tool_args
 
 TOOL_TIMEOUT = 30#RPC调用超时时间
+
+# v0.21.6：执行动作序列前用于检测未替换的「技能模板占位符」
+_EXECUTABLE_PLACEHOLDER_RE = re.compile(r"\{[a-zA-Z_][a-zA-Z0-9_]*\}")
+
+
+def _find_unresolved_placeholders(action_sequence) -> List[str]:
+    """扫描即将执行的 action_sequence 中是否仍存在 {placeholder}。
+
+    用于 plan_action_sequence_cmd：技能模板必须先把所有占位符替换为真实值后才能执行。
+    返回去重后的占位符 token 列表（含花括号），按出现顺序排列；空列表表示无未替换占位符。
+    """
+    found: List[str] = []
+    seen = set()
+
+    def _scan_str(s: str):
+        if not isinstance(s, str):
+            return
+        for m in _EXECUTABLE_PLACEHOLDER_RE.finditer(s):
+            token = m.group(0)
+            if token not in seen:
+                seen.add(token)
+                found.append(token)
+
+    for step in action_sequence:
+        if hasattr(step, "model_dump"):
+            payload = step.model_dump()
+        elif isinstance(step, dict):
+            payload = step
+        else:
+            payload = {}
+        stack = [payload]
+        while stack:
+            cur = stack.pop()
+            if isinstance(cur, str):
+                _scan_str(cur)
+            elif isinstance(cur, list):
+                stack.extend(cur)
+            elif isinstance(cur, dict):
+                stack.extend(cur.values())
+    return found
 
 # region Agent交流工具
 @tool
@@ -199,6 +240,14 @@ async def plan_action_sequence_cmd(
         str: 规划动作序列结果
     """
     # seq = ActionSequence(action_sequence=action_sequence)
+
+    unresolved = _find_unresolved_placeholders(action_sequence)
+    if unresolved:
+        return (
+            f"[{agent}]规划动作序列失败：以下占位符尚未替换为真实值："
+            + "、".join(unresolved)
+            + "。这些 {占位符} 来自技能模板蓝图，执行前必须根据当前场景替换为具体取值。"
+        )
 
     request_id = tool_call_id
     loop = asyncio.get_running_loop()
@@ -487,22 +536,23 @@ async def monitor_target_cmd(
 ) -> str:
     """持续观察类动作-持续观察一个目标物体。
 
-    当目标状态发生变化时，
-    系统会主动发送反馈消息。
-
-    该任务会持续运行，
-    直到被 stop_action_cmd 停止。
+    把视线长期挂在某个目标上：当它的状态发生变化时，你会自动收到反馈消息；
+    你也可以稍后回头查看它的详细变化记录。
 
     使用场景推荐:
-    - 当你需要持续观察一个目标物体，以发现其状态变化的方式、运动轨迹等规律时，可以使用此工具。
+    - 当你需要持续观察一个目标物体，以发现其状态变化的方式、运动轨迹等规律时使用。
     - object_index 与 object_name 必须来自同一条最近观察结果；如果不确定目标是否仍对应，请先重新观察。
 
     限制:
-    由于注意力有限，你最多只能同时持续观察3个目标。
-    Unity 会用 object_name 校验 object_index 当前指向的目标，校验失败时不会开始观察。
+    - 由于注意力有限，你最多同时持续观察 3 个目标。
+    - 系统会用 object_name 校验 object_index 当前指向的目标，校验失败时不会开始观察。
+
+    返回说明:
+    - 调用成功后，系统会告诉你这个新观察目标在你「持续观察目标」列表中的序号；
+      日后想取它的观察记录时，凭这个序号调用 get_monitor_records_cmd 即可。
 
     Args:
-        object_index(int): 目标物体编号
+        object_index(int): 目标物体编号（来自最近一次观察结果中的索引）
         object_name(str): 目标物体名称，必须与该编号在最近观察结果中的名称一致
     Return:
         str: 持续观察目标物体是否开始
@@ -538,19 +588,24 @@ async def monitor_target_cmd(
 async def get_monitor_records_cmd(
     agent: Annotated[str, InjectedState("name")],
     tool_call_id: Annotated[str, InjectedToolCallId],
-    monitor_index: int,
+    monitor_target_index: int,
 ) -> str:
     """
-    获取持续观察记录。
+    查看自己「持续观察目标」列表中某一个目标的详细变化记录。
 
     使用场景:
-    - 当持续观察目标后，希望查看观察到的详细历史记录时。
+    - 你之前用 monitor_target_cmd 持续观察了某个目标，现在想回顾它到目前为止发生过哪些状态变化。
+
+    使用方法:
+    - 在自我状态中可以看到你目前正在持续观察的目标列表，每一个都有它的「持续观察目标序号」。
+    - 把你想回顾的那个目标的「持续观察目标序号」填到 monitor_target_index 即可。
+    - 编号是「持续观察目标」列表里的序号（从 1 开始），不是当前环境观察中的对象编号。
 
     Args:
-        monitor_index(int): 持续观察目标编号
+        monitor_target_index(int): 持续观察目标序号（来自「持续观察目标」列表，从 1 开始）
 
     Return:
-        str: 观察记录
+        str: 该目标的观察记录
     """
     request_id = tool_call_id
     loop = asyncio.get_running_loop()
@@ -563,7 +618,7 @@ async def get_monitor_records_cmd(
         request = message_pb2.AgentGetMonitorRecordsRequest()
         request.agent = agent
         request.request_id = request_id
-        request.monitor_index = monitor_index
+        request.monitor_target_index = monitor_target_index
 
         await AgentServerNetMessage().broadcast_message(request)
         print(f"[{agent}] get_monitor_records_cmd 发起请求 {request_id}")

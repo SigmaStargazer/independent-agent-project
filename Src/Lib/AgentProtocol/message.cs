@@ -845,8 +845,8 @@ namespace SkillBridge.Message
         [global::System.ComponentModel.DefaultValue("")]
         public string RequestId { get; set; } = "";
 
-        [global::ProtoBuf.ProtoMember(3, Name = @"monitor_index")]
-        public int MonitorIndex { get; set; }
+        [global::ProtoBuf.ProtoMember(3, Name = @"monitor_target_index")]
+        public int MonitorTargetIndex { get; set; }
 
     }
 

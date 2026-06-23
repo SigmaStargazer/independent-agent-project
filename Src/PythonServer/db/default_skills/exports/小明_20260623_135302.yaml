@@ -1,26 +1,29 @@
 skills:
 - name: 走到目标旁交互
   description: 走到某个可交互物体附近并按下交互键
-  content: |-
-    当需要与场景中的某个物体进行交互时，先走到它身边，等"可交互且最近可交互目标就是它"成立后再触发交互。
-    适合放在平地上、能直接走过去的目标。
+  content: '当需要与场景中的某个物体进行交互时，先走到它身边，等"可交互且最近可交互目标就是它"成立后再触发交互。
+
+    适合放在平地上、能直接走过去的目标。'
   source: default
   templates:
   - name: 平地接近后交互
     description: 目标在平地上、可直接走过去时使用：先走到目标旁触发可交互，再 interact。
     action_sequence_template:
     - action: move
-      direction: "{direction}"
+      direction: '{direction}'
       condition: canInteract == true && nearestInteractableIndex == {target_index}
       allowed_contact_obj_ids: []
     - action: interact
     step_explanations:
     - step_index: 0
       action_reason: 用 move 把自己挪到目标身边，触发"可交互"的距离阈值
-      parameter_reason: |
-        - {direction}：根据目标在自己左侧还是右侧填 "left" 或 "right"
+      parameter_reason: '- {direction}：根据目标在自己左侧还是右侧填 "left" 或 "right"
+
         - {target_index}：当前观察结果里这个交互目标的序号（objects[i] 的 i）
+
         - allowed_contact_obj_ids 填 []，因为这段路上不期望与其他物体发生碰撞
+
+        '
       condition_reason: 用 canInteract && nearestInteractableIndex == 目标序号 判断"已经走到位且最近可交互目标确实是目标本身"
       adjustment_hint: 如果途中可能撞上其他能挡路的物体，把它们的序号加进 allowed_contact_obj_ids
     - step_index: 1
@@ -28,7 +31,10 @@ skills:
       parameter_reason: interact 没有参数
       condition_reason: interact 不需要 condition
       adjustment_hint: 如果交互对象会弹出选项，需要在后面再追加 select 步骤
-    usage_notes: |
-      使用条件：目标在平地上、可以直接靠近。
+    usage_notes: '使用条件：目标在平地上、可以直接靠近。
+
       参数填法：{direction} 根据目标相对自己的方位选 left/right；{target_index} 取当前观察里该交互目标的序号。
+
       如果中途需要避开陷阱等危险物体，请重新规划，不要直接套用本模板。
+
+      '
