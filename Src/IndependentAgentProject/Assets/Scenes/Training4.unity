@@ -402,7 +402,7 @@ GameObject:
   m_Component:
   - component: {fileID: 184449609}
   - component: {fileID: 184449610}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: VisionArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -954,7 +954,7 @@ GameObject:
   - component: {fileID: 769635939}
   - component: {fileID: 769635941}
   - component: {fileID: 769635940}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: BackstabArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1212,7 +1212,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1161777612}
   - component: {fileID: 1161777613}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: AttackArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1312,9 +1312,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mUseRangeDirection: 0
   mRangeCollider: {fileID: 0}
-  mInteractionZones: []
+  mInteractionZones:
+  - {fileID: 769635940}
   moveSpeed: 5
-  mPatrolPoints: []
+  mPatrolPoints:
+  - {fileID: 1696127753}
+  - {fileID: 847741476}
   mPatrolSpeed: 2
   mWaitTime: 5
   mChaseSpeed: 4
@@ -1495,7 +1498,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1649339443
 Transform:
   m_ObjectHideFlags: 0

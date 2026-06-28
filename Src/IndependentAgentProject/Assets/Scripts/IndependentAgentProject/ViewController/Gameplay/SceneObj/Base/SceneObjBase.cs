@@ -34,8 +34,18 @@ namespace IndependentAgentProject
             }
         }
 
-        // 交互区域列表（在 Inspector 里拖拽，或 Awake 自动收集）
-        [Header("交互区域（留空则使用自身Collider）")]
+        // 交互区域列表（在 Inspector 里拖拽，或 Awake 自动收集子物体上的所有 InteractionZone）
+        /// <summary>
+        /// 当前 SceneObj 接受交互的区域集合，行为按两层兜底：
+        /// <para>1. Inspector 显式拖入：以拖入的为准（仍可与子物体自动收集并存；EnemyBase 等会再 Add 自家关键 Zone）。</para>
+        /// <para>2. Inspector 留空：在 <see cref="Awake"/> 自动调用 <c>GetComponentsInChildren&lt;InteractionZone&gt;()</c>
+        /// 收集子物体上的所有 <see cref="InteractionZone"/>。</para>
+        /// <para>3. 自动收集后仍为空：<see cref="IsCharacterInAnyZone"/> / <see cref="GetNearestZoneDistance"/>
+        /// 会降级使用自身 Collider 做距离 / 重叠判定（此时 <see cref="GetActiveZoneTag"/> 返回 null，没有 ZoneTag）。</para>
+        /// 因此「留空 ≠ 强白名单」，需要严格禁用所有交互时应让该 SceneObj 没有任何子 InteractionZone 且自身 Collider 也不可达。
+        /// </summary>
+        [Header("交互区域")]
+        [Tooltip("Inspector 留空时：\n  1) Awake 自动收集子物体上所有 InteractionZone；\n  2) 若收集后仍为空，则 IsCharacterInAnyZone / GetNearestZoneDistance 降级使用自身 Collider（此时 GetActiveZoneTag 返回 null）。\n注意：「留空」不等于「禁用所有交互」。")]
         [SerializeField] protected List<InteractionZone> mInteractionZones = new List<InteractionZone>();
 
         /// <summary>

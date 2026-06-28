@@ -20,7 +20,7 @@ namespace IndependentAgentProject
         [Header("巡逻配置")]
         [SerializeField] private List<Transform> mPatrolPoints = new();
         [SerializeField] private float mPatrolSpeed = 2f;
-        [SerializeField] private float mWaitTime = 1f;
+        [SerializeField] private float mWaitTime = 5f;
 
         [Header("追人配置")]
         [SerializeField] private float mChaseSpeed = 4f;
@@ -32,6 +32,9 @@ namespace IndependentAgentProject
         private GameObject mAttackZone;
         [SerializeField][Tooltip("背刺交互子物体：GameObject，挂 Trigger Collider2D + InteractionZone(ZoneTag=back)")]
         private InteractionZone mBackstabZone;
+
+        // 抵达巡逻点的 X 距离阈值。比浮点抖动稍宽松，避免在目标附近反复抖动。
+        private const float kArriveEpsilonX = 0.05f;
 
         private int mCurrentPatrolIndex = 0;
         private float mWaitTimer = 0f;
@@ -65,16 +68,54 @@ namespace IndependentAgentProject
             mCurrentPatrolIndex = 0;
             SetNextPatrolTarget();
         }
+        public class ChaseState : FSMStateBase
+        {
+            public override string Name => "Chase";
+            public override void OnEnter(SceneObjBase o) { if (o is EnemyBase e) e.OnChaseEnter(); }
+            public override void OnFixedUpdate(SceneObjBase o) { if (o is EnemyBase e) e.OnChaseFixedUpdate(); }
+            public override void OnExit(SceneObjBase o) { if (o is EnemyBase e) e.OnChaseExit(); }
+        }
+
+        public class StunnedState : FSMStateBase, IUndetectableState, IImmovableState
+        {
+            public override string Name => "Stunned";
+            public override void OnEnter(SceneObjBase o) { if (o is EnemyBase e) e.OnStunnedEnter(); }
+            public override void OnUpdate(SceneObjBase o) { if (o is EnemyBase e) e.OnStunnedUpdate(); }
+        }
 
         #region Idle 巡逻等待
         public override void OnIdleEnter()
         {
             if (mRigidbody2D != null)
                 mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
+            mWaitTimer = 0f;
         }
         public override void OnIdleUpdate()
         {
-            if (mIsReturningToPatrol) return;
+            // 两种来源会进入 Idle：
+            //  A) 正常巡逻停顿：等 mWaitTime 后切到下一个巡逻点（SetNextPatrolTarget）。
+            //  B) Chase 追丢回归：进入 Idle 之前调用方已经把 mTargetPoint 设为最近巡逻点
+            //     并把 mIsReturningToPatrol 置 true，这里等 mWaitTime 后直接切 Move，
+            //     沿用已设的 mTargetPoint，不再调 SetNextPatrolTarget 覆盖目标。
+            if (mIsReturningToPatrol)
+            {
+                mWaitTimer += Time.deltaTime;
+                if (mWaitTimer >= mWaitTime)
+                {
+                    mWaitTimer = 0;
+                    if (mTargetPoint != null)
+                    {
+                        TurnBack((mTargetPoint.position - transform.position).x);
+                        ChangeState("Move");
+                    }
+                    else
+                    {
+                        // 防御：返回目标已被清空（罕见，如巡逻点为空），回退到正常巡逻节奏。
+                        mIsReturningToPatrol = false;
+                    }
+                }
+                return;
+            }
             if (mPatrolPoints.Count <= 1) return;
             mWaitTimer += Time.deltaTime;
             if (mWaitTimer >= mWaitTime)
@@ -107,16 +148,20 @@ namespace IndependentAgentProject
                 ChangeState("Idle");
                 return;
             }
-            transform.position = Vector3.MoveTowards(
-                transform.position, mTargetPoint.position,
-                mPatrolSpeed * Time.fixedDeltaTime);
-            if (Vector3.Distance(transform.position, mTargetPoint.position) < 0.02f)
+            float dx = mTargetPoint.position.x - transform.position.x;
+            if (Mathf.Abs(dx) < kArriveEpsilonX)
             {
-                transform.position = mTargetPoint.position;
+                if (mRigidbody2D != null)
+                    mRigidbody2D.velocity = new Vector2(0f, mRigidbody2D.velocity.y);
                 mIsReturningToPatrol = false;
                 mTargetPoint = null;
                 ChangeState("Idle");
+                return;
             }
+            float dir = Mathf.Sign(dx);
+            TurnBack(dir);
+            if (mRigidbody2D != null)
+                mRigidbody2D.velocity = new Vector2(dir * mPatrolSpeed, mRigidbody2D.velocity.y);
         }
         #endregion
 
@@ -131,21 +176,28 @@ namespace IndependentAgentProject
         {
             if (mChaseTarget == null || mChaseTarget.IsDead || mChaseTarget.IsUndetectable)
             {
-                mChaseTarget = null;
+                // 追丢：切 Idle 即可。回最近巡逻点的目标设置统一在 OnChaseExit 里做。
                 ChangeState("Idle");
-                MoveToNearestPatrolPoint();
                 return;
             }
-            Vector3 dir = (mChaseTarget.transform.position - transform.position).normalized;
-            TurnBack(dir.x);
-            transform.position = Vector3.MoveTowards(
-                transform.position, mChaseTarget.transform.position,
-                mChaseSpeed * Time.fixedDeltaTime);
+            float dx = mChaseTarget.transform.position.x - transform.position.x;
+            float dir = Mathf.Sign(dx);
+            TurnBack(dir);
+            if (mRigidbody2D != null)
+                mRigidbody2D.velocity = new Vector2(dir * mChaseSpeed, mRigidbody2D.velocity.y);
         }
         public virtual void OnChaseExit()
         {
             if (mRigidbody2D != null)
                 mRigidbody2D.velocity = Vector2.zero;
+            mChaseTarget = null;
+            // Chase 退出的统一收口：把目标设为最远巡逻点 + 标 mIsReturningToPatrol。
+            // - 追丢（OnChaseFixedUpdate）/ 离开视野（OnVisionExit）都经过这里，自动覆盖。
+            // - 走向 Stunned 时 OnStunnedEnter 会随后清掉 mTargetPoint / mIsReturningToPatrol，
+            //   FSM 顺序「旧 OnExit → 新 OnEnter」保证终态正确。
+            // - 选最远点是产品决策：Chase 通常在玩家附近终止，朝远端走相当于重新扫一段最长的巡逻路径，
+            //   比立刻回最近点更接近"恢复巡逻"的视觉直觉。
+            SetTargetToFarthestPatrolPoint();
         }
         #endregion
 
@@ -156,6 +208,7 @@ namespace IndependentAgentProject
                 mRigidbody2D.velocity = Vector2.zero;
             mChaseTarget = null;
             mTargetPoint = null;
+            mIsReturningToPatrol = false;
         }
         public virtual void OnStunnedUpdate() { }
         #endregion
@@ -163,7 +216,10 @@ namespace IndependentAgentProject
         #region Trigger 子物体回调（由 EnemyZoneForwarder 调用）
         public void OnVisionEnter(Collider2D other)
         {
-            if (StateName == "Stunned" || StateName == "Dead" || StateName == "Chase") return;
+            // 用 IsImmovable 涵盖 Stunned / Dead（以及未来任意 IImmovableState）；
+            // Chase 自身不是 immovable，但需要单独去重避免重复 ChangeState。
+            if (IsImmovable) return;
+            if (StateName == "Chase") return;
             PlayerBase player = other.GetComponentInParent<PlayerBase>();
             if (player != null && !player.IsDead && !player.IsUndetectable)
             {
@@ -176,9 +232,8 @@ namespace IndependentAgentProject
             if (StateName != "Chase") return;
             PlayerBase player = other.GetComponentInParent<PlayerBase>();
             if (player == null || player != mChaseTarget) return;
-            mChaseTarget = null;
+            // 追丢：切 Idle 即可，回最近巡逻点的目标设置统一在 OnChaseExit 里做。
             ChangeState("Idle");
-            MoveToNearestPatrolPoint();
         }
         public void OnAttackEnter(Collider2D other)
         {
@@ -192,7 +247,7 @@ namespace IndependentAgentProject
         public override (bool success, string result) Interact(GameObject chara)
         {
             string zone = GetActiveZoneTag(chara);
-            if (zone == "back")
+            if (zone == "Back")
             {
                 ChangeState("Stunned");
                 return (true, "你成功背刺了敌人！");
@@ -201,41 +256,36 @@ namespace IndependentAgentProject
         }
         #endregion
 
-        private void MoveToNearestPatrolPoint()
+        /// <summary>
+        /// 把 <see cref="mTargetPoint"/> 设为离当前位置**最远**的巡逻点，并把 <see cref="mIsReturningToPatrol"/>
+        /// 置为 true（让接下来的 Idle 等待结束后直接走向该点，而不是按巡逻序列下一个点）。
+        /// 选最远点的意图：Chase 通常在玩家附近终止，朝远点走相当于"重新扫一遍最长的一段巡逻路径"，
+        /// 比立刻回到最近点更符合"恢复巡逻"的视觉直觉。
+        /// 仅设置目标、不切换状态、不翻转面朝——面朝的翻转延迟到 <see cref="OnIdleUpdate"/> 真正切 Move 那一刻，
+        /// 避免「追丢瞬间立刻扭头看巡逻点」的违和感。
+        /// </summary>
+        private void SetTargetToFarthestPatrolPoint()
         {
-            if (mPatrolPoints.Count == 0) return;
-            mIsReturningToPatrol = true;
-            Transform nearest = null;
-            float minDist = float.MaxValue;
+            if (mPatrolPoints.Count == 0)
+            {
+                mTargetPoint = null;
+                mIsReturningToPatrol = false;
+                return;
+            }
+            Transform farthest = null;
+            float maxDist = -1f;
             foreach (var pt in mPatrolPoints)
             {
                 if (pt == null) continue;
                 float d = Vector3.Distance(transform.position, pt.position);
-                if (d < minDist)
+                if (d > maxDist)
                 {
-                    minDist = d;
-                    nearest = pt;
+                    maxDist = d;
+                    farthest = pt;
                 }
             }
-            mTargetPoint = nearest;
-            if (mTargetPoint != null)
-                TurnBack((mTargetPoint.position - transform.position).x);
-            ChangeState("Move");
-        }
-
-        public class ChaseState : FSMStateBase
-        {
-            public override string Name => "Chase";
-            public override void OnEnter(SceneObjBase o) { if (o is EnemyBase e) e.OnChaseEnter(); }
-            public override void OnFixedUpdate(SceneObjBase o) { if (o is EnemyBase e) e.OnChaseFixedUpdate(); }
-            public override void OnExit(SceneObjBase o) { if (o is EnemyBase e) e.OnChaseExit(); }
-        }
-
-        public class StunnedState : FSMStateBase, IUndetectableState, IImmovableState
-        {
-            public override string Name => "Stunned";
-            public override void OnEnter(SceneObjBase o) { if (o is EnemyBase e) e.OnStunnedEnter(); }
-            public override void OnUpdate(SceneObjBase o) { if (o is EnemyBase e) e.OnStunnedUpdate(); }
+            mTargetPoint = farthest;
+            mIsReturningToPatrol = mTargetPoint != null;
         }
     }
 }

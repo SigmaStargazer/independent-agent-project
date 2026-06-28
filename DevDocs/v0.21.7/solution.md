@@ -3,7 +3,9 @@
 > **状态**：已实现
 > **依据 PRD**：`PRD.md`
 > **最后更新**：2026-06-28
-> **后续修复**：`DevDocs/v0.21.7_fix_1/solution_actionsequence_immovable_fix.md`（ActionSequence × IImmovableState 守卫漏洞，已实现待联调）
+> **后续修复**：
+> - `DevDocs/v0.21.7_fix_1/solution_actionsequence_immovable_fix.md`（ActionSequence × IImmovableState 守卫漏洞，已实现）
+> - `DevDocs/v0.21.7_fix_2/solution_enemybase_issues_fix.md`（EnemyBase 巡逻跳/退追间隔/状态判定/Zone 自动收集说明，已实现并验收通过）
 
 ---
 
