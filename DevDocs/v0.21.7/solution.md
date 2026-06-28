@@ -1,8 +1,9 @@
 # 技术方案 — v0.21.7 Idle Wakeup 首次唤醒优化 + 新装置与新角色
 
-> **状态**：已实现 + 1 个 fix 待确认（见 `solution_actionsequence_immovable_fix.md`）
+> **状态**：已实现
 > **依据 PRD**：`PRD.md`
 > **最后更新**：2026-06-28
+> **后续修复**：`DevDocs/v0.21.7_fix_1/solution_actionsequence_immovable_fix.md`（ActionSequence × IImmovableState 守卫漏洞，已实现待联调）
 
 ---
 

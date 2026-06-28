@@ -69,7 +69,14 @@ namespace IndependentAgentProject
                 mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
             }
         }
-        public virtual void OnFollowExit() { }
+        public virtual void OnFollowExit()
+        {
+            // v0.21.7_fix_1 F4: Follow 状态退出时清空跟随目标，
+            // 覆盖 StopMovement / StartActionSequence / ReturnToCheckPointByHurt / Die
+            // 等强切路径，避免「状态不是 Follow 但 TargetFollowing 仍残留」的语义错乱。
+            // OnFollowFixedUpdate 内已有的 TargetFollowing = null 作为防御性双保险保留。
+            TargetFollowing = null;
+        }
         protected override void Awake()
         {
             base.Awake();

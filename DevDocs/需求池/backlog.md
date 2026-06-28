@@ -2,11 +2,32 @@
 
 > **状态**：候选 / 未分配版本  
 > **最后更新**：2026-06-28  
+> **文件名**：`backlog.md`（2026-06-28 由 `analysis.md` 改名，避免与版本目录内的 `analysis.md` 混淆）  
 > **目录说明**：见同目录 `README.md`。原 `DevDocs/v0.21.X/` 于 2026-06-28 改名为 `DevDocs/需求池/`。
 
 ## 用途
 
 收纳暂未立项、但已知需要后续处理的问题与想法。新版本启动时从中挑题，并把对应条目迁移到新版本目录的 `analysis.md` / `requirements/`。**不要把这里的条目当作已立项需求**。
+
+## 索引
+
+| # | 标题 | 类型 | 影响范围 | 优先级 | 状态 | 立项版本 |
+|---|---|---|---|---|---|---|
+| 1 | `WaitAction` 缺 `allowed_contact_obj_ids` | Bug / 协议+Python+Unity | 中（动作语义有缺口，已有 workaround） | P0 | 候选 | — |
+| 2 | `List[int]` 字段在模板里的占位符表达边界 | 体验 / Python 工具 schema | 中（结构性表达力缺口） | P0 | 候选 | — |
+| 3 | Monitor 推送过密带来的打断噪声 | 体验 / Unity+Python | 中（影响长时训练效率） | P1 | 候选 | — |
+| 4 | `mem_to_save` 累积长度本身没有压缩 | 体验 / 记忆系统 | 大（Episode 越长越糟） | P1 | 候选 | — |
+| 5 | 默认技能复用率评估 | 调研 / 评估 | 小 | P2 | 候选 | — |
+| 6 | 网络中断/异常时各操作报错信息不统一 | 调研 / 错误处理 | 中（用户难定位故障） | P2 | 收集中 | — |
+| 7 | Unity 工程内 `.cs` 源文件编码不一致（GBK/UTF-8） | 工程清理 / Unity | 中（Inspector 乱码，长期债） | P1 | 候选 | — |
+| 8 | Kuzu `INTERACTED_WITH` 边 `MERGE` 主键冲突 | Bug / 记忆系统 | 中（已有 3 次重试兜底，最坏可能丢 Episode） | P1 | 候选 | — |
+| 9 | `observe` 工具反馈应附带「自己的状态」 | 体验 / Unity 工具 | 中（Hidden/Dead/Stunned/Follow 易遗忘自身约束） | P1 | 候选 | — |
+
+> 字段约定：
+> - **类型**：Bug / 体验 / 工程清理 / 调研 / 评估 / 协议改动 等，标注主要落地面（Python / Unity / 协议 / 记忆系统 / 工具）。
+> - **影响范围**：小 / 中 / 大，对体验或可维护性的破坏程度，括号内简述原因。
+> - **优先级**：P0（影响验收 / 阻断后续训练）、P1（明显体验问题）、P2（长期改进 / 评估类）。
+> - **状态**：候选 / 收集中 / 已立项（标 vX.Y）/ 已完成（迁出本文件）。立项后整段剪切到对应版本目录。
 
 ---
 
@@ -293,8 +314,103 @@ file Src/IndependentAgentProject/Assets/Scripts/IndependentAgentProject/ViewCont
 
 ---
 
-- 以上 7 条均未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。
+## 8. P1 — Kuzu `INTERACTED_WITH` 边 `MERGE` 主键冲突（重复事实抽取）
+
+### 现象
+
+v0.21.7_fix_1 联调（2026-06-28_14-32-42 训练）期间，`memory_manager._memory_worker` 在写后台 Episode 时报：
+
+```text
+[MemoryManager._save_memory] ❌ 写记忆失败（最终）: Runtime exception: Found duplicated primary key value <uuid>, which violates the uniqueness constraint of the primary key column.
+```
+
+错误来源是 Graphiti 把抽到的事实边（关系类型 `INTERACTED_WITH`）`MERGE` 到 Kuzu 时撞主键。出错事实文本与「你从柜子里出来了。状态从 Hidden 回到 Idle。」高度相似，多个 Episode 被先后处理时抽到同一条事实，复用了同一个 uuid，导致 `MERGE` 行为退化为「插入但主键已存在」直接抛 `RuntimeException`。
+
+`MemoryManager._save_memory` 自带最多 3 次重试（见 `memory_system/memory_manager.py`），所以这次没影响后续写入；但日志里会刷一长串 `Runtime exception`，并且**最后一次重试如果仍冲突，对应 Episode 会被静默丢弃**（catch 到 Exception 只打 ❌，不再回滚或入死信队列）。
+
+### 根因初判
+
+1. Graphiti 抽事实边的 uuid 不是 deterministic-by-content 而是「会复用已存在边的 uuid」——多 Episode 中同一对实体 + 同一谓词的事实被合并到一条边。
+2. Kuzu 的 `REL TABLE` 主键 = 边 uuid；`MERGE (a)-[e:INTERACTED_WITH {uuid}]->(b)` 在并发或自指（同一 episode 内 a==b？待确认）场景下不会幂等地命中现有行，而是尝试创建新行。
+3. `_graph_write_lock` 已序列化 `add_episode`，但 Graphiti 内部一个 Episode 会产生多条 Cypher，自身在事务边界内可能就违反主键。
+
+### 待调查
+
+- [ ] 拿到出错 uuid，反查 `Episodic` / 关系节点，确认它是「跨 Episode 复用」还是「同 Episode 内重复」。
+- [ ] 复现：连续 `add_episode` 同样文本 5 次，看是否稳定触发。
+- [ ] 检查 Graphiti 版本是否已修复（搜 issue：`duplicated primary key` / `INTERACTED_WITH`）。
+- [ ] 评估是否给 `_save_memory` 加「主键冲突 = 视为已写入，吞掉」分支，避免噪声。
+
+### 候选方案
+
+| 方案 | 说明 |
+|---|---|
+| A | 升级 Graphiti / Kuzu 到含修复的版本（先调研）。零业务改动 |
+| B | `_save_memory` 捕获 `duplicated primary key` 错误，记 INFO 日志后视为成功；不重试不丢 Episode |
+| C | 在 Cypher 层把 `MERGE` 改为 `ON CREATE SET ... ON MATCH SET ...`（需要 Graphiti 暴露 hook，改动大） |
+
+短期 B 即可消噪声；A 是根治；C 改动太深，暂不考虑。
+
+### 复现日志
+
+- `Src/PythonServer/logs/prompts/小明/2026-06-28_14-32-42.log` 训练终端输出。
+- 终端：`terminals/4.txt` 报错段。
+
+---
+
+## 9. P1 — `observe` 工具反馈应附带「自己的状态」
+
+### 现象
+
+v0.21.7_fix_1 联调时观察到：小明在 Hidden 期间被推送了多条 monitor / observe 反馈，文本只描述外部环境（柜子、地板、平台、敌人位置 / 状态），**不包含 Agent 自身的状态**（`state=Hidden / Idle / Move / Dead / Stunned`、`TargetFollowing`、可移动性等）。
+
+后果：
+
+- Agent 在 Hidden 状态下读到 observe 反馈后，常常忘记自己「正躲在柜子里」，下一步规划 `move_cmd` 被 `IsImmovable` 守卫驳回（参见 fix_1 测试 1）。本来可以通过 prompt 上下文记住，但被高频反馈淹没后会丢。
+- 同理 Dead / Stunned / 被定身 / Follow 中的 Agent，所有外界反馈都没有「我现在能做什么」的提示。
+
+### 候选方向
+
+把 Agent 自身状态作为 observe / monitor 反馈的标准头部统一拼进去。建议字段：
+
+| 字段 | 含义 | 来源 |
+|---|---|---|
+| `state` | 当前 FSMState 名 | `CharaBase.CurState.Name` |
+| `is_immovable` | 是否处于不可移动状态 | `SceneObjBase.IsImmovable` |
+| `is_invulnerable` | 是否无敌 | `SceneObjBase.IsInvulnerable` |
+| `is_undetectable` | 是否被敌人忽略 | `SceneObjBase.IsUndetectable` |
+| `following` | 当前 Follow 目标（若有） | `CharaBase.TargetFollowing` |
+| `position` | 当前坐标 | `transform.position`，已在部分反馈中有 |
+
+预期渲染（与现有 `<你的状态>` 块一致，但保证 observe 反馈也带）：
+
+```text
+<你的状态>
+状态: Hidden（无法移动 / 无敌 / 不可被察觉）
+位置: (x, y)
+</你的状态>
+```
+
+### 候选方案
+
+| 方案 | 说明 |
+|---|---|
+| A | 在 `AIPlayer.CreateMessageText` 拼接 observe / monitor 反馈时统一插入 `<你的状态>` 块。改动集中，影响面小 |
+| B | 在工具结果 proto 中加 `agent_self_state` 字段，由 Python 侧渲染到 prompt 头部。跨语言改动大 |
+
+A 起步即可，后续如果发现 Agent 仍然遗忘，再升级到 B。
+
+### 影响范围预估
+
+- Unity：`AIPlayer.CreateMessageText`（已存在 `<你的状态>` 拼接逻辑，扩展到 observe / monitor 路径即可）。
+- Python：无改动。
+- 测试：Hidden / Dead / Stunned / Follow 四种状态下触发一次 observe 反馈，确认头部都有「无法移动 / 无敌 / 不可被察觉 / 跟随中」标签。
+
+---
+
+- 以上 9 条均未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。立项后请同步更新顶部索引表的「状态 / 立项版本」字段。
 - 复现日志：
   - 条目 1~5：`Src/PythonServer/logs/prompts/小明/2026-06-23_13-41-56.log`（v0.21.6 验收训练）
   - 条目 6：v0.21.7 联调期间断网 NewGame 控制台输出（2026-06-28）。
   - 条目 7：2026-06-28 `file` 工具扫描 `Src/IndependentAgentProject/Assets/Scripts/**/*.cs`。
+  - 条目 8~9：`Src/PythonServer/logs/prompts/小明/2026-06-28_14-32-42.log`（v0.21.7_fix_1 联调）。

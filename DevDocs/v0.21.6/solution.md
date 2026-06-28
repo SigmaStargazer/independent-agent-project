@@ -638,7 +638,7 @@ Unity 侧 `AIPlayer.GetMonitorRecords` 在序号非法时，错误信息也使�
 | 日期 | 说明 |
 |------|------|
 | 2026-06-23 | v0.21.6 全部实现：①`skill_tools` 宽松模板校验 + 占位符递归扫描 + 工具描述更新；②`base_tools.plan_action_sequence_cmd` 执行前拒绝未替换 `{placeholder}`；③`action_sequence.get_known_action_names()` 自动派生合法 action 集；④`db/default_skills/default.yaml` 迁移为内联占位符 + step_explanations；⑤`message.proto` 字段重命名为 `monitor_target_index`，已运行 `1.genproto.cmd`、MSBuild Rebuild `CSharpClient.sln`、`2.copyprotocol.cmd`；⑥Python `monitor_target_cmd` / `get_monitor_records_cmd` 角色化文案 + 入参重命名；⑦Unity `AIPlayer` / `RuntimeInfoRenderer` / `AgentService` / `AgentManager` 同步术语与字段名；⑧自测脚本 `DevDocs/v0.21.6/test_v021_6_self_test.py` 全部通过 |
-| 2026-06-23 | 验收通过。基于 `logs/prompts/小明/2026-06-23_13-41-56.log` 联调验证：①持续观察文案完全角色化（"持续观察目标[1]"/"持续观察目标序号 1"）落地；②Agent 在该日志中自主创建 `乘平台渡陷阱` 技能并添加 `从左到右渡陷阱` / `从右到左渡陷阱` 两个内联占位符模板；③`plan_action_sequence_cmd` 占位符拦截全程未误伤，Agent 调用时均已替换为真实值；④v0.21.4/v0.21.5 修复点（坐标小写、单引号、`Position` 范围禁用、`set_timer` 长间隔）无 regression。剩余的 `allowed_contact_obj_ids` 占位符表达边界、`WaitAction` 缺 `allowed_contact_obj_ids`、monitor 推送降噪等问题归入 `DevDocs/需求池/analysis.md` 候选清单。 |
+| 2026-06-23 | 验收通过。基于 `logs/prompts/小明/2026-06-23_13-41-56.log` 联调验证：①持续观察文案完全角色化（"持续观察目标[1]"/"持续观察目标序号 1"）落地；②Agent 在该日志中自主创建 `乘平台渡陷阱` 技能并添加 `从左到右渡陷阱` / `从右到左渡陷阱` 两个内联占位符模板；③`plan_action_sequence_cmd` 占位符拦截全程未误伤，Agent 调用时均已替换为真实值；④v0.21.4/v0.21.5 修复点（坐标小写、单引号、`Position` 范围禁用、`set_timer` 长间隔）无 regression。剩余的 `allowed_contact_obj_ids` 占位符表达边界、`WaitAction` 缺 `allowed_contact_obj_ids`、monitor 推送降噪等问题归入 `DevDocs/需求池/backlog.md` 候选清单。 |
 
 ---
 

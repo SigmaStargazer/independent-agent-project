@@ -536,8 +536,6 @@ namespace IndependentAgentProject
             string reason;
             if (IsDead)
                 reason = "你已经死了，无法移动。";
-            else if (StateName == "Hidden")
-                reason = "你正躲在柜子里，无法移动。";
             else
                 reason = $"当前处于 {StateName} 状态，无法移动。";
 
@@ -1375,7 +1373,8 @@ namespace IndependentAgentProject
             {
                 // 1.停止当前Action
                 this.StopMovement(false);
-                ChangeState("Idle");
+                // v0.21.7_fix_1 F1: 移除此处裸 ChangeState("Idle")，
+                // StopMovement(false) 内部已有 IImmovableState 守卫，避免覆盖。
                 // 2.替换ActionSequence
                 // 保存旧的 runtime
                 var oldRuntime = this.mCurActionSequenceRuntime;
@@ -1461,7 +1460,8 @@ namespace IndependentAgentProject
 
             // 1. 停止当前的Action
             this.StopMovement(false);
-            ChangeState("Idle");
+            // v0.21.7_fix_1 F2: 移除此处裸 ChangeState("Idle")，
+            // 用户主动停 AS 不应解除 Hidden/Dead/Stunned 等 IImmovableState 保护语义。
             // 2. 设置终止状态（不清除是为了还能调用log）
             mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
             // 3. 发送取消信息
@@ -1606,7 +1606,6 @@ namespace IndependentAgentProject
         {
             var curAction = actionSequenceRuntime.GetCurActionStep();
             this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
-
             if ( this.mCurActionRuntime.State == ActionState.Todo)
             {
                 // 获取设备信息
@@ -1656,7 +1655,10 @@ namespace IndependentAgentProject
             // 重置初始接触物体信息
             foreach (var obj in mTouchingObjs)
                 this.mCurActionRuntime.StartTouchingObjs.Add(obj);
-            ChangeState("Idle");
+            // v0.21.7_fix_1 F3: Hidden 等 IImmovableState 下不切回 Idle，
+            // 与 ExecuteInteract / ExecuteSelect / ExecuteInput / StopMovement 守卫语法对齐。
+            if (!IsImmovable)
+                ChangeState("Idle");
         }
 
         private void ExecuteInteractAction(ActionSequenceRuntime actionSequenceRuntime)
