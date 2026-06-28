@@ -8,12 +8,12 @@ namespace IndependentAgentProject
 {
     public class HumanPlayer : PlayerBase
     {
-        public override string Name => "Íæ¼Ò";
-        public override string Desc => "ÈËÀàÍæ¼Ò";
+        public override string Name => "ç©å®¶";
+        public override string Desc => "äººç±»ç©å®¶";
 
         //private UIChat mUIChat;
 
-        // ===== ÊäÈëÄ£Ê½ =====
+        // ===== è¾“å…¥æ¨¡å¼ =====
 
         private enum PlayerMode
         {
@@ -35,23 +35,25 @@ namespace IndependentAgentProject
 
         private void GetInput()
         {
-            //// ===== ´ò¿ª / ¹Ø±ÕÁÄÌì =====
-
-            //if (Input.GetButtonDown("ToggleChat"))
-            //{
-            //    ToggleChat();
-            //    return;
-            //}
-
-            // ===== ÁÄÌìÄ£Ê½½ûÖ¹²Ù×÷ =====
-
+            // ===== èŠå¤©æ¨¡å¼ç¦æ­¢æ“ä½œ =====
             if (mMode == PlayerMode.Chatting)
             {
                 return;
             }
 
-            // ===== ÒÆ¶¯ =====
+            // ===== ä¸å¯ç§»åŠ¨çŠ¶æ€ï¼ˆHidden / Dead ç­‰å®ç° IImmovableState çš„çŠ¶æ€ï¼‰ =====
+            // æ³¨ï¼šDead å·²è¢« Update å…¥å£çš„ IsDead æå‰ returnï¼›è¿™é‡Œä¸»è¦æ‹¦ Hidden ç­‰å…¶å®ƒä¸å¯ç§»åŠ¨çŠ¶æ€ã€‚
+            // ä»å…è®¸æŒ‰ Interactï¼ˆç”¨äºä»æŸœå­é‡Œå‡ºæ¥ç­‰ï¼‰ã€‚
+            if (IsImmovable)
+            {
+                if (Input.GetButtonDown("Interact"))
+                {
+                    DoInteract();
+                }
+                return;
+            }
 
+            // ===== ç§»åŠ¨ =====
             float horizontal = Input.GetAxisRaw("Horizontal");
             if (horizontal != 0)
             {
@@ -63,11 +65,10 @@ namespace IndependentAgentProject
                 ChangeState("Idle");
             }
 
-            // ===== ½»»¥ =====
-
+            // ===== äº¤äº’ =====
             if (Input.GetButtonDown("Interact"))
             {
-                Interact();
+                DoInteract();
             }
         }
 
@@ -105,20 +106,20 @@ namespace IndependentAgentProject
         }
 
         // =========================
-        // ½»»¥×î½üÉè±¸
+        // äº¤äº’æœ€è¿‘è®¾å¤‡
         // =========================
 
-        private void Interact()
+        private void DoInteract()
         {
             if (SceneObjManager.Instance == null)
                 return;
 
             (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
-            Debug.Log($"Íæ¼Ò½»»¥½á¹û::success:{success} result:{result}");
+            Debug.Log($"ç©å®¶äº¤äº’ç»“æœ::success:{success} result:{result}");
         }
 
         // =========================
-        // ÁÄÌì·¢ËÍ
+        // èŠå¤©å‘é€
         // =========================
 
         //public void SendChatMessage(string text)
@@ -127,7 +128,7 @@ namespace IndependentAgentProject
         //        return;
 
         //    AgentService.Instance.SendUserMessage(
-        //        "Íæ¼Ò",
+        //        "ç©å®¶",
         //        text
         //    );
         //}

@@ -170,7 +170,7 @@ namespace IndependentAgentProject
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.Interact(requestId);
+                agentObj.DoInteract(requestId);
             }
         }
 
@@ -178,7 +178,7 @@ namespace IndependentAgentProject
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.Select(selection, requestId);
+                agentObj.DoSelect(selection, requestId);
             }
         }
 
@@ -186,7 +186,7 @@ namespace IndependentAgentProject
         {
             if (mAgents.TryGetValue(agent, out var agentObj))
             {
-                agentObj.TextInput(inputText, requestId);
+                agentObj.DoTextInput(inputText, requestId);
             }
         }
         #endregion

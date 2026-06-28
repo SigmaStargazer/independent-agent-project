@@ -2,6 +2,8 @@
   "enabled": true,
   "delay_min_seconds": 120,
   "delay_max_seconds": 300,
+  "first_delay_min_seconds": 25,
+  "first_delay_max_seconds": 35,
   "summary_max_events": 3,
   "summary_timeout_seconds": 5,
   "ignore_self_events": true,

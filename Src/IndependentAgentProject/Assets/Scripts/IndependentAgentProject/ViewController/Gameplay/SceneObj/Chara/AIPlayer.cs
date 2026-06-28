@@ -526,6 +526,30 @@ namespace IndependentAgentProject
 
         #region Agent动作指令。当AgentManager收到服务端LLM的指令时，会调用相应Agent示例的下列方法
 
+        /// <summary>
+        /// 移动入口守卫：若当前状态实现 IImmovableState（如 Hidden / Dead / Stunned），
+        /// 直接通过工具结果反馈失败给 Python 端，并返回 true 让调用方提前 return。
+        /// </summary>
+        private bool RejectIfImmovable(string toolName, string requestId)
+        {
+            if (!IsImmovable) return false;
+            string reason;
+            if (IsDead)
+                reason = "你已经死了，无法移动。";
+            else if (StateName == "Hidden")
+                reason = "你正躲在柜子里，无法移动。";
+            else
+                reason = $"当前处于 {StateName} 状态，无法移动。";
+
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                toolName,
+                requestId,
+                $"[{toolName}失败]{reason}"
+            );
+            return true;
+        }
+
         public bool StopMovement(bool stopActionSequence = true)
         {
             bool success = false;
@@ -540,21 +564,33 @@ namespace IndependentAgentProject
                 mCurActionSequenceRuntime.State = ActionSequenceState.Aborted;
                 success = true;
             }
-            ChangeState("Idle");
+            // 注意：若当前处于 IImmovableState（Hidden / Dead / Stunned 等），
+            // 不强制切回 Idle，以避免破坏躲藏 / 死亡 / 击晕等语义。
+            if (!IsImmovable)
+                ChangeState("Idle");
             return success;
         }
 
         /// <summary>
-        /// 反馈：被陷阱传送回最近的 CheckPoint。
-        /// 1. StopMovement(true) 中止当前 Action / ActionSequence
-        /// 2. 走 PlayerBase.ReturnToCheckPoint 完成位置 + 速度归零 + Idle
-        /// 3. 给 Agent 发反馈（feedback 自带打断语义，下一轮 LLM 立即重新决策）
+        /// 受伤型重生反馈：被陷阱（IInvulnerableState 不命中时）传送回最近的 CheckPoint。
+        /// v0.21.7-fix：从 ReturnToCheckPoint override 改到 ReturnToCheckPointByHurt override：
+        /// - 中性版本 ReturnToCheckPoint 不再 override，调试 / 系统重置走 PlayerBase 默认（不发 feedback）；
+        /// - 真正由「受伤」触发的传送才走这里，并仅在没被 IsInvulnerable 拦截时才发反馈。
+        ///
+        /// 流程：
+        /// 1. StopMovement(true) 中止当前 Action / ActionSequence；
+        /// 2. base.ReturnToCheckPointByHurt：若 IsInvulnerable 则直接 return，不传送；
+        /// 3. 只有真正发生传送（!IsInvulnerable）时给 Agent 发反馈，避免「无敌但仍报告被传送」的语义错位。
         /// </summary>
-        public override void ReturnToCheckPoint(SceneObjBase sceneObj)
+        public override void ReturnToCheckPointByHurt(SceneObjBase sceneObj)
         {
             StopMovement(stopActionSequence: true);
 
-            base.ReturnToCheckPoint(sceneObj);
+            // v0.21.7-fix: 不直接调 ReturnToCheckPoint，统一走带无敌判定的 ByHurt 路径。
+            // 用 IsInvulnerable 判定是否真正发生传送，避免重复发反馈。
+            if (IsInvulnerable) return;
+
+            base.ReturnToCheckPointByHurt(sceneObj);
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
 
             string sceneObjName = sceneObj.Name;
@@ -774,8 +810,7 @@ namespace IndependentAgentProject
                 $"今后想回顾它的详细变化记录时，调用 get_monitor_records 并填入持续观察目标序号 {monitorTargetIndex} 即可。"
             );
         }
-        public void GetMonitorRecords(string requestId, int monitorTargetIndex)
-        {
+        public void GetMonitorRecords(string requestId, int monitorTargetIndex)        {
             if (monitorTargetIndex < 1 || monitorTargetIndex > mObserveRuntimes.Count)
             {
                 AgentService.Instance.SendToolResultMessage(
@@ -848,6 +883,7 @@ namespace IndependentAgentProject
         /// 
         public void Move(string requestId, bool moveRight, float distance)
         {
+            if (RejectIfImmovable("Move", requestId)) return;
             this.StopMovement();
             this.moveRight = moveRight;
             float startX = transform.position.x;
@@ -906,6 +942,7 @@ namespace IndependentAgentProject
 
         public void FollowTarget(string requestId, int objectIndex, string objectName, float minDistance, float maxDistance)
         {
+            if (RejectIfImmovable("FollowTarget", requestId)) return;
             var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
             if (objectIndex < 0 || objectIndex >= sceneObjs.Count)
             {
@@ -1040,10 +1077,27 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
+        /// 交互入口守卫：当前处于 Dead 状态时拒绝执行任何交互（Interact / Select / TextInput）。
+        /// Hidden 等其它 IImmovableState 仍允许交互（PRD-3.5 / PRD-3.6）。
+        /// </summary>
+        private bool RejectIfDead(string toolName, string requestId)
+        {
+            if (!IsDead) return false;
+            AgentService.Instance.SendToolResultMessage(
+                Name,
+                toolName,
+                requestId,
+                $"[{toolName}失败]你已经死了，无法执行交互。"
+            );
+            return true;
+        }
+
+        /// <summary>
         /// 交互
         /// </summary>
-        public void Interact(string requestId)
+        public void DoInteract(string requestId)
         {
+            if (RejectIfDead("Interact", requestId)) return;
             if (SceneObjManager.Instance == null)
             {
                 Debug.LogError("场景中未找到 SceneObjManager！");
@@ -1055,8 +1109,9 @@ namespace IndependentAgentProject
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
-        public void Select(int selection, string requestId)
+        public void DoSelect(int selection, string requestId)
         {
+            if (RejectIfDead("Select", requestId)) return;
             if (SceneObjManager.Instance == null)
             {
                 Debug.LogError("场景中未找到 SceneObjManager！");
@@ -1068,8 +1123,9 @@ namespace IndependentAgentProject
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
         }
 
-        public void TextInput(string inputText, string requestId)
+        public void DoTextInput(string inputText, string requestId)
         {
+            if (RejectIfDead("TextInput", requestId)) return;
             if (SceneObjManager.Instance == null)
             {
                 Debug.LogError("场景中未找到 SceneObjManager！");
@@ -1463,6 +1519,22 @@ namespace IndependentAgentProject
 
         private void ExecuteMoveAction(ActionSequenceRuntime actionSequenceRuntime)
         {
+            // Hidden / Dead / Stunned 等 IImmovableState 下禁止 ActionSequence 的位移行为
+            if (IsImmovable)
+            {
+                var curAction0 = actionSequenceRuntime.GetCurActionStep();
+                var curRuntime0 = actionSequenceRuntime.GetCurActionRuntime();
+                curRuntime0.Result ??= new ActionResult();
+                curRuntime0.Result.Message = IsDead
+                    ? "[动作中断]你已经死了，无法移动。"
+                    : $"[动作中断]当前处于 {StateName} 状态，无法移动。";
+                curRuntime0.State = ActionState.Failed;
+
+                var finishedRuntime0 = curRuntime0;
+                this.mCurActionRuntime = null;
+                OnActionFinished(finishedRuntime0);
+                return;
+            }
             var curAction = actionSequenceRuntime.GetCurActionStep();
             this.moveRight = curAction.Move.direction == MoveAction.Direction.Right;
             this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
@@ -1589,6 +1661,17 @@ namespace IndependentAgentProject
 
         private void ExecuteInteractAction(ActionSequenceRuntime actionSequenceRuntime)
         {
+            // Dead 状态下禁止 ActionSequence 的交互
+            if (IsDead)
+            {
+                var failedRuntime0 = actionSequenceRuntime.GetCurActionRuntime();
+                failedRuntime0.Result ??= new ActionResult();
+                failedRuntime0.Result.Message = "[动作中断]你已经死了，无法执行交互。";
+                failedRuntime0.State = ActionState.Failed;
+                this.mCurActionRuntime = null;
+                OnActionFinished(failedRuntime0);
+                return;
+            }
             var curAction = actionSequenceRuntime.GetCurActionStep();
             this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
 
@@ -1605,8 +1688,9 @@ namespace IndependentAgentProject
             // 重置初始接触物体信息
             foreach (var obj in mTouchingObjs)
                 this.mCurActionRuntime.StartTouchingObjs.Add(obj);
-            // 执行一次
-            ChangeState("Idle");
+            // Hidden 等 IImmovableState 下不切回 Idle，以保留躲藏状态
+            if (!IsImmovable)
+                ChangeState("Idle");
             (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
@@ -1626,6 +1710,16 @@ namespace IndependentAgentProject
 
         private void ExecuteSelectAction(ActionSequenceRuntime actionSequenceRuntime)
         {
+            if (IsDead)
+            {
+                var failed = actionSequenceRuntime.GetCurActionRuntime();
+                failed.Result ??= new ActionResult();
+                failed.Result.Message = "[动作中断]你已经死了，无法执行选择。";
+                failed.State = ActionState.Failed;
+                this.mCurActionRuntime = null;
+                OnActionFinished(failed);
+                return;
+            }
             var curAction = actionSequenceRuntime.GetCurActionStep();
             this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
 
@@ -1644,8 +1738,9 @@ namespace IndependentAgentProject
             // 重置初始接触物体信息
             foreach (var obj in mTouchingObjs)
                 this.mCurActionRuntime.StartTouchingObjs.Add(obj);
-            // 执行一次
-            ChangeState("Idle");
+            // Hidden 等 IImmovableState 下不切回 Idle，以保留躲藏状态
+            if (!IsImmovable)
+                ChangeState("Idle");
             int selection = curAction.Select.Selection;
             (bool success, string result) = SceneObjManager.Instance.Select(this.gameObject, selection);
             // 获得执行结果后，直接OnActionFinished
@@ -1666,6 +1761,16 @@ namespace IndependentAgentProject
 
         private void ExecuteInputAction(ActionSequenceRuntime actionSequenceRuntime)
         {
+            if (IsDead)
+            {
+                var failed = actionSequenceRuntime.GetCurActionRuntime();
+                failed.Result ??= new ActionResult();
+                failed.Result.Message = "[动作中断]你已经死了，无法执行输入。";
+                failed.State = ActionState.Failed;
+                this.mCurActionRuntime = null;
+                OnActionFinished(failed);
+                return;
+            }
             var curAction = actionSequenceRuntime.GetCurActionStep();
             this.mCurActionRuntime = actionSequenceRuntime.GetCurActionRuntime();
 
@@ -1682,8 +1787,9 @@ namespace IndependentAgentProject
             // 重置初始接触物体信息
             foreach (var obj in mTouchingObjs)
                 this.mCurActionRuntime.StartTouchingObjs.Add(obj);
-            // 执行一次
-            ChangeState("Idle");
+            // Hidden 等 IImmovableState 下不切回 Idle，以保留躲藏状态
+            if (!IsImmovable)
+                ChangeState("Idle");
             string inputText = curAction.Input.InputText;
             (bool success, string result) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
             // 获得执行结果后，直接OnActionFinished

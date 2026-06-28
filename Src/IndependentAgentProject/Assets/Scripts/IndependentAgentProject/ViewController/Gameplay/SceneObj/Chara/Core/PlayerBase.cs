@@ -2,6 +2,7 @@ using FrameworkDesign;
 using IndependentAgentProject;
 using Services;
 using ShootingEditor2D;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace IndependentAgentProject
@@ -13,9 +14,15 @@ namespace IndependentAgentProject
         /// <summary>最近接触到的 CheckPoint。被 CheckPoint.OnTriggerEnter2D 调用 UpdateCheckPoint 时刷新。</summary>
         public CheckPoint LastCheckPoint { get; private set; }
 
+        // v0.21.7-fix: Hidden 状态进入时保存的 Rigidbody2D 约束，退出时无条件还原。
+        private RigidbodyConstraints2D mHiddenSavedConstraints;
+        // v0.21.7-fix: Hidden 进入时被禁用的 Renderer 列表，退出时按列表还原（避免把进入前就 disabled 的也开起来）。
+        private readonly List<Renderer> mHiddenDisabledRenderers = new List<Renderer>();
+
         protected override void Awake()
         {
             base.Awake();
+            RegisterState(new HiddenState());
             this.RegisterEvent<GameOverEvent>(e =>
             {
                 if (this.GetStateName() != "Dead")
@@ -24,6 +31,56 @@ namespace IndependentAgentProject
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
+
+        #region Hidden Hook（v0.21.7 躲藏功能；柜子 Cabinet 负责进入 / 退出）
+        /// <summary>
+        /// 进入 Hidden 状态：
+        /// 1) 保存当前 Rigidbody2D.constraints 并切到 FreezeAll，彻底锁定位置/旋转（重力/外力/平台均无法改变坐标）；
+        /// 2) 速度与角速度归零，避免冻结瞬间残留动量；
+        /// 3) 关闭玩家及所有子节点上当前 enabled 的 Renderer（SpriteRenderer/MeshRenderer/ParticleSystemRenderer 等），
+        ///    并记录到列表用于 OnHiddenExit 时还原——不动 GameObject.activeSelf 以保留 FSM/Collider/Trigger/脚本运行。
+        /// </summary>
+        public virtual void OnHiddenEnter()
+        {
+            if (mRigidbody2D != null)
+            {
+                mHiddenSavedConstraints = mRigidbody2D.constraints;
+                mRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+                mRigidbody2D.velocity = Vector2.zero;
+                mRigidbody2D.angularVelocity = 0f;
+            }
+
+            mHiddenDisabledRenderers.Clear();
+            foreach (var r in GetComponentsInChildren<Renderer>(includeInactive: false))
+            {
+                if (r != null && r.enabled)
+                {
+                    mHiddenDisabledRenderers.Add(r);
+                    r.enabled = false;
+                }
+            }
+        }
+        public virtual void OnHiddenUpdate() { }
+        public virtual void OnHiddenFixedUpdate() { }
+        /// <summary>
+        /// 退出 Hidden 状态：
+        /// 1) 无条件还原 constraints 到进入前保存的值（D6：如未来 Dead 要加约束，由 DeadState 自行设置）；
+        /// 2) 按 OnHiddenEnter 记录的列表把被关闭的 Renderer.enabled 还原为 true。
+        /// </summary>
+        public virtual void OnHiddenExit()
+        {
+            if (mRigidbody2D != null)
+            {
+                mRigidbody2D.constraints = mHiddenSavedConstraints;
+            }
+
+            foreach (var r in mHiddenDisabledRenderers)
+            {
+                if (r != null) r.enabled = true;
+            }
+            mHiddenDisabledRenderers.Clear();
+        }
+        #endregion
 
         #region FSM Hook
         public override void OnIdleEnter()
@@ -64,14 +121,8 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// 返回最近 CheckPoint 的重生锚点：
-        /// 1. 取 LastCheckPoint.GetRespawnPosition()（默认 respawnAnchor，未挂则用 CheckPoint 自身位置）
-        /// 2. 速度归零（线速度 + 角速度），避免重生后继续滑行
-        /// 3. 切到 Idle 状态
-        /// 4. LastCheckPoint == null 时只打印警告并返回——避免被瞬移到错误位置
-        ///
-        /// AIPlayer 会覆写：在 base.ReturnToCheckPoint() 之前先 StopMovement(true) 中断 ActionSequence，
-        /// 完成后再 SendFeedbackToAgent 通知 LLM。
+        /// 中性版本：返回最近 CheckPoint 的重生锚点。语义为「我决定回到检查点」（调试命令 / 系统重置），
+        /// 不检查 IsInvulnerable——无敌状态下也会被传送。受伤型传送请调 ReturnToCheckPointByHurt。
         /// </summary>
         public virtual void ReturnToCheckPoint(SceneObjBase sceneObjBase)
         {
@@ -90,6 +141,46 @@ namespace IndependentAgentProject
             ChangeState("Idle");
         }
 
+        /// <summary>
+        /// 受伤型版本：由 Trap 等伤害性机关触发。语义为「玩家被伤害性机关击中，传送回检查点」。
+        /// 当 IsInvulnerable（如 Hidden / Dead）时直接拒绝，符合 v0.21.7-fix 的免疫语义。
+        /// AIPlayer 会 override 以追加 StopMovement(true) 与反馈消息。
+        /// </summary>
+        public virtual void ReturnToCheckPointByHurt(SceneObjBase sceneObjBase)
+        {
+            if (IsInvulnerable) return;
+            ReturnToCheckPoint(sceneObjBase);
+        }
+
+        #endregion
+
+        #region Hidden FSM State
+        /// <summary>
+        /// 躲藏状态：实现 IUndetectableState（不被敌人检测/追击）、IImmovableState（屏蔽主动位移）、
+        /// IInvulnerableState（CharaBase.Die() 与 PlayerBase.ReturnToCheckPointByHurt 入口免疫）。
+        /// 进入/退出由柜子 Cabinet.Interact 直接调用 player.ChangeState 切换。
+        /// </summary>
+        public class HiddenState : FSMStateBase, IUndetectableState, IImmovableState, IInvulnerableState
+        {
+            public override string Name => "Hidden";
+
+            public override void OnEnter(SceneObjBase sceneObj)
+            {
+                if (sceneObj is PlayerBase player) player.OnHiddenEnter();
+            }
+            public override void OnUpdate(SceneObjBase sceneObj)
+            {
+                if (sceneObj is PlayerBase player) player.OnHiddenUpdate();
+            }
+            public override void OnFixedUpdate(SceneObjBase sceneObj)
+            {
+                if (sceneObj is PlayerBase player) player.OnHiddenFixedUpdate();
+            }
+            public override void OnExit(SceneObjBase sceneObj)
+            {
+                if (sceneObj is PlayerBase player) player.OnHiddenExit();
+            }
+        }
         #endregion
     }
 }

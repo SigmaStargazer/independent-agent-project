@@ -60,6 +60,8 @@ DEFAULT_IDLE_WAKEUP_CONFIG = {
     "enabled": True,
     "delay_min_seconds": 120,
     "delay_max_seconds": 300,
+    "first_delay_min_seconds": 25,
+    "first_delay_max_seconds": 35,
     "summary_max_events": 3,
     "summary_timeout_seconds": 5,
     "ignore_self_events": True,
@@ -86,12 +88,21 @@ def load_idle_wakeup_config() -> dict:
     if max_delay < min_delay:
         max_delay = min_delay
 
+    first_min_delay = float(config.get("first_delay_min_seconds", 25))
+    first_max_delay = float(config.get("first_delay_max_seconds", 35))
+    if first_min_delay <= 0:
+        first_min_delay = 25
+    if first_max_delay < first_min_delay:
+        first_max_delay = first_min_delay
+
     summary_max_events = int(config.get("summary_max_events", config.get("max_world_events", 3)))
     summary_timeout = float(config.get("summary_timeout_seconds", config.get("rpc_timeout_seconds", 5)))
 
     config["enabled"] = bool(config.get("enabled", True))
     config["min_delay_seconds"] = min_delay
     config["max_delay_seconds"] = max_delay
+    config["first_min_delay_seconds"] = first_min_delay
+    config["first_max_delay_seconds"] = first_max_delay
     config["max_world_events"] = max(0, summary_max_events)
     config["ignore_self_events"] = bool(config.get("ignore_self_events", True))
     config["rpc_timeout_seconds"] = max(1.0, summary_timeout)
@@ -543,6 +554,10 @@ class Agent:
         self._idle_wakeup_task: asyncio.Task | None = None
         self._idle_wakeup_seq = 0
         self._is_graph_running = False
+        # 是否在下次 _schedule_idle_wakeup 时使用「首次短间隔」；
+        # 只有在 _asend_message（用户消息 / feedback）触发时置位为 True，
+        # 调度后立刻清空，确保后续 idle 走回长间隔。
+        self._pending_first_wakeup = False
 
         # 是否存在未完成checkpoint
         # self._has_unfinished_checkpoint = False
@@ -608,12 +623,19 @@ class Agent:
         if not self._can_schedule_idle_wakeup():
             return
 
-        min_delay = IDLE_WAKEUP_CONFIG["min_delay_seconds"]
-        max_delay = IDLE_WAKEUP_CONFIG["max_delay_seconds"]
+        if self._pending_first_wakeup:
+            min_delay = IDLE_WAKEUP_CONFIG["first_min_delay_seconds"]
+            max_delay = IDLE_WAKEUP_CONFIG["first_max_delay_seconds"]
+            self._pending_first_wakeup = False
+            wakeup_kind = "first"
+        else:
+            min_delay = IDLE_WAKEUP_CONFIG["min_delay_seconds"]
+            max_delay = IDLE_WAKEUP_CONFIG["max_delay_seconds"]
+            wakeup_kind = "normal"
         delay = random.uniform(min_delay, max_delay)
         seq = self._idle_wakeup_seq
         self._idle_wakeup_task = asyncio.create_task(self._idle_wakeup_after_delay(seq, delay))
-        print(f"[{self.name}] idle wakeup scheduled in {delay:.1f}s")
+        print(f"[{self.name}] idle wakeup scheduled in {delay:.1f}s ({wakeup_kind})")
 
     async def _idle_wakeup_after_delay(self, seq: int, delay: float):
         try:
@@ -714,6 +736,8 @@ class Agent:
 
     async def _asend_message(self, message: str, is_feedback: bool = False, force_interrupt: bool = False):
         self._cancel_idle_wakeup()
+        # 收到外界消息/反馈：标记下次 idle wakeup 走「首次短间隔」
+        self._pending_first_wakeup = True
         # =========================
         # 0. 记录消息时间
         # =========================
@@ -1128,8 +1152,7 @@ class Agent:
             # 4. clear resume state
             # =========================
             self._resume_state = None
-            # =========================
-            # 4. initialize queues
+            self._pending_first_wakeup = False
             # =========================
             self.message_queue = asyncio.Queue()
             self.feedback_queue = asyncio.Queue()

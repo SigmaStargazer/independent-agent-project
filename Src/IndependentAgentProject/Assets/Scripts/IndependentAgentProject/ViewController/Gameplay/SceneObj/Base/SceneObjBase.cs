@@ -12,13 +12,13 @@ namespace IndependentAgentProject
         public abstract string Name { get; }
         public abstract string Desc { get; }
 
-        [Header("·¶Î§·½Î»ÅäÖÃ")]
+        [Header("èŒƒå›´æ–¹ä½é…ç½®")]
         [SerializeField]
         protected bool mUseRangeDirection = false;
 
         /// <summary>
-        /// ÓÃÓÚ¼ÆËã·¶Î§·½Î»µÄCollider
-        /// ²»ÌîÔòÄ¬ÈÏÊ¹ÓÃ×ÔÉíCollider2D
+        /// ç”¨äºè®¡ç®—èŒƒå›´æ–¹ä½çš„Collider
+        /// ä¸å¡«åˆ™é»˜è®¤ä½¿ç”¨è‡ªèº«Collider2D
         /// </summary>
         [SerializeField]
         protected Collider2D mRangeCollider;
@@ -34,12 +34,12 @@ namespace IndependentAgentProject
             }
         }
 
-        // ½»»¥ÇøÓòÁĞ±í£¨ÔÚ Inspector ÀïÍÏ×§£¬»ò Awake ×Ô¶¯ÊÕ¼¯£©
-        [Header("½»»¥ÇøÓò£¨Áô¿ÕÔòÊ¹ÓÃ×ÔÉíCollider£©")]
-        [SerializeField] private List<InteractionZone> mInteractionZones = new List<InteractionZone>();
+        // äº¤äº’åŒºåŸŸåˆ—è¡¨ï¼ˆåœ¨ Inspector é‡Œæ‹–æ‹½ï¼Œæˆ– Awake è‡ªåŠ¨æ”¶é›†ï¼‰
+        [Header("äº¤äº’åŒºåŸŸï¼ˆç•™ç©ºåˆ™ä½¿ç”¨è‡ªèº«Colliderï¼‰")]
+        [SerializeField] protected List<InteractionZone> mInteractionZones = new List<InteractionZone>();
 
         /// <summary>
-        /// ×´Ì¬»ú
+        /// çŠ¶æ€æœº
         /// </summary>
         protected Dictionary<string, FSMStateBase> mStates = new Dictionary<string, FSMStateBase>();
         protected FSMStateBase mCurState;
@@ -61,17 +61,17 @@ namespace IndependentAgentProject
 
         protected virtual void Awake()
         {
-            // Ç¿ÖÆ×¢Èë»ù´¡×´Ì¬
+            // å¼ºåˆ¶æ³¨å…¥åŸºç¡€çŠ¶æ€
             RegisterState(new IdleState());
             RegisterState(new MoveState());
-            // ×Ô¶¯ÊÕ¼¯ËùÓĞ×Ó¶ÔÏóÉÏµÄ InteractionZone
+            // è‡ªåŠ¨æ”¶é›†æ‰€æœ‰å­å¯¹è±¡ä¸Šçš„ InteractionZone
             if (mInteractionZones.Count == 0)
                 mInteractionZones.AddRange(GetComponentsInChildren<InteractionZone>());
         }
 
         protected virtual void Start()
         {
-            // Ä¬ÈÏ½øÈëIdle×´Ì¬
+            // é»˜è®¤è¿›å…¥IdleçŠ¶æ€
             ChangeState("Idle");
         }
 
@@ -84,7 +84,7 @@ namespace IndependentAgentProject
             mCurState?.OnFixedUpdate(this);
         }
 
-        // ×¢²áµ½SceneObjManager
+        // æ³¨å†Œåˆ°SceneObjManager
         protected virtual void OnEnable()
         {
             if (SceneObjManager.Instance != null)
@@ -100,7 +100,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// ×¢²á×´Ì¬
+        /// æ³¨å†ŒçŠ¶æ€
         /// </summary>
         /// <param name="state"></param>
         protected void RegisterState(FSMStateBase state)
@@ -132,17 +132,37 @@ namespace IndependentAgentProject
             return mCurState?.Name ?? "Idle";
         }
 
-        #region ½»»¥ÇøÓòÅĞ¶Ï
         /// <summary>
-        /// ÊäÈë½ÇÉ«µÄGameObject£¬Êä³ö¸Ã½ÇÉ«ÊÇ·ñÔÚÈÎÒâ½»»¥ÇøÓòÄÚ
-        /// <param name="chara">½ÇÉ«µÄGameObject¡£ÓÃÓÚÅĞ¶Ï¸Ã</param>
-        /// <returns>bool£¬¸Ã½ÇÉ«ÊÇ·ñÔÚÈÎÒâ½»»¥ÇøÓòÄÚ</returns>
+        /// å½“å‰çŠ¶æ€æ˜¯å¦åº”è¢«åˆ¤å®šä¸ºã€Œä¸å¯è¢«æ£€æµ‹/è¿½å‡»ã€ï¼ˆå³ mCurState å®ç° IUndetectableStateï¼‰ã€‚
+        /// ç»Ÿä¸€åœ¨ SceneObjBase æä¾›ï¼šå­ç±»ä¸€èˆ¬ä¸éœ€è¦†å†™ï¼Œç”±å„è‡ª FSMState è‡ªå·±å†³å®šã€‚
+        /// </summary>
+        public virtual bool IsUndetectable => mCurState is IUndetectableState;
+
+        /// <summary>
+        /// å½“å‰çŠ¶æ€æ˜¯å¦ã€Œç¦æ­¢ä¸»åŠ¨ç§»åŠ¨ã€ï¼ˆå³ mCurState å®ç° IImmovableStateï¼‰ã€‚
+        /// ç”¨äº HumanPlayer çš„è¾“å…¥å±è”½ã€AIPlayer çš„ Move / Follow å·¥å…·ï¼Œ
+        /// ä»¥åŠ ActionSequence ä¸­ MoveAction / FollowAction çš„ç»Ÿä¸€æ‹’ç»ä½ç§»ã€‚
+        /// </summary>
+        public virtual bool IsImmovable => mCurState is IImmovableState;
+
+        /// <summary>
+        /// å½“å‰çŠ¶æ€æ˜¯å¦ã€Œå…ç–«è‡´æ­»ä¼¤å®³ä¸å—ä¼¤å‹é‡ç”Ÿã€ï¼ˆå³ mCurState å®ç° IInvulnerableStateï¼‰ã€‚
+        /// ç”¨äº CharaBase.Die() å…¥å£æ‹¦æˆªã€PlayerBase.ReturnToCheckPointByHurt å…ç–«åˆ¤å®šã€‚
+        /// ä¸­æ€§çš„ ReturnToCheckPointï¼ˆè°ƒè¯• / ç³»ç»Ÿé‡ç½®ï¼‰ä¸èµ°è¯¥åˆ¤å®šã€‚
+        /// </summary>
+        public virtual bool IsInvulnerable => mCurState is IInvulnerableState;
+
+        #region äº¤äº’åŒºåŸŸåˆ¤æ–­
+        /// <summary>
+        /// è¾“å…¥è§’è‰²çš„GameObjectï¼Œè¾“å‡ºè¯¥è§’è‰²æ˜¯å¦åœ¨ä»»æ„äº¤äº’åŒºåŸŸå†…
+        /// <param name="chara">è§’è‰²çš„GameObjectã€‚ç”¨äºåˆ¤æ–­è¯¥</param>
+        /// <returns>boolï¼Œè¯¥è§’è‰²æ˜¯å¦åœ¨ä»»æ„äº¤äº’åŒºåŸŸå†…</returns>
         /// </summary>
         public bool IsCharacterInAnyZone(GameObject chara)
         {
             if (mInteractionZones.Count == 0)
             {
-                // ½µ¼¶£ºÊ¹ÓÃ×ÔÉí Collider
+                // é™çº§ï¼šä½¿ç”¨è‡ªèº« Collider
                 var selfCol = GetComponent<Collider2D>();
                 var charaCol = chara?.GetComponent<Collider2D>();
                 if (selfCol == null || charaCol == null) return false;
@@ -168,9 +188,9 @@ namespace IndependentAgentProject
             return min;
         }
         /// <summary>
-        /// »ñÈ¡½ÇÉ«ËùÔÚµÄ¾ßÌåÇøÓò±êÇ©£¨ÓÃÓÚÇø·ÖÓïÒå£¬ÈçÕıÃæ/±³Ãæ£©
-        /// <param name="chara">½ÇÉ«µÄGameObject¡£ÓÃÓÚ»ñÈ¡½ÇÉ«Óë¸ÃÖØºÏµÄ½»»¥ÇøÓò±êÇ©</param>
-        /// <returns>string£¬½ÇÉ«ËùÔÚ¾ßÌåÇøÓò±êÇ©</returns>
+        /// è·å–è§’è‰²æ‰€åœ¨çš„å…·ä½“åŒºåŸŸæ ‡ç­¾ï¼ˆç”¨äºåŒºåˆ†è¯­ä¹‰ï¼Œå¦‚æ­£é¢/èƒŒé¢ï¼‰
+        /// <param name="chara">è§’è‰²çš„GameObjectã€‚ç”¨äºè·å–è§’è‰²ä¸è¯¥é‡åˆçš„äº¤äº’åŒºåŸŸæ ‡ç­¾</param>
+        /// <returns>stringï¼Œè§’è‰²æ‰€åœ¨å…·ä½“åŒºåŸŸæ ‡ç­¾</returns>
         /// </summary>
         public string GetActiveZoneTag(GameObject chara)
         {
@@ -178,7 +198,7 @@ namespace IndependentAgentProject
                 if (zone.ContainsCharacter(chara)) return zone.ZoneTag;
             return null;
         }
-        #endregion ½»»¥ÇøÓòÅĞ¶Ï
+        #endregion äº¤äº’åŒºåŸŸåˆ¤æ–­
 
         public IArchitecture GetArchitecture()
         {

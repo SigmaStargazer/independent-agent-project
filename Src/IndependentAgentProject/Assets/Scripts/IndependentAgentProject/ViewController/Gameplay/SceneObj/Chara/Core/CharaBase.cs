@@ -11,7 +11,7 @@ namespace IndependentAgentProject
         protected Rigidbody2D mRigidbody2D;
         public float moveSpeed = 5f;
         protected bool moveRight;
-        // �泯����
+        // 面朝方向
         public bool IsRight => transform.localScale.x > 0;
         public bool IsDead => StateName == "Dead";
         public SceneObjBase TargetFollowing { get; protected set; }
@@ -37,7 +37,7 @@ namespace IndependentAgentProject
         // Follow hooks
         public virtual void OnFollowEnter() { }
         public virtual void OnFollowUpdate() { }
-        public virtual void OnFollowFixedUpdate() 
+        public virtual void OnFollowFixedUpdate()
         {
             if (TargetFollowing == null)
             {
@@ -47,21 +47,21 @@ namespace IndependentAgentProject
 
             float delta = TargetFollowing.transform.position.x - transform.position.x;
             float distance = Mathf.Abs(delta);
-            // �������淶Χ�����и���
+            // 超出跟随范围，进行跟随
             if (distance > FollowMaxDistance)
             {
                 float dir = Mathf.Sign(delta);
                 TurnBack(dir);
                 mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
             }
-            // ���ڱ��ַ�Χ�ڣ����־���
+            // 处于保持范围内，保持距离
             else if (distance < FollowMinDistance)
             {
                 float dir = -Mathf.Sign(delta);
                 TurnBack(dir);
                 mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
             }
-            // ���ں��ʵķ�Χ�ڣ�ֹͣ�ƶ�
+            // 处于合适的范围内，停止移动
             else
             {
                 float dir = Mathf.Sign(delta);
@@ -78,7 +78,7 @@ namespace IndependentAgentProject
             RegisterState(new FollowState());
         }
 
-        public class DeadState : FSMStateBase
+        public class DeadState : FSMStateBase, IUndetectableState, IImmovableState, IInvulnerableState
         {
             public override string Name => "Dead";
 
@@ -87,17 +87,17 @@ namespace IndependentAgentProject
                 if (sceneObj is CharaBase chara)
                     chara.OnDeadEnter();
             }
-            public override void OnUpdate(SceneObjBase sceneObj) 
+            public override void OnUpdate(SceneObjBase sceneObj)
             {
                 if (sceneObj is CharaBase chara)
                     chara.OnDeadUpdate();
-            } 
+            }
             public override void OnFixedUpdate(SceneObjBase sceneObj)
             {
                 if (sceneObj is CharaBase chara)
                     chara.OnDeadFixedUpdate();
             }
-                
+
             public override void OnExit(SceneObjBase sceneObj)
             {
                 if (sceneObj is CharaBase chara)
@@ -138,20 +138,24 @@ namespace IndependentAgentProject
         }
         public void Die()
         {
+            // v0.21.7-fix: IInvulnerableState 下任何来源的致死调用都被入口拦截。
+            // 现有三处伤害源（Laser / Abyss / EnemyBase 攻击）最终都走这里，
+            // 无需逐个改伤害源；同时也防御已 Dead 状态被重复 Die 触发 OnDeadEnter。
+            if (IsInvulnerable) return;
             ChangeState("Dead");
         }
 
         public virtual (bool success, string result) Interact(GameObject chara)
         {
-            return (false, "�ö����޷�����");
+            return (false, "该对象无法交互");
         }
         public virtual (bool success, string result) Select(GameObject chara, int selection)
         {
-            return (false, "�ö���δ�ṩѡ��");
+            return (false, "该对象未提供选项");
         }
         public virtual (bool success, string result) TextInput(GameObject chara, string inputText)
         {
-            return (false, "�ö���δ�ṩ�����");
+            return (false, "该对象未提供输入框");
         }
     }
 }
