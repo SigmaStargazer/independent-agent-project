@@ -6,6 +6,7 @@
 > **后续修复**：
 > - `DevDocs/v0.21.7_fix_1/solution_actionsequence_immovable_fix.md`（ActionSequence × IImmovableState 守卫漏洞，已实现）
 > - `DevDocs/v0.21.7_fix_2/solution_enemybase_issues_fix.md`（EnemyBase 巡逻跳/退追间隔/状态判定/Zone 自动收集说明，已实现并验收通过）
+> - `DevDocs/v0.21.7_fix_3/solution.md`（LaserTraining 与 ReturnToCheckPoint 参数解耦：签名换 string sourceName + AIPlayer 相对位置反馈，已实现并验收通过）
 
 ---
 

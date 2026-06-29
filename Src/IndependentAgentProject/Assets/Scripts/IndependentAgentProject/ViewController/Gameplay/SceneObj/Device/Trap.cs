@@ -24,7 +24,7 @@ namespace IndependentAgentProject
             PlayerBase player = collision.GetComponent<PlayerBase>();
             if (player != null)
             {
-                player.ReturnToCheckPointByHurt(this);
+                player.ReturnToCheckPointByHurt(this.Name);
             }
         }
     }

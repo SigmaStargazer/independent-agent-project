@@ -574,27 +574,46 @@ namespace IndependentAgentProject
         /// v0.21.7-fix：从 ReturnToCheckPoint override 改到 ReturnToCheckPointByHurt override：
         /// - 中性版本 ReturnToCheckPoint 不再 override，调试 / 系统重置走 PlayerBase 默认（不发 feedback）；
         /// - 真正由「受伤」触发的传送才走这里，并仅在没被 IsInvulnerable 拦截时才发反馈。
+        /// v0.21.7-fix_3：
+        /// 1. 参数类型 SceneObjBase → string sourceName，让"伤害源"无须是 SceneObjBase（如 LaserTraining）；
+        /// 2. 反馈消息使用相对方向 / 距离（口径与 SceneObjInfoRenderer 一致），不暴露绝对坐标；
+        /// 3. 附带"触碰时面朝 / 触碰时横向速度"，便于 AI 复盘触碰瞬间姿态、并在同名伤害源（如多片"激光"）场景下做区分。
         ///
-        /// 流程：
-        /// 1. StopMovement(true) 中止当前 Action / ActionSequence；
-        /// 2. base.ReturnToCheckPointByHurt：若 IsInvulnerable 则直接 return，不传送；
-        /// 3. 只有真正发生传送（!IsInvulnerable）时给 Agent 发反馈，避免「无敌但仍报告被传送」的语义错位。
+        /// 采样顺序（关键）：
+        /// 1) 先采样 hitX / face / vx / vxDir（StopMovement 会清速度、base 调用会改 transform，所以必须最先采）；
+        /// 2) StopMovement(true)；
+        /// 3) IsInvulnerable 命中则 return（不发反馈、不传送）；
+        /// 4) base.ReturnToCheckPointByHurt(sourceName) 完成实际传送；
+        /// 5) 此时 transform.position 已是检查点 X → 算 dx = hitX - current.x，得到「最后位置」相对当前自身的方向 / 距离；
+        /// 6) 拼多句反馈，给 Agent 发出。
         /// </summary>
-        public override void ReturnToCheckPointByHurt(SceneObjBase sceneObj)
+        public override void ReturnToCheckPointByHurt(string sourceName = null)
         {
+            float hitX = transform.position.x;
+            string face = IsRight ? "right" : "left";
+            float vx = mRigidbody2D != null ? mRigidbody2D.velocity.x : 0f;
+            string vxDir = vx > 0.01f ? "right" : (vx < -0.01f ? "left" : "");
+
             StopMovement(stopActionSequence: true);
 
-            // v0.21.7-fix: 不直接调 ReturnToCheckPoint，统一走带无敌判定的 ByHurt 路径。
-            // 用 IsInvulnerable 判定是否真正发生传送，避免重复发反馈。
             if (IsInvulnerable) return;
 
-            base.ReturnToCheckPointByHurt(sceneObj);
-            var sceneObjs = SceneObjManager.Instance.GetSceneObjsExcluding(this.gameObject);
+            base.ReturnToCheckPointByHurt(sourceName);
 
-            string sceneObjName = sceneObj.Name;
-            int index = sceneObjs.IndexOf(sceneObj);
+            float dx = hitX - transform.position.x;
+            string dirX = dx < 0 ? "left" : "right";
+            float distX = Mathf.Abs(dx);
 
-            this.SendFeedbackToAgent($"[返回检查点]你触碰到: {index}. {sceneObjName}。已被传送回最近的检查点。当前动作序列已中断。");
+            string display = string.IsNullOrEmpty(sourceName) ? "陷阱" : sourceName;
+            string vxPart = string.IsNullOrEmpty(vxDir)
+                ? $"横向速度 {Mathf.Abs(vx):F2}m/s"
+                : $"横向速度 {Mathf.Abs(vx):F2}m/s 方向{vxDir}";
+            string text =
+                $"[返回检查点]你触碰到: {display}。" +
+                $"最后位置在你的 {dirX}方向 {distX:F2}m。" +
+                $"触碰时面朝{face}，{vxPart}。" +
+                $"已被传送回最近的检查点。当前动作/动作序列已中断。";
+            this.SendFeedbackToAgent(text);
         }
 
         public void StopAction(string requestId, string actionType)

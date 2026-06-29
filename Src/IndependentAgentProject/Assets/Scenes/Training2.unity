@@ -451,6 +451,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SceneDisplayName: "\u7B2C\u4E09\u5173"
   Description: 
+  SceneType: 1
 --- !u!4 &789838276 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1713044117564056767, guid: 63830125277a2704f9cc80464945bde6, type: 3}

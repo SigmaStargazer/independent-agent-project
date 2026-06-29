@@ -1,7 +1,7 @@
 # 需求池 / 候选问题清单（不依附具体版本）
 
 > **状态**：候选 / 未分配版本  
-> **最后更新**：2026-06-28  
+> **最后更新**：2026-06-29  
 > **文件名**：`backlog.md`（2026-06-28 由 `analysis.md` 改名，避免与版本目录内的 `analysis.md` 混淆）  
 > **目录说明**：见同目录 `README.md`。原 `DevDocs/v0.21.X/` 于 2026-06-28 改名为 `DevDocs/需求池/`。
 
@@ -22,6 +22,7 @@
 | 7 | Unity 工程内 `.cs` 源文件编码不一致（GBK/UTF-8） | 工程清理 / Unity | 中（Inspector 乱码，长期债） | P1 | 候选 | — |
 | 8 | Kuzu `INTERACTED_WITH` 边 `MERGE` 主键冲突 | Bug / 记忆系统 | 中（已有 3 次重试兜底，最坏可能丢 Episode） | P1 | 候选 | — |
 | 9 | `observe` 工具反馈应附带「自己的状态」 | 体验 / Unity 工具 | 中（Hidden/Dead/Stunned/Follow 易遗忘自身约束） | P1 | 候选 | — |
+| 10 | idle wakeup 无信息量心理活动应抑制写入 | 体验 / 记忆系统 | 中（任务完成后 idle 期反复刷重复 Episode） | P1 | 候选 | — |
 
 > 字段约定：
 > - **类型**：Bug / 体验 / 工程清理 / 调研 / 评估 / 协议改动 等，标注主要落地面（Python / Unity / 协议 / 记忆系统 / 工具）。
@@ -355,6 +356,12 @@ v0.21.7_fix_1 联调（2026-06-28_14-32-42 训练）期间，`memory_manager._me
 
 - `Src/PythonServer/logs/prompts/小明/2026-06-28_14-32-42.log` 训练终端输出。
 - 终端：`terminals/4.txt` 报错段。
+- **2026-06-29 补充复现**：`logs/prompts/小明/2026-06-29_19-50-46.log`（v0.21.7_fix_3 完成连续 5 次穿越激光网后的 idle 等待期）。`terminals/4.txt:935-1024` 报错段，参数细节：
+  - `uuid = 31540bf9-8397-4a0e-a0be-c70da9bffd09`
+  - `name = "MONITORED"`、`fact = "一切如常，继续待命。"`
+  - `source_node_uuid == target_node_uuid == 5aa935d8...`（self-loop）
+  - `episodes` 累计 5 个 episode uuid，且 3 次重试均失败
+  - 上游成因：任务完成后 AI 在 idle wakeup 上反复生成几乎完全相同的心理活动「一切如常，继续待命」，Graphiti 事实去重把它们判为同一条边并复用 uuid，触发 `MERGE` 时 Kuzu 当作 `CREATE` 处理 → 撞主键。该复现进一步说明：**仅做下游 retry 不够，还需要上游抑制无意义心理活动写入（见条目 10）**。
 
 ---
 
@@ -408,9 +415,75 @@ A 起步即可，后续如果发现 Agent 仍然遗忘，再升级到 B。
 
 ---
 
-- 以上 9 条均未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。立项后请同步更新顶部索引表的「状态 / 立项版本」字段。
+## 10. P1 — idle wakeup 无信息量心理活动应抑制写入长期记忆
+
+### 现象
+
+v0.21.7_fix_3 联调（2026-06-29_19-50-46）的训练后期，小明在完成「连续 5 次穿越激光网」任务后进入 idle 等待。系统每隔几十秒推送一次 `idle wakeup`：
+
+```text
+[2016年03月04日 21:23]你已经空闲了一段时间，可以稍微留意一下周围。
+[世界事件摘要]
+最近事件数: 3
+1. 0.3秒前，2. 自动开关的激光网: Inactive -> Active
+...
+```
+
+AI 每次产出几乎完全相同的心理活动：
+
+- 「一切如常，继续在门旁待命。任务已完成，随时可进入第二关。」
+- 「一切如常，激光网规律不变，继续在门旁待命。」
+- 「一切如常，继续在门旁待命。已等待多月，激光网规律依旧稳定，随时可以行动。」
+
+每条都会触发一次 `save_memory` → `add_episode`。**详见 `logs/prompts/小明/2026-06-29_19-50-46.log` line 11605~12482，连续 30+ 条几乎同义的 idle 响应**。
+
+直接后果：
+
+1. **触发条目 8 的主键冲突连锁**：Graphiti 事实去重把这些同义句判为同一条事实边，3 次 retry 都用同一 uuid，全部失败 → Episode 被丢弃；
+2. **Worker 日志被刷得很满**：每条 idle 响应都会跑一次 LLM 抽取（费 token）、3 次 retry（费时间），最终还失败；
+3. **记忆图谱噪声**：即使 retry 成功，长期下来「一切如常」类无信息量 Episode 会大量堆积，挤压有用 Episode 的语义权重。
+
+### 根因
+
+- `agent_interuptible.py` 的 `save_memory` 节点目前**无条件**入队（只要本轮跑到了 END）。
+- idle wakeup 的语义是「让 Agent 留意一下周围」，并非要求长期记忆这件事；但当前是把它当作普通用户消息处理，因此心理活动也被入队。
+- 缺乏「内容与上一条几乎相同」的去重判断；缺乏「本轮无信息量、跳过记忆」的旁路。
+
+### 候选方案
+
+| 方案 | 说明 |
+|------|------|
+| A | **prompt 侧**：在 idle wakeup 提示语里加一条「若与上一次状态完全一致，则只用极简词回应，不再展开心理活动」。改动最小，但只能减少而不能根治 |
+| B | **节点侧**：`save_memory` 节点检查本轮 `mem_to_save` 是否与上一条已落库 Episode 相似度过高（hash / 长度差 / embedding 相似），过高则跳过入队。需要存最近一条文本摘要 |
+| C | **入口侧**：`Agent.asend_message` 中识别 idle wakeup（前缀「你已经空闲了一段时间」）→ 标记本轮 `skip_memory=True`，`save_memory` 节点读到该标记直接 return | 
+| D | **组合**：A + C。idle wakeup 默认 skip_memory；但若 AI 决定主动调工具（说明 idle 触发了真正的行动），则不再 skip |
+
+推荐 **D**：D = A（prompt 引导简短）+ C（入口标记 skip）。idle 期反复刷的纯心理活动不再入库，但如果 idle wakeup 触发了真正动作（observe / 移动 / communicate 等），则保留写入。
+
+### 验收建议
+
+- 训练任务完成后让 Agent 在 idle 状态待至少 20 个 idle wakeup 周期。
+- 验证 worker 日志无 `duplicate edge retry` 噪声；
+- 验证 `mem_episode` 检索时不会出现大量「一切如常」类 Episode；
+- 验证若 Agent 在 idle 期主动调工具（如 `observe_cmd`），该轮记忆仍正常写入。
+
+### 影响范围预估
+
+- Python：`agent_framwork/agents/agent_interuptible.py`（`save_memory` 节点 + State 中加 `skip_memory` 字段）、`main.py` 或 `Agent.asend_message`（识别 idle wakeup 前缀，注入标记）。
+- 与条目 8 强相关：本条若先落地，条目 8 的触发概率会大幅下降；条目 8 仍需独立处理「正常推理路径下的事实去重 retry 兼容性」。
+- 测试：不依赖 Unity 联调，可用 `pytest` 直接驱动 `Agent.aprocess_message` mock idle 输入。
+
+### 复现日志
+
+- `logs/prompts/小明/2026-06-29_19-50-46.log`（line 11605~12482，30+ 条 idle 响应）
+- `terminals/4.txt:935-1024`（v0.21.7_fix_3 联调时 worker 报错段）
+
+---
+
+- 以上 10 条均未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。立项后请同步更新顶部索引表的「状态 / 立项版本」字段。
 - 复现日志：
   - 条目 1~5：`Src/PythonServer/logs/prompts/小明/2026-06-23_13-41-56.log`（v0.21.6 验收训练）
   - 条目 6：v0.21.7 联调期间断网 NewGame 控制台输出（2026-06-28）。
   - 条目 7：2026-06-28 `file` 工具扫描 `Src/IndependentAgentProject/Assets/Scripts/**/*.cs`。
-  - 条目 8~9：`Src/PythonServer/logs/prompts/小明/2026-06-28_14-32-42.log`（v0.21.7_fix_1 联调）。
+  - 条目 8~9：`Src/PythonServer/logs/prompts/小明/2026-06-28_14-32-42.log`（v0.21.7_fix_1 联调）；条目 8 另有 2026-06-29 复现 `logs/prompts/小明/2026-06-29_19-50-46.log`。
+  - 条目 10：`Src/PythonServer/logs/prompts/小明/2026-06-29_19-50-46.log`（v0.21.7_fix_3 联调）。

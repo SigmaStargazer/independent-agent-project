@@ -123,8 +123,10 @@ namespace IndependentAgentProject
         /// <summary>
         /// 中性版本：返回最近 CheckPoint 的重生锚点。语义为「我决定回到检查点」（调试命令 / 系统重置），
         /// 不检查 IsInvulnerable——无敌状态下也会被传送。受伤型传送请调 ReturnToCheckPointByHurt。
+        /// v0.21.7-fix_3：参数从 SceneObjBase 退化为 string sourceName，仅作子类（AIPlayer）反馈消息显示名，
+        /// 基类不使用。这样可让"伤害源"无须是 SceneObjBase（如 LaserTraining 等子物体 MonoBehaviour 也可调用）。
         /// </summary>
-        public virtual void ReturnToCheckPoint(SceneObjBase sceneObjBase)
+        public virtual void ReturnToCheckPoint(string sourceName = null)
         {
             if (LastCheckPoint == null)
             {
@@ -142,14 +144,15 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// 受伤型版本：由 Trap 等伤害性机关触发。语义为「玩家被伤害性机关击中，传送回检查点」。
+        /// 受伤型版本：由 Trap / LaserTraining 等伤害性机关触发。语义为「玩家被伤害性机关击中，传送回检查点」。
         /// 当 IsInvulnerable（如 Hidden / Dead）时直接拒绝，符合 v0.21.7-fix 的免疫语义。
         /// AIPlayer 会 override 以追加 StopMovement(true) 与反馈消息。
+        /// v0.21.7-fix_3：参数从 SceneObjBase 退化为 string sourceName（仅作显示用）。
         /// </summary>
-        public virtual void ReturnToCheckPointByHurt(SceneObjBase sceneObjBase)
+        public virtual void ReturnToCheckPointByHurt(string sourceName = null)
         {
             if (IsInvulnerable) return;
-            ReturnToCheckPoint(sceneObjBase);
+            ReturnToCheckPoint(sourceName);
         }
 
         #endregion
