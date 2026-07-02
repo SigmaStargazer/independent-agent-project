@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class BroadcastMessageToAgentsStep : IFlowStep
     {
-        public string DisplayName => "ÏòËùÓĞAgent·¢ËÍÊı¾İ";
+        public string DisplayName => "å‘æ‰€æœ‰Agentå‘é€æ•°æ®";
 
         private readonly string mMessage;
 
@@ -21,7 +21,7 @@ namespace IndependentAgentProject
         public UniTask Execute()
         {
             SceneObjManager.Instance.BroadcastMessageToAgents(mMessage);
-            // Ã»ÓĞÒì²½µÄ²½Öè£¬Ö±½Ó·µ»Ø¼´¿ÉUniTask.CompletedTask;
+            // æ²¡æœ‰å¼‚æ­¥çš„æ­¥éª¤ï¼Œç›´æ¥è¿”å›å³å¯UniTask.CompletedTask;
             return UniTask.CompletedTask;
         }
     }

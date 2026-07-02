@@ -10,20 +10,20 @@ namespace IndependentAgentProject
 
         public virtual void OnClick()
         {
-            // Ä¬ÈÏ¿ÕÊµÏÖ
+            // é»˜è®¤ç©ºå®ç°
         }
         public abstract bool IsInteractable { get; }
         public virtual (bool success, string result) Interact(GameObject chara)
         {
-            return (false, "¸Ã¶ÔÏóÎŞ·¨½»»¥");
+            return (false, "è¯¥å¯¹è±¡æ— æ³•äº¤äº’");
         }
         public virtual (bool success, string result) Select(GameObject chara, int selection)
         {
-            return (false,"¸Ã¶ÔÏóÎ´Ìá¹©Ñ¡Ïî");
+            return (false,"è¯¥å¯¹è±¡æœªæä¾›é€‰é¡¹");
         }
         public virtual (bool success, string result) TextInput(GameObject chara, string inputText)
         {
-            return (false, "¸Ã¶ÔÏóÎ´Ìá¹©ÊäÈë¿ò");
+            return (false, "è¯¥å¯¹è±¡æœªæä¾›è¾“å…¥æ¡†");
         }
     }
 }

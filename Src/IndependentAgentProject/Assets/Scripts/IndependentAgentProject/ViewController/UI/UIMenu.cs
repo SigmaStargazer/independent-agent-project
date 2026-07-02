@@ -32,15 +32,15 @@ namespace IndependentAgentProject
 
         }
         /// <summary>
-        /// (²âÊÔ)±£´æ´æµµ
+        /// (æµ‹è¯•)ä¿å­˜å­˜æ¡£
         /// </summary>
         public void OnClickSave()
         {
             SaveManager.Instance.Save(this.SceneName);
-            Debug.Log($"±£´æ³É¹¦");
+            Debug.Log($"ä¿å­˜æˆåŠŸ");
         }
         /// <summary>
-        /// (²âÊÔ)ÏÂÒ»¹Ø
+        /// (æµ‹è¯•)ä¸‹ä¸€å…³
         /// </summary>
         /// 
         public void OnClickNextMap()

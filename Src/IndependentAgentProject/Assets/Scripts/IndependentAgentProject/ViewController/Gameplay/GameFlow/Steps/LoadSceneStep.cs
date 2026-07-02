@@ -11,7 +11,7 @@ namespace IndependentAgentProject
 {
     public class LoadSceneStep : IFlowStep
     {
-        public string DisplayName => "加载场景";
+        public string DisplayName => "鍔犺浇鍦烘櫙";
 
         private readonly string levalName;
         public LoadSceneStep(string levelName)
@@ -22,7 +22,7 @@ namespace IndependentAgentProject
         public async UniTask Execute()
         {
             await SceneManager.LoadSceneAsync(levalName);
-            await UniTask.NextFrame();// 进入到场景的第一帧，使得各GameObject的Start()方法执行完毕
+            await UniTask.NextFrame();// 杩涘叆鍒板満鏅殑绗竴甯э紝浣垮緱鍚凣ameObject鐨凷tart()鏂规硶鎵ц瀹屾瘯
         }
     }
 }

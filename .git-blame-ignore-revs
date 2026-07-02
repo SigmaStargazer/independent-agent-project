@@ -1,0 +1,9 @@
+# 此文件列出需要 git blame 忽略的提交（如纯编码 / 格式化批量转换）。
+# 启用方式（仓库内执行一次）：
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# 一行一个完整 commit hash；# 开头为注释。
+#
+# v0.22.0: 批量把 IndependentAgentProject 主工程 .cs 从 GBK 转 UTF-8（无 BOM）。
+# 提交后请把该 commit 的完整 40 位 SHA 追加到下方，并删除本行说明：
+# <COMMIT_SHA_PLACEHOLDER>

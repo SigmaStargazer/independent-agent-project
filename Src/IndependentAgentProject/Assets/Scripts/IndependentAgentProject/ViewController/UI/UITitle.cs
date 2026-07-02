@@ -10,15 +10,15 @@ namespace IndependentAgentProject
 {
     public class UITitle : MonoBehaviour
     {
-        [Header("µÚÒ»¹ØÃû³Æ")]
+        [Header("ç¬¬ä¸€å…³åç§°")]
         [SerializeField]
         private string mFirstLevelName = "Level1";
-        [Header("´´½¨AgentÅäÖÃ")]
+        [Header("åˆ›å»ºAgenté…ç½®")]
         [SerializeField]
-        private string mAgentName = "Ğ¡Ã÷";
+        private string mAgentName = "å°æ˜";
         [SerializeField]
-        private string mAgentDesc = "ÊÇÒ»¸ö°ïÖú»úÆ÷ÈË";
-        [Header("ĞÂÓÎÏ·µ¯´°")]
+        private string mAgentDesc = "æ˜¯ä¸€ä¸ªå¸®åŠ©æœºå™¨äºº";
+        [Header("æ–°æ¸¸æˆå¼¹çª—")]
         [SerializeField]
         private GameObject mNewGameWarmimhPanel;
 

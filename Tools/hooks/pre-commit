@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# v0.22.0 pre-commit hook: 拦截以 GBK / 未知编码 staged 的文本文件。
+# 由 Tools/enable_hooks.{sh,cmd} 注册到 core.hooksPath。
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# 优先用项目内 venv 的 python（Windows 常见），其次 py -3，再次 python3 / python。
+PY=""
+if [ -x "$ROOT/Src/PythonServer/.venv/Scripts/python.exe" ]; then
+  PY="$ROOT/Src/PythonServer/.venv/Scripts/python.exe"
+elif [ -x "$ROOT/Src/PythonServer/.venv/bin/python" ]; then
+  PY="$ROOT/Src/PythonServer/.venv/bin/python"
+elif command -v py >/dev/null 2>&1; then
+  PY="py -3"
+elif command -v python3 >/dev/null 2>&1; then
+  PY="python3"
+elif command -v python >/dev/null 2>&1; then
+  PY="python"
+else
+  echo "[pre-commit] 找不到 python 解释器，跳过编码检查。" >&2
+  exit 0
+fi
+
+# shellcheck disable=SC2086
+$PY "$ROOT/Tools/check_file_encoding.py" --staged

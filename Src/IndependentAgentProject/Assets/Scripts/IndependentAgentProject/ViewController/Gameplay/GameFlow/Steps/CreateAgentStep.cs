@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class DeleteMemoryStep : IFlowStep
     {
-        public string DisplayName => "É¾³ý¾É¼ÇÒä";
+        public string DisplayName => "åˆ é™¤æ—§è®°å¿†";
         public async UniTask Execute()
         {
             await AgentServiceAsyncExtensions.DeleteMemoryAsync();

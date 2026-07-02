@@ -422,6 +422,7 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 | 工具开发 | `Doc/Agent工具开发流程.md` |
 | ActionSequence | `Doc/ActionSequence开发流程.md` |
 | 存档方案 | `Doc/存档方案.md` |
+| **项目编码基线（v0.22.0 起）** | **`DevDocs/feature-design/项目编码基线.md`** |
 | Cursor Skill | `.cursor/skills/develop-agent-tool/`（PythonServer 工作区副本：`Src/PythonServer/.cursor/skills/`） |
 
 ### DevDocs 协作约定

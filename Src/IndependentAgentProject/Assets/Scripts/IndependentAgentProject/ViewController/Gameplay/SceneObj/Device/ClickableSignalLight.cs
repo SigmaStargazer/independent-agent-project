@@ -6,8 +6,8 @@ namespace IndependentAgentProject
 {
     public class ClickableSignalLight : DeviceBase
     {
-        public override string Name => "�źŵ�";
-        public override string Desc => "�к�ƺ��̵�����״̬";
+        public override string Name => "信号灯";
+        public override string Desc => "有红灯和绿灯两种状态";
 
         public override bool IsInteractable => false;
 
@@ -15,14 +15,14 @@ namespace IndependentAgentProject
 
         protected override void Awake()
         {
-            //����״̬
+            //添加状态
             RegisterState(new GreenLightState());
             RegisterState(new RedLightState());
         }
 
         protected override void Start()
         {
-            // Ĭ�Ͻ���Close״̬
+            // 默认进入Close状态
             ChangeState("RedLight");
         }
 
@@ -47,7 +47,7 @@ namespace IndependentAgentProject
                 ChangeState("GreenLight");
             else if (StateName == "GreenLight")
                 ChangeState("RedLight");
-            Debug.Log($"�źŵ�״̬�л�:{StateName}");
+            Debug.Log($"信号灯状态切换:{StateName}");
         }
     }
 }

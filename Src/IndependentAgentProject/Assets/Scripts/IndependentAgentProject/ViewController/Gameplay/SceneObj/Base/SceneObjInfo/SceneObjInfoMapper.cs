@@ -7,19 +7,19 @@ namespace IndependentAgentProject
     {
         public (List<SceneObjInfoModel> sceneObjsInfo, SceneObjInfoModel targetObjInfo) GetSceneObjsInfo(GameObject agentGo, List<SceneObjBase> sceneObjs)
         {
-            // ³õÊ¼»¯·µ»ØÖµ
+            // åˆå§‹åŒ–è¿”å›å€¼
             List<SceneObjInfoModel> sceneObjsInfo = new List<SceneObjInfoModel>();
             SceneObjInfoModel targetObjInfo = null;
 
             if (agentGo == null)
             {
-                Debug.LogError("[SceneObjInfoMapper±¨´í]agentGo == null£¡");
+                Debug.LogError("[SceneObjInfoMapperæŠ¥é”™]agentGo == nullï¼");
                 return (sceneObjsInfo, targetObjInfo);
             }
 
             if (SceneObjManager.Instance == null)
             {
-                Debug.LogError("[SceneObjInfoMapper±¨´í]³¡¾°ÖĞÎ´ÕÒµ½ SceneObjManager£¡");
+                Debug.LogError("[SceneObjInfoMapperæŠ¥é”™]åœºæ™¯ä¸­æœªæ‰¾åˆ° SceneObjManagerï¼");
                 return (sceneObjsInfo, targetObjInfo);
             }
 
@@ -30,11 +30,11 @@ namespace IndependentAgentProject
                 sceneObjsInfo.Add(sceneObjInfo);
             }
 
-            // »ñÈ¡Âß¼­ÖĞ¶¨ÒåµÄ¿É½»»¥¶ÔÏó£¨×î½üÇÒ½Ó´¥£©
+            // è·å–é€»è¾‘ä¸­å®šä¹‰çš„å¯äº¤äº’å¯¹è±¡ï¼ˆæœ€è¿‘ä¸”æ¥è§¦ï¼‰
             SceneObjBase targetObj = SceneObjManager.Instance.GetNearestInteractableObj(agentGo);
             if (targetObj != null)
             {
-                // Èç¹ûÕÒµ½ÁË·ûºÏÌõ¼şµÄ¶ÔÏó£¬½«ÆäĞÅÏ¢°ü×°½ø×Öµä
+                // å¦‚æœæ‰¾åˆ°äº†ç¬¦åˆæ¡ä»¶çš„å¯¹è±¡ï¼Œå°†å…¶ä¿¡æ¯åŒ…è£…è¿›å­—å…¸
                 targetObjInfo = this.Map(targetObj, agentGo);
             }
 
@@ -43,7 +43,7 @@ namespace IndependentAgentProject
         private SceneObjInfoModel Map(SceneObjBase sceneObj, GameObject agentGo)
         {
 
-            // Èç¹û¶ÔÏó²»´æÔÚ»òÕß±»½ûÓÃ£¬Ôò·µ»Ø¿Õ×Öµä
+            // å¦‚æœå¯¹è±¡ä¸å­˜åœ¨æˆ–è€…è¢«ç¦ç”¨ï¼Œåˆ™è¿”å›ç©ºå­—å…¸
             if (sceneObj == null || !sceneObj.gameObject.activeInHierarchy)
                 return null;
             SceneObjInfoModel sceneObjInfo = new SceneObjInfoModel();
@@ -53,7 +53,7 @@ namespace IndependentAgentProject
             // desc
             sceneObjInfo.Desc = sceneObj.Desc;
 
-            // ·½Î»
+            // æ–¹ä½
             //// dirction
             //float xDiff = sceneObj.transform.position.x - charaX;
             //string direction = xDiff < 0 ? "left" : "right";
@@ -98,7 +98,7 @@ namespace IndependentAgentProject
             // state
             sceneObjInfo.State = sceneObj.GetStateName();
 
-            // SceneObjÎªCharaBaseÊ±£¬Ôö¼ÓÃæ³¯·½Ïò
+            // SceneObjä¸ºCharaBaseæ—¶ï¼Œå¢åŠ é¢æœæ–¹å‘
             if (sceneObj is CharaBase chara)
             {
                 sceneObjInfo.FaceDirection = chara.IsRight ? "right" : "left";

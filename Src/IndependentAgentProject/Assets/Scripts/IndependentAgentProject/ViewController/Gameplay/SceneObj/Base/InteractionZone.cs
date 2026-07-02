@@ -5,15 +5,15 @@ using UnityEngine;
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// ½»»¥ÇøÓò×é¼ş£¬¹ÒÔØÔÚ SceneObjBase ×Ó¶ÔÏóÉÏ
-    /// Ö§³Ö¶àÇøÓò
+    /// äº¤äº’åŒºåŸŸç»„ä»¶ï¼ŒæŒ‚è½½åœ¨ SceneObjBase å­å¯¹è±¡ä¸Š
+    /// æ”¯æŒå¤šåŒºåŸŸ
     /// </summary>
     public class InteractionZone : MonoBehaviour
     {
-        [Tooltip("ÇøÓò±êÇ©£¬Èç front/back£¬Áô¿ÕÔòÎªÄ¬ÈÏÇøÓò")]
+        [Tooltip("åŒºåŸŸæ ‡ç­¾ï¼Œå¦‚ front/backï¼Œç•™ç©ºåˆ™ä¸ºé»˜è®¤åŒºåŸŸ")]
         public string ZoneTag = "";
 
-        // µ±Ç°ÔÚÇøÓòÄÚµÄ½ÇÉ«Åö×²ÌåÊıÁ¿
+        // å½“å‰åœ¨åŒºåŸŸå†…çš„è§’è‰²ç¢°æ’ä½“æ•°é‡
         private int mOverlapCount = 0;
         public LayerMask TargetLayers;
 
@@ -34,9 +34,9 @@ namespace IndependentAgentProject
             return (layerMask.value & objLayerMask) > 0;
         }
         /// <summary>
-        /// Ö¸¶¨½ÇÉ«ÊÇ·ñÔÚ½»»¥ÇøÓòÄÚ
-        /// <param name="chara">½ÇÉ«µÄGameObject</param>
-        /// <returns>bool£¬¸Ã½ÇÉ«ÊÇ·ñÔÚ¸Ã½»»¥ÇøÓòÄÚ</returns>
+        /// æŒ‡å®šè§’è‰²æ˜¯å¦åœ¨äº¤äº’åŒºåŸŸå†…
+        /// <param name="chara">è§’è‰²çš„GameObject</param>
+        /// <returns>boolï¼Œè¯¥è§’è‰²æ˜¯å¦åœ¨è¯¥äº¤äº’åŒºåŸŸå†…</returns>
         /// </summary>
         public bool ContainsCharacter(GameObject chara)
         {
@@ -49,10 +49,10 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// »ñÈ¡½ÇÉ«Óë½»»¥ÇøÓòÖ®¼äµÄ¾àÀë
+        /// è·å–è§’è‰²ä¸äº¤äº’åŒºåŸŸä¹‹é—´çš„è·ç¦»
         /// </summary>
-        /// <param name="chara">½ÇÉ«µÄGameObject</param>
-        /// <return>float£¬½ÇÉ«Óë½»»¥ÇøÓòµÄ¾àÀë</return>
+        /// <param name="chara">è§’è‰²çš„GameObject</param>
+        /// <return>floatï¼Œè§’è‰²ä¸äº¤äº’åŒºåŸŸçš„è·ç¦»</return>
         /// <returns></returns>
         public float DistanceTo(GameObject chara)
         {

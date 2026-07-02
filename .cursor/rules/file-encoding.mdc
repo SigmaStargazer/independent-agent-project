@@ -17,3 +17,12 @@ alwaysApply: true
 
 - 仓库根目录 `.editorconfig` 已声明 `charset = utf-8`
 - 工作区 `.vscode/settings.json` 已关闭 `files.autoGuessEncoding`（Windows 下避免误猜 GBK）
+
+## 自检与拦截（v0.22.0 起）
+
+- 本地自检：`python Tools/check_file_encoding.py`（默认范围仅治理 Unity 主工程 `.cs` + 文档，旧场景与 Python 业务源码默认放行）。
+- 启用本地 pre-commit 拦截（推荐，所有开发者克隆后第一步执行一次）：
+  - Git Bash / Linux / macOS：`bash Tools/enable_hooks.sh`
+  - Windows CMD：`Tools\enable_hooks.cmd`
+- 批量修复 GBK 嫌疑文件：`python Tools/check_file_encoding.py --fix <path>`
+- 完整说明与跨项目复用：`DevDocs/feature-design/项目编码基线.md`

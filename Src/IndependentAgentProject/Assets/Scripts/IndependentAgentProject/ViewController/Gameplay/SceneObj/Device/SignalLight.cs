@@ -6,21 +6,21 @@ namespace IndependentAgentProject
 {
     public class SignalLight : DeviceBase
     {
-        public override string Name => "ĞÅºÅµÆ";
-        public override string Desc => "ÓĞºìµÆºÍÂÌµÆÁ½ÖÖ×´Ì¬";
+        public override string Name => "ä¿¡å·ç¯";
+        public override string Desc => "æœ‰çº¢ç¯å’Œç»¿ç¯ä¸¤ç§çŠ¶æ€";
 
         public override bool IsInteractable => false;
 
         protected override void Awake()
         {
-            //Ìí¼Ó×´Ì¬
+            //æ·»åŠ çŠ¶æ€
             RegisterState(new GreenLightState());
             RegisterState(new RedLightState());
         }
 
         protected override void Start()
         {
-            // Ä¬ÈÏ½øÈëClose×´Ì¬
+            // é»˜è®¤è¿›å…¥CloseçŠ¶æ€
             ChangeState("RedLight");
         }
 

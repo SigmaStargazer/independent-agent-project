@@ -44,11 +44,11 @@ namespace IndependentAgentProject
         }
         //public void OnClickSend()
         //{
-        //    // ´´½¨Agent
-        //    AgentService.Instance.SendAgentCreate("Ğ¡Ã÷", "ÊÇÒ»¸ö°ïÖú»úÆ÷ÈË");
-        //    AgentService.Instance.SendAgentCreate("Ğ¡ºì", "ÊÇÓÃ»§µÄÃØÊé");
+        //    // åˆ›å»ºAgent
+        //    AgentService.Instance.SendAgentCreate("å°æ˜", "æ˜¯ä¸€ä¸ªå¸®åŠ©æœºå™¨äºº");
+        //    AgentService.Instance.SendAgentCreate("å°çº¢", "æ˜¯ç”¨æˆ·çš„ç§˜ä¹¦");
         //    AgentService.Instance.SendSceneStart(1);
-        //    AgentService.Instance.SendUserMessage("Ğ¡Ã÷", "ºÍĞ¡ºìËµ£¬ÈÃËıÄÖ¸öÃ¿Ìì8µãµÄÆğ´²Áå£¬9µãµÄÉÏ°àÁåÉù£¬È»ºóÃ¿ÌìÄÖÁåÏìÊ±ÈÃËıÖ±½ÓÍ¨ÖªÎÒ¡£");
+        //    AgentService.Instance.SendUserMessage("å°æ˜", "å’Œå°çº¢è¯´ï¼Œè®©å¥¹é—¹ä¸ªæ¯å¤©8ç‚¹çš„èµ·åºŠé“ƒï¼Œ9ç‚¹çš„ä¸Šç­é“ƒå£°ï¼Œç„¶åæ¯å¤©é—¹é“ƒå“æ—¶è®©å¥¹ç›´æ¥é€šçŸ¥æˆ‘ã€‚");
         //}
 
         public void OnClickCreateAgent()
@@ -59,7 +59,7 @@ namespace IndependentAgentProject
             }
             else
             {
-                Debug.LogWarning("ÊäÈë¿òÎ´°ó¶¨»òÄÚÈİÎª¿Õ£¡");
+                Debug.LogWarning("è¾“å…¥æ¡†æœªç»‘å®šæˆ–å†…å®¹ä¸ºç©ºï¼");
             }
         }
 
@@ -72,12 +72,12 @@ namespace IndependentAgentProject
         {
             if (success)
             {
-                Debug.Log($"ÒÑ¼ÓÔØµÄAgent: {string.Join(", ", agentNames)}");
-                AgentService.Instance.SendSceneStart(1); // ¼ÓÔØ³¡¾°
+                Debug.Log($"å·²åŠ è½½çš„Agent: {string.Join(", ", agentNames)}");
+                AgentService.Instance.SendSceneStart(1); // åŠ è½½åœºæ™¯
             }
             else
             {
-                Debug.LogWarning("¼ÓÔØAgentÊ§°Ü£¡");
+                Debug.LogWarning("åŠ è½½Agentå¤±è´¥ï¼");
             }
         }
 
@@ -93,28 +93,28 @@ namespace IndependentAgentProject
 
         //public void OnClickSendMessage()
         //{
-        //    //// ´´½¨Agent
-        //    //AgentService.Instance.SendAgentCreate("Ğ¡Ã÷", "ÊÇÒ»¸ö°ïÖú»úÆ÷ÈË");
-        //    //AgentService.Instance.SendAgentCreate("Ğ¡ºì", "ÊÇÓÃ»§µÄÃØÊé");
+        //    //// åˆ›å»ºAgent
+        //    //AgentService.Instance.SendAgentCreate("å°æ˜", "æ˜¯ä¸€ä¸ªå¸®åŠ©æœºå™¨äºº");
+        //    //AgentService.Instance.SendAgentCreate("å°çº¢", "æ˜¯ç”¨æˆ·çš„ç§˜ä¹¦");
         //    //AgentService.Instance.SendSceneStart(1);
 
-        //    // ·¢ËÍÏûÏ¢
+        //    // å‘é€æ¶ˆæ¯
         //    if (messageInputField != null && !string.IsNullOrEmpty(messageInputField.text))
         //    {
-        //        // »ñÈ¡ÊäÈë¿òµÄÄÚÈİ
+        //        // è·å–è¾“å…¥æ¡†çš„å†…å®¹
         //        string userMessage = messageInputField.text;
 
-        //        // ·¢ËÍ¸øĞ¡Ã÷
-        //        AgentService.Instance.SendUserMessage("Ğ¡Ã÷", userMessage);
+        //        // å‘é€ç»™å°æ˜
+        //        AgentService.Instance.SendUserMessage("å°æ˜", userMessage);
 
-        //        // Çå¿ÕÊäÈë¿ò
+        //        // æ¸…ç©ºè¾“å…¥æ¡†
         //        messageInputField.text = "";
 
-        //        Debug.Log($"ÒÑ·¢ËÍÏûÏ¢¸øĞ¡Ã÷: {userMessage}");
+        //        Debug.Log($"å·²å‘é€æ¶ˆæ¯ç»™å°æ˜: {userMessage}");
         //    }
         //    else
         //    {
-        //        Debug.LogWarning("ÊäÈë¿òÎ´°ó¶¨»òÄÚÈİÎª¿Õ£¡");
+        //        Debug.LogWarning("è¾“å…¥æ¡†æœªç»‘å®šæˆ–å†…å®¹ä¸ºç©ºï¼");
         //    }
         //}
         //private void OnGetAgentMessage(string agent, string ai_message)

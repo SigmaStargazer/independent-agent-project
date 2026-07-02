@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class SceneObjManager : MonoSingleton<SceneObjManager>
     {
-        // Ê¹ÓÃ List Î¬»¤³¡¾°ÖĞËùÓĞµÄ³¡¾°ÎïÌå
+        // ä½¿ç”¨ List ç»´æŠ¤åœºæ™¯ä¸­æ‰€æœ‰çš„åœºæ™¯ç‰©ä½“
         private List<SceneObjBase> mSceneObjs = new List<SceneObjBase>();
 
         public static event Action<SceneObjBase> OnSceneObjCreated;
@@ -30,14 +30,14 @@ namespace IndependentAgentProject
         {
             mSceneObjs.Clear();
         }
-        #region ×¢²áÓë×¢ÏúÂß¼­
+        #region æ³¨å†Œä¸æ³¨é”€é€»è¾‘
 
         public void Register(SceneObjBase SceneObj)
         {
             if (SceneObj != null && !mSceneObjs.Contains(SceneObj))
             {
-                mSceneObjs.Add(SceneObj); // Ìí¼Óµ½³¡¾°ÎïÌåÁĞ±í
-                OnSceneObjCreated?.Invoke(SceneObj); //Í¨¹ıÊÂ¼şÍ¨Öª£¬½«³¡¾°ÎïÌåÌí¼Óµ½³¡¾°ÎïÌåÁĞ±íÖĞ
+                mSceneObjs.Add(SceneObj); // æ·»åŠ åˆ°åœºæ™¯ç‰©ä½“åˆ—è¡¨
+                OnSceneObjCreated?.Invoke(SceneObj); //é€šè¿‡äº‹ä»¶é€šçŸ¥ï¼Œå°†åœºæ™¯ç‰©ä½“æ·»åŠ åˆ°åœºæ™¯ç‰©ä½“åˆ—è¡¨ä¸­
             }
         }
 
@@ -52,7 +52,7 @@ namespace IndependentAgentProject
         #endregion
         
         /// <summary>
-        /// »ñÈ¡³¡¾°ÖĞÖ¸¶¨ÀàĞÍµÄ³¡¾°ÎïÌåÁĞ±í
+        /// è·å–åœºæ™¯ä¸­æŒ‡å®šç±»å‹çš„åœºæ™¯ç‰©ä½“åˆ—è¡¨
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -62,7 +62,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// »ñÈ¡È¥µôÖ¸¶¨ÎïÌåµÄ³¡¾°ÎïÌåÁĞ±í
+        /// è·å–å»æ‰æŒ‡å®šç‰©ä½“çš„åœºæ™¯ç‰©ä½“åˆ—è¡¨
         /// </summary>
         /// <param name="excludeTarget"></param>
         /// <returns></returns>
@@ -76,16 +76,16 @@ namespace IndependentAgentProject
                 .ToList();
         }
 
-        #region ¼ìË÷Éè±¸ĞÅÏ¢
+        #region æ£€ç´¢è®¾å¤‡ä¿¡æ¯
 
         /// <summary>
-        /// »ñÈ¡Óë½ÇÉ«½Ó´¥ÇÒ¾àÀë×î½üµÄ¿É½»»¥ÎïÌå
+        /// è·å–ä¸è§’è‰²æ¥è§¦ä¸”è·ç¦»æœ€è¿‘çš„å¯äº¤äº’ç‰©ä½“
         /// </summary>
         public SceneObjBase GetNearestInteractableObj(GameObject chara)
         {
             if (chara == null) return null;
 
-            // »ñÈ¡½ÇÉ«µÄÅö×²Ìå£¬ÓÃÓÚ¼ì²â½Ó´¥
+            // è·å–è§’è‰²çš„ç¢°æ’ä½“ï¼Œç”¨äºæ£€æµ‹æ¥è§¦
             Collider2D charaCollider = chara.GetComponent<Collider2D>();
             if (charaCollider == null) return null;
 
@@ -93,18 +93,18 @@ namespace IndependentAgentProject
             SceneObjBase target = null;
             float minDistance = float.MaxValue;
 
-            // ÕÒµ½×î½üÇÒ½Ó´¥µÄÉè±¸
+            // æ‰¾åˆ°æœ€è¿‘ä¸”æ¥è§¦çš„è®¾å¤‡
             foreach (var sceneObj in mSceneObjs)
             {
                 if (sceneObj is IInteractable)
                 {
                     IInteractable interactable = sceneObj as IInteractable;
                     //Collider2D objCollider = sceneObj.GetComponent<Collider2D>();
-                    // ²âÊÔ
+                    // æµ‹è¯•
                     //var colliderDist = new ColliderDistance2D();
                     //if (sceneObj.gameObject != chara)
                     //    colliderDist = objCollider.Distance(charaCollider);
-                    //Debug.Log($"½Ó´¥ÅĞ¶ÏÌõ¼ş¿ÉÊÓ»¯: {sceneObj.Name}\n" +
+                    //Debug.Log($"æ¥è§¦åˆ¤æ–­æ¡ä»¶å¯è§†åŒ–: {sceneObj.Name}\n" +
                     //    $"sceneObj.gameObject != chara: {sceneObj.gameObject != chara}" +
                     //    $"interactable.IsInteractable: {interactable.IsInteractable}\n" +
                     //    $"objCollider != null: {objCollider != null}\n" +
@@ -114,7 +114,7 @@ namespace IndependentAgentProject
                         && interactable.IsInteractable 
                         && sceneObj.IsCharacterInAnyZone(chara))
                     {
-                        // ¼ÆËãXÖá¾àÀë£¨ÓëGetDevicesInfoÖĞµÄÂß¼­±£³ÖÒ»ÖÂ£©
+                        // è®¡ç®—Xè½´è·ç¦»ï¼ˆä¸GetDevicesInfoä¸­çš„é€»è¾‘ä¿æŒä¸€è‡´ï¼‰
                         float dist = sceneObj.GetNearestZoneDistance(chara);
 
                         if (dist < minDistance)
@@ -129,10 +129,10 @@ namespace IndependentAgentProject
         }
         #endregion
 
-        #region AgentÏûÏ¢·¢ËÍ
+        #region Agentæ¶ˆæ¯å‘é€
 
         /// <summary>
-        /// ÏòÖ¸¶¨Agent·¢ËÍÏûÏ¢
+        /// å‘æŒ‡å®šAgentå‘é€æ¶ˆæ¯
         /// </summary>
         public bool SendMessageToAgent(string agentName, string msg, bool forceInterrupt = false)
         {
@@ -142,7 +142,7 @@ namespace IndependentAgentProject
             AIPlayer targetAgent = mSceneObjs.OfType<AIPlayer>().FirstOrDefault(agent => agent.Name == agentName);
             if (targetAgent == null)
             {
-                Debug.LogWarning($"Î´ÕÒµ½Agent: {agentName}");
+                Debug.LogWarning($"æœªæ‰¾åˆ°Agent: {agentName}");
                 return false;
             }
 
@@ -151,7 +151,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// ÏòËùÓĞAgent¹ã²¥ÏûÏ¢
+        /// å‘æ‰€æœ‰Agentå¹¿æ’­æ¶ˆæ¯
         /// </summary>
         public void BroadcastMessageToAgents(string msg, bool forceInterrupt = false)
         {
@@ -164,12 +164,12 @@ namespace IndependentAgentProject
                 }
             }
 
-            Debug.Log($"ÒÑÏò {agents.Count} ¸öAgent¹ã²¥ÏûÏ¢");
+            Debug.Log($"å·²å‘ {agents.Count} ä¸ªAgentå¹¿æ’­æ¶ˆæ¯");
         }
 
         #endregion
 
-        #region ½»»¥Âß¼­
+        #region äº¤äº’é€»è¾‘
 
         public (bool success, string result) Interact(GameObject chara)
         {
@@ -184,8 +184,8 @@ namespace IndependentAgentProject
             }
             else
             {
-                return (false, "Ã»ÓĞ¿É½»»¥¶ÔÏó");
-                //Debug.Log($"Ã»ÓĞ¿É½»»¥Éè±¸");
+                return (false, "æ²¡æœ‰å¯äº¤äº’å¯¹è±¡");
+                //Debug.Log($"æ²¡æœ‰å¯äº¤äº’è®¾å¤‡");
             }
         }
 
@@ -202,8 +202,8 @@ namespace IndependentAgentProject
             }
             else
             {
-                return (false, "Ã»ÓĞ¿É½»»¥¶ÔÏó");
-                //Debug.Log($"Ã»ÓĞ¿É½»»¥Éè±¸");
+                return (false, "æ²¡æœ‰å¯äº¤äº’å¯¹è±¡");
+                //Debug.Log($"æ²¡æœ‰å¯äº¤äº’è®¾å¤‡");
             }
         }
 
@@ -219,8 +219,8 @@ namespace IndependentAgentProject
             }
             else
             {
-                return (false, "Ã»ÓĞ¿É½»»¥¶ÔÏó");
-                //Debug.Log($"Ã»ÓĞ¿É½»»¥Éè±¸");
+                return (false, "æ²¡æœ‰å¯äº¤äº’å¯¹è±¡");
+                //Debug.Log($"æ²¡æœ‰å¯äº¤äº’è®¾å¤‡");
             }
         }
 

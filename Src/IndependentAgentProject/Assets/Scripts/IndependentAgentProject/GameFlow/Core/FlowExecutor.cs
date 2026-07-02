@@ -18,18 +18,18 @@ namespace GameFlow
         {
             if (isRunning)
             {
-                Debug.LogWarning("ÒÑÓĞFlowÕıÔÚÖ´ĞĞ");
+                Debug.LogWarning("å·²æœ‰Flowæ­£åœ¨æ‰§è¡Œ");
                 return;
             }
             isRunning = true;
             try
             {
-                // 1. ÏÔÊ¾¼ÓÔØ½çÃæ
+                // 1. æ˜¾ç¤ºåŠ è½½ç•Œé¢
                 if (flow.ShowLoadingScreen)
                 {
                     await TransitionUI.Instance.FadeIn();
                 }
-                // 2. Ö´ĞĞ²½Öè
+                // 2. æ‰§è¡Œæ­¥éª¤
                 int total = flow.Steps.Count;
                 for (int i = 0; i < total; i++)
                 {
@@ -42,15 +42,15 @@ namespace GameFlow
                     }
                     await step.Execute();
                 }
-                // 3. Ìø×ªÖÁÄ¿±ê³¡¾°
+                // 3. è·³è½¬è‡³ç›®æ ‡åœºæ™¯
                 if (!string.IsNullOrEmpty(flow.TargetScene))
                 {
                     await SceneManager.LoadSceneAsync(flow.TargetScene);
                 }
-                // 4. Òş²Ø¼ÓÔØ½çÃæ
+                // 4. éšè—åŠ è½½ç•Œé¢
                 if (flow.ShowLoadingScreen)
                 {
-                    TransitionUI.Instance.SetProgress(1f,"Íê³É");
+                    TransitionUI.Instance.SetProgress(1f,"å®Œæˆ");
                     await UniTask.Delay(150);
                     await TransitionUI.Instance.FadeOut();
                 }
@@ -58,12 +58,12 @@ namespace GameFlow
             catch (System.Exception e)
             {
                 Debug.LogException(e);
-                // 1. Òş²Ø¼ÓÔØ½çÃæ
+                // 1. éšè—åŠ è½½ç•Œé¢
                 if (flow.ShowLoadingScreen)
                 {
                     await TransitionUI.Instance.FadeOut();
                 }
-                // 2. ¸ù¾İÊ§°Ü²ßÂÔ´¦Àí
+                // 2. æ ¹æ®å¤±è´¥ç­–ç•¥å¤„ç†
                 switch (flow.FailPolicy)
                 {
                     case FlowFailPolicy.ReturnTitle:
@@ -72,7 +72,7 @@ namespace GameFlow
                     case FlowFailPolicy.StayCurrentScene:
                         break;
                 }
-                // 3. ÏÔÊ¾´íÎóĞÅÏ¢
+                // 3. æ˜¾ç¤ºé”™è¯¯ä¿¡æ¯
                 TransitionUI.Instance.ShowError(e.Message);
             }
             isRunning = false;

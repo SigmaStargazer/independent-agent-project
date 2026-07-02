@@ -5,12 +5,12 @@ using UnityEngine;
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// 是否能点击接口。需要被 MouseClickInteractor2D 触发
-    /// 注意：被点击的物体必须有碰撞体，根据IsTrigger的状态决定是否能产生碰撞事件
+    /// 鏄惁鑳界偣鍑绘帴鍙ｃ�傞渶瑕佽 MouseClickInteractor2D 瑙﹀彂
+    /// 娉ㄦ剰锛氳鐐瑰嚮鐨勭墿浣撳繀椤绘湁纰版挒浣擄紝鏍规嵁IsTrigger鐨勭姸鎬佸喅瀹氭槸鍚﹁兘浜х敓纰版挒浜嬩欢
     /// </summary>
     public interface IClickable
     {
-        bool IsClickable { get; }   // 是否允许点击
-        void OnClick();          // 点击行为
+        bool IsClickable { get; }   // 鏄惁鍏佽鐐瑰嚮
+        void OnClick();          // 鐐瑰嚮琛屼负
     }
 }

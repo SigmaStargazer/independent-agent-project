@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class CreateAgentStep : IFlowStep
     {
-        public string DisplayName => "´´½¨Agent";
+        public string DisplayName => "åˆ›å»ºAgent";
 
         private readonly string name;
         private readonly string desc;

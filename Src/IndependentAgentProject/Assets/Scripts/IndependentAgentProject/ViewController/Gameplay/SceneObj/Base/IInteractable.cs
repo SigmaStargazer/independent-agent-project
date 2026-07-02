@@ -4,7 +4,7 @@ namespace IndependentAgentProject
 {
     public interface IInteractable
     {
-        bool IsInteractable { get; } // ×¢Òâ£º¸ÃÊôĞÔ²»ÄÜÉèÖÃÎª¶¯Ì¬ÊıÖµ£¬·ñÔòÔÚ¶¯×÷ĞòÁĞĞ£ÑéÊ±£¬¿ÉÄÜ»áÇ°ºó²»Ò»ÖÂ
+        bool IsInteractable { get; } // æ³¨æ„ï¼šè¯¥å±æ€§ä¸èƒ½è®¾ç½®ä¸ºåŠ¨æ€æ•°å€¼ï¼Œå¦åˆ™åœ¨åŠ¨ä½œåºåˆ—æ ¡éªŒæ—¶ï¼Œå¯èƒ½ä¼šå‰åä¸ä¸€è‡´
         (bool success, string result) Interact(GameObject chara);
 
         (bool success, string result) Select(GameObject chara, int selection);

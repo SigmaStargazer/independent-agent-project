@@ -23,6 +23,20 @@ clone后，使用以下命令安装依赖：
 uv sync
 ```
 
+**克隆后第一步（推荐）：启用本地编码 pre-commit 拦截**
+
+为防止以 GBK 等非 UTF-8 编码提交 `.cs` / `.md` / `.proto` 等文本文件，仓库自带本地 git hook：
+
+```bash
+# Git Bash / Linux / macOS
+bash Tools/enable_hooks.sh
+
+# Windows CMD
+Tools\enable_hooks.cmd
+```
+
+执行后 `git config core.hooksPath` 会被设为 `Tools/hooks`，之后 `git commit` 会自动跑 `Tools/check_file_encoding.py --staged`。出现 GBK 嫌疑文件可用 `python Tools/check_file_encoding.py --fix <path>` 批量转换。详见 `DevDocs/feature-design/项目编码基线.md`。
+
 #### 使用说明
 
 1. 单独测试智能体

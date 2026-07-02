@@ -1,7 +1,7 @@
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// ÊÇ·ñ»á±»´¥·¢£¨ÀıÈç¿ª¹ØµÈ£©
+    /// æ˜¯å¦ä¼šè¢«è§¦å‘ï¼ˆä¾‹å¦‚å¼€å…³ç­‰ï¼‰
     /// </summary>
     public interface ITriggerable
     {

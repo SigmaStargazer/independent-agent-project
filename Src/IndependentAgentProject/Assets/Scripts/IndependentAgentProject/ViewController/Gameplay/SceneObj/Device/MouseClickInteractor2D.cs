@@ -25,7 +25,7 @@ namespace IndependentAgentProject
 
                 if (!device.IsClickable)
                 {
-                    //Debug.Log($"{device.Name} ²»¿Éµã»÷£¡");
+                    //Debug.Log($"{device.Name} ä¸å¯ç‚¹å‡»ï¼");
                     return;
                 }
 

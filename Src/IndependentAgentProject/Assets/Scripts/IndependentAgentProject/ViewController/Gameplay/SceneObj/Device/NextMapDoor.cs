@@ -6,67 +6,67 @@ using UnityEngine;
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// ÏÂÒ»¹ØÈë¿ÚÃÅ
-    /// µ±ËùÓĞÍæ¼Ò¶¼½øÈë½»»¥ÇøÓòºó£¬ÔÊĞí½øÈëÏÂÒ»¹Ø
+    /// ä¸‹ä¸€å…³å…¥å£é—¨
+    /// å½“æ‰€æœ‰ç©å®¶éƒ½è¿›å…¥äº¤äº’åŒºåŸŸåï¼Œå…è®¸è¿›å…¥ä¸‹ä¸€å…³
     /// </summary>
     public class NextMapDoor : DeviceBase
     {
-        [Header("ÏÂÒ»¹ØÅäÖÃ")]
-        [Tooltip("Build SettingsÖĞµÄSceneÃû×Ö")]
+        [Header("ä¸‹ä¸€å…³é…ç½®")]
+        [Tooltip("Build Settingsä¸­çš„Sceneåå­—")]
         public string NextScene;
 
-        [Tooltip("ÏÂÒ»¹ØÖĞÎÄÃû")]
+        [Tooltip("ä¸‹ä¸€å…³ä¸­æ–‡å")]
         public string NextMapName;
 
-        #region »ù´¡ĞÅÏ¢
-        public override string Name => "ÃÅ";
+        #region åŸºç¡€ä¿¡æ¯
+        public override string Name => "é—¨";
         public override string Desc
         {
             get
             {
-                // ÃÅ·â±Õ
+                // é—¨å°é—­
                 if (string.IsNullOrEmpty(NextScene))
                 {
-                    return "Ò»ÉÈ·â±Õ×ÅµÄÃÅ";
+                    return "ä¸€æ‰‡å°é—­ç€çš„é—¨";
                 }
-                // Î´ÖªÇøÓò
+                // æœªçŸ¥åŒºåŸŸ
                 if (string.IsNullOrEmpty(NextMapName))
                 {
-                    return "Í¨ÏòÎ´ÖªÇøÓòµÄÃÅ¡£µ±ËùÓĞÍæ¼Ò¶¼À´µ½ÕâÊ±£¬¿É½øÈë";
+                    return "é€šå‘æœªçŸ¥åŒºåŸŸçš„é—¨ã€‚å½“æ‰€æœ‰ç©å®¶éƒ½æ¥åˆ°è¿™æ—¶ï¼Œå¯è¿›å…¥";
                 }
-                // ÒÑÖªÇøÓò
-                return $"Í¨Ïò{NextMapName}µÄÃÅ¡£µ±ËùÓĞÍæ¼Ò¶¼À´µ½ÕâÊ±£¬¿É½øÈë";
+                // å·²çŸ¥åŒºåŸŸ
+                return $"é€šå‘{NextMapName}çš„é—¨ã€‚å½“æ‰€æœ‰ç©å®¶éƒ½æ¥åˆ°è¿™æ—¶ï¼Œå¯è¿›å…¥";
             }
         }
         public override bool IsInteractable => !string.IsNullOrEmpty(NextScene);
         #endregion
 
-        #region ½»»¥Âß¼­
+        #region äº¤äº’é€»è¾‘
         public override (bool success, string result) Interact(GameObject chara)
         {
-            // ÃÅ·â±Õ
+            // é—¨å°é—­
             if (string.IsNullOrEmpty(NextScene))
             {
-                return (false, "ÃÅËÆºõ·â±Õ×Å");
+                return (false, "é—¨ä¼¼ä¹å°é—­ç€");
             }
 
-            // ÈËÃ»µ½Æë
+            // äººæ²¡åˆ°é½
             if (!AreAllPlayersInsideDoor())
             {
                 int insideCount = GetPlayersInsideDoorCount();
                 int totalCount = GetAllPlayers().Count;
-                return (false, $"»¹ÓĞÍæ¼ÒÎ´µ½´ïÃÅÇ°£¨{insideCount}/{totalCount}£©");
+                return (false, $"è¿˜æœ‰ç©å®¶æœªåˆ°è¾¾é—¨å‰ï¼ˆ{insideCount}/{totalCount}ï¼‰");
             }
 
-            // ½øÈëÏÂÒ»¹Ø
+            // è¿›å…¥ä¸‹ä¸€å…³
             GameFlowManager.Instance.NextMap(NextScene).Forget(Debug.LogException);
-            return (true, $"ÕıÔÚÇ°Íù{GetTargetMapDisplayName()}");
+            return (true, $"æ­£åœ¨å‰å¾€{GetTargetMapDisplayName()}");
         }
         #endregion
 
-        #region Ìõ¼şÅĞ¶Ï
+        #region æ¡ä»¶åˆ¤æ–­
         /// <summary>
-        /// ËùÓĞÍæ¼ÒÊÇ·ñ¶¼ÔÚÃÅÇøÓòÄÚ
+        /// æ‰€æœ‰ç©å®¶æ˜¯å¦éƒ½åœ¨é—¨åŒºåŸŸå†…
         /// </summary>
         private bool AreAllPlayersInsideDoor()
         {
@@ -81,7 +81,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// µ±Ç°ÔÚÃÅÇøÓòÄÚµÄÍæ¼ÒÊıÁ¿
+        /// å½“å‰åœ¨é—¨åŒºåŸŸå†…çš„ç©å®¶æ•°é‡
         /// </summary>
         private int GetPlayersInsideDoorCount()
         {
@@ -89,7 +89,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// »ñÈ¡³¡¾°ÄÚËùÓĞÍæ¼Ò
+        /// è·å–åœºæ™¯å†…æ‰€æœ‰ç©å®¶
         /// </summary>
         private List<PlayerBase> GetAllPlayers()
         {
@@ -97,11 +97,11 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// »ñÈ¡µØÍ¼ÏÔÊ¾Ãû
+        /// è·å–åœ°å›¾æ˜¾ç¤ºå
         /// </summary>
         private string GetTargetMapDisplayName()
         {
-            return string.IsNullOrEmpty(NextMapName) ? "Î´ÖªÇøÓò" : NextMapName;
+            return string.IsNullOrEmpty(NextMapName) ? "æœªçŸ¥åŒºåŸŸ" : NextMapName;
         }
         #endregion
     }

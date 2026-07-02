@@ -81,7 +81,7 @@ namespace Services
                 if (success)
                     tcs.TrySetResult(agents);
                 else
-                    tcs.TrySetException(new Exception("LoadAgentʧ��"));
+                    tcs.TrySetException(new Exception("LoadAgent失败"));
             }
             AgentService.Instance.OnLoadAgent += Handler;
             AgentService.Instance.SendAgentLoad();
@@ -120,7 +120,7 @@ namespace Services
             return tcs.Task;
         }
 
-        public static UniTask InterruptAgentAsync(string stopReason = "ϵͳ�ر�")
+        public static UniTask InterruptAgentAsync(string stopReason = "系统关闭")
         {
             var tcs = new UniTaskCompletionSource();
             void Handler(bool success, string reason)

@@ -5,11 +5,11 @@ namespace IndependentAgentProject
 {
     public class MovingPlatformAuto : DeviceBase
     {
-        public override string Name => "×Ô¶¯ÒÆ¶¯µÄÆ½Ì¨";
-        public override string Desc => "ËÆºõ»áÑØ×ÅÄ³ÖÖÂ·¾¶Íù¸´ÔË¶¯¡£";
+        public override string Name => "è‡ªåŠ¨ç§»åŠ¨çš„å¹³å°";
+        public override string Desc => "ä¼¼ä¹ä¼šæ²¿ç€æŸç§è·¯å¾„å¾€å¤è¿åŠ¨ã€‚";
         public override bool IsInteractable => false;
 
-        [Header("Â·¾¶µã")]
+        [Header("è·¯å¾„ç‚¹")]
         [SerializeField]
         private List<Transform> mWayPoints = new();
         [SerializeField]
@@ -37,7 +37,7 @@ namespace IndependentAgentProject
             if (mWayPoints.Count <= 1)
                 return;
 
-            // Idle¼ÆÊ±
+            // Idleè®¡æ—¶
             mWaitTimer += Time.deltaTime;
             if (mWaitTimer >= mWaitTime)
             {
@@ -56,7 +56,7 @@ namespace IndependentAgentProject
                 mTargetPoint.position,
                 mMoveSpeed * Time.fixedDeltaTime
             );
-            // Í£Ö¹Âß¼­
+            // åœæ­¢é€»è¾‘
             if (Vector3.Distance(transform.position, mTargetPoint.position) < 0.02f)
             {
                 transform.position = mTargetPoint.position;

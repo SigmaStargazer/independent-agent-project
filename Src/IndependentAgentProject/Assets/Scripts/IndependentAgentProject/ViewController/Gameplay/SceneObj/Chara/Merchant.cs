@@ -7,9 +7,9 @@ namespace IndependentAgentProject
 {
     public class Merchant : CharaBase
     {
-        public override string Name => "ÉÌÈË";
-        public override string Desc => "¿ÉÒÔÔÚÕâÀï¹ºÂòÉÌÆ·\n" +
-            "(ÍµÍµ¸æËßÄã£¬ÄãÒ²¿ÉÒÔÔÚËûÉíºóÇÔÈ¡²ÆÎïÅ¶£¡)";
+        public override string Name => "å•†äºº";
+        public override string Desc => "å¯ä»¥åœ¨è¿™é‡Œè´­ä¹°å•†å“\n" +
+            "(å·å·å‘Šè¯‰ä½ ï¼Œä½ ä¹Ÿå¯ä»¥åœ¨ä»–èº«åçªƒå–è´¢ç‰©å“¦ï¼)";
 
         public override (bool success, string result) Interact(GameObject chara)
         {
@@ -18,7 +18,7 @@ namespace IndependentAgentProject
             {
                 "front" => DoTrade(chara),
                 "back" => DoSteal(chara),
-                _ => (false, "ÎŞ·¨½»»¥")
+                _ => (false, "æ— æ³•äº¤äº’")
             };
         }
         public override (bool success, string result) Select(GameObject chara, int selection)
@@ -30,29 +30,29 @@ namespace IndependentAgentProject
                     {
                         return selection switch
                         {
-                            1 => (true, "Äã¹ºÂòÁËÒ»¸öÉúÃüÒ©Ë®"),
-                            2 => (true, "Äã¹ºÂòÁËÒ»¸öµ¥ÊÖ½£"),
-                            3 => (true, "Äã¹ºÂòÁËÒ»¸ö»¤¼×"),
-                            _ => (false, "Ñ¡Ïî´íÎó£¡ÇëÑ¡ÔñÕıÈ·µÄÑ¡Ïî")
+                            1 => (true, "ä½ è´­ä¹°äº†ä¸€ä¸ªç”Ÿå‘½è¯æ°´"),
+                            2 => (true, "ä½ è´­ä¹°äº†ä¸€ä¸ªå•æ‰‹å‰‘"),
+                            3 => (true, "ä½ è´­ä¹°äº†ä¸€ä¸ªæŠ¤ç”²"),
+                            _ => (false, "é€‰é¡¹é”™è¯¯ï¼è¯·é€‰æ‹©æ­£ç¡®çš„é€‰é¡¹")
                         };
                     }
                 default:
-                    return (false, "Ñ¡Ïî´íÎó£¡ÇëÑ¡ÔñÕıÈ·µÄÑ¡Ïî");
+                    return (false, "é€‰é¡¹é”™è¯¯ï¼è¯·é€‰æ‹©æ­£ç¡®çš„é€‰é¡¹");
             }
         }
         private (bool success, string result) DoTrade(GameObject chara)
         {
             return (
                 true,
-                "Äã¿ÉÒÔÑ¡Ôñ¹ºÂò£º" +
-                "  1. ÉúÃüÒ©Ë®: 5½ğ±Ò" +
-                "  2. µ¥ÊÖ½£: 200½ğ±Ò" +
-                "  3. »¤¼×: 100½ğ±Ò"
+                "ä½ å¯ä»¥é€‰æ‹©è´­ä¹°ï¼š" +
+                "  1. ç”Ÿå‘½è¯æ°´: 5é‡‘å¸" +
+                "  2. å•æ‰‹å‰‘: 200é‡‘å¸" +
+                "  3. æŠ¤ç”²: 100é‡‘å¸"
                 );
         }
         private (bool success, string result) DoSteal(GameObject chara)
         {
-            return (true, "Äã»ñµÃÁË10½ğ±Ò");
+            return (true, "ä½ è·å¾—äº†10é‡‘å¸");
         }
 
 

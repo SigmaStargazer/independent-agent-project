@@ -11,20 +11,20 @@ namespace IndependentAgentProject
     {
         public string pwd;
 
-        public override string Name => "±£ÏÕÏä";
-        public override string Desc => "¼á¹ÌµÄ±£ÏÕÏä£¬ÉÏÃæËÆºõÓĞÃÜÂëËø";
+        public override string Name => "ä¿é™©ç®±";
+        public override string Desc => "åšå›ºçš„ä¿é™©ç®±ï¼Œä¸Šé¢ä¼¼ä¹æœ‰å¯†ç é”";
         public override bool IsInteractable => true;
 
         protected override void Awake()
         {
-            //Ìí¼Ó×´Ì¬
+            //æ·»åŠ çŠ¶æ€
             RegisterState(new OpenState());
             RegisterState(new CloseState());
         }
 
         protected override void Start()
         {
-            // Ä¬ÈÏ½øÈëClose×´Ì¬
+            // é»˜è®¤è¿›å…¥CloseçŠ¶æ€
             ChangeState("Close");
         }
 
@@ -33,12 +33,12 @@ namespace IndependentAgentProject
             switch (mCurState.Name)
             {
                 case "Open":
-                    return (true, "±£ÏÕÏäÎ´¹ØÉÏ");
+                    return (true, "ä¿é™©ç®±æœªå…³ä¸Š");
                 case "Close":
                     if (pwd == null || !Regex.IsMatch(pwd, @"^\d{4}$"))
                         return (true, PwdNotSettedOpen());
                     else
-                        return (true, "ÇëÊäÈë4Î»ÊıÃÜÂë: ____");
+                        return (true, "è¯·è¾“å…¥4ä½æ•°å¯†ç : ____");
                 default:
                     return (true, "");
             }
@@ -49,7 +49,7 @@ namespace IndependentAgentProject
             switch (mCurState.Name)
             {
                 case "Open":
-                    return (false, "Éè±¸Î´Ìá¹©ÊäÈë¿ò");
+                    return (false, "è®¾å¤‡æœªæä¾›è¾“å…¥æ¡†");
                 case "Close":
                     if (pwd == null || !Regex.IsMatch(pwd, @"^\d{4}$"))
                         return (true, PwdNotSettedOpen());
@@ -60,39 +60,39 @@ namespace IndependentAgentProject
                             if (inputText == pwd)
                             {
                                 ChangeState("Open");
-                                return (true, "´ò¿ª±£ÏÕÏä³É¹¦");
+                                return (true, "æ‰“å¼€ä¿é™©ç®±æˆåŠŸ");
                             }
                             else
                             {
-                                return (false, "ÃÜÂë´íÎó");
+                                return (false, "å¯†ç é”™è¯¯");
                             }
                         }
                         else
                         {
-                            return (false, "ÊäÈë²»ÊÇ4Î»Êı×Ö£¡");
+                            return (false, "è¾“å…¥ä¸æ˜¯4ä½æ•°å­—ï¼");
                         }
                     }
                 default:
-                    return (false, $"±£ÏÕÏä´¦ÓÚÎŞ·¨´ò¿ªµÄ×´Ì¬:{this.StateName}");
+                    return (false, $"ä¿é™©ç®±å¤„äºæ— æ³•æ‰“å¼€çš„çŠ¶æ€:{this.StateName}");
             }
         }
 
         /// <summary>
-        /// ÃÜÂëÎ´ÉèÖÃÊ±£¬Ö±½Ó´ò¿ª
+        /// å¯†ç æœªè®¾ç½®æ—¶ï¼Œç›´æ¥æ‰“å¼€
         /// </summary>
         /// <returns></returns>
         private string PwdNotSettedOpen()
         {
             if (pwd == null)
             {
-                Debug.Log("SafeBoxÎ´ÉèÖÃÃÜÂë");
+                Debug.Log("SafeBoxæœªè®¾ç½®å¯†ç ");
             }
             else if (!Regex.IsMatch(pwd, @"^\d{4}$"))
             {
-                Debug.Log("SafeBoxÃÜÂë²»ÊÇ4Î»Êı×Ö");
+                Debug.Log("SafeBoxå¯†ç ä¸æ˜¯4ä½æ•°å­—");
             }
             ChangeState("Open");
-            return "´ò¿ª±£ÏÕÏä³É¹¦";
+            return "æ‰“å¼€ä¿é™©ç®±æˆåŠŸ";
         }
 
         public class OpenState : FSMStateBase

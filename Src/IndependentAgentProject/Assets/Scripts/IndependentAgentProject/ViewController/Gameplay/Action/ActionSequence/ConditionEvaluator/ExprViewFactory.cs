@@ -17,7 +17,7 @@ namespace IndependentAgentProject
         {
             var view = new SceneObjExprView();
 
-            // Position: Vector3 ¡ú Vector2
+            // Position: Vector3 â†’ Vector2
             Vector3 pos3 = sceneObj.transform.position;
             view.Position = new Vector2(pos3.x, pos3.y);
 

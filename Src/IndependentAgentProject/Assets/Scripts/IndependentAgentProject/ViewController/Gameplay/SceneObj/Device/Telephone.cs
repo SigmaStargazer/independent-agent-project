@@ -6,14 +6,14 @@ namespace IndependentAgentProject
 {
     public class Telephone : DeviceBase
     {
-        public override string Name => "µç»°";
-        public override string Desc => "Ò»Ì¨ÀÏÊ½ÓÐÏßµç»°¡£";
+        public override string Name => "ç”µè¯";
+        public override string Desc => "ä¸€å°è€å¼æœ‰çº¿ç”µè¯ã€‚";
 
         public override bool IsInteractable => false;
 
         public override (bool success, string result) Interact(GameObject chara)
         {
-            return (false, "¸ÃÉè±¸ÎÞ·¨½»»¥");
+            return (false, "è¯¥è®¾å¤‡æ— æ³•äº¤äº’");
         }
     }
 

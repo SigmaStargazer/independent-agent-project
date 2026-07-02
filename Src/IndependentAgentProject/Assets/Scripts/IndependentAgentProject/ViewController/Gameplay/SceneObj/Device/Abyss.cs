@@ -8,8 +8,8 @@ namespace IndependentAgentProject
 {
     public class Abyss : SceneObjBase
     {
-        public override string Name => "ÉîÔ¨";
-        public override string Desc => "Éî²»¼ûµ×¡£Ò»µ©µôÏÂÈ¥£¬ºó¹û²»¿°ÉèÏë¡£";
+        public override string Name => "æ·±æ¸Š";
+        public override string Desc => "æ·±ä¸è§åº•ã€‚ä¸€æ—¦æ‰ä¸‹å»ï¼Œåæœä¸å ªè®¾æƒ³ã€‚";
 
 
         private void OnTriggerEnter2D(Collider2D collision)

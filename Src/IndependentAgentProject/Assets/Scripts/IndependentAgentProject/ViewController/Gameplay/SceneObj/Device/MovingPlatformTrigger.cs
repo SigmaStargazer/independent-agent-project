@@ -5,20 +5,20 @@ namespace IndependentAgentProject
 {
     public class MovingPlatformTrigger : DeviceBase, ITriggerable
     {
-        public override string Name => "ÒÆ¶¯Æ½Ì¨";
-        public override string Desc => "Ò»¸öĞü¿ÕµÄÆ½Ì¨¡£²»ÖªµÀÊÇ·ñ¿ÉÒÔÒÆ¶¯¡­¡­";
+        public override string Name => "ç§»åŠ¨å¹³å°";
+        public override string Desc => "ä¸€ä¸ªæ‚¬ç©ºçš„å¹³å°ã€‚ä¸çŸ¥é“æ˜¯å¦å¯ä»¥ç§»åŠ¨â€¦â€¦";
         public override bool IsInteractable => false;
 
-        [Header("Â·¾¶µã")]
+        [Header("è·¯å¾„ç‚¹")]
         [SerializeField]
         private List<Transform> mWayPoints = new();
         [SerializeField]
         private float mMoveSpeed = 2f;
 
-        // µ±Ç°ËùÔÚÂ·¾¶µãË÷Òı
-        // -1±íÊ¾¿ª³¡²»ÔÚÈÎºÎÂ·¾¶µã
+        // å½“å‰æ‰€åœ¨è·¯å¾„ç‚¹ç´¢å¼•
+        // -1è¡¨ç¤ºå¼€åœºä¸åœ¨ä»»ä½•è·¯å¾„ç‚¹
         private int mCurrentIndex = -1;
-        // µ±Ç°Ä¿±êÂ·¾¶µã
+        // å½“å‰ç›®æ ‡è·¯å¾„ç‚¹
         private int mTargetIndex = -1;
         private Transform mTargetPoint;
 
@@ -31,7 +31,7 @@ namespace IndependentAgentProject
             if (mWayPoints.Count == 0)
                 return;
 
-            // ÅĞ¶Ï¿ª³¡ÊÇ·ñÒÑ¾­ÔÚÄ³¸öÂ·¾¶µãÉÏ
+            // åˆ¤æ–­å¼€åœºæ˜¯å¦å·²ç»åœ¨æŸä¸ªè·¯å¾„ç‚¹ä¸Š
             for (int i = 0; i < mWayPoints.Count; i++)
             {
                 if (Vector3.Distance(transform.position, mWayPoints[i].position) < 0.05f)
@@ -53,7 +53,7 @@ namespace IndependentAgentProject
                 transform.position,
                 mTargetPoint.position);
 
-            // ÒÆ¶¯Íê³É
+            // ç§»åŠ¨å®Œæˆ
             if (remainDistance <= step)
             {
                 transform.position = mTargetPoint.position;
@@ -92,8 +92,8 @@ namespace IndependentAgentProject
             if (!CanTrigger())
                 return;
 
-            // ÉèÖÃÄ¿±êµãµÄË÷Òı
-            // ¿ª³¡²»ÔÚÈÎºÎÂ·¾¶µã
+            // è®¾ç½®ç›®æ ‡ç‚¹çš„ç´¢å¼•
+            // å¼€åœºä¸åœ¨ä»»ä½•è·¯å¾„ç‚¹
             if (mCurrentIndex == -1)
             {
                 mTargetIndex = 0;

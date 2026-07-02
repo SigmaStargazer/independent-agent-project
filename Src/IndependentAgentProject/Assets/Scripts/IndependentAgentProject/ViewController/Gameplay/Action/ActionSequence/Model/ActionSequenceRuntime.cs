@@ -9,13 +9,13 @@ namespace IndependentAgentProject
 {
     public enum ActionSequenceState
     {
-        Idle,           // ¿ÕÏĞ
-        //Validating,     // Ğ£ÑéÖĞ
-        //WaitingConfirm, // µÈ´ıÈ·ÈÏ
-        Executing,      // Ö´ĞĞÖĞ
-        Paused,         // ÔİÍ£ÖĞ
-        Completed,      // ÒÑÍê³É
-        Aborted         // ÒÑÖĞÖ¹
+        Idle,           // ç©ºé—²
+        //Validating,     // æ ¡éªŒä¸­
+        //WaitingConfirm, // ç­‰å¾…ç¡®è®¤
+        Executing,      // æ‰§è¡Œä¸­
+        Paused,         // æš‚åœä¸­
+        Completed,      // å·²å®Œæˆ
+        Aborted         // å·²ä¸­æ­¢
     }
     public class ActionSequenceRuntime
     {
@@ -66,10 +66,10 @@ namespace IndependentAgentProject
                 }
                 else
                 {
-                    actionName = "Î´¶¨ÒåµÄActionStep";
+                    actionName = "æœªå®šä¹‰çš„ActionStep";
                 }
 
-                //ĞÂ½¨Ò»¸öActionRuntime
+                //æ–°å»ºä¸€ä¸ªActionRuntime
                 var actionRuntime = new ActionRuntime
                 {
                     ActionName = actionName,
@@ -82,7 +82,7 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// »ñÈ¡µ±Ç°ActionStepµÄÔËĞĞÊ±¶ÔÏó
+        /// è·å–å½“å‰ActionStepçš„è¿è¡Œæ—¶å¯¹è±¡
         /// </summary>
         /// <returns></returns>
         public ActionRuntime GetCurActionRuntime()
@@ -96,7 +96,7 @@ namespace IndependentAgentProject
         }
 
         ///// <summary>
-        ///// ÅĞ¶ÏÊÇ·ñ»¹ÓĞActionStep£¬È»ºó·µ»ØActionStep/null
+        ///// åˆ¤æ–­æ˜¯å¦è¿˜æœ‰ActionStepï¼Œç„¶åè¿”å›ActionStep/null
         ///// </summary>
         public ActionStep GetCurActionStep()
         {
@@ -108,13 +108,13 @@ namespace IndependentAgentProject
                 return null;
         }
 
-        // ÄÚ´æÊÍ·Å
+        // å†…å­˜é‡Šæ”¾
         public void Dispose()
         {
-            // ===== ×´Ì¬±ê¼Ç =====
+            // ===== çŠ¶æ€æ ‡è®° =====
             State = ActionSequenceState.Aborted;
 
-            // ===== ÊÍ·ÅÄÚ²¿ runtime ¶ÔÏó =====
+            // ===== é‡Šæ”¾å†…éƒ¨ runtime å¯¹è±¡ =====
             if (ActionRuntimeLog != null)
             {
                 foreach (var rt in ActionRuntimeLog)
@@ -126,21 +126,21 @@ namespace IndependentAgentProject
                 ActionRuntimeLog = null;
             }
 
-            // ===== ÊÍ·ÅÉè±¸¿ìÕÕ =====
+            // ===== é‡Šæ”¾è®¾å¤‡å¿«ç…§ =====
             if (SceneObjSnap != null)
             {
                 SceneObjSnap.Clear();
                 SceneObjSnap = null;
             }
 
-            // ===== ÊÍ·Å¶¯×÷ĞòÁĞ =====
+            // ===== é‡Šæ”¾åŠ¨ä½œåºåˆ— =====
             if (ActionSequence != null)
             {
                 ActionSequence.Clear();
                 ActionSequence = null;
             }
 
-            //// ===== ÊÍ·Å²ßÂÔ / ·şÎñ¶ÔÏó =====
+            //// ===== é‡Šæ”¾ç­–ç•¥ / æœåŠ¡å¯¹è±¡ =====
             //if (mConditionEvaluator != null)
             //{
             //    if (mConditionEvaluator is IDisposable d)
@@ -149,7 +149,7 @@ namespace IndependentAgentProject
             //    mConditionEvaluator = null;
             //}
 
-            // ===== ÔËĞĞÌ¬Ë÷Òı¸´Î» =====
+            // ===== è¿è¡Œæ€ç´¢å¼•å¤ä½ =====
             CurActionIndex = 0;
         }
     }

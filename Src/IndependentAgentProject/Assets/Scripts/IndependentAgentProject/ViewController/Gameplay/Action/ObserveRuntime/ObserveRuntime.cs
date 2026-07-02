@@ -9,20 +9,20 @@ namespace IndependentAgentProject
         public string ActionName;
         public ActionState State;
         public SceneObjBase Target;
-        public string TargetName; // ·ÀÖ¹destroyºóÎŞ·¨»ñÈ¡Target.Name
+        public string TargetName; // é˜²æ­¢destroyåæ— æ³•è·å–Target.Name
 
         /// <summary>
-        /// ×î½üµÄ¹Û²ì¼ÇÂ¼
+        /// æœ€è¿‘çš„è§‚å¯Ÿè®°å½•
         /// </summary>
-        public const int MaxRecords = 20; // ×î´ó¼ÇÂ¼Êı
-        public Queue<string> Records = new(); // ¹Û²ì¼ÇÂ¼
-        public int UnreadCount;// ×ÔÉÏ´ÎAgent¶ÁÈ¡ºóĞÂÔöµÄ¼ÇÂ¼Êı
+        public const int MaxRecords = 20; // æœ€å¤§è®°å½•æ•°
+        public Queue<string> Records = new(); // è§‚å¯Ÿè®°å½•
+        public int UnreadCount;// è‡ªä¸Šæ¬¡Agentè¯»å–åæ–°å¢çš„è®°å½•æ•°
 
         public float ObserveStartTime;
 
         public string LastStateName;
-        public float LastChangeTime; // ×îºó±ä»¯Ê±¼ä
-        public int StateChangeNum = 0; // ×´Ì¬±ä»¯´ÎÊı
+        public float LastChangeTime; // æœ€åå˜åŒ–æ—¶é—´
+        public int StateChangeNum = 0; // çŠ¶æ€å˜åŒ–æ¬¡æ•°
         public Action<SceneObjBase, string, string> StateChangedHandler;
     }
 }

@@ -14,11 +14,11 @@ public class BootstrapEntry : MonoBehaviour
 
 #if UNITY_EDITOR
 
-        // ±à¼­Æ÷Ä£Ê½£º
-        // ·µ»ØÔ­±¾²âÊÔScene
+        // ç¼–è¾‘å™¨æ¨¡å¼ï¼š
+        // è¿”å›åŸæœ¬æµ‹è¯•Scene
         string lastScene = EditorPrefs.GetString("LastOpenedScene","");
 
-        // ·ÀÖ¹ËÀÑ­»·
+        // é˜²æ­¢æ­»å¾ªç¯
         if (!string.IsNullOrEmpty(lastScene) && !lastScene.Contains("Bootstrap"))
         {
             SceneManager.LoadScene(lastScene);
@@ -27,14 +27,14 @@ public class BootstrapEntry : MonoBehaviour
 
 #endif
 
-        // ÕıÊ½ÓÎÏ·£º
-        // ½øÈë±êÌâ
+        // æ­£å¼æ¸¸æˆï¼š
+        // è¿›å…¥æ ‡é¢˜
         SceneManager.LoadScene("Title");
     }
 
     private async UniTask Initialize()
     {
-        // ³õÊ¼»¯È«¾ÖÏµÍ³
+        // åˆå§‹åŒ–å…¨å±€ç³»ç»Ÿ
         await UniTask.Yield();
     }
 }

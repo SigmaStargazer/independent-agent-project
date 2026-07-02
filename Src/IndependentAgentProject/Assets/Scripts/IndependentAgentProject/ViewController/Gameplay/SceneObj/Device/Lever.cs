@@ -5,10 +5,10 @@ namespace IndependentAgentProject
 {
     public class Lever : DeviceBase
     {
-        public override string Name => "À­¸Ë";
-        public override string Desc => "À­¶¯ºóËÆºõÄÜ¿ØÖÆÊ²Ã´µÄ×°ÖÃ¡£";
+        public override string Name => "æ‹‰æ†";
+        public override string Desc => "æ‹‰åŠ¨åä¼¼ä¹èƒ½æ§åˆ¶ä»€ä¹ˆçš„è£…ç½®ã€‚";
         public override bool IsInteractable => true;
-        [Header("´¥·¢Ä¿±ê")]
+        [Header("è§¦å‘ç›®æ ‡")]
         [SerializeField]
         private List<MonoBehaviour> mTargets = new();
 
@@ -24,7 +24,7 @@ namespace IndependentAgentProject
                 triggerable.Trigger();
                 success = true;
             }
-            return (success, success ? "À­¶¯ºóËÆºõÓĞÊ²Ã´×°ÖÃ¶¯ÁË¡£" : "À­¶¯ºóËÆºõÃ»ÓĞ×÷ÓÃ¡£");
+            return (success, success ? "æ‹‰åŠ¨åä¼¼ä¹æœ‰ä»€ä¹ˆè£…ç½®åŠ¨äº†ã€‚" : "æ‹‰åŠ¨åä¼¼ä¹æ²¡æœ‰ä½œç”¨ã€‚");
         }
     }
 }

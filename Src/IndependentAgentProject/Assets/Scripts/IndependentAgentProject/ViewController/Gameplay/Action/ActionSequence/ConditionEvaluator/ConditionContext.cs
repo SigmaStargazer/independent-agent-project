@@ -7,24 +7,24 @@ namespace IndependentAgentProject
 {
     public class ConditionContext
     {
-        // Ô´¶ÔÏó£¨ÕæÊµÊÀ½ç£©
+        // æºå¯¹è±¡ï¼ˆçœŸå®ä¸–ç•Œï¼‰
         public SceneObjBase MyselfSrc { get; }
         public List<SceneObjBase> ObjectsSrc { get; }
 
 
-        // ±í´ïÊ½ÊÓÍ¼
+        // è¡¨è¾¾å¼è§†å›¾
         public SceneObjExprView Myself { get; private set; }
         public List<SceneObjExprView> Objects { get; private set; }
         public int NearestInteractableIndex { get; private set; }
 
-        // ¶¯Ì¬±äÁ¿
+        // åŠ¨æ€å˜é‡
         public float Displacement { get; set; }
         public float ActionTime { get; set; }
         public bool CanInteract { get; set; }
 
         public ConditionContext(SceneObjBase myself, List<SceneObjBase> objects)
         {
-            //// Í¶Ó°µ½ Expression View
+            //// æŠ•å½±åˆ° Expression View
             //Myself = ExprViewFactory.From(myself);
             //Objects = objects.Select(ExprViewFactory.From).ToList();
             MyselfSrc = myself;
@@ -36,14 +36,14 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// Ë¢ĞÂ±í´ïÊ½ÊÓÍ¼
+        /// åˆ·æ–°è¡¨è¾¾å¼è§†å›¾
         /// </summary>
         public void RefreshViews()
         {
             Myself = ExprViewFactory.From(MyselfSrc);
             Objects = ObjectsSrc.Select(ExprViewFactory.From).ToList();
 
-            // Ë¢ĞÂ½»»¥×´Ì¬
+            // åˆ·æ–°äº¤äº’çŠ¶æ€
             var nearest = SceneObjManager.Instance?.GetNearestInteractableObj(MyselfSrc.gameObject);
             CanInteract = nearest != null;
             NearestInteractableIndex = nearest != null ? ObjectsSrc.IndexOf(nearest) : -1;

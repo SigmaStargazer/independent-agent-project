@@ -6,8 +6,8 @@ namespace IndependentAgentProject
 {
     public class Box : DeviceBase
     {
-        public override string Name => "Ïä×Ó";
-        public override string Desc => "Ò»¸ö¿ÉÒÔ±»ÍÆ¶¯µÄÏä×Ó";
+        public override string Name => "ç®±å­";
+        public override string Desc => "ä¸€ä¸ªå¯ä»¥è¢«æ¨åŠ¨çš„ç®±å­";
         public override bool IsInteractable => false;
     }
 }

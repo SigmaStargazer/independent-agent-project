@@ -15,12 +15,12 @@ namespace IndependentAgentProject
         private Vector3 mTargetPos;
         private Vector3 velocity;
 
-        //// ÕâÀïÏŞÖÆµÄ·¶Î§´ú±íµØÍ¼±ß½ç
+        //// è¿™é‡Œé™åˆ¶çš„èŒƒå›´ä»£è¡¨åœ°å›¾è¾¹ç•Œ
         //private float mMinX = -5;
         //private float mMaxX = 5;
         //private float mMinY = -5;
         //private float mMaxY = 5;
-        //LateUpdateÔÚÒ»Ö¡µÄ×îºó½øĞĞ¼ÆËã
+        //LateUpdateåœ¨ä¸€å¸§çš„æœ€åè¿›è¡Œè®¡ç®—
 
         private void Start()
         {
@@ -40,7 +40,7 @@ namespace IndependentAgentProject
                 //}
                 //else
                 //{
-                //    // ÍË³öUpdate·½·¨
+                //    // é€€å‡ºUpdateæ–¹æ³•
                 //    return;
                 //}
                 return;
@@ -60,16 +60,16 @@ namespace IndependentAgentProject
             mTargetPos.y = playerPos.y + 2;
             mTargetPos.z = -10;
 
-            // Ôö¼ÓÒ»¸öÆ½»¬´¦Àí
+            // å¢åŠ ä¸€ä¸ªå¹³æ»‘å¤„ç†
             var position = transform.position;
             position = Vector3.SmoothDamp(
                 position,
                 mTargetPos,
                 ref velocity,
                 smoothTime);
-            // Ëø¶¨ÔÚÒ»¸ö¹Ì¶¨ÇøÓò
+            // é”å®šåœ¨ä¸€ä¸ªå›ºå®šåŒºåŸŸ
             //public static float Clamp (float value, float min, float max);
-            //// ½«ÖµvalueÏŞÖÆÔÚ£¨min£¬max£©ÄÚ
+            //// å°†å€¼valueé™åˆ¶åœ¨ï¼ˆminï¼Œmaxï¼‰å†…
             //transform.position = new Vector3(
             //    Mathf.Clamp(position.x, mMinX, mMaxX),
             //    Mathf.Clamp(position.y, mMinY, mMaxY),

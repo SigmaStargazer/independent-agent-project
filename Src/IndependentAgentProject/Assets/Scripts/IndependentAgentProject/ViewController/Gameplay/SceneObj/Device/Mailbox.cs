@@ -8,8 +8,8 @@ namespace IndependentAgentProject
     public class Mailbox : DeviceBase
     {
         public string pwd = "4753";
-        public override string Name => "ĞÅÏä";
-        public override string Desc => "ÀïÃæ¿ÉÄÜ´æ×ÅĞÅ¼ş¡£";
+        public override string Name => "ä¿¡ç®±";
+        public override string Desc => "é‡Œé¢å¯èƒ½å­˜ç€ä¿¡ä»¶ã€‚";
 
         public override bool IsInteractable => true;
 
@@ -17,10 +17,10 @@ namespace IndependentAgentProject
         {
             return (
                 true, 
-                "²éÔÄĞÅÏä£º¹²ÓĞ3·âĞÅ¼ş¡£Äã¿ÉÒÔÑ¡Ôñ²éÔÄ£º" +
-                "  1. [2015.1.1]À´×ÔĞ¡ÀÚµÄĞÅ¼ş" +
-                "  2. [2015.9.1]À´×ÔĞ¡ÂäµÄĞÅ¼ş" +
-                "  3. [2015,12,31]²éÔÄÀ´×ÔĞ¡ºìĞÅ¼ş"
+                "æŸ¥é˜…ä¿¡ç®±ï¼šå…±æœ‰3å°ä¿¡ä»¶ã€‚ä½ å¯ä»¥é€‰æ‹©æŸ¥é˜…ï¼š" +
+                "  1. [2015.1.1]æ¥è‡ªå°ç£Šçš„ä¿¡ä»¶" +
+                "  2. [2015.9.1]æ¥è‡ªå°è½çš„ä¿¡ä»¶" +
+                "  3. [2015,12,31]æŸ¥é˜…æ¥è‡ªå°çº¢ä¿¡ä»¶"
                 );
         }
 
@@ -29,13 +29,13 @@ namespace IndependentAgentProject
             switch (selection)
             {
                 case 1:
-                    return (true, $"²éÔÄÀ´×ÔĞ¡ÀÚĞÅ¼ş£º\nTo Ğ¡Ã÷£º\n  »¶Ó­²Î¼ÓÎÒÃÇµÄ²âÊÔ£¡");
+                    return (true, $"æŸ¥é˜…æ¥è‡ªå°ç£Šä¿¡ä»¶ï¼š\nTo å°æ˜ï¼š\n  æ¬¢è¿å‚åŠ æˆ‘ä»¬çš„æµ‹è¯•ï¼");
                 case 2:
-                    return (true, $"²éÔÄÀ´×ÔĞ¡ÂäĞÅ¼ş£º\nTo Ğ¡Ã÷£º\n  ÓÃ»§µÄ±¸ÓÃÔ¿³×ÔÚ»¨ÅèÏÂÃæ");
+                    return (true, $"æŸ¥é˜…æ¥è‡ªå°è½ä¿¡ä»¶ï¼š\nTo å°æ˜ï¼š\n  ç”¨æˆ·çš„å¤‡ç”¨é’¥åŒ™åœ¨èŠ±ç›†ä¸‹é¢");
                 case 3:
-                    return (true, $"²éÔÄÀ´×ÔĞ¡ºìĞÅ¼ş£º\nTo Ğ¡Ã÷£º\n  ±£ÏÕÏäµÄÃÜÂëÊÇ{pwd}");
+                    return (true, $"æŸ¥é˜…æ¥è‡ªå°çº¢ä¿¡ä»¶ï¼š\nTo å°æ˜ï¼š\n  ä¿é™©ç®±çš„å¯†ç æ˜¯{pwd}");
                 default:
-                    return (false, "Ñ¡Ïî´íÎó£¡ÇëÑ¡ÔñÕıÈ·µÄÑ¡Ïî");
+                    return (false, "é€‰é¡¹é”™è¯¯ï¼è¯·é€‰æ‹©æ­£ç¡®çš„é€‰é¡¹");
             }
         }
     }

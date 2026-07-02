@@ -17,10 +17,10 @@ namespace IndependentAgentProject
         public NextMapFlow(string nextLevelName)
         {
             TargetScene = nextLevelName;
-            string message = "ÏµÍ³¹ÜÀíÔ±: ½øÈëĞÂ³¡¾°¡£ÈçÓĞ½øĞĞÖĞµÄÈÎÎñ£¬Çë×ÔĞĞ¾ö¶¨ÊÇ·ñĞèÒª¼ÌĞø½øĞĞ";
+            string message = "ç³»ç»Ÿç®¡ç†å‘˜: è¿›å…¥æ–°åœºæ™¯ã€‚å¦‚æœ‰è¿›è¡Œä¸­çš„ä»»åŠ¡ï¼Œè¯·è‡ªè¡Œå†³å®šæ˜¯å¦éœ€è¦ç»§ç»­è¿›è¡Œ";
             Steps = new List<IFlowStep>()
             {
-                new InterruptAgentStep("½øÈëĞÂ³¡¾°"),
+                new InterruptAgentStep("è¿›å…¥æ–°åœºæ™¯"),
 
                 new BackupMemoryStep(0),
 

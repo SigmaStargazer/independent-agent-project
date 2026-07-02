@@ -10,7 +10,7 @@ namespace IndependentAgentProject
 {
     public class RestoreMemoryStep : IFlowStep
     {
-        public string DisplayName => "¶ÁÈ¡¼ÇÒä";
+        public string DisplayName => "è¯»å–è®°å¿†";
 
         private readonly int slotId;
 

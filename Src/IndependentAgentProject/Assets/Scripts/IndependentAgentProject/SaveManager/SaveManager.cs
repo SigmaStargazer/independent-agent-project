@@ -26,7 +26,7 @@ namespace IndependentAgentProject
             var data = new SaveData();
             data.LevelName = levelName;
 
-            var jsonStr = JsonUtility.ToJson(data);// ½«Êı¾İ×ªÎªjson×Ö·û´®
+            var jsonStr = JsonUtility.ToJson(data);// å°†æ•°æ®è½¬ä¸ºjsonå­—ç¬¦ä¸²
             System.IO.File.WriteAllText(this.filePath, jsonStr);
         }
 
