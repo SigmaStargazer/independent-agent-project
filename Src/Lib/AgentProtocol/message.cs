@@ -194,6 +194,9 @@ namespace SkillBridge.Message
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
             => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
 
+        [global::ProtoBuf.ProtoMember(1, Name = @"allowed_contact_obj_ids", IsPacked = true)]
+        public int[] AllowedContactObjIds { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]

@@ -181,6 +181,7 @@ async def create_action_skill(
     重要：action_sequence_template 是「参数化动作序列模板蓝图」。
     - 凡是不同场景下需要调整的字段（如目标编号、阈值、方向等），都应写成 `{snake_case}` 占位符，例如 `"{target_interactable_index}"`、`"{direction}"`、`"{exit_threshold}"`。
     - 占位符必须出现在 JSON 字符串里，不能写成裸的 `{direction}`（必须是 `"{direction}"`），不允许中文或大写、空格。
+    - `List[int]` 字段（如 `allowed_contact_obj_ids`）也可以参数化：把占位符作为字符串写在列表里，例如 `"allowed_contact_obj_ids": ["{platform_index}"]`。执行时替换为真实整数。
     - 真正执行动作序列时（plan_action_sequence_cmd），必须先把所有占位符替换成当前场景的真实值；保留任何 `{...}` 都会被拒绝。
     - 每个占位符在 step_explanations.parameter_reason / usage_notes 中要说明含义、如何确定取值。
     - action 字段本身不能是占位符；动作类型必须是合法的动作之一（wait / move / interact / select / input 等，由系统从 ActionStep 自动推导）。
@@ -253,7 +254,7 @@ async def add_action_skill_template(
 
     重要：action_sequence_template 是「参数化动作序列模板蓝图」（同 create_action_skill 的规则）：
     - 不同场景下需要调整的字段写成 `"{snake_case}"` 占位符（如 `"{platform_index}"`、`"{exit_threshold}"`）；
-    - 占位符必须包在字符串里；
+    - 占位符必须包在字符串里；`List[int]` 字段写成 `["{platform_index}"]`；
     - 真正执行动作序列时必须先替换全部占位符。
 
     Args:

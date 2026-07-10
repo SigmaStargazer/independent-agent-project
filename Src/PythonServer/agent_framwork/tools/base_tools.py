@@ -139,7 +139,10 @@ def build_pb_action_step(step) -> message_pb2.ActionStep:
 
     # ===== action =====
     if isinstance(step, WaitActionModel):
-        pb_step.wait.CopyFrom(message_pb2.WaitAction())
+        if step.allowed_contact_obj_ids:
+            pb_step.wait.allowed_contact_obj_ids.extend(
+                step.allowed_contact_obj_ids
+            )
 
     elif isinstance(step, MoveActionModel):
         pb_step.move.direction = (
@@ -231,6 +234,27 @@ async def plan_action_sequence_cmd(
         },
         {
             "action": "interact",
+        }
+    ]
+    4) (假设平台序号为3，陷阱序号为2)乘移动平台渡陷阱：走上平台后等待平台移动至对岸
+    解析：等待期间平台会载着你穿过陷阱区域，因此 wait 和 move 都需要把平台(3)和陷阱(2)加入 allowed_contact_obj_ids，否则会被判定为碰撞中断。
+    action_sequence = [
+        {
+            "action": "move",
+            "direction": "right",
+            "condition": "canInteract == true && nearestInteractableIndex == 3",
+            "allowed_contact_obj_ids": [3]
+        },
+        {
+            "action": "wait",
+            "condition": "actionTime >= 5",
+            "allowed_contact_obj_ids": [2, 3]
+        },
+        {
+            "action": "move",
+            "direction": "right",
+            "condition": "displacement >= 2",
+            "allowed_contact_obj_ids": [3]
         }
     ]
 

@@ -125,7 +125,7 @@ message ActionStep {
 // ===== 具体 Action =====
 
 message WaitAction {
-  // 当前无额外参数
+  repeated int32 allowed_contact_obj_ids = 1;
 }
 
 message MoveAction {
