@@ -11,6 +11,7 @@ from agent_framwork.managers.agent_manager import AgentManager
 from agent_framwork.systems.time_system import TimeSystem
 from memory_system import MemoryManager
 from memory_system.action_skill_system import load_default_skills
+from tools.console_logger import start_console_logging, stop_console_logging
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -301,20 +302,27 @@ async def other_tasks():
     print("Other tasks done")
 
 async def main():
-    # 1. 在这里全局执行一次初始化
-    print("正在初始化记忆系统...")
-    await MemoryManager().initialize()
-    print("MemoryManager 初始化完成。")
-
-    # 也可以在这里初始化 TimeSystem，如果需要的话
-    await TimeSystem().aset_time(year=2016, month=1, day=1)
-
-    print("正在启动服务器...")
-    # 2. 系统初始化完成后，再启动网络服务和其他任务
-    await asyncio.gather(
-        server.astart(),
-        other_tasks()
+    # 0. 安装终端日志镜像（stdout/stderr 同时写入 logs/console/{时间戳}.log）
+    log_file, stdout_orig, stderr_orig = start_console_logging(
+        base_dir=os.path.dirname(__file__)
     )
+    try:
+        # 1. 在这里全局执行一次初始化
+        print("正在初始化记忆系统...")
+        await MemoryManager().initialize()
+        print("MemoryManager 初始化完成。")
+
+        # 也可以在这里初始化 TimeSystem，如果需要的话
+        await TimeSystem().aset_time(year=2016, month=1, day=1)
+
+        print("正在启动服务器...")
+        # 2. 系统初始化完成后，再启动网络服务和其他任务
+        await asyncio.gather(
+            server.astart(),
+            other_tasks()
+        )
+    finally:
+        stop_console_logging(log_file, stdout_orig, stderr_orig)
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,0 +1,72 @@
+import os
+import sys
+from datetime import datetime
+
+
+class TeeWriter:
+    """把写入镜像到原始 stream 与日志文件，每行写后即 flush。"""
+
+    def __init__(self, original, file):
+        self._original = original
+        self._file = file
+
+    def write(self, data):
+        self._original.write(data)
+        self._original.flush()
+        self._file.write(data)
+        self._file.flush()
+
+    def flush(self):
+        self._original.flush()
+        self._file.flush()
+
+    def isatty(self):
+        return self._original.isatty()
+
+    def __getattr__(self, name):
+        return getattr(self._original, name)
+
+
+def start_console_logging(base_dir: str):
+    """安装 TeeWriter，把 stdout/stderr 镜像到日志文件。
+
+    返回 (file, stdout_orig, stderr_orig)；未启用或创建失败时返回 (None, None, None)。
+    """
+    enabled = os.getenv("CONSOLE_LOG_ENABLED", "true").lower() == "true"
+    if not enabled:
+        return None, None, None
+
+    now = datetime.now()
+    filename = now.strftime("%Y-%m-%d_%H-%M-%S")
+    log_dir = os.path.join(base_dir, "logs", "console")
+    os.makedirs(log_dir, exist_ok=True)
+    filepath = os.path.join(log_dir, filename + ".log")
+    if os.path.exists(filepath):
+        filename += f"_{now.microsecond // 1000:03d}"
+        filepath = os.path.join(log_dir, filename + ".log")
+
+    try:
+        f = open(filepath, "w", encoding="utf-8")
+    except OSError:
+        # 降级：仅终端输出，不阻断启动
+        # 此时 stdout 尚未被替换，直接 print 到终端
+        print(f"[console_logger] 无法创建终端日志文件 {filepath}，跳过落盘")
+        return None, None, None
+
+    stdout_orig, stderr_orig = sys.stdout, sys.stderr
+    sys.stdout = TeeWriter(stdout_orig, f)
+    sys.stderr = TeeWriter(stderr_orig, f)
+    return f, stdout_orig, stderr_orig
+
+
+def stop_console_logging(f, stdout_orig, stderr_orig):
+    """还原 stdout/stderr，关闭日志文件。参数为 None 时空操作。"""
+    if f is None:
+        return
+    sys.stdout = stdout_orig
+    sys.stderr = stderr_orig
+    try:
+        f.flush()
+        f.close()
+    except Exception:
+        pass
