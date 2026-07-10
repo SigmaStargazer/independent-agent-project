@@ -263,6 +263,7 @@ class State(TypedDict):
     mem_skill_index: str # 动作技能记忆索引（RAG 注入 system prompt）
     mem_to_save: str # 待存储的记忆
     logged_tool_call_ids: list[str] # 用于记忆工具调用时，去重tool_message中重试的部分
+    skip_memory: bool # 本轮是否跳过记忆写入（idle wakeup 无工具调用时为 True）
 
 # 定义节点
 async def search_memory(state: State):
@@ -412,9 +413,15 @@ async def cache_tool_mem(state: State):
         mem_to_save += "\n" + "\n".join(new_entries)
         logged_ids.update(new_ids)
 
+    # 有工具调用时解除 skip_memory（idle 触发了真正行动，应正常写入）
+    skip_memory = state.get('skip_memory', False)
+    if new_entries:
+        skip_memory = False
+
     return {
         "mem_to_save": mem_to_save,
-        "logged_tool_call_ids": list(logged_ids)  # 注意：set 不能直接存，需转 list 或保持为 set（取决于 state schema）
+        "logged_tool_call_ids": list(logged_ids),  # 注意：set 不能直接存，需转 list 或保持为 set（取决于 state schema）
+        "skip_memory": skip_memory
     }
 
 async def save_memory(state: State):
@@ -423,7 +430,15 @@ async def save_memory(state: State):
     """
     name = state['name']
     mem_to_save = state['mem_to_save']
-    
+
+    # idle wakeup 且无工具调用时跳过写入
+    if state.get('skip_memory', False):
+        print(f"[{name}] skip memory (idle wakeup, no action)")
+        return {
+            "mem_to_save": "",
+            "logged_tool_call_ids": []
+        }
+
     await aperf_print(f"[{name}]存储记忆开始")
     curtime = await TimeSystem().aget_current_time()
     await memory_manager.save_memory(name=state['name'], memory=mem_to_save, curtime=curtime)
@@ -594,7 +609,8 @@ class Agent:
             "mem_episode": old_values.get("mem_episode", ""),
             "mem_skill_index": old_values.get("mem_skill_index", ""),
             "mem_to_save": mem_to_save,
-            "logged_tool_call_ids": old_values.get("logged_tool_call_ids", [])
+            "logged_tool_call_ids": old_values.get("logged_tool_call_ids", []),
+            "skip_memory": False  # 恢复后的轮次按正常逻辑处理
         }
 
     def _is_idle_wakeup_enabled(self) -> bool:
@@ -693,7 +709,11 @@ class Agent:
                 message = f"[{virtual_time}]" + message
 
             print(f"[{self.name}]Idle wakeup message: {message}")
-            await self.message_queue.put(TimedMessage(timestamp=real_time, content=message))
+            await self.message_queue.put(TimedMessage(
+                timestamp=real_time,
+                content=message,
+                skip_memory=True
+            ))
             self._idle_wakeup_seq += 1
             self._idle_wakeup_task = None
 
@@ -887,10 +907,14 @@ class Agent:
                 msg_id = str(uuid.uuid4())
                 human_msg = HumanMessage(content=full_messages, id=msg_id)
                 
+                # 任一消息携带 skip_memory=True，则本轮跳过记忆写入
+                skip_memory = any(getattr(item, 'skip_memory', False) for item in items)
+
                 # 初始输入状态
                 input_state = {
                     "messages": [human_msg], 
-                    "name": self.name
+                    "name": self.name,
+                    "skip_memory": skip_memory
                 }
                 # 当前 checkpoint 正在处理中
                 # self._has_unfinished_checkpoint = True

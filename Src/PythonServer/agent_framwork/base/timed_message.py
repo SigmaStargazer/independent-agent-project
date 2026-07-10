@@ -4,3 +4,4 @@ from dataclasses import dataclass
 class TimedMessage:
     timestamp: float
     content: str
+    skip_memory: bool = False
