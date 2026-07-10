@@ -361,6 +361,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1883198597299313087}
+  - component: {fileID: 1827856819102498915}
   m_Layer: 6
   m_Name: Point_2
   m_TagString: Untagged
@@ -383,6 +384,19 @@ Transform:
   m_Father: {fileID: 1883198598636861352}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1827856819102498915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1883198597299313080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a92af126cdace004090ba5f9773d2d54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Facing: 1
 --- !u!1 &1883198597522140665
 GameObject:
   m_ObjectHideFlags: 0
@@ -591,6 +605,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1883198598717718674}
+  - component: {fileID: 7096955597147204707}
   m_Layer: 6
   m_Name: Point_1
   m_TagString: Untagged
@@ -613,6 +628,19 @@ Transform:
   m_Father: {fileID: 1883198598636861352}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7096955597147204707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1883198598717718675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a92af126cdace004090ba5f9773d2d54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Facing: 1
 --- !u!1 &1883198598973676254
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,6 +739,10 @@ MonoBehaviour:
   mPatrolSpeed: 2
   mWaitTime: 5
   mChaseSpeed: 4
+  mAlertedSeconds: 1
+  mInspectSeconds: 5
+  mInspectTurnInterval: 1.2
+  mSameSourceCooldown: 15
   mVisionZone: {fileID: 1883198597977334227}
   mAttackZone: {fileID: 1883198599256525392}
   mBackstabZone: {fileID: 1883198597522140671}

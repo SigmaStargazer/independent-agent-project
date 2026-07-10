@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: 804696414558167123}
   - component: {fileID: 4568239170281738107}
   m_Layer: 5
-  m_Name: PanelTrainingBtns
+  m_Name: PanelTraining
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
