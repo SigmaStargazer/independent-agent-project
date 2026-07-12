@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: d7d19b035aa38144ca28366667000c6d
+NativeFormatImporter:
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 126124
+  packageName: Universal Fighting Engine 2 (Source)
+  packageVersion: 2.5.3
+  assetPath: Assets/UFE/Demos/Shared_Assets/Stages/TrainingRoom2D/Materials/training_grid_red.mat
+  uploadId: 608562
