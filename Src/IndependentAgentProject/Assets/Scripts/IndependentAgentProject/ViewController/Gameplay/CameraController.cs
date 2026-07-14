@@ -58,7 +58,7 @@ namespace IndependentAgentProject
 
             mTargetPos.x = playerPos.x + (isRight ? 3 : -3);
             mTargetPos.y = playerPos.y + 2;
-            //mTargetPos.z = -10;
+            mTargetPos.z = -10;
 
             // 增加一个平滑处理
             var position = transform.position;
