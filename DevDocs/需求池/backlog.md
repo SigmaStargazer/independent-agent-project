@@ -15,13 +15,13 @@
 |---|---|---|---|---|---|---|
 | 1 | `WaitAction` 缺 `allowed_contact_obj_ids` | Bug / 协议+Python+Unity | 中（动作语义有缺口，已有 workaround） | P0 | 已立项 | v0.22.4 |
 | 2 | `List[int]` 字段在模板里的占位符表达边界 | 体验 / Python 工具 schema | 中（结构性表达力缺口） | P0 | 已立项 | v0.22.4 |
-| 3 | Monitor 推送过密带来的打断噪声 | 体验 / Unity+Python | 中（影响长时训练效率） | P1 | 候选 | — |
-| 4 | `mem_to_save` 累积长度本身没有压缩 | 体验 / 记忆系统 | 大（Episode 越长越糟） | P1 | 候选 | — |
-| 5 | 默认技能复用率评估 | 调研 / 评估 | 小 | P2 | 候选 | — |
-| 6 | 网络中断/异常时各操作报错信息不统一 | 调研 / 错误处理 | 中（用户难定位故障） | P2 | 收集中 | — |
+| 3 | Monitor 推送过密带来的打断噪声 | 体验 / Unity+Python | 中（影响长时训练效率） | P1 | 候选 | - |
+| 4 | `mem_to_save` 累积长度本身没有压缩 | 体验 / 记忆系统 | 大（Episode 越长越糟） | P1 | 候选 | - |
+| 5 | 默认技能复用率评估 | 调研 / 评估 | 小 | P2 | 候选 | - |
+| 6 | 网络中断/异常时各操作报错信息不统一 | 调研 / 错误处理 | 中（用户难定位故障） | P2 | 收集中 | - |
 | 7 | Unity 工程内 `.cs` 源文件编码不一致（GBK/UTF-8） | 工程清理 / Unity | 中（Inspector 乱码，长期债） | P1 | 已立项 | v0.22.0 |
-| 8 | Kuzu `INTERACTED_WITH` 边 `MERGE` 主键冲突 | Bug / 记忆系统 | 中（已有 3 次重试兜底，最坏可能丢 Episode） | P1 | 候选 | — |
-| 9 | `observe` 工具反馈应附带「自己的状态」 | 体验 / Unity 工具 | 中（Hidden/Dead/Stunned/Follow 易遗忘自身约束） | P1 | 候选 | — |
+| 8 | Kuzu `INTERACTED_WITH` 边 `MERGE` 主键冲突 | Bug / 记忆系统 | 中（已有 3 次重试兜底，最坏可能丢 Episode） | P1 | 候选 | - |
+| 9 | `observe` 工具反馈应附带「自己的状态」 | 体验 / Unity 工具 | 中（Hidden/Dead/Stunned/Follow 易遗忘自身约束） | P1 | 已立项 | v0.22.11 |
 | 10 | idle wakeup 无信息量心理活动应抑制写入 | 体验 / 记忆系统 | 中（任务完成后 idle 期反复刷重复 Episode） | P1 | 已完成 | v0.22.2 |
 
 > 字段约定：

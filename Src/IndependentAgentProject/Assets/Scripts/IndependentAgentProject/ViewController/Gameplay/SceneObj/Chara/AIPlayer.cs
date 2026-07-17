@@ -686,12 +686,8 @@ namespace IndependentAgentProject
         /// </summary>
         public void Observe(string requestId)
         {
-            // 获取设备信息
-            List<Dictionary<string, object>> sceneObjsInfo = new List<Dictionary<string, object>>();
-            string sceneObjsInfoDesc = this.GetEnvSceneObjsInfo();
-
-            // 拼接
-            string messageToSend = $"[观察结果]\n<环境>\n{sceneObjsInfoDesc}\n</环境>";
+            // 复用 CreateMessageText，自动补 <你的状态> / <当前场景> / <环境> 三块
+            string messageToSend = this.CreateMessageText("[观察结果]");
 
             // 发送给Agent
             // tool_name = "observe"只用于日志打印，不用于判断
