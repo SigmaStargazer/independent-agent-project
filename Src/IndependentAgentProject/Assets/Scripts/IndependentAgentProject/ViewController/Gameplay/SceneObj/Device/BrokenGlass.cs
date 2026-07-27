@@ -60,7 +60,7 @@ namespace IndependentAgentProject
             //    Gizmos.DrawWireCube(center, size);
             //}
 
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, mAttractRadius);
         }
     }
