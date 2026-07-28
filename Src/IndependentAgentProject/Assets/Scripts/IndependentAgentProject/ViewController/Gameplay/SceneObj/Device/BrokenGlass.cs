@@ -20,11 +20,15 @@ namespace IndependentAgentProject
         public override bool IsClickable => false;
 
         [Header("异常源配置")]
-        [SerializeField][Tooltip("声音传播半径，作为 EnemyAnomalyEvent.Radius 上送。红色 Gizmos 可视化。")]
+        [SerializeField][Tooltip("声音传播半径，作为 EnemyAnomalyEvent.Radius 上送。Gizmos 可视化。")]
         private float mAttractRadius = 5f;
 
         [SerializeField][Tooltip("同一块碎玻璃两次广播的最小间隔（秒）。冷却期内 Trigger 进入不再广播。")]
         private float mCooldownSeconds = 1.5f;
+
+        [Header("Gizmos 可视化")]
+        [SerializeField][Tooltip("Scene 视图中声音传播半径的线框颜色。")]
+        private Color mGizmoColor = Color.green;
 
         private float mCooldownEndTime = 0f;
 
@@ -60,7 +64,7 @@ namespace IndependentAgentProject
             //    Gizmos.DrawWireCube(center, size);
             //}
 
-            Gizmos.color = Color.green;
+            Gizmos.color = mGizmoColor;
             Gizmos.DrawWireSphere(transform.position, mAttractRadius);
         }
     }

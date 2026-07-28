@@ -8,7 +8,7 @@ public static class BootstrapPlayMode
 
     static BootstrapPlayMode()
     {
-        // 按下play 键时调用
+        // 鎸変笅play 閿椂璋冪敤
         EditorApplication.playModeStateChanged += OnPlayModeChanged;
     }
 
@@ -17,11 +17,11 @@ public static class BootstrapPlayMode
     {
         if (state == PlayModeStateChange.ExitingEditMode)
         {
-            // 当前真正打开的Scene
+            // 褰撳墠鐪熸鎵撳紑鐨凷cene
             string currentScene = EditorSceneManager.GetActiveScene().path;
-            // 记录下来
+            // 璁板綍涓嬫潵
             EditorPrefs.SetString(LastSceneKey, currentScene);
-            // 强制PlayMode从Bootstrap启动
+            // 寮哄埗PlayMode浠嶣ootstrap鍚姩
             var bootstrap =AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/Bootstrap.unity");
             EditorSceneManager.playModeStartScene =bootstrap;
         }

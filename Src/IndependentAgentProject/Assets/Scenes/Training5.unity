@@ -771,6 +771,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BrokenGlass (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8358121770346933751, guid: ee8cda5dbe12f6d43a16968fdffc311c, type: 3}
+      propertyPath: mAttractRadius
+      value: 7.339144
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee8cda5dbe12f6d43a16968fdffc311c, type: 3}
 --- !u!4 &982566430 stripped
@@ -2889,7 +2893,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8358121770346933751, guid: ee8cda5dbe12f6d43a16968fdffc311c, type: 3}
       propertyPath: mAttractRadius
-      value: 9.07
+      value: 7.177922
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee8cda5dbe12f6d43a16968fdffc311c, type: 3}
