@@ -1,7 +1,7 @@
 # 需求池 / 候选问题清单（不依附具体版本）
 
 > **状态**：候选 / 未分配版本  
-> **最后更新**：2026-07-10（条目 1、2 立项至 v0.22.4）
+> **最后更新**：2026-08-03（条目 11 新增：Follow FSM 状态粒度问题）
 > **文件名**：`backlog.md`（2026-06-28 由 `analysis.md` 改名，避免与版本目录内的 `analysis.md` 混淆）  
 > **目录说明**：见同目录 `README.md`。原 `DevDocs/v0.21.X/` 于 2026-06-28 改名为 `DevDocs/需求池/`。
 
@@ -23,6 +23,7 @@
 | 8 | Kuzu `INTERACTED_WITH` 边 `MERGE` 主键冲突 | Bug / 记忆系统 | 中（已有 3 次重试兜底，最坏可能丢 Episode） | P1 | 候选 | - |
 | 9 | `observe` 工具反馈应附带「自己的状态」 | 体验 / Unity 工具 | 中（Hidden/Dead/Stunned/Follow 易遗忘自身约束） | P1 | 已立项 | v0.22.11 |
 | 10 | idle wakeup 无信息量心理活动应抑制写入 | 体验 / 记忆系统 | 中（任务完成后 idle 期反复刷重复 Episode） | P1 | 已完成 | v0.22.2 |
+| 11 | `Follow` 作为 FSM 状态粒度过粗，无法表达跟随中的走/停/跳/爬 | 设计 / Unity FSM+动画 | 大（跟随行为表现受限，需重构 Follow 语义） | P1 | 候选 | - |
 
 > 字段约定：
 > - **类型**：Bug / 体验 / 工程清理 / 调研 / 评估 / 协议改动 等，标注主要落地面（Python / Unity / 协议 / 记忆系统 / 工具）。
@@ -484,7 +485,49 @@ AI 每次产出几乎完全相同的心理活动：
 
 ---
 
-- 以上 10 条均未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。立项后请同步更新顶部索引表的「状态 / 立项版本」字段。
+## 11. P1 - `Follow` 作为 FSM 状态粒度过粗，无法表达跟随中的走/停/跳/爬
+
+### 现象
+
+`CharaBase` 当前把 `Follow` 实现为一个 FSM 状态（`CharaBase.FollowState`），`OnFollowFixedUpdate` 内部按与目标的距离分三段处理：
+
+- `distance > FollowMaxDistance`：移动追赶
+- `distance < FollowMinDistance`：反向移动保持距离
+- 中间区间：停止
+
+也就是说，同一个 `Follow` 状态内角色会在「移动」和「停止」之间切换，但**不触发 `ChangeState`**。这导致：
+
+1. **动画无法正确表达**：`SceneObjAnimator` 订阅的是 `OnStateChanged`，`Follow` 期间内部走/停不切状态，动画组件只能一直播 `Follow` 状态对应的动画，无法区分走动与站立。
+2. **表现力受限**：JRPG 里队友跟随玩家时，会随地形自动走、跑、跳、停；玩家爬梯子时队友也跟着爬。这些都需要在「跟随」这个行为模式下，叠加常规的 Idle/Move/Jump/Climb 等**表现状态**，而当前 Follow 把行为模式和表现状态混在一个 FSM 状态里，无法叠加。
+3. **`EnemyBase` 已绕开**：`EnemyBase.Awake` 里 `mStates.Remove("Follow")`，说明 Follow 语义对敌人也不适用，敌人用 Chase/Searching/Inspect 等更细粒度状态。
+
+### 根因
+
+`Follow` 被设计成 FSM 的一个**状态**，但它实质上是一种**移动控制策略**（「以某目标为锚点，自动调整自身位移」）。FSM 状态表达的是「当前在做什么表现」（Idle/Move/Jump/Climb/Dead），而 Follow 表达的是「为什么这样移动」（因为正在跟随）。两者是正交维度，塞进同一个 FSM 状态机必然粒度冲突。
+
+### 候选方向（待立项时细化）
+
+| 方向 | 说明 |
+|------|------|
+| A. Follow 降级为移动策略 | `CharaBase` 不再注册 `FollowState`；改为持有 `FollowTarget` + `FollowStrategy`，每帧由策略驱动位移，FSM 仍走 Idle/Move/Jump 等表现状态。`ChangeState("Follow")` 的调用点改为 `StartFollow(target)` / `StopFollow()` |
+| B. 双层状态机 | 表现层 FSM（Idle/Move/Jump/Climb/Dead）+ 行为层 FSM（Free/Patrol/Follow/Flee）。动画驱动表现层，行为层只决定位移策略。改动较大 |
+| C. Follow 内部子状态 | Follow 内部再拆 `FollowMove`/`FollowIdle`/`FollowJump`，按距离/地形 `ChangeState`。最小改动但 FSM 膨胀，且仍无法表达爬梯子等需要外部输入的表现 |
+
+倾向 **A**：Follow 作为移动策略叠加在表现 FSM 之上，最贴合 JRPG 跟随直觉，且不污染表现状态机。
+
+### 影响范围预估
+
+- Unity：`CharaBase`（移除 `FollowState`，重构为策略）、`PlayerBase`/`AIPlayer`（调用点）、`EnemyBase`（已移除 Follow，基本不受影响）、`SceneObjAnimator`（Follow 不再是动画状态，自动忽略）
+- 协议 / Python：无
+- 动画：Follow 不再作为独立动画状态，跟随中的走/停/跳改由表现 FSM 驱动动画
+
+### 与 v0.22.16 的关系
+
+v0.22.16 的 `SceneObjAnimator` 本期**不处理 Follow 内部的走/停表现**。`CharaBase` 仍保留 `FollowState`，动画组件可将其配为 `skipAnimation` 或建一个粗粒度 Follow 动画。Follow 的重构另起版本，届时动画组件无需改动（因为重构后 Follow 不再是 FSM 状态，表现由 Idle/Move 等驱动，组件天然支持）。
+
+---
+
+- 以上条目中，1/2/7/9/10 已立项或完成，其余未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。立项后请同步更新顶部索引表的「状态 / 立项版本」字段。
 - 复现日志：
   - 条目 1~5：`Src/PythonServer/logs/prompts/小明/2026-06-23_13-41-56.log`（v0.21.6 验收训练）
   - 条目 6：v0.21.7 联调期间断网 NewGame 控制台输出（2026-06-28）。
