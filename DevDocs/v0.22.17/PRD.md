@@ -1,6 +1,6 @@
 # PRD - v0.22.17 SceneObjAnimator 进阶：单状态内多动画流转
 
-> **状态**：待确认
+> **状态**：已确认
 > **对应需求**：`requirements/`（用户口头需求）
 > **最后更新**：2026-08-04
 
@@ -32,14 +32,14 @@ v0.22.16 的 `SceneObjAnimator` 实现了「FSM 状态名 -> Animator 状态名�
 
 1. **明确分层**：FSM 状态间的切换仍由组件 `CrossFade` 驱动（不建 Transition）；单个 FSM 状态的动画内部流转由 Animator 自管（可建 Transition）
 2. **转换边动画**：组件用 `(oldState, newState)` 查转换映射表，命中则播过渡动画入口
-3. **物理参数透传**：组件每帧向 Animator 写 `velY` / `grounded` / `speed`，供 Animator 用 Transition 条件 / Blend Tree 管理跳跃等内部阶段
+3. **物理参数透传**：组件每帧向 Animator 写 `velY` / `grounded`，供 Animator 用 Transition 条件管理跳跃等内部阶段
 
 ## 2. 范围
 
 ### 2.1 本期包含
 
 - 扩展 `SceneObjAnimator`：新增转换映射表（`(oldState, newState) -> 过渡动画入口`）
-- 扩展 `SceneObjAnimator`：新增物理参数透传（`velY` / `grounded` / `speed`）
+- 扩展 `SceneObjAnimator`：新增物理参数透传（`velY` / `grounded`）
 - 明确 Animator 配置规范：哪些用组件跳转、哪些用 Animator 内部 Transition
 - 提供 Idle 随机插播、起跑/刹车、跳跃阶段的 Animator 配置示例
 
@@ -112,7 +112,6 @@ Move_Brake (No Loop) ──Transition(exitTime=1.0)──> Idle_Base (Loop)
 |------|------|------|
 | `velY` | `Rigidbody2D.velocity.y` | 上正下负；Animator 据此区分上升/下落 |
 | `grounded` | Collider 触地判定（需配置） | true=着地、false=空中 |
-| `speed` | `Rigidbody2D.velocity.x` 绝对值（归一化） | 走/跑混合；也解决 Follow 类走/停（见需求池 11） |
 
 跳跃 Animator 配置示例：
 ```
@@ -147,17 +146,19 @@ Jump_Base (入口)
 - [ ] 未配转换映射的状态切换，行为与 v0.22.16 一致
 - [ ] `velY` 参数正确写入（跳跃时正负切换）
 - [ ] `grounded` 参数正确写入（离地 false、着地 true）
-- [ ] `speed` 参数正确写入（移动时非零、停止时零）
 - [ ] 跳跃全过程：起跳->上升->下落->着地，由 Animator 内部 Transition 驱动，组件不切状态
 - [ ] Device 无 Rigidbody2D 时不写物理参数、不报错
 - [ ] v0.22.16 现有配置零改动即可工作
 
 ## 7. 待确认问题
 
-- [ ] **`grounded` 判定方式**：组件自持 Collider + LayerMask（方式 A），还是外部写入（方式 B）？倾向 A。
-- [ ] **`speed` 归一化**：除以 `moveSpeed` 还是可配 `maxSpeed`？倾向可配 `maxSpeed`，默认用 `moveSpeed`。
-- [ ] **转换映射打断**：起跑动画播到一半被 FSM 切走（如进 Chase），是否直接 CrossFade 打断？倾向是（FSM 权威优先）。
-- [ ] **跳跃入口命名**：FSM 状态名是否就叫 `Jump`？当前代码无 Jump 状态，需确认是否本期新增 Jump FSM 状态，还是仅做组件能力（Jump 状态由后续版本加）。倾向：**仅做组件能力**，Jump FSM 状态另起版本。
+以下三项已通过 2026-08-04 对话确认，转为已决策：
+
+- [x] **`grounded` 判定方式**：在角色 GameObject 下挂一个名为 `GroundCheck` 的子物体（带 `CircleCollider2D` Trigger），组件开放一个字段让用户把这个子物体拖入。组件每帧用该 Collider 的 `IsTouchingLayers(groundLayerMask)` 判定触地。
+- [x] **转换映射打断**：FSM 权威优先。过渡动画（如起跑）播到一半被 FSM 切走时，直接 `CrossFade` 打断，进入新状态。
+- [x] **Jump FSM 状态**：本期仅做组件能力（`velY` / `grounded` 透传 + Animator 配置规范），不新增 Jump FSM 状态。功能不能缺，等后续版本加 Jump 状态时直接可用。
+
+**PRD §7 全部待确认问题已闭环，转为已确认状态。**
 
 ---
 

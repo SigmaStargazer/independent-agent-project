@@ -171,7 +171,7 @@ namespace IndependentAgentProject
 
         #region 交互逻辑
 
-        public (bool success, string result) Interact(GameObject chara)
+        public (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             SceneObjBase target = GetNearestInteractableObj(chara);
 
@@ -179,17 +179,17 @@ namespace IndependentAgentProject
             {
                 string deviceName = target.Name;
                 IInteractable interactable = target as IInteractable;
-                (bool success, string result) = interactable.Interact(chara);
-                return (success, $"{deviceName}:\n{result}");
+                (bool success, string result, InteractAnimTag animTag) = interactable.Interact(chara);
+                return (success, $"{deviceName}:\n{result}", animTag);
             }
             else
             {
-                return (false, "没有可交互对象");
+                return (false, "没有可交互对象", InteractAnimTag.None);
                 //Debug.Log($"没有可交互设备");
             }
         }
 
-        public (bool success, string result) Select(GameObject chara, int selection)
+        public (bool success, string result, InteractAnimTag animTag) Select(GameObject chara, int selection)
         {
             SceneObjBase target = GetNearestInteractableObj(chara);
 
@@ -197,29 +197,29 @@ namespace IndependentAgentProject
             {
                 string deviceName = target.Name;
                 IInteractable interactable = target as IInteractable;
-                (bool success, string result) = interactable.Select(chara, selection);
-                return (success, $"{deviceName}:\n{result}");
+                (bool success, string result, InteractAnimTag animTag) = interactable.Select(chara, selection);
+                return (success, $"{deviceName}:\n{result}", animTag);
             }
             else
             {
-                return (false, "没有可交互对象");
+                return (false, "没有可交互对象", InteractAnimTag.None);
                 //Debug.Log($"没有可交互设备");
             }
         }
 
-        public (bool success, string result) TextInput(GameObject chara, string inputText)
-        { 
+        public (bool success, string result, InteractAnimTag animTag) TextInput(GameObject chara, string inputText)
+        {
             SceneObjBase target = GetNearestInteractableObj(chara);
             if (target != null && target is IInteractable)
             {
                 string deviceName = target.Name;
                 IInteractable interactable = target as IInteractable;
-                (bool success, string result) = interactable.TextInput(chara, inputText);
-                return (success, $"{deviceName}:\n{result}");
+                (bool success, string result, InteractAnimTag animTag) = interactable.TextInput(chara, inputText);
+                return (success, $"{deviceName}:\n{result}", animTag);
             }
             else
             {
-                return (false, "没有可交互对象");
+                return (false, "没有可交互对象", InteractAnimTag.None);
                 //Debug.Log($"没有可交互设备");
             }
         }

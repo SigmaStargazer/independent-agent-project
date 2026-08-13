@@ -12,7 +12,7 @@ namespace IndependentAgentProject
         [SerializeField]
         private List<MonoBehaviour> mTargets = new();
 
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             bool success = false;
             foreach (var target in mTargets)
@@ -24,7 +24,9 @@ namespace IndependentAgentProject
                 triggerable.Trigger();
                 success = true;
             }
-            return (success, success ? "拉动后似乎有什么装置动了。" : "拉动后似乎没有作用。");
+            return (success,
+                success ? "拉动后似乎有什么装置动了。" : "拉动后似乎没有作用。",
+                success ? InteractAnimTag.Interact : InteractAnimTag.None);
         }
     }
 }

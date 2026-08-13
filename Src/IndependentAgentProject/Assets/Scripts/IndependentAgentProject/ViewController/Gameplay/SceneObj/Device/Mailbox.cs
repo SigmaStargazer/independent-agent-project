@@ -13,29 +13,30 @@ namespace IndependentAgentProject
 
         public override bool IsInteractable => true;
 
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             return (
-                true, 
+                true,
                 "查阅信箱：共有3封信件。你可以选择查阅：" +
                 "  1. [2015.1.1]来自小磊的信件" +
                 "  2. [2015.9.1]来自小落的信件" +
-                "  3. [2015,12,31]查阅来自小红信件"
+                "  3. [2015,12,31]查阅来自小红信件",
+                InteractAnimTag.Interact
                 );
         }
 
-        public override (bool success, string result) Select(GameObject chara, int selection)
+        public override (bool success, string result, InteractAnimTag animTag) Select(GameObject chara, int selection)
         {
             switch (selection)
             {
                 case 1:
-                    return (true, $"查阅来自小磊信件：\nTo 小明：\n  欢迎参加我们的测试！");
+                    return (true, $"查阅来自小磊信件：\nTo 小明：\n  欢迎参加我们的测试！", InteractAnimTag.Select);
                 case 2:
-                    return (true, $"查阅来自小落信件：\nTo 小明：\n  用户的备用钥匙在花盆下面");
+                    return (true, $"查阅来自小落信件：\nTo 小明：\n  用户的备用钥匙在花盆下面", InteractAnimTag.Select);
                 case 3:
-                    return (true, $"查阅来自小红信件：\nTo 小明：\n  保险箱的密码是{pwd}");
+                    return (true, $"查阅来自小红信件：\nTo 小明：\n  保险箱的密码是{pwd}", InteractAnimTag.Select);
                 default:
-                    return (false, "选项错误！请选择正确的选项");
+                    return (false, "选项错误！请选择正确的选项", InteractAnimTag.None);
             }
         }
     }

@@ -1116,7 +1116,9 @@ namespace IndependentAgentProject
                 Debug.LogError("场景中未找到 SceneObjManager！");
                 return;
             }
-            (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.Interact(this.gameObject);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             string messageToSend = $"[交互结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "Interact", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
@@ -1130,7 +1132,9 @@ namespace IndependentAgentProject
                 Debug.LogError("场景中未找到 SceneObjManager！");
                 return;
             }
-            (bool success, string result) = SceneObjManager.Instance.Select(this.gameObject, selection);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.Select(this.gameObject, selection);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             string messageToSend = $"[选择结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "Select", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
@@ -1144,7 +1148,9 @@ namespace IndependentAgentProject
                 Debug.LogError("场景中未找到 SceneObjManager！");
                 return;
             }
-            (bool success, string result) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             string messageToSend = $"[输入结果]{result}";
             AgentService.Instance.SendToolResultMessage(this.Name, "TextInput", requestId, messageToSend);
             Debug.Log($"已发送消息给{this.Name}: {messageToSend}");
@@ -1721,7 +1727,9 @@ namespace IndependentAgentProject
             // Hidden 等 IImmovableState 下不切回 Idle，以保留躲藏状态
             if (!IsImmovable)
                 ChangeState("Idle");
-            (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.Interact(this.gameObject);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
                 this.mCurActionRuntime.Result = new ActionResult();
@@ -1772,7 +1780,9 @@ namespace IndependentAgentProject
             if (!IsImmovable)
                 ChangeState("Idle");
             int selection = curAction.Select.Selection;
-            (bool success, string result) = SceneObjManager.Instance.Select(this.gameObject, selection);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.Select(this.gameObject, selection);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
                 this.mCurActionRuntime.Result = new ActionResult();
@@ -1821,7 +1831,9 @@ namespace IndependentAgentProject
             if (!IsImmovable)
                 ChangeState("Idle");
             string inputText = curAction.Input.InputText;
-            (bool success, string result) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.TextInput(this.gameObject, inputText);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             // 获得执行结果后，直接OnActionFinished
             if (this.mCurActionRuntime.Result == null)
                 this.mCurActionRuntime.Result = new ActionResult();

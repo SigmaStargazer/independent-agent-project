@@ -11,9 +11,9 @@ namespace IndependentAgentProject
 
         public override bool IsInteractable => false;
 
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
-            return (false, "该设备无法交互");
+            return (false, "该设备无法交互", InteractAnimTag.None);
         }
     }
 

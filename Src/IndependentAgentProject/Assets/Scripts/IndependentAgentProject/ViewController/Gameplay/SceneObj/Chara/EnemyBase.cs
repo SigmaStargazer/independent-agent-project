@@ -464,15 +464,15 @@ namespace IndependentAgentProject
         #endregion
 
         #region 背刺交互
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             string zone = GetActiveZoneTag(chara);
             if (zone == "Back")
             {
                 ChangeState("Stunned");
-                return (true, "你成功背刺了敌人！");
+                return (true, "你成功背刺了敌人！", InteractAnimTag.Backstab);
             }
-            return (false, "无法从正面或侧面攻击敌人。");
+            return (false, "无法从正面或侧面攻击敌人。", InteractAnimTag.None);
         }
         #endregion
 

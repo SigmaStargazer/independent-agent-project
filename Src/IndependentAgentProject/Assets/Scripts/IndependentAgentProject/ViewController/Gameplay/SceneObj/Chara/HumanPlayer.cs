@@ -114,7 +114,9 @@ namespace IndependentAgentProject
             if (SceneObjManager.Instance == null)
                 return;
 
-            (bool success, string result) = SceneObjManager.Instance.Interact(this.gameObject);
+            (bool success, string result, InteractAnimTag animTag) = SceneObjManager.Instance.Interact(this.gameObject);
+            if (mPlayerAnimator != null)
+                mPlayerAnimator.PlayOneShotByTag(animTag);
             Debug.Log($"玩家交互结果::success:{success} result:{result}");
         }
 

@@ -11,17 +11,17 @@ namespace IndependentAgentProject
         public override string Desc => "可以在这里购买商品\n" +
             "(偷偷告诉你，你也可以在他身后窃取财物哦！)";
 
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             string zone = GetActiveZoneTag(chara);
             return zone switch
             {
                 "front" => DoTrade(chara),
-                "back" => DoSteal(chara),
-                _ => (false, "无法交互")
+                "back"  => DoSteal(chara),
+                _       => (false, "无法交互", InteractAnimTag.None)
             };
         }
-        public override (bool success, string result) Select(GameObject chara, int selection)
+        public override (bool success, string result, InteractAnimTag animTag) Select(GameObject chara, int selection)
         {
             string zone = GetActiveZoneTag(chara);
             switch (zone)
@@ -30,32 +30,32 @@ namespace IndependentAgentProject
                     {
                         return selection switch
                         {
-                            1 => (true, "你购买了一个生命药水"),
-                            2 => (true, "你购买了一个单手剑"),
-                            3 => (true, "你购买了一个护甲"),
-                            _ => (false, "选项错误！请选择正确的选项")
+                            1 => (true, "你购买了一个生命药水", InteractAnimTag.Select),
+                            2 => (true, "你购买了一个单手剑", InteractAnimTag.Select),
+                            3 => (true, "你购买了一个护甲", InteractAnimTag.Select),
+                            _ => (false, "选项错误！请选择正确的选项", InteractAnimTag.None)
                         };
                     }
                 default:
-                    return (false, "选项错误！请选择正确的选项");
+                    return (false, "选项错误！请选择正确的选项", InteractAnimTag.None);
             }
         }
-        private (bool success, string result) DoTrade(GameObject chara)
+        private (bool success, string result, InteractAnimTag animTag) DoTrade(GameObject chara)
         {
             return (
                 true,
                 "你可以选择购买：" +
                 "  1. 生命药水: 5金币" +
                 "  2. 单手剑: 200金币" +
-                "  3. 护甲: 100金币"
+                "  3. 护甲: 100金币",
+                InteractAnimTag.Trade
                 );
         }
-        private (bool success, string result) DoSteal(GameObject chara)
+        private (bool success, string result, InteractAnimTag animTag) DoSteal(GameObject chara)
         {
-            return (true, "你获得了10金币");
+            return (true, "你获得了10金币", InteractAnimTag.Steal);
         }
 
 
     }
 }
-

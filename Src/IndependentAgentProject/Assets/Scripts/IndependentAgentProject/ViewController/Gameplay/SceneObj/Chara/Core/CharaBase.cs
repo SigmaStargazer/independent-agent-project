@@ -152,17 +152,17 @@ namespace IndependentAgentProject
             ChangeState("Dead");
         }
 
-        public virtual (bool success, string result) Interact(GameObject chara)
+        public virtual (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
-            return (false, "该对象无法交互");
+            return (false, "该对象无法交互", InteractAnimTag.None);
         }
-        public virtual (bool success, string result) Select(GameObject chara, int selection)
+        public virtual (bool success, string result, InteractAnimTag animTag) Select(GameObject chara, int selection)
         {
-            return (false, "该对象未提供选项");
+            return (false, "该对象未提供选项", InteractAnimTag.None);
         }
-        public virtual (bool success, string result) TextInput(GameObject chara, string inputText)
+        public virtual (bool success, string result, InteractAnimTag animTag) TextInput(GameObject chara, string inputText)
         {
-            return (false, "该对象未提供输入框");
+            return (false, "该对象未提供输入框", InteractAnimTag.None);
         }
     }
 }

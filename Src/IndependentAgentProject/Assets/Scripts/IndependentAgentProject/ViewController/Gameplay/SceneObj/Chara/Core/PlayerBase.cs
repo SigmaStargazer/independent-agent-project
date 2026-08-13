@@ -19,9 +19,13 @@ namespace IndependentAgentProject
         // v0.21.7-fix: Hidden 进入时被禁用的 Renderer 列表，退出时按列表还原（避免把进入前就 disabled 的也开起来）。
         private readonly List<Renderer> mHiddenDisabledRenderers = new List<Renderer>();
 
+        // v0.22.18: 缓存 PlayerAnimator 组件，供交互动画播放使用
+        protected PlayerAnimator mPlayerAnimator;
+
         protected override void Awake()
         {
             base.Awake();
+            mPlayerAnimator = GetComponent<PlayerAnimator>();
             RegisterState(new HiddenState());
             this.RegisterEvent<GameOverEvent>(e =>
             {

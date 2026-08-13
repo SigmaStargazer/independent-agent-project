@@ -1,0 +1,56 @@
+{
+  "format": "frame-sequence",
+  "frame_count": 8,
+  "frame_duration_ms": 100,
+  "total_duration_ms": 800,
+  "frames": [
+    {
+      "index": 0,
+      "source_index": 0,
+      "file": "frame_001.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 1,
+      "source_index": 1,
+      "file": "frame_002.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 2,
+      "source_index": 2,
+      "file": "frame_003.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 3,
+      "source_index": 3,
+      "file": "frame_004.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 4,
+      "source_index": 4,
+      "file": "frame_005.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 5,
+      "source_index": 5,
+      "file": "frame_006.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 6,
+      "source_index": 6,
+      "file": "frame_007.png",
+      "duration_ms": 100
+    },
+    {
+      "index": 7,
+      "source_index": 7,
+      "file": "frame_008.png",
+      "duration_ms": 100
+    }
+  ]
+}

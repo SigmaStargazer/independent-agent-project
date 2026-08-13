@@ -21,31 +21,31 @@ namespace IndependentAgentProject
         [SerializeField][Tooltip("玩家离开柜子时被瞬移到此位置")]
         private Transform mExitAnchor;
 
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             PlayerBase player = chara != null ? chara.GetComponent<PlayerBase>() : null;
             if (player == null)
-                return (false, "只有玩家才能使用柜子。");
+                return (false, "只有玩家才能使用柜子。", InteractAnimTag.None);
             if (player.IsDead)
-                return (false, "已经死了，无法使用柜子。");
+                return (false, "已经死了，无法使用柜子。", InteractAnimTag.None);
 
             if (player.StateName != "Hidden")
             {
                 if (mEnterAnchor == null)
-                    return (false, "柜子的进入位置未配置。");
+                    return (false, "柜子的进入位置未配置。", InteractAnimTag.None);
                 player.transform.position = mEnterAnchor.position;
                 // v0.21.7-fix: 速度归零与位置冻结由 PlayerBase.OnHiddenEnter 统一处理（FreezeAll + 归零），Cabinet 不再双重管控。
                 player.ChangeState("Hidden");
-                return (true, "你躲进了柜子里。");
+                return (true, "你躲进了柜子里。", InteractAnimTag.None);
             }
             else
             {
                 if (mExitAnchor == null)
-                    return (false, "柜子的离开位置未配置。");
+                    return (false, "柜子的离开位置未配置。", InteractAnimTag.None);
                 player.transform.position = mExitAnchor.position;
                 // v0.21.7-fix: Hidden 期间速度本就被 FreezeAll 锁定为 0；OnHiddenExit 只还原 constraints，Cabinet 无需再清速度。
                 player.ChangeState("Idle");
-                return (true, "你从柜子里出来了。");
+                return (true, "你从柜子里出来了。", InteractAnimTag.None);
             }
         }
     }

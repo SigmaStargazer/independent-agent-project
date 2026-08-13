@@ -42,12 +42,12 @@ namespace IndependentAgentProject
         #endregion
 
         #region 交互逻辑
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             // 门封闭
             if (string.IsNullOrEmpty(NextScene))
             {
-                return (false, "门似乎封闭着");
+                return (false, "门似乎封闭着", InteractAnimTag.None);
             }
 
             // 人没到齐
@@ -55,12 +55,12 @@ namespace IndependentAgentProject
             {
                 int insideCount = GetPlayersInsideDoorCount();
                 int totalCount = GetAllPlayers().Count;
-                return (false, $"还有玩家未到达门前（{insideCount}/{totalCount}）");
+                return (false, $"还有玩家未到达门前（{insideCount}/{totalCount}）", InteractAnimTag.None);
             }
 
             // 进入下一关
             GameFlowManager.Instance.NextMap(NextScene).Forget(Debug.LogException);
-            return (true, $"正在前往{GetTargetMapDisplayName()}");
+            return (true, $"正在前往{GetTargetMapDisplayName()}", InteractAnimTag.None);
         }
         #endregion
 

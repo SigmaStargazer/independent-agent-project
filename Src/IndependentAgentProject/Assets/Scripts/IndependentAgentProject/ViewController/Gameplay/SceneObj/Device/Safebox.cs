@@ -28,31 +28,31 @@ namespace IndependentAgentProject
             ChangeState("Close");
         }
 
-        public override (bool success, string result) Interact(GameObject chara)
+        public override (bool success, string result, InteractAnimTag animTag) Interact(GameObject chara)
         {
             switch (mCurState.Name)
             {
                 case "Open":
-                    return (true, "保险箱未关上");
+                    return (true, "保险箱未关上", InteractAnimTag.Interact);
                 case "Close":
                     if (pwd == null || !Regex.IsMatch(pwd, @"^\d{4}$"))
-                        return (true, PwdNotSettedOpen());
+                        return (true, PwdNotSettedOpen(), InteractAnimTag.Interact);
                     else
-                        return (true, "请输入4位数密码: ____");
+                        return (true, "请输入4位数密码: ____", InteractAnimTag.Interact);
                 default:
-                    return (true, "");
+                    return (true, "", InteractAnimTag.None);
             }
         }
 
-        public override (bool success, string result) TextInput(GameObject chara, string inputText)
+        public override (bool success, string result, InteractAnimTag animTag) TextInput(GameObject chara, string inputText)
         {
             switch (mCurState.Name)
             {
                 case "Open":
-                    return (false, "设备未提供输入框");
+                    return (false, "设备未提供输入框", InteractAnimTag.None);
                 case "Close":
                     if (pwd == null || !Regex.IsMatch(pwd, @"^\d{4}$"))
-                        return (true, PwdNotSettedOpen());
+                        return (true, PwdNotSettedOpen(), InteractAnimTag.TextInput);
                     else
                     {
                         if (Regex.IsMatch(inputText, @"^\d{4}$"))
@@ -60,20 +60,20 @@ namespace IndependentAgentProject
                             if (inputText == pwd)
                             {
                                 ChangeState("Open");
-                                return (true, "打开保险箱成功");
+                                return (true, "打开保险箱成功", InteractAnimTag.TextInput);
                             }
                             else
                             {
-                                return (false, "密码错误");
+                                return (false, "密码错误", InteractAnimTag.None);
                             }
                         }
                         else
                         {
-                            return (false, "输入不是4位数字！");
+                            return (false, "输入不是4位数字！", InteractAnimTag.None);
                         }
                     }
                 default:
-                    return (false, $"保险箱处于无法打开的状态:{this.StateName}");
+                    return (false, $"保险箱处于无法打开的状态:{this.StateName}", InteractAnimTag.None);
             }
         }
 
