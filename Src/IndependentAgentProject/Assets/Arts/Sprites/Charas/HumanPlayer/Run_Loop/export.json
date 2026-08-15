@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "profileId": "pose",
+  "animationId": "run_loop",
+  "canvas": {
+    "width": 748,
+    "height": 917,
+    "originPixelX": 379,
+    "originPixelY": 635,
+    "padding": 24,
+    "autoMeasured": true
+  },
+  "kind": "sequence",
+  "audio": {
+    "schemaVersion": 1,
+    "files": [],
+    "events": []
+  },
+  "frames": [
+    {
+      "filename": "frame_0001.png",
+      "time": 0.05,
+      "sourceFrame": 0,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0002.png",
+      "time": 0.15,
+      "sourceFrame": 1,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0003.png",
+      "time": 0.25,
+      "sourceFrame": 2,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0004.png",
+      "time": 0.35,
+      "sourceFrame": 3,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0005.png",
+      "time": 0.45,
+      "sourceFrame": 4,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0006.png",
+      "time": 0.55,
+      "sourceFrame": 5,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0007.png",
+      "time": 0.65,
+      "sourceFrame": 6,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0008.png",
+      "time": 0.75,
+      "sourceFrame": 7,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0009.png",
+      "time": 0.85,
+      "sourceFrame": 8,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0010.png",
+      "time": 0.95,
+      "sourceFrame": 9,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0011.png",
+      "time": 1.05,
+      "sourceFrame": 10,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0012.png",
+      "time": 1.15,
+      "sourceFrame": 11,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0013.png",
+      "time": 1.25,
+      "sourceFrame": 12,
+      "durationMs": 100,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    }
+  ],
+  "completedAt": "2026-08-15T08:02:12.641Z"
+}

@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "profileId": "pose",
+  "animationId": "down",
+  "canvas": {
+    "width": 748,
+    "height": 917,
+    "originPixelX": 379,
+    "originPixelY": 635,
+    "padding": 24,
+    "autoMeasured": true
+  },
+  "kind": "sequence",
+  "audio": {
+    "schemaVersion": 1,
+    "files": [],
+    "events": []
+  },
+  "frames": [
+    {
+      "filename": "frame_0001.png",
+      "time": 0.0125,
+      "sourceFrame": 0,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0002.png",
+      "time": 0.0375,
+      "sourceFrame": 1,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0003.png",
+      "time": 0.0625,
+      "sourceFrame": 2,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0004.png",
+      "time": 0.0875,
+      "sourceFrame": 3,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0005.png",
+      "time": 0.1125,
+      "sourceFrame": 4,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0006.png",
+      "time": 0.1375,
+      "sourceFrame": 5,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0007.png",
+      "time": 0.1625,
+      "sourceFrame": 6,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0008.png",
+      "time": 0.1875,
+      "sourceFrame": 7,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0009.png",
+      "time": 0.2125,
+      "sourceFrame": 8,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0010.png",
+      "time": 0.2375,
+      "sourceFrame": 9,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0011.png",
+      "time": 0.2625,
+      "sourceFrame": 10,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0012.png",
+      "time": 0.2875,
+      "sourceFrame": 11,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0013.png",
+      "time": 0.3125,
+      "sourceFrame": 12,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0014.png",
+      "time": 0.3375,
+      "sourceFrame": 13,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0015.png",
+      "time": 0.3625,
+      "sourceFrame": 14,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0016.png",
+      "time": 0.3875,
+      "sourceFrame": 15,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0017.png",
+      "time": 0.4125,
+      "sourceFrame": 16,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0018.png",
+      "time": 0.4375,
+      "sourceFrame": 17,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0019.png",
+      "time": 0.4625,
+      "sourceFrame": 18,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0020.png",
+      "time": 0.4875,
+      "sourceFrame": 19,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0021.png",
+      "time": 0.5125,
+      "sourceFrame": 20,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0022.png",
+      "time": 0.5375,
+      "sourceFrame": 21,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0023.png",
+      "time": 0.5625,
+      "sourceFrame": 22,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0024.png",
+      "time": 0.5875,
+      "sourceFrame": 23,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0025.png",
+      "time": 0.6125,
+      "sourceFrame": 24,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0026.png",
+      "time": 0.6375,
+      "sourceFrame": 25,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0027.png",
+      "time": 0.6625,
+      "sourceFrame": 26,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0028.png",
+      "time": 0.6875,
+      "sourceFrame": 27,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    },
+    {
+      "filename": "frame_0029.png",
+      "time": 0.7125,
+      "sourceFrame": 28,
+      "durationMs": 25,
+      "x": 0,
+      "y": 0,
+      "width": 748,
+      "height": 917
+    }
+  ],
+  "completedAt": "2026-08-15T08:06:30.558Z"
+}
