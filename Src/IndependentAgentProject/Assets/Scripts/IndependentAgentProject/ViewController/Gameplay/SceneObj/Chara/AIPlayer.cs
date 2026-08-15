@@ -1067,26 +1067,9 @@ namespace IndependentAgentProject
                 return;
             }
 
-            float delta = TargetFollowing.transform.position.x - transform.position.x;
-            float distance = Mathf.Abs(delta);
-            if (distance > FollowMaxDistance)
-            {
-                float dir = Mathf.Sign(delta);
-                TurnBack(dir);
-                mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
-            }
-            else if (distance < FollowMinDistance)
-            {
-                float dir = -Mathf.Sign(delta);
-                TurnBack(dir);
-                mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
-            }
-            else
-            {
-                float dir = Mathf.Sign(delta);
-                TurnBack(dir);
-                mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
-            }
+            // v0.22.21: 转向与速度收敛到 CharaBase.OnFollowFixedUpdate（面向目标，不从 velocity.x 推导），
+            // 子类只保留业务（目标消失处理）。三分支的 TurnBack 与速度赋值删除。
+            base.OnFollowFixedUpdate();
         }
 
         /// <summary>

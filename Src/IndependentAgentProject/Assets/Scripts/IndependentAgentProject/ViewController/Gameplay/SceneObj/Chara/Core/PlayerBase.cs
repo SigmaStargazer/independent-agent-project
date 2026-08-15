@@ -94,14 +94,18 @@ namespace IndependentAgentProject
 
         public override void OnMoveEnter()
         {
-            float dir = moveRight ? 1f : -1f;
-            TurnBack(dir);
+            // v0.22.21: 转向收敛到 CharaBase.OnMoveFixedUpdate（读 velocity.x），
+            // OnMoveEnter 不再翻转——首帧朝向由同物理帧内随后执行的 OnMoveFixedUpdate 按速度修正。
         }
 
         public override void OnMoveFixedUpdate()
         {
             float dir = moveRight ? 1f : -1f;
+            // v0.22.21: 只写速度；转向由 CharaBase.OnMoveFixedUpdate 按本帧刚写入的 velocity.x 处理。
+            // 所有基于 moveRight 的移动（HumanPlayer 输入 / AIPlayer Move 工具 / ActionSequence MoveAction）
+            // 都汇聚到 Move 状态的 OnMoveFixedUpdate，每帧执行、不受 ChangeState 同状态去重影响。
             mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
+            base.OnMoveFixedUpdate();
         }
 
         public override void OnMoveExit()

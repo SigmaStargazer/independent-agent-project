@@ -239,8 +239,8 @@ namespace IndependentAgentProject
         #region Move 巡逻或返回路径点
         public override void OnMoveEnter()
         {
-            if (mTargetPoint != null)
-                TurnBack((mTargetPoint.position - transform.position).x);
+            // v0.22.21: 转向收敛到 CharaBase.OnMoveFixedUpdate（读 velocity.x），
+            // OnMoveEnter 不再翻转——首帧朝向由同物理帧内随后执行的 OnMoveFixedUpdate 按速度修正。
         }
         public override void OnMoveFixedUpdate()
         {
@@ -261,9 +261,9 @@ namespace IndependentAgentProject
                 return;
             }
             float dir = Mathf.Sign(dx);
-            TurnBack(dir);
-            if (mRigidbody2D != null)
-                mRigidbody2D.velocity = new Vector2(dir * mPatrolSpeed, mRigidbody2D.velocity.y);
+            // v0.22.21: 只写速度；转向由 CharaBase.OnMoveFixedUpdate 按本帧刚写入的 velocity.x 处理。
+            mRigidbody2D.velocity = new Vector2(dir * mPatrolSpeed, mRigidbody2D.velocity.y);
+            base.OnMoveFixedUpdate();
         }
         #endregion
 

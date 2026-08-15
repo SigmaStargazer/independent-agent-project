@@ -28,6 +28,15 @@ namespace IndependentAgentProject
                 transform.localScale = localScale;
             }
         }
+        // v0.22.21: Move 状态专属 FixedUpdate hook——转向收敛点。
+        // 读当前速度方向（velocity.x）与 Scale.X 符号比对，不一致才翻转（TurnBack 幂等）。
+        // Move 状态下 velocity.x 每帧由意图移动代码覆盖（PlayerBase / EnemyBase 的 OnMoveFixedUpdate 先写速度、再调 base），
+        // 因此读到的即意图速度方向，天然规避「受击击退」等外力速度（发生在非 Move 状态，不走本 hook）。
+        public override void OnMoveFixedUpdate()
+        {
+            if (mRigidbody2D != null && Mathf.Abs(mRigidbody2D.velocity.x) > 0.01f)
+                TurnBack(mRigidbody2D.velocity.x);
+        }
         // Dead hooks
         public virtual void OnDeadEnter() { }
         public virtual void OnDeadUpdate() { }
@@ -47,25 +56,23 @@ namespace IndependentAgentProject
 
             float delta = TargetFollowing.transform.position.x - transform.position.x;
             float distance = Mathf.Abs(delta);
+            // 转向在 Chara 内：Follow 面向跟随目标（后退时速度方向与面朝相反，不能用 velocity.x 推导）
+            TurnBack(delta);
             // 超出跟随范围，进行跟随
             if (distance > FollowMaxDistance)
             {
                 float dir = Mathf.Sign(delta);
-                TurnBack(dir);
                 mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
             }
             // 处于保持范围内，保持距离
             else if (distance < FollowMinDistance)
             {
                 float dir = -Mathf.Sign(delta);
-                TurnBack(dir);
                 mRigidbody2D.velocity = new Vector2(dir * moveSpeed, mRigidbody2D.velocity.y);
             }
             // 处于合适的范围内，停止移动
             else
             {
-                float dir = Mathf.Sign(delta);
-                TurnBack(dir);
                 mRigidbody2D.velocity = new Vector2(0, mRigidbody2D.velocity.y);
             }
         }
