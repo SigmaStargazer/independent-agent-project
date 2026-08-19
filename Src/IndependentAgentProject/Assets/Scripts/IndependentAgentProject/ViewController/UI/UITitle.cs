@@ -197,11 +197,12 @@ namespace IndependentAgentProject
             ShowConfig();
         }
 
-        /// <summary>取消保存：仅关闭保存确认弹窗，停留当前配置子面板。</summary>
+        /// <summary>取消保存：关闭保存确认弹窗并返回设置总览</summary>
         public void OnCancelSaveConfig()
         {
             if (mSaveConfigMsgBox != null)
                 mSaveConfigMsgBox.SetActive(false);
+            ShowConfig();
         }
 
         private void SetSubPanelActive(GameObject subPanel)

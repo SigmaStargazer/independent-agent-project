@@ -6,7 +6,7 @@ namespace IndependentAgentProject
     /// <summary>
     /// 通用 MsgBox 弹窗控制脚本（仅表现层）。
     /// 挂在 MsgBox 根节点（UIMsgBox Prefab）上，负责：
-    ///  - 单按钮实例自动隐藏第 2 个按钮（未关联 mBtn2 时）；
+    ///  - 支持 1~3 个按钮，未配置的按钮自动隐藏（未关联 mBtn2 / mBtn3 时）；
     ///  - 对缺失引用给出配置提醒；
     ///  - 弹窗激活时按 ESC 触发 Btn1（默认按钮，通常为「确认」）。
     /// 按钮点击回调、文案由各场景实例在 Inspector 中配置/拖拽绑定，脚本不感知业务。
@@ -20,11 +20,13 @@ namespace IndependentAgentProject
         [SerializeField]
         private Text mWarningTxt;
 
-        [Header("按钮区（单按钮实例：Btn2 留空即可，Awake 自动隐藏）")]
+        [Header("按钮区（单/双按钮实例：未用的按钮留空，Awake 自动隐藏）")]
         [SerializeField]
         private Button mBtn1;
         [SerializeField]
         private Button mBtn2;
+        [SerializeField]
+        private Button mBtn3;
 
         private void Awake()
         {
@@ -37,13 +39,19 @@ namespace IndependentAgentProject
                 Debug.LogWarning("[UIMsgBox] 未关联 Btn1", this);
             }
 
-            // 单按钮实例：未关联 mBtn2 时，自动隐藏模板默认的第 2 个按钮节点
-            if (mBtn2 == null)
+            // 未配置的按钮一律隐藏（支持 1~3 个按钮）
+            ApplyButtonVisibility(mBtn2, "Btn2");
+            ApplyButtonVisibility(mBtn3, "Btn3");
+        }
+
+        private void ApplyButtonVisibility(Button btn, string nodeName)
+        {
+            if (btn == null)
             {
-                Transform btn2 = transform.Find("Btn2");
-                if (btn2 != null)
+                Transform node = transform.Find(nodeName);
+                if (node != null)
                 {
-                    btn2.gameObject.SetActive(false);
+                    node.gameObject.SetActive(false);
                 }
             }
         }
