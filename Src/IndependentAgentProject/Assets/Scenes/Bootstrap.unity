@@ -1300,7 +1300,7 @@ GameObject:
   - component: {fileID: 1967400924}
   - component: {fileID: 1967400923}
   m_Layer: 5
-  m_Name: ErrorPanel
+  m_Name: MsgboxError
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -272,6 +272,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 394559307}
   smoothTime: 0.5
+  boundsEnabled: 0
+  boundsCenter: {x: 0, y: 0}
+  boundsSize: {x: 20, y: 10}
+  boundsGizmoColor: {r: 1, g: 0.5, b: 0, a: 0.8}
 --- !u!4 &150414795 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 979267152774314571, guid: 845d4f862de770c468f137fee282709e, type: 3}
@@ -448,6 +452,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SceneDisplayName: "\u7B2C\u4E00\u5173"
   Description: 
+  SceneType: 0
 --- !u!114 &737002895 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7804191072315605948, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
@@ -1121,6 +1126,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7804191072223307349, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7804191072573803107, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -1169,24 +1178,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI
       objectReference: {fileID: 0}
-    - target: {fileID: 7804191073264339219, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7804191073264339219, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7804191073264339219, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7804191073689409803, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7804191073689409803, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7804191073689409803, guid: b28e2ac30fcb157428ff861ad37b0b46, type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

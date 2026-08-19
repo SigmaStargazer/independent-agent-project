@@ -684,7 +684,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4970669960726016015, guid: 49b36362c97c8184da827a65473dd187, type: 3}
       propertyPath: m_Name
-      value: PanelConfirmExit
+      value: MsgboxConfirmExit
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49b36362c97c8184da827a65473dd187, type: 3}
@@ -1036,7 +1036,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2646297592052964368, guid: 7de20b8121083ca4b8d95717ca73b189, type: 3}
       propertyPath: m_Name
-      value: PanelGameOver
+      value: MsgboxGameOver
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7de20b8121083ca4b8d95717ca73b189, type: 3}
