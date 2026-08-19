@@ -32,15 +32,28 @@ namespace IndependentAgentProject
         [Header("设置面板")]
         [SerializeField]
         private GameObject mConfigPanel;
+        [Header("配置子面板")]
+        [SerializeField]
+        private GameObject mLLMAgentPanel;
+        [SerializeField]
+        private GameObject mLLMMemoryPanel;
+        [SerializeField]
+        private GameObject mEmbeddingPanel;
+        [SerializeField]
+        private GameObject mRerankerPanel;
         [Header("新游戏弹窗")]
         [SerializeField]
-        private GameObject mNewGameWarmingPanel;
+        private GameObject mNewGameWarmingMsgbox;
+        [Header("保存配置确认弹窗")]
+        [SerializeField]
+        private GameObject mSaveConfigMsgBox;
         [Header("无API Key弹窗")]
         [SerializeField]
-        private GameObject mNoApiKeyPanel;
+        private GameObject mNoApiKeyMsgbox;
         [Header("退出游戏弹窗")]
         [SerializeField]
-        private GameObject mQuitPanel;
+        private GameObject mQuitMsgbox;
+
 
         [Header("输入消抖窗口（秒），防止 ESC 返回时被 anyKeyDown 立刻切回")]
         [SerializeField]
@@ -50,12 +63,14 @@ namespace IndependentAgentProject
 
         void Awake()
         {
-            if (mNewGameWarmingPanel != null)
-                mNewGameWarmingPanel.SetActive(false);
-            if (mNoApiKeyPanel != null)
-                mNoApiKeyPanel.SetActive(false);
-            if (mQuitPanel != null)
-                mQuitPanel.SetActive(false);
+            if (mNewGameWarmingMsgbox != null)
+                mNewGameWarmingMsgbox.SetActive(false);
+            if (mNoApiKeyMsgbox != null)
+                mNoApiKeyMsgbox.SetActive(false);
+            if (mQuitMsgbox != null)
+                mQuitMsgbox.SetActive(false);
+            if (mSaveConfigMsgBox != null)
+                mSaveConfigMsgBox.SetActive(false);
         }
         void Start()
         {
@@ -70,13 +85,27 @@ namespace IndependentAgentProject
                 return;
             }
 
-            // 统一 ESC / 任意键 分发（方案 A：UITitle 总控）
+            // 有 MsgBox 弹窗打开时，ESC 由 UIMsgBox 接管（触发 Btn1），UITitle 不处理
+            if (UIMsgBox.AnyActive)
+            {
+                return;
+            }
+
+            // 统一 ESC / 任意键 分发
             if (mPressAnyButtonPanel != null && mPressAnyButtonPanel.activeSelf)
             {
                 // 按任意按钮：任意键/鼠标/手柄 进入主菜单（ESC 亦作为普通按键）
                 if (Input.anyKeyDown)
                 {
                     ShowMainMenu();
+                }
+            }
+            else if (IsSubPanelActive())
+            {
+                // 配置子面板：ESC 弹出保存确认
+                if (Input.GetButtonDown("Menu"))
+                {
+                    ShowSaveConfigMsgBox();
                 }
             }
             else if (mConfigPanel != null && mConfigPanel.activeSelf)
@@ -103,6 +132,10 @@ namespace IndependentAgentProject
             SetPanelActive(mPressAnyButtonPanel, true);
             SetPanelActive(mMainMenuPanel, false);
             SetPanelActive(mConfigPanel, false);
+            SetPanelActive(mLLMAgentPanel, false);
+            SetPanelActive(mLLMMemoryPanel, false);
+            SetPanelActive(mEmbeddingPanel, false);
+            SetPanelActive(mRerankerPanel, false);
             LockInput();
         }
 
@@ -112,16 +145,90 @@ namespace IndependentAgentProject
             SetPanelActive(mPressAnyButtonPanel, false);
             SetPanelActive(mMainMenuPanel, true);
             SetPanelActive(mConfigPanel, false);
+            SetPanelActive(mLLMAgentPanel, false);
+            SetPanelActive(mLLMMemoryPanel, false);
+            SetPanelActive(mEmbeddingPanel, false);
+            SetPanelActive(mRerankerPanel, false);
             LockInput();
         }
 
-        /// <summary>切换到设置面板。</summary>
+        /// <summary>切换到设置面板（关闭 4 个配置子面板，从任一子面板返回设置总览）。</summary>
         public void ShowConfig()
         {
             SetPanelActive(mPressAnyButtonPanel, false);
             SetPanelActive(mMainMenuPanel, false);
+            SetPanelActive(mLLMAgentPanel, false);
+            SetPanelActive(mLLMMemoryPanel, false);
+            SetPanelActive(mEmbeddingPanel, false);
+            SetPanelActive(mRerankerPanel, false);
             SetPanelActive(mConfigPanel, true);
             LockInput();
+        }
+
+        /// <summary>打开「LLM Agent」配置子面板。</summary>
+        public void OnClickLLMAgentConfig()
+        {
+            SetSubPanelActive(mLLMAgentPanel);
+        }
+
+        /// <summary>打开「LLM Memory」配置子面板。</summary>
+        public void OnClickLLMMemoryConfig()
+        {
+            SetSubPanelActive(mLLMMemoryPanel);
+        }
+
+        /// <summary>打开「Embedding」配置子面板。</summary>
+        public void OnClickEmbeddingConfig()
+        {
+            SetSubPanelActive(mEmbeddingPanel);
+        }
+
+        /// <summary>打开「Reranker」配置子面板。</summary>
+        public void OnClickRerankerConfig()
+        {
+            SetSubPanelActive(mRerankerPanel);
+        }
+
+        /// <summary>确认保存：关闭保存确认弹窗并返回设置总览（实际保存逻辑后续版本实现）。</summary>
+        public void OnConfirmSaveConfig()
+        {
+            if (mSaveConfigMsgBox != null)
+                mSaveConfigMsgBox.SetActive(false);
+            ShowConfig();
+        }
+
+        /// <summary>取消保存：仅关闭保存确认弹窗，停留当前配置子面板。</summary>
+        public void OnCancelSaveConfig()
+        {
+            if (mSaveConfigMsgBox != null)
+                mSaveConfigMsgBox.SetActive(false);
+        }
+
+        private void SetSubPanelActive(GameObject subPanel)
+        {
+            SetPanelActive(mLLMAgentPanel, subPanel == mLLMAgentPanel);
+            SetPanelActive(mLLMMemoryPanel, subPanel == mLLMMemoryPanel);
+            SetPanelActive(mEmbeddingPanel, subPanel == mEmbeddingPanel);
+            SetPanelActive(mRerankerPanel, subPanel == mRerankerPanel);
+            SetPanelActive(mConfigPanel, false);
+            LockInput();
+        }
+
+        private bool IsSubPanelActive()
+        {
+            return (mLLMAgentPanel != null && mLLMAgentPanel.activeSelf)
+                || (mLLMMemoryPanel != null && mLLMMemoryPanel.activeSelf)
+                || (mEmbeddingPanel != null && mEmbeddingPanel.activeSelf)
+                || (mRerankerPanel != null && mRerankerPanel.activeSelf);
+        }
+
+        private void ShowSaveConfigMsgBox()
+        {
+            if (mSaveConfigMsgBox != null)
+            {
+                mSaveConfigMsgBox.SetActive(true);
+                LockInput();
+            }
         }
 
         private void SetPanelActive(GameObject panel, bool active)

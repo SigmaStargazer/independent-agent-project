@@ -173,8 +173,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mWarningTxt: {fileID: 8381970375226343481}
-  mBtn1: {fileID: 8381970377057178097}
-  mBtn2: {fileID: 0}
+  mBtn1: {fileID: 8381970377057178111}
+  mBtn2: {fileID: 8381970376582954757}
 --- !u!1 &8381970375948533887
 GameObject:
   m_ObjectHideFlags: 0
