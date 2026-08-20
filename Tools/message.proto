@@ -201,6 +201,7 @@ message NetMessageRequest{
 	
 	AgentExportSkillsRequest agentExportSkillsRequest = 31;
 	AgentGetWorldEventSummaryRequest agentGetWorldEventSummaryRequest = 32;
+	InitRequest initRequest = 33;
 }
 
 message NetMessageResponse{
@@ -214,6 +215,7 @@ message NetMessageResponse{
 	MemoryDeleteCurrentResponse memoryDeleteCurrentResponse = 8;
 	
 	AgentExportSkillsResponse agentExportSkillsResponse = 9;
+	InitResponse initResponse = 10;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -268,6 +270,15 @@ message AgentInterruptRequest {
 }
 
 message AgentInterruptResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+// 初始化信号：Unity 连上后、进场景前发送，触发 Python 读 api_config.json 并初始化 LLM/Embedder（v0.23.0）
+message InitRequest {
+}
+
+message InitResponse {
 	bool success = 1;
 	string errormsg = 2;
 }

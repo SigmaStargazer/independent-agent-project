@@ -9,9 +9,7 @@ from datetime import datetime
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain_core.runnables import RunnablePassthrough
 
 from typing import Annotated, Literal
 from typing_extensions import TypedDict
@@ -128,16 +126,35 @@ model_name = os.getenv("AGENT_MODEL")
 model_timeout = float(os.getenv("AGENT_LLM_TIMEOUT", "120"))
 model_max_retries = int(os.getenv("AGENT_LLM_MAX_RETRIES", "1"))
 
-model = ChatOpenAI(
-        model_name = model_name,
-        openai_api_base = model_api_base,
-        openai_api_key = model_api_key,
-        streaming = False,
-        verbose = True,
-        request_timeout = model_timeout,
-        max_retries = model_max_retries,
-    )
-output_parser = StrOutputParser()
+# LLM 延迟构造：模块 import 阶段不读 env / 不建 ChatOpenAI，
+# 待 main() 完成 api_config.json -> os.environ 注入后再按需构造（v0.23.0）。
+_llm_with_tools = None
+
+
+def get_llm_with_tools():
+    """返回绑定了生产工具列表的 LLM（惰性构造）。未初始化（缺 Key）时显式报错。"""
+    global _llm_with_tools
+    if _llm_with_tools is None:
+        _base = os.getenv("AGENT_API_BASE") or ""
+        _key = os.getenv("AGENT_API_KEY") or ""
+        _name = os.getenv("AGENT_MODEL") or ""
+        if not (_base and _key and _name):
+            raise RuntimeError(
+                "LLM 尚未初始化：缺少 AGENT_API_BASE / AGENT_API_KEY / AGENT_MODEL。"
+                "请先在 Title 配置 API 并确保 Python 已收到 InitRequest（或 --auto-init）。"
+            )
+        _model = ChatOpenAI(
+            model_name=_name,
+            openai_api_base=_base,
+            openai_api_key=_key,
+            streaming=False,
+            verbose=True,
+            request_timeout=model_timeout,
+            max_retries=model_max_retries,
+        )
+        _llm_with_tools = _model.bind_tools(tools)
+    return _llm_with_tools
+
 
 # 生产工具列表
 tools = [
@@ -178,16 +195,6 @@ tools = [
 #     base_tools.search_episode_memories
 # ]
          
-llm_with_tools = model.bind_tools(tools)
-
-MAX_CONTEXT_SIZE = 20
-
-def _filter_messages(messages, k=20):
-        """
-        用于删减上下文长度
-        """
-        messages = messages[-k:]
-        return messages
 
 # 提示词模板
 # system_template = """你扮演的角色名叫{name}，{description}。
@@ -241,13 +248,6 @@ prompt_template = ChatPromptTemplate.from_messages(
         MessagesPlaceholder(variable_name="messages")
     ]
 )
-# 初始化chain(废弃)
-chain = (
-    RunnablePassthrough.assign(messages=lambda x: _filter_messages(x["messages"], k = MAX_CONTEXT_SIZE)) 
-    | prompt_template 
-    | llm_with_tools
-    )
-
 # 记忆管理器
 memory_manager = MemoryManager()
 
@@ -363,7 +363,7 @@ async def chatbot(state: State):
         print(f"====prompt结束====") 
 
     await aperf_print(f"[{name}]模型输出开始")
-    response = await llm_with_tools.ainvoke(prompt)
+    response = await get_llm_with_tools().ainvoke(prompt)
     print(response.content)
     await aperf_print(f"[{name}]模型输出完成")
     

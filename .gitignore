@@ -90,6 +90,10 @@ __pycache__/
 # 忽略数据库临时文件
 *.wal
 
+# ===== 本地运行生成的敏感配置文件（勿进 Git） =====
+# v0.23.0：Title 场景玩家填写 API Key 后写入；含明文凭证，禁止入库
+Src/Data/Config/api_config.json
+
 
 # 白名单
 # —— Tools：第三方工具链（必须进仓库） ——

@@ -27,10 +27,7 @@ from agent_framwork.utils.prompt_utils import estimate_tokens
 from dotenv import load_dotenv
 load_dotenv()
 
-mem_model_api_base = os.getenv("MEMORY_API_BASE")
-mem_model_api_key = os.getenv("MEMORY_API_KEY")
-mem_model_name = os.getenv("MEMORY_MODEL")
-
+# 记忆压缩相关配置（不依赖 Key，模块级读取即可）
 QUEUE_SIZE = int(os.getenv("MEMORY_QUEUE_SIZE", 1000))
 MEMORY_COMPRESS_ENABLED = os.getenv("MEMORY_COMPRESS_ENABLED", "true").lower() == "true"
 MEMORY_COMPRESS_TRIGGER_TOKENS = int(os.getenv("MEMORY_COMPRESS_TRIGGER_TOKENS", "12000"))
@@ -48,19 +45,11 @@ class _SharedKuzuDriver(KuzuDriver):
 @singleton
 class MemoryManager:
     def __init__(self):
-        self._llm_config = LLMConfig(
-                api_key=mem_model_api_key, model=mem_model_name,
-                small_model=mem_model_name, base_url=mem_model_api_base
-            )
-        self._compress_model = ChatOpenAI(
-            model=mem_model_name,
-            api_key=mem_model_api_key,
-            base_url=mem_model_api_base,
-            request_timeout=MEMORY_COMPRESS_TIMEOUT,
-            max_retries=MEMORY_COMPRESS_MAX_RETRIES,
-            max_tokens=MEMORY_COMPRESS_TARGET_TOKENS,
-            temperature=0,
-        )
+        # LLM 相关对象不在 __init__ 构造：模块可能被 agent_interuptible 在
+        # api_config.json 注入 os.environ 之前 import，此时 Key 为 None。
+        # 延迟到 initialize()（main 完成 load_api_config_into_env 之后）再构造。
+        self._llm_config = None
+        self._compress_model = None
         self._initialized = False
         self._init_lock = None
         self._kuzu_driver = None
@@ -76,11 +65,43 @@ class MemoryManager:
         self._graph_write_lock = asyncio.Lock()
         self._action_skill = None
 
+    def _build_llm_config(self) -> LLMConfig:
+        """在 initialize() 内实时读取 env 构造记忆 LLM 配置（此时 Key 已注入）。"""
+        mem_model_api_base = os.getenv("MEMORY_API_BASE")
+        mem_model_api_key = os.getenv("MEMORY_API_KEY")
+        mem_model_name = os.getenv("MEMORY_MODEL")
+        return LLMConfig(
+            api_key=mem_model_api_key,
+            model=mem_model_name,
+            small_model=mem_model_name,
+            base_url=mem_model_api_base,
+        )
+
+    def _build_compress_model(self) -> ChatOpenAI:
+        """在 initialize() 内实时读取 env 构造记忆压缩模型。"""
+        mem_model_api_base = os.getenv("MEMORY_API_BASE")
+        mem_model_api_key = os.getenv("MEMORY_API_KEY")
+        mem_model_name = os.getenv("MEMORY_MODEL")
+        return ChatOpenAI(
+            model=mem_model_name,
+            api_key=mem_model_api_key,
+            base_url=mem_model_api_base,
+            request_timeout=MEMORY_COMPRESS_TIMEOUT,
+            max_retries=MEMORY_COMPRESS_MAX_RETRIES,
+            max_tokens=MEMORY_COMPRESS_TARGET_TOKENS,
+            temperature=0,
+        )
+
     @property
     def action_skill(self):
         if self._action_skill is None:
             self._action_skill = ActionSkillManager()
         return self._action_skill
+
+    @property
+    def is_initialized(self) -> bool:
+        """记忆系统是否已初始化（v0.23.0：InitRequest / --auto-init 后为 True）。"""
+        return self._initialized
 
     def _reset_subsystems_for_reinitialize(self):
         self.action_skill.reset_for_reinitialize()
@@ -106,6 +127,10 @@ class MemoryManager:
             dbsvc = DBConnectionService()
             embedder = EmbedderService().get_embedder()
             reranker = EmbedderService().get_reranker()
+
+            # 1.5 LLM 对象延迟构造：此时 main() 已完成 api_config.json -> env 注入
+            self._llm_config = self._build_llm_config()
+            self._compress_model = self._build_compress_model()
 
             # 2. 组装 Graphiti（基于 service 提供的 db/conn）
             self._kuzu_driver = _SharedKuzuDriver(dbsvc.get_db(), dbsvc.get_conn())
@@ -311,6 +336,10 @@ class MemoryManager:
                 f"chars={len(memory)}, compress=False"
             )
             return memory
+        if self._compress_model is None:
+            # 未初始化（缺 Key / 未收到 InitRequest）时走本地兜底，不静默失败也不崩溃
+            print(f"[MemoryManager][{name}] 压缩模型未初始化，使用本地兜底压缩")
+            return self._fallback_diary_memory(memory)
 
         print(
             f"[MemoryManager][{name}] memory length tokens={tokens}, "

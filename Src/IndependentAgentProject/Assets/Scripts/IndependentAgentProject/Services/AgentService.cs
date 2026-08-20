@@ -27,6 +27,8 @@ namespace Services
         //public UnityEngine.Events.UnityAction<Result, string> OnCreateAgent;
         //public UnityEngine.Events.UnityAction<Result, string> OnStartScene;
         public event UnityAction<bool, string> OnCreateAgent;
+        // v0.23.0：InitRequest/InitResponse（Unity 配置面板初始化 Python LLM 组件）
+        public event UnityAction<bool, string> OnInit;
         public event UnityAction<bool, List<string>> OnLoadAgent;
         public event UnityAction<bool, string> OnStartScene;
         public event UnityAction<bool, string> OnStopScene;
@@ -72,6 +74,7 @@ namespace Services
             AgentClient.Instance.OnConnect += OnGameServerConnect;
             AgentClient.Instance.OnDisconnect += OnGameServerDisconnect;
             MessageDistributer.Instance.Subscribe<AgentCreateResponse>(this.OnAgentCreate);// 记得写订阅消息和注销
+            MessageDistributer.Instance.Subscribe<InitResponse>(this.OnInitResponse_);
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<SceneStopResponse>(this.OnSceneStop);
@@ -111,6 +114,7 @@ namespace Services
         public void Dispose()
         {
             MessageDistributer.Instance.Unsubscribe<AgentCreateResponse>(this.OnAgentCreate);
+            MessageDistributer.Instance.Unsubscribe<InitResponse>(this.OnInitResponse_);
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<SceneStopResponse>(this.OnSceneStop);
@@ -246,6 +250,10 @@ namespace Services
                 {
                     OnCreateAgent?.Invoke(false, error);
                 }
+                else if (message.Request.initRequest != null)
+                {
+                    OnInit?.Invoke(false, error);
+                }
                 else if (message.Request.agentLoadRequest != null)
                 {
                     OnLoadAgent?.Invoke(false, null);
@@ -276,6 +284,33 @@ namespace Services
                 }
             }
             return true;
+        }
+
+        // v0.23.0：通知 Python 读取 api_config.json 并初始化记忆系统（需先建立连接）
+        public void SendInit()
+        {
+            Debug.LogFormat("InitRequest::");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.initRequest = new InitRequest();
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                pendingMessages.Enqueue(message);
+                if (!this.connected && !this.connecting)
+                {
+                    this.ConnectToServer();
+                }
+            }
+        }
+
+        void OnInitResponse_(object sender, InitResponse response)
+        {
+            Debug.LogFormat("OnInit::Success:{0} [{1}]", response.Success, response.Errormsg);
+            this.OnInit?.Invoke(response.Success, response.Errormsg);
         }
 
         // 创建Agent

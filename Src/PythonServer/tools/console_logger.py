@@ -11,8 +11,14 @@ class TeeWriter:
         self._file = file
 
     def write(self, data):
-        self._original.write(data)
-        self._original.flush()
+        # 终端流可能为 GBK 编码（Windows 控制台），emoji/非常规字符会触发
+        # UnicodeEncodeError；用 errors='replace' 兜底，保证日志镜像不阻断业务。
+        try:
+            self._original.write(data)
+            self._original.flush()
+        except UnicodeEncodeError:
+            self._original.write(data.encode(self._original.encoding, errors="replace").decode(self._original.encoding))
+            self._original.flush()
         self._file.write(data)
         self._file.flush()
 

@@ -737,7 +737,7 @@ GameObject:
   - component: {fileID: 143811717}
   - component: {fileID: 143811716}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1318,7 +1318,7 @@ GameObject:
   - component: {fileID: 264204385}
   - component: {fileID: 264204384}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2883,7 +2883,7 @@ GameObject:
   - component: {fileID: 423181778}
   - component: {fileID: 423181777}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3319,7 +3319,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8381970375816613132, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8381970375948533885, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_Text
@@ -3893,7 +3893,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1464406014}
         m_TargetAssemblyTypeName: IndependentAgentProject.UITitle, Assembly-CSharp
-        m_MethodName: OnClickLLMAgentConfig
+        m_MethodName: OnClickLLMAgentSetting
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3954,7 +3954,7 @@ GameObject:
   - component: {fileID: 559534295}
   - component: {fileID: 559534294}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4130,7 +4130,7 @@ GameObject:
   - component: {fileID: 566575677}
   - component: {fileID: 566575676}
   m_Layer: 5
-  m_Name: BtnConfig
+  m_Name: BtnSetting
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4203,7 +4203,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1464406014}
         m_TargetAssemblyTypeName: IndependentAgentProject.UITitle, Assembly-CSharp
-        m_MethodName: OnClickConfig
+        m_MethodName: OnClickSetting
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4472,7 +4472,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1464406014}
         m_TargetAssemblyTypeName: IndependentAgentProject.UITitle, Assembly-CSharp
-        m_MethodName: OnClickEmbeddingConfig
+        m_MethodName: OnClickEmbeddingSetting
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4532,7 +4532,7 @@ GameObject:
   - component: {fileID: 641815036}
   - component: {fileID: 641815035}
   m_Layer: 5
-  m_Name: PanelConfig
+  m_Name: PanelSetting
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4748,7 +4748,7 @@ GameObject:
   - component: {fileID: 683019461}
   - component: {fileID: 683019460}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6369,7 +6369,7 @@ GameObject:
   - component: {fileID: 922951622}
   - component: {fileID: 922951621}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6731,7 +6731,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8381970375816613132, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_Name
-      value: MsgboxSaveConfig
+      value: MsgboxSaveSetting
       objectReference: {fileID: 0}
     - target: {fileID: 8381970375816613132, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_IsActive
@@ -7711,7 +7711,7 @@ GameObject:
   - component: {fileID: 1084323965}
   - component: {fileID: 1084323964}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8368,7 +8368,7 @@ GameObject:
   - component: {fileID: 1201269111}
   - component: {fileID: 1201269110}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9573,15 +9573,27 @@ MonoBehaviour:
   mAgentDesc: "\u5C0F\u660E\u662F\u4E00\u4E2A\u5E2E\u52A9\u673A\u5668\u4EBA"
   mPressAnyButtonPanel: {fileID: 376643207}
   mMainMenuPanel: {fileID: 863243967}
-  mConfigPanel: {fileID: 641815033}
+  mSettingPanel: {fileID: 641815033}
   mLLMAgentPanel: {fileID: 1757972172}
   mLLMMemoryPanel: {fileID: 1757972172}
   mEmbeddingPanel: {fileID: 291330371}
   mRerankerPanel: {fileID: 1205776999}
   mNewGameWarmingMsgbox: {fileID: 1674596562}
-  mSaveConfigMsgBox: {fileID: 1353351017}
+  mSaveSettingMsgBox: {fileID: 1353351017}
   mNoApiKeyMsgbox: {fileID: 1967584298}
   mQuitMsgbox: {fileID: 755621621}
+  mAgentBaseInput: {fileID: 1530996062}
+  mAgentKeyInput: {fileID: 1876675570}
+  mAgentModelInput: {fileID: 559534294}
+  mMemoryBaseInput: {fileID: 264204384}
+  mMemoryKeyInput: {fileID: 922951621}
+  mMemoryModelInput: {fileID: 1201269110}
+  mEmbeddingBaseInput: {fileID: 683019460}
+  mEmbeddingKeyInput: {fileID: 2106877259}
+  mEmbeddingModelInput: {fileID: 1084323964}
+  mRerankerBaseInput: {fileID: 143811716}
+  mRerankerKeyInput: {fileID: 2041272550}
+  mRerankerModelInput: {fileID: 423181777}
   mInputLockTime: 0.25
 --- !u!1 &1469099549
 GameObject:
@@ -9887,7 +9899,7 @@ GameObject:
   - component: {fileID: 1530996063}
   - component: {fileID: 1530996062}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11893,7 +11905,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1464406014}
         m_TargetAssemblyTypeName: IndependentAgentProject.UITitle, Assembly-CSharp
-        m_MethodName: OnClickRerankerConfig
+        m_MethodName: OnClickRerankerSetting
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12032,7 +12044,7 @@ GameObject:
   - component: {fileID: 1876675571}
   - component: {fileID: 1876675570}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12654,7 +12666,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1464406014}
         m_TargetAssemblyTypeName: IndependentAgentProject.UITitle, Assembly-CSharp
-        m_MethodName: OnClickLLMMemoryConfig
+        m_MethodName: OnClickLLMMemorySetting
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12835,7 +12847,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8381970376582954757, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClickConfig
+      value: OnClickSetting
       objectReference: {fileID: 0}
     - target: {fileID: 8381970376582954757, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -13450,7 +13462,7 @@ GameObject:
   - component: {fileID: 2041272551}
   - component: {fileID: 2041272550}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13841,7 +13853,7 @@ GameObject:
   - component: {fileID: 2106877260}
   - component: {fileID: 2106877259}
   m_Layer: 5
-  m_Name: InputField (TMP) (1)
+  m_Name: InputField (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -4,6 +4,15 @@ import re
 import asyncio
 from datetime import datetime
 
+# Windows 控制台默认 GBK 编码，项目日志含大量 emoji/中文，先重配 stdout/stderr 为 UTF-8，
+# 避免 print emoji 时 UnicodeEncodeError（v0.23.0 修复）。
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 from network.servers import AgentServerNetMessage, TOOL_WAITERS
 from network import message_pb2
 
@@ -12,6 +21,7 @@ from agent_framwork.systems.time_system import TimeSystem
 from memory_system import MemoryManager
 from memory_system.action_skill_system import load_default_skills
 from tools.console_logger import start_console_logging, stop_console_logging
+from config.api_config_loader import load_api_config_into_env
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -33,12 +43,15 @@ async def handle_agent_create_request(msg, context):
     desc = msg.desc
 
     print(f"创建Agent: {name}: {desc}")
-    # await MemoryManager().initialize()
-    # await TimeSystem().aset_time(year=2016,month=1,day=1)
-    cur_time = await TimeSystem().aget_current_time()
-    
     response = message_pb2.AgentCreateResponse()
+    if not MemoryManager().is_initialized:
+        response.success = False
+        response.errormsg = "记忆系统尚未初始化：请先在 Title 配置 API 并确保已发送 InitRequest（或 Python 使用 --auto-init 启动）。"
+        print(f"创建Agent失败: {response.errormsg}")
+        await context['server'].send_message(response, context)
+        return
     try:
+        cur_time = await TimeSystem().aget_current_time()
         result = await AgentManager().acreate_agent(
             name=name, 
             summary=desc,
@@ -75,8 +88,13 @@ async def handle_agent_create_request(msg, context):
 @server.on_message(message_pb2.AgentLoadRequest)
 async def handle_agent_load_request(msg, context):
     print("加载Agent")
-    # await MemoryManager().initialize()
     response = message_pb2.AgentLoadResponse()
+    if not MemoryManager().is_initialized:
+        response.success = False
+        response.errormsg = "记忆系统尚未初始化：请先在 Title 配置 API 并确保已发送 InitRequest（或 Python 使用 --auto-init 启动）。"
+        print(f"加载Agent失败: {response.errormsg}")
+        await context['server'].send_message(response, context)
+        return
     try:
         agent_names = await AgentManager().aload_agent_all()
         response.agent_names.extend(agent_names) # agent_names 的list
@@ -95,6 +113,12 @@ async def handle_scene_start_request(msg, context):
     map_id = msg.map_id
     print(f"启动场景: {map_id}")
     response = message_pb2.SceneStartResponse()
+    if not MemoryManager().is_initialized:
+        response.success = False
+        response.errormsg = "记忆系统尚未初始化：请先在 Title 配置 API 并确保已发送 InitRequest（或 Python 使用 --auto-init 启动）。"
+        print(f"场景启动失败: {response.errormsg}")
+        await context['server'].send_message(response, context)
+        return
     try:
         # await MemoryManager().initialize()
         
@@ -143,6 +167,26 @@ async def handle_agent_interrupt_request(msg, context):
         response.errormsg = str(e)
         print(f"中断Agent失败: {str(e)}")
         await context['server'].send_message(response, context)    
+
+@server.on_message(message_pb2.InitRequest)
+async def handle_init_request(msg, context):
+    """初始化信号（v0.23.0）：Unity 连上后、进场景前发送。
+
+    顺序：读 api_config.json 注入 os.environ -> 初始化 MemoryManager（Graphiti/LLM/Embedder）。
+    幂等：重复收到时 MemoryManager.initialize() 内部短路，直接返回成功。
+    """
+    print("收到 InitRequest，开始初始化...")
+    response = message_pb2.InitResponse()
+    try:
+        load_api_config_into_env()
+        await MemoryManager().initialize()
+        response.success = True
+        print("InitRequest 处理完成，初始化成功。")
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"初始化失败: {str(e)}")
+    await context['server'].send_message(response, context)
 
 @server.on_message(message_pb2.UserSendMessageRequest)
 async def handle_user_send_msg_request(msg, context):
@@ -301,16 +345,21 @@ async def other_tasks():
     await asyncio.sleep(10)
     print("Other tasks done")
 
-async def main():
+async def main(auto_init: bool = False):
     # 0. 安装终端日志镜像（stdout/stderr 同时写入 logs/console/{时间戳}.log）
     log_file, stdout_orig, stderr_orig = start_console_logging(
         base_dir=os.path.dirname(__file__)
     )
     try:
-        # 1. 在这里全局执行一次初始化
-        print("正在初始化记忆系统...")
-        await MemoryManager().initialize()
-        print("MemoryManager 初始化完成。")
+        # 1. v0.23.0：默认无 Key 启动——不初始化记忆系统，仅监听端口，等 Unity 的 InitRequest。
+        #    开发期可传 --auto-init 等效 init 信号（读 api_config.json -> 初始化）。
+        if auto_init:
+            print("--auto-init：执行初始化（等效收到 InitRequest）")
+            load_api_config_into_env()
+            await MemoryManager().initialize()
+            print("MemoryManager 初始化完成。")
+        else:
+            print("无 Key 启动模式：等待 Unity 发送 InitRequest 后再初始化记忆系统。")
 
         # 也可以在这里初始化 TimeSystem，如果需要的话
         await TimeSystem().aset_time(year=2016, month=1, day=1)
@@ -325,4 +374,12 @@ async def main():
         stop_console_logging(log_file, stdout_orig, stderr_orig)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import argparse
+    parser = argparse.ArgumentParser(description="Independent Agent PythonServer")
+    parser.add_argument(
+        "--auto-init",
+        action="store_true",
+        help="启动时立即读 api_config.json 并初始化记忆系统（等效收到 InitRequest）；不带则无 Key 监听，等 Unity init 信号",
+    )
+    args = parser.parse_args()
+    asyncio.run(main(auto_init=args.auto_init))

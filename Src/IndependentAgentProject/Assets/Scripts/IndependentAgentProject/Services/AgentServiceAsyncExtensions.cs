@@ -7,6 +7,23 @@ namespace Services
 {
     public static class AgentServiceAsyncExtensions
     {
+        /// <summary>v0.23.0：发送 InitRequest，等待 Python 初始化记忆系统完成。</summary>
+        public static UniTask InitAsync()
+        {
+            var tcs = new UniTaskCompletionSource();
+            void Handler(bool success, string reason)
+            {
+                AgentService.Instance.OnInit -= Handler;
+                if (success)
+                    tcs.TrySetResult();
+                else
+                    tcs.TrySetException(new Exception(reason));
+            }
+            AgentService.Instance.OnInit += Handler;
+            AgentService.Instance.SendInit();
+            return tcs.Task;
+        }
+
         public static UniTask DeleteMemoryAsync()
         {
             var tcs = new UniTaskCompletionSource();
