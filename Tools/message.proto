@@ -202,6 +202,7 @@ message NetMessageRequest{
 	AgentExportSkillsRequest agentExportSkillsRequest = 31;
 	AgentGetWorldEventSummaryRequest agentGetWorldEventSummaryRequest = 32;
 	InitRequest initRequest = 33;
+	CloseRequest closeRequest = 34;
 }
 
 message NetMessageResponse{
@@ -216,6 +217,7 @@ message NetMessageResponse{
 	
 	AgentExportSkillsResponse agentExportSkillsResponse = 9;
 	InitResponse initResponse = 10;
+	CloseResponse closeResponse = 11;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -279,6 +281,15 @@ message InitRequest {
 }
 
 message InitResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+// 关闭信号：回 Title 时发送，触发 Python 关闭全部已初始化系统（v0.23.0b 生命周期重构）
+message CloseRequest {
+}
+
+message CloseResponse {
 	bool success = 1;
 	string errormsg = 2;
 }

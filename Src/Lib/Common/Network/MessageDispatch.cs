@@ -17,6 +17,7 @@ namespace Network
             if (message.memoryDeleteCurrentResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.memoryDeleteCurrentResponse);}
             if (message.agentExportSkillsResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentExportSkillsResponse);}
             if (message.initResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.initResponse);}
+            if (message.closeResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.closeResponse);}
         }
 
         public void Dispatch(T sender, SkillBridge.Message.NetMessageRequest message)
@@ -65,6 +66,7 @@ namespace Network
             if (message.agentExportSkillsRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentExportSkillsRequest); }
 
             if (message.initRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.initRequest); }
+            if (message.closeRequest != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.closeRequest); }
         }
     }
 }

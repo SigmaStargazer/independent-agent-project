@@ -156,6 +156,12 @@ def get_llm_with_tools():
     return _llm_with_tools
 
 
+def reset_llm_cache():
+    """清除模块级 LLM 缓存，使下次 get_llm_with_tools() 用最新 Key 重建（供 leave_game 调用）。"""
+    global _llm_with_tools
+    _llm_with_tools = None
+
+
 # 生产工具列表
 tools = [
         # base_tools.communicate_to_agent, 

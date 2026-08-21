@@ -419,6 +419,7 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 | 资源 | 路径 |
 |------|------|
 | **版本开发文档（需求→PRD→方案）** | **`DevDocs/`**（说明见 `DevDocs/README.md`） |
+| **架构梳理文档（跨版本，生命周期等）** | **`DevDocs/Architecture/`** |
 | 工具开发 | `Doc/Agent工具开发流程.md` |
 | ActionSequence | `Doc/ActionSequence开发流程.md` |
 | 存档方案 | `Doc/存档方案.md` |
@@ -440,6 +441,8 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 **Skill 用法**：Agent 聊天输入 `/develop-agent-tool` 或 `@develop-agent-tool`；找不到时检查工作区根目录并重载窗口。
 
 **已确认约定**：
+
+0. **架构优先原则（最高优先级）**：每个版本**不以「最小改动」作为目标/约束**，永远以**架构最干净、最符合项目长期发展**的实现方式为目标。哪怕是彻底重构也要避免架构腐化。当「改得少」与「架构好」冲突时，**无条件选择架构好**。
 
 1. 生产 Agent 仅 `agent_interuptible.py`
 2. `Src/GameServer/` 与 Agent 链路无关

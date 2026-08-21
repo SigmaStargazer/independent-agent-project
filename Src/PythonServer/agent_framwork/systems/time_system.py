@@ -70,6 +70,20 @@ class TimeSystem:
             self.virtual_time += timedelta(seconds=virtual_elapsed)
             self.running = False
 
+    async def areset(self):
+        """暂停并归零虚拟时间（供 leave_game 调用，回 Title 回到零时间状态）。幂等。"""
+        async with self._lock:
+            if self.virtual_time is None and not self.running:
+                return
+            self.virtual_time = None
+            self.real_start_time = None
+            self.speed = 1.0
+            self.running = False
+            self.alarm_callbacks.clear()
+        if self._task and not self._task.done():
+            self._task.cancel()
+            self._task = None
+
     async def aresume_time(self):
         """
         恢复时间系统。

@@ -19,7 +19,7 @@ namespace IndependentAgentProject
             TargetScene = titleSceneName;
             Steps = new List<IFlowStep>()
             {
-                new StopAgentStep(),
+                new CloseStep(),
 
                 new LoadSceneStep(titleSceneName),
             };

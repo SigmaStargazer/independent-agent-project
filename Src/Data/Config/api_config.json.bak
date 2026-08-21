@@ -1,0 +1,14 @@
+{
+    "agentApiBase": "https://ark.cn-beijing.volces.com/api/coding/v3",
+    "agentApiKey": "ark-59e3d5e5-61d6-408b-aaf5-d7c3537ea688-62b5b",
+    "agentModel": "deepseek-v4-flash",
+    "memoryApiBase": "https://ark.cn-beijing.volces.com/api/coding/v3",
+    "memoryApiKey": "ark-59e3d5e5-61d6-408b-aaf5-d7c3537ea688-62b5b",
+    "memoryModel": "deepseek-v4-flash",
+    "embeddingApiBase": "22",
+    "embeddingApiKey": "11",
+    "embeddingModel": "11",
+    "rerankerApiBase": "22",
+    "rerankerApiKey": "1",
+    "rerankerModel": ""
+}

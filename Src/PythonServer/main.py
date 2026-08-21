@@ -21,7 +21,7 @@ from agent_framwork.systems.time_system import TimeSystem
 from memory_system import MemoryManager
 from memory_system.action_skill_system import load_default_skills
 from tools.console_logger import start_console_logging, stop_console_logging
-from config.api_config_loader import load_api_config_into_env
+from lifecycle import AgentLifecycle
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -122,8 +122,8 @@ async def handle_scene_start_request(msg, context):
     try:
         # await MemoryManager().initialize()
         
+        # 时间基准（aset_time）已在 enter_game 设置；此处启动时钟并设定流速
         await TimeSystem().aset_speed(1440)
-        await TimeSystem().aset_time(year=2016,month=1,day=1)
         await TimeSystem().astart_time()
         
         await AgentManager().astart_all()
@@ -170,22 +170,40 @@ async def handle_agent_interrupt_request(msg, context):
 
 @server.on_message(message_pb2.InitRequest)
 async def handle_init_request(msg, context):
-    """初始化信号（v0.23.0）：Unity 连上后、进场景前发送。
+    """初始化信号（v0.23.0）：Unity 进场景前发送，触发 Python 读 api_config.json 并初始化系统。
 
-    顺序：读 api_config.json 注入 os.environ -> 初始化 MemoryManager（Graphiti/LLM/Embedder）。
-    幂等：重复收到时 MemoryManager.initialize() 内部短路，直接返回成功。
+    收敛到 AgentLifecycle.enter_game()（v0.23.0b）：读 json 注入 env -> 初始化 MemoryManager。
+    幂等：已在游戏内（已初始化）时 enter_game 内部短路，直接返回成功。
     """
     print("收到 InitRequest，开始初始化...")
     response = message_pb2.InitResponse()
     try:
-        load_api_config_into_env()
-        await MemoryManager().initialize()
+        await AgentLifecycle.enter_game()
         response.success = True
         print("InitRequest 处理完成，初始化成功。")
     except Exception as e:
         response.success = False
         response.errormsg = str(e)
         print(f"初始化失败: {str(e)}")
+    await context['server'].send_message(response, context)
+
+@server.on_message(message_pb2.CloseRequest)
+async def handle_close_request(msg, context):
+    """关闭信号（v0.23.0b）：回 Title 时发送，触发 Python 关闭全部已初始化系统。
+
+    收敛到 AgentLifecycle.leave_game()：停止 Agent + 清 LLM 缓存 + 归零时间 + 关闭资源。
+    幂等：未初始化时 leave_game 跳过资源关闭（但 Agent/时间清理始终执行）。
+    """
+    print("收到 CloseRequest，开始关闭系统...")
+    response = message_pb2.CloseResponse()
+    try:
+        await AgentLifecycle.leave_game()
+        response.success = True
+        print("CloseRequest 处理完成，系统已关闭。")
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"关闭系统失败: {str(e)}")
     await context['server'].send_message(response, context)
 
 @server.on_message(message_pb2.UserSendMessageRequest)
@@ -355,14 +373,12 @@ async def main(auto_init: bool = False):
         #    开发期可传 --auto-init 等效 init 信号（读 api_config.json -> 初始化）。
         if auto_init:
             print("--auto-init：执行初始化（等效收到 InitRequest）")
-            load_api_config_into_env()
-            await MemoryManager().initialize()
-            print("MemoryManager 初始化完成。")
+            await AgentLifecycle.enter_game()
         else:
             print("无 Key 启动模式：等待 Unity 发送 InitRequest 后再初始化记忆系统。")
 
-        # 也可以在这里初始化 TimeSystem，如果需要的话
-        await TimeSystem().aset_time(year=2016, month=1, day=1)
+        # TimeSystem 不在启动时设置时间基准（v0.23.0b）：Title 阶段完全零状态，
+        # 进游戏由 SceneStart 设置，回 Title 由 leave_game 归零。见 DevDocs/Architecture/生命周期架构.md。
 
         print("正在启动服务器...")
         # 2. 系统初始化完成后，再启动网络服务和其他任务

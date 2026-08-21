@@ -24,6 +24,23 @@ namespace Services
             return tcs.Task;
         }
 
+        /// <summary>v0.23.0b：发送 CloseRequest，等待 Python 关闭全部已初始化系统完成（回 Title）。</summary>
+        public static UniTask CloseAsync()
+        {
+            var tcs = new UniTaskCompletionSource();
+            void Handler(bool success, string reason)
+            {
+                AgentService.Instance.OnClose -= Handler;
+                if (success)
+                    tcs.TrySetResult();
+                else
+                    tcs.TrySetException(new Exception(reason));
+            }
+            AgentService.Instance.OnClose += Handler;
+            AgentService.Instance.SendClose();
+            return tcs.Task;
+        }
+
         public static UniTask DeleteMemoryAsync()
         {
             var tcs = new UniTaskCompletionSource();

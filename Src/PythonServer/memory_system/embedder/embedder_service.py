@@ -2,7 +2,8 @@
 """EmbedderService: 共享的 Embedding / Reranker 客户端单例。
 
 职责：
-    - 从 .env 读取 EMBEDDING_* / RERANKER_* 配置
+    - 从 os.environ 读取 EMBEDDING_* / RERANKER_* 配置（模块导入时 load_dotenv() 已把 .env 读入内存；
+      进游戏时 load_api_config_into_env(force=True) 会用 api_config.json 覆盖 os.environ，见 lifecycle）
     - 实例化 SafeBatchOpenAIEmbedder 与 SafeBatchOpenAIReranker
     - 让所有业务模块（MemoryManager、ActionSkillManager 等）共享同一组实例
 
@@ -88,3 +89,11 @@ class EmbedderService:
             self._initialized = True
             print("✅ [EmbedderService] initialized")
         return self
+
+    async def close(self) -> None:
+        """释放 embedder/reranker，复位初始化状态（供 leave_game 调用，回 Title 回到零系统）。"""
+        self._embedder = None
+        self._reranker = None
+        self._initialized = False
+        self._init_lock = None
+        print("✅ [EmbedderService] closed")

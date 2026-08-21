@@ -22,6 +22,8 @@ namespace IndependentAgentProject
             {
                 new StopAgentStep(),
 
+                new InitializeStep(),
+
                 new RestoreMemoryStep(0),
 
                 new LoadAgentStep(),
