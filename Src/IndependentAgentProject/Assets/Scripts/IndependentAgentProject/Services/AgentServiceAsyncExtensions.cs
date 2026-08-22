@@ -41,6 +41,23 @@ namespace Services
             return tcs.Task;
         }
 
+        /// <summary>v0.23.1：发送 ApiTestRequest，测试当前面板 API 配置可用性（零系统，Title 阶段「测试后保存」触发）。</summary>
+        public static UniTask ApiTestAsync(string category, string apiBase, string apiKey, string model)
+        {
+            var tcs = new UniTaskCompletionSource();
+            void Handler(bool success, string reason)
+            {
+                AgentService.Instance.OnApiTest -= Handler;
+                if (success)
+                    tcs.TrySetResult();
+                else
+                    tcs.TrySetException(new Exception(reason));
+            }
+            AgentService.Instance.OnApiTest += Handler;
+            AgentService.Instance.SendApiTest(category, apiBase, apiKey, model);
+            return tcs.Task;
+        }
+
         public static UniTask DeleteMemoryAsync()
         {
             var tcs = new UniTaskCompletionSource();

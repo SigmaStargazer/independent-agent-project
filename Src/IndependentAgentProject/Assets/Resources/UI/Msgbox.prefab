@@ -390,7 +390,7 @@ MonoBehaviour:
   mWarningTxt: {fileID: 8381970375226343481}
   mBtn1: {fileID: 8381970377057178111}
   mBtn2: {fileID: 8381970376582954757}
-  mBtn3: {fileID: 0}
+  mBtn3: {fileID: 1142611979701934363}
 --- !u!1 &8381970375948533887
 GameObject:
   m_ObjectHideFlags: 0

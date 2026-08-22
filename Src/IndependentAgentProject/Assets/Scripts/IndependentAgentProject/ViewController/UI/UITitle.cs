@@ -4,8 +4,9 @@ using UnityEngine;
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// 标题页 UI（v0.23.0b 拆分后）：仅保留页面切换逻辑。
-    /// API 配置的读取 / 回填 / 变更检测 / 保存 / 校验下沉到 UISetting（挂 UIConfig）。
+    /// 标题页 UI（v0.23.1）：页面切换 + MsgboxSaveApiKey（测试后保存）+ 3 个 API 测试结果弹窗。
+    /// API 配置的读取 / 回填 / 变更检测 / 保存 / 测试流程下沉到 UISetting（挂 UIConfig）。
+    /// v0.23.1 起退出配置面板固定返回 PanelSetting，不再记录弹窗来源层级（SaveMsgFrom/UILevel 已移除）。
     /// </summary>
     public class UITitle : MonoBehaviour
     {
@@ -38,7 +39,7 @@ namespace IndependentAgentProject
         [Header("新游戏弹窗")]
         [SerializeField]
         private GameObject mNewGameWarmingMsgbox;
-        [Header("保存设置确认弹窗")]
+        [Header("保存设置确认弹窗（v0.23.1 起不再使用，保留供以后设置项使用）")]
         [SerializeField]
         private GameObject mSaveSettingMsgBox;
         [Header("无API Key弹窗")]
@@ -47,6 +48,18 @@ namespace IndependentAgentProject
         [Header("退出游戏弹窗")]
         [SerializeField]
         private GameObject mQuitMsgbox;
+
+        // ===== v0.23.1：测试后保存相关弹窗 =====
+        [Header("API 配置保存确认弹窗（4 个模型配置 Panel 退出专用：取消/退出/测试后保存）")]
+        [SerializeField]
+        private GameObject mSaveApiKeyMsgBox;
+        [Header("API 测试结果弹窗")]
+        [SerializeField]
+        private UIMsgBox mModelTestingMsgbox;       // 测试中（取消）
+        [SerializeField]
+        private UIMsgBox mModelAvailableMsgbox;      // 可用（继续配置/保存退出）
+        [SerializeField]
+        private UIMsgBox mModelUnavailableMsgbox;    // 不可用（继续配置/退出）
 
         [Header("API 配置读写组件（挂 UIConfig 上的 UISetting）")]
         [SerializeField]
@@ -68,26 +81,21 @@ namespace IndependentAgentProject
                 mQuitMsgbox.SetActive(false);
             if (mSaveSettingMsgBox != null)
                 mSaveSettingMsgBox.SetActive(false);
+            if (mSaveApiKeyMsgBox != null)
+                mSaveApiKeyMsgBox.SetActive(false);
+            if (mModelTestingMsgbox != null)
+                mModelTestingMsgbox.gameObject.SetActive(false);
+            if (mModelAvailableMsgbox != null)
+                mModelAvailableMsgbox.gameObject.SetActive(false);
+            if (mModelUnavailableMsgbox != null)
+                mModelUnavailableMsgbox.gameObject.SetActive(false);
 
-            // 注入保存/退出后的「回上一层」回调：UISetting 只请求，切换由 UITitle 执行
+            // 注入回调：UISetting 只请求，切换/弹窗显隐由 UITitle 执行
             if (mSetting != null)
             {
-                mSetting.OnRequestBack = OnRequestBackFromSaveMsg;
-            }
-        }
-
-        /// <summary>
-        /// 保存确认弹窗的保存/退出按钮触发：回退到打开弹窗的那一层。
-        /// </summary>
-        private void OnRequestBackFromSaveMsg(UISetting.UILevel fromLevel)
-        {
-            if (fromLevel == UISetting.UILevel.Setting)
-            {
-                ShowMainMenu();   // 设置 → 主菜单
-            }
-            else
-            {
-                ShowSetting();    // 子面板 → 设置
+                mSetting.OnStartApiTest = OnStartApiTest;
+                mSetting.OnApiTestFinished = OnApiTestFinished;
+                mSetting.OnRequestBackToSetting = ShowSetting;
             }
         }
 
@@ -247,14 +255,14 @@ namespace IndependentAgentProject
         }
 
         /// <summary>
-        /// ESC 从子面板返回：有编辑 → 弹保存确认；无编辑 → 直接返回设置。
+        /// ESC 从子面板返回：有编辑 → 弹 MsgboxSaveApiKey；无编辑 → 直接返回设置。
         /// </summary>
         private void TryLeaveSubPanel()
         {
             bool changed = mSetting != null && mSetting.HasConfigChanged();
             if (changed)
             {
-                ShowSaveSettingMsgBox();
+                ShowSaveApiKeyMsgBox();
             }
             else
             {
@@ -262,26 +270,123 @@ namespace IndependentAgentProject
             }
         }
 
-        private void ShowSaveSettingMsgBox()
+        /// <summary>
+        /// 弹出 MsgboxSaveApiKey（4 个模型配置 Panel 退出专用）。
+        /// </summary>
+        private void ShowSaveApiKeyMsgBox()
         {
-            if (mSaveSettingMsgBox != null)
+            if (mSaveApiKeyMsgBox != null)
             {
-                // 记录弹窗来源层级：保存/退出后回退到该层
-                if (mSetting != null)
-                    mSetting.SaveMsgFrom = UISetting.UILevel.SubPanel;
-                mSaveSettingMsgBox.SetActive(true);
+                mSaveApiKeyMsgBox.SetActive(true);
                 LockInput();
             }
         }
 
-        /// <summary>
-        /// 保存确认弹窗的「取消」按钮（Btn1，ESC 也触发）：仅关弹窗，停留在当前子面板（不切换）。
-        /// </summary>
-        public void CloseSaveConfigMsgBox()
+        // ===== MsgboxSaveApiKey 按钮（由用户在场景中绑定到 UITitle 公开方法） =====
+
+        /// <summary>Btn1「取消」：仅关弹窗，停留当前子面板（不切换）。</summary>
+        public void OnClickCloseMsgBox()
         {
-            if (mSaveSettingMsgBox != null)
-                mSaveSettingMsgBox.SetActive(false);
+            if (mSaveApiKeyMsgBox != null)
+                mSaveApiKeyMsgBox.SetActive(false);
             LockInput();
+        }
+
+        /// <summary>Btn2「退出」：不保存，固定返回 PanelSetting。</summary>
+        public void OnClickExitSaveApiKey()
+        {
+            if (mSaveApiKeyMsgBox != null)
+                mSaveApiKeyMsgBox.SetActive(false);
+            if (mSetting != null)
+                mSetting.OnExitToSetting();
+        }
+
+        /// <summary>Btn3「测试后保存」：关 SaveApiKey，由 UISetting 发起测试。</summary>
+        public void OnClickConfirmTestApiKey()
+        {
+            if (mSaveApiKeyMsgBox != null)
+                mSaveApiKeyMsgBox.SetActive(false);
+            if (mSetting != null)
+                mSetting.OnConfirmTestConfig();
+        }
+
+        // ===== 测试流程回调（由 UISetting 注入到 Awake，勿手动绑定） =====
+
+        /// <summary>开始测试：关 SaveApiKey、开 ModelTesting、锁输入。</summary>
+        private void OnStartApiTest(string category)
+        {
+            if (mSaveApiKeyMsgBox != null)
+                mSaveApiKeyMsgBox.SetActive(false);
+            if (mModelTestingMsgbox != null)
+                mModelTestingMsgbox.gameObject.SetActive(true);
+            LockInput();
+        }
+
+        /// <summary>测试完成：关 ModelTesting，按结果开 Available / Unavailable。</summary>
+        private void OnApiTestFinished(bool success, string errmsg)
+        {
+            if (mModelTestingMsgbox != null)
+                mModelTestingMsgbox.gameObject.SetActive(false);
+            if (success)
+            {
+                if (mModelAvailableMsgbox != null)
+                    mModelAvailableMsgbox.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (mModelUnavailableMsgbox != null)
+                {
+                    mModelUnavailableMsgbox.SetText("模型不可用：\n" + errmsg);
+                    mModelUnavailableMsgbox.gameObject.SetActive(true);
+                }
+            }
+            LockInput();
+        }
+
+        // ===== 三个结果 Msgbox 按钮（由用户在场景中绑定到 UITitle 公开方法） =====
+
+        /// <summary>MsgboxModelTesting.Btn1「取消」：停止测试（丢弃异步结果），关弹窗，停留当前面板。</summary>
+        public void OnClickCancelTestApiKey()
+        {
+            if (mSetting != null)
+                mSetting.CancelApiTest();
+            if (mModelTestingMsgbox != null)
+                mModelTestingMsgbox.gameObject.SetActive(false);
+            LockInput();
+        }
+
+        /// <summary>MsgboxModelAvailable.Btn1「继续配置」：关弹窗，留在当前 Panel。</summary>
+        public void CloseAvailableContinue()
+        {
+            if (mModelAvailableMsgbox != null)
+                mModelAvailableMsgbox.gameObject.SetActive(false);
+            LockInput();
+        }
+
+        /// <summary>MsgboxModelAvailable.Btn2「保存退出」：此刻才保存配置并返回 PanelSetting。</summary>
+        public void OnClickSaveApiKeyExit()
+        {
+            if (mModelAvailableMsgbox != null)
+                mModelAvailableMsgbox.gameObject.SetActive(false);
+            if (mSetting != null)
+                mSetting.OnConfirmSaveAfterTest();
+        }
+
+        /// <summary>MsgboxModelUnavailable.Btn1「继续配置」：关弹窗，留在当前 Panel。</summary>
+        public void CloseUnavailableContinue()
+        {
+            if (mModelUnavailableMsgbox != null)
+                mModelUnavailableMsgbox.gameObject.SetActive(false);
+            LockInput();
+        }
+
+        /// <summary>MsgboxModelUnavailable.Btn2「退出」：关弹窗，返回 PanelSetting（不保存）。</summary>
+        public void OnClickExitUnavailable()
+        {
+            if (mModelUnavailableMsgbox != null)
+                mModelUnavailableMsgbox.gameObject.SetActive(false);
+            if (mSetting != null)
+                mSetting.OnExitToSetting();
         }
 
         private void SetPanelActive(GameObject panel, bool active)

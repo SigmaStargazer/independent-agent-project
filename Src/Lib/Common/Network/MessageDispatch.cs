@@ -18,6 +18,7 @@ namespace Network
             if (message.agentExportSkillsResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.agentExportSkillsResponse);}
             if (message.initResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.initResponse);}
             if (message.closeResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.closeResponse);}
+            if (message.apiTestResponse != null) { MessageDistributer<T>.Instance.RaiseEvent(sender, message.apiTestResponse);}
         }
 
         public void Dispatch(T sender, SkillBridge.Message.NetMessageRequest message)

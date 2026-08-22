@@ -1169,6 +1169,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 100992686}
     m_Modifications:
+    - target: {fileID: 4669424776609823932, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8381970375816613130, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: mBtn2
       value: 
@@ -1264,6 +1268,10 @@ PrefabInstance:
     - target: {fileID: 8381970375948533885, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
       propertyPath: m_Text
       value: "\u597D\u7684"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8381970376582954759, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}

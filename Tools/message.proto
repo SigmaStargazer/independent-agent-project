@@ -203,6 +203,7 @@ message NetMessageRequest{
 	AgentGetWorldEventSummaryRequest agentGetWorldEventSummaryRequest = 32;
 	InitRequest initRequest = 33;
 	CloseRequest closeRequest = 34;
+	ApiTestRequest apiTestRequest = 35;
 }
 
 message NetMessageResponse{
@@ -218,6 +219,7 @@ message NetMessageResponse{
 	AgentExportSkillsResponse agentExportSkillsResponse = 9;
 	InitResponse initResponse = 10;
 	CloseResponse closeResponse = 11;
+	ApiTestResponse apiTestResponse = 12;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -290,6 +292,19 @@ message CloseRequest {
 }
 
 message CloseResponse {
+	bool success = 1;
+	string errormsg = 2;
+}
+
+// API 连通性测试：Title 阶段「测试后保存」后，测试当前面板模型的可用性（v0.23.1）
+message ApiTestRequest {
+	string category = 1;   // llm | embedding | rerank（当前面板对应测试类型）
+	string api_base = 2;   // 该组 base url
+	string api_key = 3;    // 该组 key
+	string model = 4;      // 该组 model 名
+}
+
+message ApiTestResponse {
 	bool success = 1;
 	string errormsg = 2;
 }

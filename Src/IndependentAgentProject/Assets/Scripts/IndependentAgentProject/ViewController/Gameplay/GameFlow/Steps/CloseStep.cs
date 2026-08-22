@@ -10,7 +10,7 @@ namespace IndependentAgentProject
     /// Python 侧 AgentLifecycle.leave_game() 幂等，未初始化时跳过资源关闭（但 Agent/时间清理始终执行）。</summary>
     public class CloseStep : IFlowStep
     {
-        public string DisplayName => "安全Agent系统";
+        public string DisplayName => "关闭Agent系统";
 
         public async UniTask Execute()
         {

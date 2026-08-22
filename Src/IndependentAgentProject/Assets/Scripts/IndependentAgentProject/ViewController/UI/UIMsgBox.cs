@@ -56,6 +56,17 @@ namespace IndependentAgentProject
             }
         }
 
+        /// <summary>
+        /// 设置提示文案（v0.23.1：结果弹窗显示 API 测试失败原因等动态信息）。
+        /// </summary>
+        public void SetText(string text)
+        {
+            if (mWarningTxt != null)
+            {
+                mWarningTxt.text = text ?? "";
+            }
+        }
+
         private void OnEnable()
         {
             transform.SetAsLastSibling();   // 每次显示时移到 Canvas 最上层

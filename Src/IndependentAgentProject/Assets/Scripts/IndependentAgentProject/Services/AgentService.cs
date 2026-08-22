@@ -31,6 +31,8 @@ namespace Services
         public event UnityAction<bool, string> OnInit;
         // v0.23.0b：CloseRequest/CloseResponse（回 Title 关闭全部系统）
         public event UnityAction<bool, string> OnClose;
+        // v0.23.1：ApiTestRequest/ApiTestResponse（API Key 可用性测试）
+        public event UnityAction<bool, string> OnApiTest;
         public event UnityAction<bool, List<string>> OnLoadAgent;
         public event UnityAction<bool, string> OnStartScene;
         public event UnityAction<bool, string> OnStopScene;
@@ -78,6 +80,7 @@ namespace Services
             MessageDistributer.Instance.Subscribe<AgentCreateResponse>(this.OnAgentCreate);// 记得写订阅消息和注销
             MessageDistributer.Instance.Subscribe<InitResponse>(this.OnInitResponse_);
             MessageDistributer.Instance.Subscribe<CloseResponse>(this.OnCloseResponse_);
+            MessageDistributer.Instance.Subscribe<ApiTestResponse>(this.OnApiTestResponse_);
             MessageDistributer.Instance.Subscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Subscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Subscribe<SceneStopResponse>(this.OnSceneStop);
@@ -119,6 +122,7 @@ namespace Services
             MessageDistributer.Instance.Unsubscribe<AgentCreateResponse>(this.OnAgentCreate);
             MessageDistributer.Instance.Unsubscribe<InitResponse>(this.OnInitResponse_);
             MessageDistributer.Instance.Unsubscribe<CloseResponse>(this.OnCloseResponse_);
+            MessageDistributer.Instance.Unsubscribe<ApiTestResponse>(this.OnApiTestResponse_);
             MessageDistributer.Instance.Unsubscribe<AgentLoadResponse>(this.OnAgentLoad);
             MessageDistributer.Instance.Unsubscribe<SceneStartResponse>(this.OnSceneStart);
             MessageDistributer.Instance.Unsubscribe<SceneStopResponse>(this.OnSceneStop);
@@ -262,6 +266,10 @@ namespace Services
                 {
                     OnClose?.Invoke(false, error);
                 }
+                else if (message.Request.apiTestRequest != null)
+                {
+                    OnApiTest?.Invoke(false, error);
+                }
                 else if (message.Request.agentLoadRequest != null)
                 {
                     OnLoadAgent?.Invoke(false, null);
@@ -336,6 +344,31 @@ namespace Services
             }
         }
 
+        // v0.23.1：请求 Python 测试当前面板 API 配置可用性（Title 阶段「测试后保存」触发，零系统）
+        public void SendApiTest(string category, string apiBase, string apiKey, string model)
+        {
+            Debug.LogFormat($"ApiTestRequest::category:{category} base:{apiBase} model:{model}");
+            NetMessage message = new NetMessage();
+            message.Request = new NetMessageRequest();
+            message.Request.apiTestRequest = new ApiTestRequest();
+            message.Request.apiTestRequest.Category = category;
+            message.Request.apiTestRequest.ApiBase = apiBase;
+            message.Request.apiTestRequest.ApiKey = apiKey;
+            message.Request.apiTestRequest.Model = model;
+            if (this.connected && AgentClient.Instance.Connected)
+            {
+                AgentClient.Instance.SendMessage(message);
+            }
+            else
+            {
+                pendingMessages.Enqueue(message);
+                if (!this.connected && !this.connecting)
+                {
+                    this.ConnectToServer();
+                }
+            }
+        }
+
         void OnInitResponse_(object sender, InitResponse response)
         {
             Debug.LogFormat("OnInit::Success:{0} [{1}]", response.Success, response.Errormsg);
@@ -346,6 +379,12 @@ namespace Services
         {
             Debug.LogFormat("OnClose::Success:{0} [{1}]", response.Success, response.Errormsg);
             this.OnClose?.Invoke(response.Success, response.Errormsg);
+        }
+
+        void OnApiTestResponse_(object sender, ApiTestResponse response)
+        {
+            Debug.LogFormat("OnApiTest::Success:{0} [{1}]", response.Success, response.Errormsg);
+            this.OnApiTest?.Invoke(response.Success, response.Errormsg);
         }
 
         // 创建Agent

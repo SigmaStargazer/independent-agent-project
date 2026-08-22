@@ -381,6 +381,9 @@ namespace SkillBridge.Message
         [global::ProtoBuf.ProtoMember(34)]
         public CloseRequest closeRequest { get; set; }
 
+        [global::ProtoBuf.ProtoMember(35)]
+        public ApiTestRequest apiTestRequest { get; set; }
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -422,6 +425,9 @@ namespace SkillBridge.Message
 
         [global::ProtoBuf.ProtoMember(11)]
         public CloseResponse closeResponse { get; set; }
+
+        [global::ProtoBuf.ProtoMember(12)]
+        public ApiTestResponse apiTestResponse { get; set; }
 
     }
 
@@ -604,6 +610,47 @@ namespace SkillBridge.Message
 
     [global::ProtoBuf.ProtoContract()]
     public partial class CloseResponse : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"success")]
+        public bool Success { get; set; }
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"errormsg")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Errormsg { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class ApiTestRequest : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, Name = @"category")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Category { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(2, Name = @"api_base")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string ApiBase { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(3, Name = @"api_key")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string ApiKey { get; set; } = "";
+
+        [global::ProtoBuf.ProtoMember(4, Name = @"model")]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string Model { get; set; } = "";
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class ApiTestResponse : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
         global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)

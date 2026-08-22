@@ -40,9 +40,9 @@ API Key配置好并在MsgboxSaveSetting点「保存退出」后，目前需要�
 具体唤起时机如下：
 1）在MsgboxSaveSetting点「保存退出」后：
 
-从当前的逻辑改为开始对API Key是否可用进行测试，并停留在当前Panel、关闭MsgboxSaveSetting、唤起MsgboxModelTesting
+逻辑改为开始对API Key是否可用进行测试，关闭MsgboxSaveSetting、唤起MsgboxModelTesting。不再切换Panel
 
-注意：刚刚的页面配置什么模型就测什么，不需要对所有模型都进行测试
+注意：刚刚的页面配置什么模型就测什么，不需要对其他3个Panel配置的模型进行测试
 
 2）当API Key可用性测试通过时：
 
@@ -62,7 +62,9 @@ API Key配置好并在MsgboxSaveSetting点「保存退出」后，目前需要�
 
 2）MsgboxModelAvailable
 
-- 退出：关闭该Msgbox，并返回PanelSetting
+- 继续配置：关闭该Msgbox，留在当前Panel
+
+- 保存退出：关闭该Msgbox，保存配置，并返回PanelSetting
 
 2）MsgboxModelUnavailable
 

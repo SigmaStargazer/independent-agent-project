@@ -22,6 +22,7 @@ from memory_system import MemoryManager
 from memory_system.action_skill_system import load_default_skills
 from tools.console_logger import start_console_logging, stop_console_logging
 from lifecycle import AgentLifecycle
+from config.api_tester import test_api_connectivity
 
 # 项目根目录
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -204,6 +205,31 @@ async def handle_close_request(msg, context):
         response.success = False
         response.errormsg = str(e)
         print(f"关闭系统失败: {str(e)}")
+    await context['server'].send_message(response, context)
+
+@server.on_message(message_pb2.ApiTestRequest)
+async def handle_api_test_request(msg, context):
+    """API 连通性测试（v0.23.1）：Title 阶段「测试后保存」触发。
+
+    零系统：不初始化任何系统，仅用面板文本框当前值临时构造客户端发一次最小请求。
+    只做转发，把 test_api_connectivity 的 (success, errormsg) 回给 Unity。
+    """
+    print(f"收到 ApiTestRequest: category={msg.category}, base={msg.api_base}, model={msg.model}")
+    response = message_pb2.ApiTestResponse()
+    try:
+        success, errormsg = await test_api_connectivity(
+            category=msg.category,
+            api_base=msg.api_base,
+            api_key=msg.api_key,
+            model=msg.model,
+        )
+        response.success = success
+        response.errormsg = errormsg
+        print(f"ApiTestRequest 处理完成: success={success}, errormsg={errormsg}")
+    except Exception as e:
+        response.success = False
+        response.errormsg = str(e)
+        print(f"API 测试异常: {str(e)}")
     await context['server'].send_message(response, context)
 
 @server.on_message(message_pb2.UserSendMessageRequest)
