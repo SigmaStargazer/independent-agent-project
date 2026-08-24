@@ -16,18 +16,25 @@ namespace Services
     /// </summary>
     public static class JsonConfigIO
     {
-        /// <summary>配置文件目录（.../Src/Data/Config）。</summary>
+        /// <summary>配置文件目录。
+        /// 编辑器：.../Src/Data/Config（Application.dataPath 上两级）；
+        /// 打包：&lt;游戏根&gt;/Data/Config（Application.dataPath 上一级）。
+        /// 与 AgentService.PortConfigDir() 同一规则，保证端口文件与 api_config.json 同目录（v0.23.2）。</summary>
         public static string ConfigDir()
         {
             DirectoryInfo assetsDir = new DirectoryInfo(Application.dataPath);
             DirectoryInfo projectRoot = assetsDir.Parent;
-            DirectoryInfo srcRoot = projectRoot != null ? projectRoot.Parent : null;
-            if (srcRoot == null)
+#if UNITY_EDITOR
+            DirectoryInfo configRoot = projectRoot != null ? projectRoot.Parent : null;   // Src/
+#else
+            DirectoryInfo configRoot = projectRoot;                                       // 游戏根
+#endif
+            if (configRoot == null)
             {
-                Debug.LogWarning("[JsonConfigIO] 无法定位 Src 目录（构建环境可能不支持外部路径）。");
+                Debug.LogWarning("[JsonConfigIO] 无法定位配置目录（构建环境可能不支持外部路径）。");
                 return Path.Combine(Application.persistentDataPath, "Data", "Config");
             }
-            return Path.Combine(srcRoot.FullName, "Data", "Config");
+            return Path.Combine(configRoot.FullName, "Data", "Config");
         }
 
         /// <summary>读取 JSON 文件；文件不存在 / 解析失败时返回 fallback。始终按 UTF-8 处理。</summary>

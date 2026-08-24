@@ -3,6 +3,7 @@ using Common;
 using Network;
 using ProtoBuf;
 using SkillBridge.Message;
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,11 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.MemoryProfiler;
-using UnityEditor.PackageManager.Requests;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -179,31 +175,102 @@ namespace Services
             AgentClient.Instance.Connect();
         }
 
+        // v0.23.2：端口文件轮询间隔 / 连接总超时（打包后 Python 子进程冷启动有延迟，需等待而非回退 8000）
+        const int PORT_WAIT_INTERVAL_MS = 500;
+        const int CONNECT_TIMEOUT_SEC = 30;
+
+        /// <summary>
+        /// 端口文件目录：统一规则（与 JsonConfigIO.ConfigDir() 一致）。
+        /// 编辑器：Application.dataPath(Assets) 上两级 = Src/，端口文件在 Src/Data/Config/。
+        /// 打包：Application.dataPath 上一级 = 游戏根，端口文件在 &lt;游戏根&gt;/Data/Config/。
+        /// </summary>
+        static string PortConfigDir()
+        {
+#if UNITY_EDITOR
+            // 编辑器：Src/Data/Config（上两级）
+            string root = Directory.GetParent(Application.dataPath)?.Parent?.FullName;
+#else
+            // 打包：<游戏根>/Data/Config（上一级）
+            string root = Directory.GetParent(Application.dataPath)?.FullName;
+#endif
+            if (string.IsNullOrEmpty(root))
+            {
+                throw new DirectoryNotFoundException("Unable to find the root directory.");
+            }
+            return Path.Combine(root, "Data", "Config");
+        }
+
         int GetPort()
         {
-            try
+            string filePath = Path.Combine(PortConfigDir(), "agent_server_port.txt");
+            Debug.Log($"GetPort filePath: {filePath}");
+
+            if (!File.Exists(filePath))
             {
-                // 获取当前目录的上一级目录路径
-                string projectRoot = Directory.GetParent(Application.dataPath).Parent?.FullName;
-                // 只在 PC/Mac/Linux 构建的应用 中有效。Android/iOS：沙盒机制不允许访问外部路径
-                Debug.Log($"projectRoot: {projectRoot}");
-
-                if (projectRoot == null)
-                {
-                    throw new DirectoryNotFoundException("Unable to find the Src directory.");
-                }
-
-                string filePath = Path.Combine(projectRoot, "Data", "Config", "agent_server_port.txt");
-                Debug.Log($"filePath: {filePath}");
-
-                // 从文件中读取服务端端口号
-                string portStr = File.ReadAllText(filePath).Trim();
-                return int.Parse(portStr);
+                throw new FileNotFoundException("Server port file not found. Please ensure the server is running.", filePath);
             }
-            catch (FileNotFoundException)
+            string portStr = File.ReadAllText(filePath).Trim();
+            if (string.IsNullOrEmpty(portStr))
             {
-                Debug.Log("Server port file not found. Please ensure the server is running.");
-                return 8000;
+                throw new InvalidDataException("Server port file is empty (server has not written the port yet).");
+            }
+            int port = int.Parse(portStr);
+            if (port <= 0)
+            {
+                throw new InvalidDataException($"Server port file contains an invalid port: {port}.");
+            }
+            return port;
+        }
+
+        /// <summary>
+        /// v0.23.2：异步等待 Python 服务端连接就绪。
+        /// 阶段一：轮询端口文件就绪（存在且为合法端口）；
+        /// 阶段二：轮询 TCP 连接就绪（AgentClient.Connected）。
+        /// 全程协程（UniTask.Delay），不阻塞主线程；总超时 CONNECT_TIMEOUT_SEC 后抛 TimeoutException。
+        /// </summary>
+        public async UniTask EnsureConnectedAsync()
+        {
+            float deadline = Time.realtimeSinceStartup + CONNECT_TIMEOUT_SEC;
+
+            // 阶段一：等端口文件就绪（存在且合法端口）
+            int port;
+            while (true)
+            {
+                try
+                {
+                    port = GetPort();
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (Time.realtimeSinceStartup >= deadline)
+                    {
+                        throw new TimeoutException($"等待端口文件超时（>{CONNECT_TIMEOUT_SEC}s）：{e.Message}");
+                    }
+                    await UniTask.Delay(PORT_WAIT_INTERVAL_MS);
+                }
+            }
+
+            // 阶段二：等 TCP 连接就绪（重复发起连接直到 Connected 或超时）
+            while (true)
+            {
+                if (AgentClient.Instance.Connected)
+                {
+                    this.connected = true;
+                    this.connecting = false;
+                    return;
+                }
+                if (Time.realtimeSinceStartup >= deadline)
+                {
+                    throw new TimeoutException($"连接 Python 服务端超时（>{CONNECT_TIMEOUT_SEC}s）：127.0.0.1:{port}");
+                }
+                if (!this.connected && !this.connecting)
+                {
+                    this.connecting = true;
+                    AgentClient.Instance.Init("127.0.0.1", port);
+                    AgentClient.Instance.Connect(); // 内部 BeginConnect 异步，不阻塞主线程
+                }
+                await UniTask.Delay(PORT_WAIT_INTERVAL_MS);
             }
         }
 

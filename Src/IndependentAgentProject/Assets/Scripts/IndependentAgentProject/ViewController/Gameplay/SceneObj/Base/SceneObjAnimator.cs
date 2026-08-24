@@ -289,8 +289,9 @@ namespace IndependentAgentProject
 
         /// <summary>
         /// 读取指定 Layer 的默认状态名（AnimatorController 层默认状态）。
-        /// 仅编辑器内调用。
+        /// 仅编辑器内调用；打包版不编译（UnityEditor.Animations 仅编辑器存在）。
         /// </summary>
+#if UNITY_EDITOR
         private string GetLayerDefaultStateName(int layerIndex)
         {
             if (_animator != null && _animator.runtimeAnimatorController != null)
@@ -305,6 +306,7 @@ namespace IndependentAgentProject
             }
             return null;
         }
+#endif
 
         /// <summary>
         /// 在上层 Action Layer 播放一次性动作动画（v0.22.18）。

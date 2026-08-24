@@ -1,7 +1,7 @@
 # 需求池 / 候选问题清单（不依附具体版本）
 
 > **状态**：候选 / 未分配版本  
-> **最后更新**：2026-08-03（条目 11 新增：Follow FSM 状态粒度问题）
+> **最后更新**：2026-08-24（条目 12 新增：客户端打包方案剩余工作）
 > **文件名**：`backlog.md`（2026-06-28 由 `analysis.md` 改名，避免与版本目录内的 `analysis.md` 混淆）  
 > **目录说明**：见同目录 `README.md`。原 `DevDocs/v0.21.X/` 于 2026-06-28 改名为 `DevDocs/需求池/`。
 
@@ -24,6 +24,7 @@
 | 9 | `observe` 工具反馈应附带「自己的状态」 | 体验 / Unity 工具 | 中（Hidden/Dead/Stunned/Follow 易遗忘自身约束） | P1 | 已立项 | v0.22.11 |
 | 10 | idle wakeup 无信息量心理活动应抑制写入 | 体验 / 记忆系统 | 中（任务完成后 idle 期反复刷重复 Episode） | P1 | 已完成 | v0.22.2 |
 | 11 | `Follow` 作为 FSM 状态粒度过粗，无法表达跟随中的走/停/跳/爬 | 设计 / Unity FSM+动画 | 大（跟随行为表现受限，需重构 Follow 语义） | P1 | 候选 | - |
+| 12 | 客户端打包方案（Unity + Python 本地一体化）剩余工作 | 工程 / 打包（Unity+Python+脚本） | 大（发布前提，6 个子项，见正文） | P1 | 候选 | - |
 
 > 字段约定：
 > - **类型**：Bug / 体验 / 工程清理 / 调研 / 评估 / 协议改动 等，标注主要落地面（Python / Unity / 协议 / 记忆系统 / 工具）。
@@ -527,6 +528,52 @@ v0.22.16 的 `SceneObjAnimator` 本期**不处理 Follow 内部的走/停表现*
 
 ---
 
+## 12. P1 — 客户端打包方案（Unity + Python 本地一体化）剩余工作
+
+### 背景
+
+`DevDocs/feature-design/打包方案.md`（2026-07-20 更新）规划了把 Unity 客户端 + Python Agent 服务端打包成单机客户端（玩家双击 exe 即玩、自动拉起 Python、玩家自备 API Key）。方案已定，但**尚未按规划版本落地**。
+
+### 现状：哪些已完成 / 哪些未完成
+
+经核对（2026-08-24），打包方案 §10 规划的 v0.23.0~v0.23.6 六个版本，其中**编号已被 API 配置工作（v0.23.0a/0b/v0.23.1）占用**，两者是不同任务：
+
+| 打包方案版本 | 主题 | 实际状态 |
+|---|---|---|
+| v0.23.0 | Unity 端口路径改造 + 连接重试 | ❌ 未做（`AgentService.GetPort()` 仍 `Parent.Parent`，无 `#if UNITY_EDITOR` 分支；`ConnectToServer()` 无轮询重试） |
+| v0.23.1 | Python 内嵌运行时 | ❌ 未做（无 `Tools/build_python_runtime.cmd`、`Tools/requirements.txt`、`PythonServer/python/`+`runtime/`） |
+| v0.23.2 | Unity 托管 Python 进程 | ❌ 未做（无 `PythonProcessLauncher.cs`；`BootstrapEntry.cs` 仍是纯场景跳转） |
+| v0.23.3 | Python 侧延迟初始化 | ✅ 大部分已做（`main.py` 已有无 Key 启动 / `--auto-init` / `InitRequest`→`enter_game` / `CloseRequest`→`leave_game` / 读 `api_config.json` 注入 env，v0.23.0a/0b 时顺带完成） |
+| v0.23.4 | Title API 配置 UI 与注入 | ✅ 主体已做（`ApiConfigStore.cs` / `UISetting.cs` / Title 配置面板 / 测试后保存）。**缺加密**：`ApiConfigStore` 目前明文 JSON，方案 §4.2/§8.9 要求 AES + 机器绑定密钥 |
+| v0.23.5 | 一键打包脚本 | ❌ 未做（无 `Tools/build_package.cmd`） |
+| v0.23.6 | Python 源码保护 + 体积优化 | ❌ 未做（无 `.pyc` 预编译、无完整性校验、无体积瘦身） |
+
+### 待办子项
+
+1. **Unity 端口路径与连接重试**（≈v0.23.0）：`AgentService.GetPort()` 加 `#if UNITY_EDITOR` 打包分支（打包后 `Application.dataPath` 的 `Parent`）；`ConnectToServer()` 改轮询重试而非回退 8000。注意方案 §10 已提示 `ClientBase.DoConnect()` 的 `BeginConnect + WaitOne(10000)` 会阻塞主线程，需用 UniTask 异步重试。
+2. **Python 内嵌运行时**（≈v0.23.1）：新增 `Tools/requirements.txt`（从 `pyproject.toml` 导出、排除 `graphiti_core`）+ `Tools/build_python_runtime.cmd`（下载 python-build-standalone 3.12 + `pip install --target`）。
+3. **Unity 托管 Python 进程**（≈v0.23.2）：新增 `PythonProcessLauncher.cs`（`Process.Start` 拉 `main.py`、`WorkingDirectory=PythonServer/`、`WaitForPortReady` 轮询、`OnApplicationQuit` Kill）；`BootstrapEntry.cs` 加 `#if !UNITY_EDITOR` 分支。
+4. **ApiConfigStore 加密**（≈v0.23.4 补）：明文 → AES + 机器绑定密钥（MAC/主板序列号派生密钥）。**安全硬性要求**，发布前必须做。
+5. **一键打包脚本**（≈v0.23.5）：`Tools/build_package.cmd`（Unity Build + 组装目录 + 排除 `.env`/`db`/`logs`/测试 + 打 zip）。
+6. **Python 源码保护 + 体积优化**（≈v0.23.6）：`compileall` 预编译 `.py`→`.pyc`、删除 `.py`、完整性哈希校验（可选）、体积瘦身、7z 压缩。
+
+### 候选推进方式
+
+按打包方案 §10 逐版本走 dev-docs 流程：立项时从本条目迁移，每版本在 `DevDocs/v0.23.x/` 生成 PRD/solution 再开发。主线「解压即玩」约 4 个版本（端口路径+重试 / 内嵌运行时 / Unity 托管进程 / 打包脚本），加固约 2 个（加密 / 源码保护+体积）。macOS 支持（方案 §12，约 5-6 人天）建议 Windows 主线跑通后作为后续单独立项。
+
+### 影响范围预估
+
+- Unity：`AgentService.cs`、`BootstrapEntry.cs`、新增 `PythonProcessLauncher.cs`、`ApiConfigStore.cs`（加密）。
+- Python：`main.py`（打包路径验证）、`tools/console_logger.py`（日志降级，已有支持）。
+- 新增脚本：`Tools/build_python_runtime.cmd`、`Tools/build_package.cmd`、`Tools/requirements.txt`。
+- 安全：打包前需在各供应商后台轮换/禁用 `.env` 中的开发者 Key（方案 §6.2）。
+
+### 参考文档
+
+- `DevDocs/feature-design/打包方案.md`（权威方案，含目录结构 / 时序 / 脚本骨架 / 风险矩阵 / 版本规划）。
+
+---
+
 - 以上条目中，1/2/7/9/10 已立项或完成，其余未立项；新版本启动时从中挑题，并把对应条目从本文件迁移到新版本目录的 `analysis.md`。立项后请同步更新顶部索引表的「状态 / 立项版本」字段。
 - 复现日志：
   - 条目 1~5：`Src/PythonServer/logs/prompts/小明/2026-06-23_13-41-56.log`（v0.21.6 验收训练）
@@ -534,3 +581,4 @@ v0.22.16 的 `SceneObjAnimator` 本期**不处理 Follow 内部的走/停表现*
   - 条目 7：2026-06-28 `file` 工具扫描 `Src/IndependentAgentProject/Assets/Scripts/**/*.cs`。
   - 条目 8~9：`Src/PythonServer/logs/prompts/小明/2026-06-28_14-32-42.log`（v0.21.7_fix_1 联调）；条目 8 另有 2026-06-29 复现 `logs/prompts/小明/2026-06-29_19-50-46.log`。
   - 条目 10：`Src/PythonServer/logs/prompts/小明/2026-06-29_19-50-46.log`（v0.21.7_fix_3 联调）。
+  - 条目 12：无复现日志；依据 `DevDocs/feature-design/打包方案.md` 与 2026-08-24 代码核对（`AgentService.cs` / `BootstrapEntry.cs` / `ApiConfigStore.cs` / `Tools/` 现状）。

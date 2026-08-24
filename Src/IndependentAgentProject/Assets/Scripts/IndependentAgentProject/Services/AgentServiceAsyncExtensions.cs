@@ -7,6 +7,12 @@ namespace Services
 {
     public static class AgentServiceAsyncExtensions
     {
+        /// <summary>v0.23.2：等待 Python 服务端连接就绪（端口文件就绪 + TCP 连接成功），超时抛异常。</summary>
+        public static UniTask EnsureConnectedAsync()
+        {
+            return AgentService.Instance.EnsureConnectedAsync();
+        }
+
         /// <summary>v0.23.0：发送 InitRequest，等待 Python 初始化记忆系统完成。</summary>
         public static UniTask InitAsync()
         {

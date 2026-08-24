@@ -14,6 +14,9 @@ namespace IndependentAgentProject
 
         public async UniTask Execute()
         {
+            // v0.23.2：先等待 Python 服务端连接就绪（端口文件就绪 + TCP 连接成功），再初始化。
+            // 打包后 Python 子进程冷启动有延迟；连接超时抛异常 → FlowExecutor 按 FailPolicy 报错回 Title。
+            await AgentServiceAsyncExtensions.EnsureConnectedAsync();
             await AgentServiceAsyncExtensions.InitAsync();
         }
     }
