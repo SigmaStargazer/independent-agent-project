@@ -122,6 +122,15 @@ Src/Data/Config/api_config.json
 Src/PythonServer/db/**/*.kuzu
 Src/PythonServer/db/**/*.kuzu.wal
 
+# ===== Python 内嵌运行时（v0.23.3，构建产物，勿进 Git） =====
+# 由 Tools/build_python_runtime.cmd 生成；可整体拷贝到无 Python/uv 的机器运行
+Src/PythonServer/python/
+Src/PythonServer/runtime/
+
+# ===== Python 虚拟环境（uv venv，开发期已弃用，勿进 Git） =====
+.venv/
+Src/PythonServer/.venv/
+
 # ===== Windows 保留设备名（误重定向产生的垃圾文件） =====
 # Git Bash 里误写 `> nul` / `2>nul`（cmd 写法）会真创建一个 0 字节的 `nul` 文件，
 # git 在 Windows 上无法把保留设备名 nul 加入索引，导致 `git add` 报 invalid path 整批失败。

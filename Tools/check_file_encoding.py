@@ -244,7 +244,7 @@ def _resolve_repo_root() -> Path:
 def _staged_files(repo_root: Path) -> list[Path]:
     try:
         out_bytes = subprocess.check_output(
-            ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMRT"],
+            ["git", "-c", "core.quotepath=false", "diff", "--cached", "--name-only", "--diff-filter=ACMRT"],
             cwd=repo_root,
         )
     except (subprocess.CalledProcessError, FileNotFoundError):

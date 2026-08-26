@@ -450,6 +450,7 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 4. 与用户交流默认简体中文
 5. 不主动 git commit / push，除非用户明确要求
 6. **`agent_framwork/` 不放业务代码**：`agent_framwork` 的设计目标是可复用到不同项目的通用框架。业务逻辑（如特定技能系统、特定工具实现等）应放在独立目录（如 `action_skill_system/`）中，通过接口与框架对接。后续会逐步将 `agent_framwork` 中已有的业务代码解耦分出。
+7. **不要用 `AskQuestion`（选择题卡片）向用户发问**：该工具在当前环境有 bug，用户点不了选项。需要用户做决策时，直接用普通文字（中文）列出选项与编号，让用户用文字回复（如「A」「BA」）。
 
 ### 开发纪律
 
