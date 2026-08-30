@@ -21,6 +21,8 @@ from memory_system.action_skill_system import ActionSkillManager
 from memory_system.db_conn import DBConnectionService
 from memory_system.embedder import EmbedderService
 
+from runtime.path_config import get_data_dir
+
 from agent_framwork.base.singleton import singleton
 from agent_framwork.utils.prompt_utils import estimate_tokens
 
@@ -58,7 +60,7 @@ class MemoryManager:
         self._memory_queue = asyncio.Queue(maxsize=QUEUE_SIZE)
         self._worker_task = None
 
-        self._backup_root = "db/backups"
+        self._backup_root = os.path.join(get_data_dir(), "backups")
         self._max_backup_slots = int(os.getenv("MAX_BACKUP_SLOTS", 10))
         self._backup_lock = asyncio.Lock()
 
