@@ -412,6 +412,21 @@ cd Src/PythonServer && uv run python main.py   # 先启动
 
 `.env`：`AGENT_API_*`（对话）、`MEMORY_*` / `EMBEDDING_*` / `RERANKER_*`（记忆）。
 
+### Unity MCP（Cursor ↔ Unity 编辑器）
+
+Cursor 可通过 **MCP** 直接读取/操作 Unity 编辑器（基于 CoplayDev/unity-mcp，HTTP 传输），**不走**运行期游戏内 TCP+Protobuf 链路，是编辑器/开发期工具。
+
+- **配置**：全局 `~/.cursor/mcp.json` 已注册：
+  ```json
+  { "mcpServers": { "unityMCP": { "url": "http://127.0.0.1:8080/mcp", "type": "http" } } }
+  ```
+- **前提**：Unity 内 `Window > MCP for Unity` 的 **Start Bridge** 必须在运行。重新打开 Cursor 前先启动 Bridge，否则认证超时、工具不可用（连接失败时命名空间状态为 `error`，可用 `mcp_auth` 认证重试）。
+- **连接名**：`user-unityMCP`（认证成功后可用）。当前 Unity 实例：`IndependentAgentProject`（2021.3.8f1c1）。
+- **用法**：
+  - `GetDynamicTools` 列出工具；`FetchMcpResource` 读 `mcpforunity://...` 资源（`editor/state`、`project/info`、`instances` 等）；
+  - `CallDynamicTool` 调用工具：`manage_scene`、`manage_gameobject`、`manage_asset`、`apply_text_edits`、`batch_execute`、`read_console`、`unity_reflect`、`unity_docs` 等（改脚本后先 `read_console` 检查编译错误）。
+- **定位**：MCP 用于**编辑器侧**开发（查场景层级、检查编译、增删 GameObject、验证 Unity API），与运行期 Agent 工具链路（§1.3 工具 RPC）无关。
+
 ---
 
 ## 八、文档、Skills 与约定

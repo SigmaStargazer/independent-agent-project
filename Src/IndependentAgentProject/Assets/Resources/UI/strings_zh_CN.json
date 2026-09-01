@@ -1,0 +1,18 @@
+{
+  "tab_model_config": "模型配置",
+  "tab_display_settings": "画面",
+  "game_display_mode": "显示模式",
+  "game_resolution": "分辨率",
+  "mode_windowed": "窗口化",
+  "mode_borderless": "无边框",
+  "mode_fullscreen": "全屏",
+  "resolution_format": "{0} x {1}",
+  "msgbox_empty_api_key_title": "配置不完整",
+  "msgbox_empty_api_key_hint": "有模型配置项为空，无法测试保存",
+  "msgbox_empty_api_key_continue": "继续配置",
+  "msgbox_empty_api_key_exit": "退出",
+  "msgbox_save_setting_hint": "画面设置已变更，是否保存？",
+  "msgbox_save_setting_save_exit": "保存并退出",
+  "msgbox_save_setting_exit": "退出",
+  "msgbox_save_setting_cancel": "取消"
+}

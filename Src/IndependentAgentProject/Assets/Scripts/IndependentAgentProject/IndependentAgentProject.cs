@@ -10,6 +10,8 @@ namespace IndependentAgentProject
         protected override void Init()
         {
             RegisterModel<IGameModel>(new GameModel());
+            RegisterModel<IGameSettingsModel>(new GameSettingsModel());
+            RegisterModel<IApiConfigModel>(new ApiConfigModel());
         }
     }
 

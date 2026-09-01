@@ -4,9 +4,11 @@ using UnityEngine;
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// 标题页 UI（v0.23.1）：页面切换 + MsgboxSaveApiKey（测试后保存）+ 3 个 API 测试结果弹窗。
-    /// API 配置的读取 / 回填 / 变更检测 / 保存 / 测试流程下沉到 UISetting（挂 UIConfig）。
-    /// v0.23.1 起退出配置面板固定返回 PanelSetting，不再记录弹窗来源层级（SaveMsgFrom/UILevel 已移除）。
+    /// 标题页 UI（v0.23.4）：页面切换 + MsgboxSaveApiKey（测试后保存）+ 3 个 API 测试结果弹窗
+    /// + MsgboxEmptyApiKey（配置不完整提示）+ MsgboxSaveSetting（画面设置变更确认）。
+    /// 模型配置数据（读取/回填/变更检测/保存/测试流程）在 UIModelConfig（挂 ContentModelConfig）；
+    /// 设置页根容器 UISetting（挂 PanelSetting）管 Tab 切换（数据驱动）与画面配置（显示模式/分辨率）。
+    /// v0.23.4 导航：配置子面板 ESC → 返回 PanelTab；PanelTab ESC → 检测画面变更（有则弹 MsgboxSaveSetting）后回主菜单。
     /// </summary>
     public class UITitle : MonoBehaviour
     {
@@ -27,24 +29,18 @@ namespace IndependentAgentProject
         [Header("设置面板")]
         [SerializeField]
         private GameObject mSettingPanel;
-        [Header("配置子面板")]
-        [SerializeField]
-        private GameObject mLLMAgentPanel;
-        [SerializeField]
-        private GameObject mLLMMemoryPanel;
-        [SerializeField]
-        private GameObject mEmbeddingPanel;
-        [SerializeField]
-        private GameObject mRerankerPanel;
         [Header("新游戏弹窗")]
         [SerializeField]
         private GameObject mNewGameWarmingMsgbox;
-        [Header("保存设置确认弹窗（v0.23.1 起不再使用，保留供以后设置项使用）")]
+        [Header("保存设置确认弹窗")]
         [SerializeField]
         private GameObject mSaveSettingMsgBox;
         [Header("无API Key弹窗")]
         [SerializeField]
         private GameObject mNoApiKeyMsgbox;
+        [Header("配置不完整提示弹窗")]
+        [SerializeField]
+        private GameObject mEmptyApiKeyMsgbox;
         [Header("退出游戏弹窗")]
         [SerializeField]
         private GameObject mQuitMsgbox;
@@ -61,7 +57,11 @@ namespace IndependentAgentProject
         [SerializeField]
         private UIMsgBox mModelUnavailableMsgbox;    // 不可用（继续配置/退出）
 
-        [Header("API 配置读写组件（挂 UIConfig 上的 UISetting）")]
+        [Header("模型配置数据组件（挂 ContentModelConfig 上的 UIModelConfig，v0.23.4 起）")]
+        [SerializeField]
+        private UIModelConfig mModelConfig;
+
+        [Header("设置页根容器（PanelSetting 上的 UISetting，v0.23.4 起用于 Tab 复位 / 画面变更检测）")]
         [SerializeField]
         private UISetting mSetting;
 
@@ -79,6 +79,8 @@ namespace IndependentAgentProject
                 mNoApiKeyMsgbox.SetActive(false);
             if (mQuitMsgbox != null)
                 mQuitMsgbox.SetActive(false);
+            if (mEmptyApiKeyMsgbox != null)
+                mEmptyApiKeyMsgbox.SetActive(false);
             if (mSaveSettingMsgBox != null)
                 mSaveSettingMsgBox.SetActive(false);
             if (mSaveApiKeyMsgBox != null)
@@ -90,12 +92,12 @@ namespace IndependentAgentProject
             if (mModelUnavailableMsgbox != null)
                 mModelUnavailableMsgbox.gameObject.SetActive(false);
 
-            // 注入回调：UISetting 只请求，切换/弹窗显隐由 UITitle 执行
-            if (mSetting != null)
+            // 注入回调：UIModelConfig 只请求，切换/弹窗显隐由 UITitle 执行
+            if (mModelConfig != null)
             {
-                mSetting.OnStartApiTest = OnStartApiTest;
-                mSetting.OnApiTestFinished = OnApiTestFinished;
-                mSetting.OnRequestBackToSetting = ShowSetting;
+                mModelConfig.OnStartApiTest = OnStartApiTest;
+                mModelConfig.OnApiTestFinished = OnApiTestFinished;
+                mModelConfig.OnRequestBackToSetting = ShowSetting;
             }
         }
 
@@ -137,10 +139,10 @@ namespace IndependentAgentProject
             }
             else if (mSettingPanel != null && mSettingPanel.activeSelf)
             {
-                // 设置：ESC 返回主菜单
+                // 设置页（PanelTab）：ESC 先检测画面变更，有则弹 MsgboxSaveSetting，无变更返回主菜单
                 if (Input.GetButtonDown("Menu"))
                 {
-                    ShowMainMenu();
+                    TryLeaveSettingTab();
                 }
             }
             else if (mMainMenuPanel != null && mMainMenuPanel.activeSelf)
@@ -161,10 +163,6 @@ namespace IndependentAgentProject
             SetPanelActive(mPressAnyButtonPanel, true);
             SetPanelActive(mMainMenuPanel, false);
             SetPanelActive(mSettingPanel, false);
-            SetPanelActive(mLLMAgentPanel, false);
-            SetPanelActive(mLLMMemoryPanel, false);
-            SetPanelActive(mEmbeddingPanel, false);
-            SetPanelActive(mRerankerPanel, false);
             LockInput();
         }
 
@@ -176,98 +174,175 @@ namespace IndependentAgentProject
             SetPanelActive(mPressAnyButtonPanel, false);
             SetPanelActive(mMainMenuPanel, true);
             SetPanelActive(mSettingPanel, false);
-            SetPanelActive(mLLMAgentPanel, false);
-            SetPanelActive(mLLMMemoryPanel, false);
-            SetPanelActive(mEmbeddingPanel, false);
-            SetPanelActive(mRerankerPanel, false);
             LockInput();
         }
 
         /// <summary>
-        /// 切换到设置面板（关闭 4 个配置子面板，从任一子面板返回设置总览）。
+        /// 切换到设置面板（复位 Tab + 隐藏子面板 + 刷新回填；从任一子面板返回设置总览也走这里）。
+        /// 子面板 / Tab 的内部显隐由 UISetting（mSetting）统一调度，UITitle 只负责页面级切换。
         /// </summary>
         public void ShowSetting()
         {
             SetPanelActive(mPressAnyButtonPanel, false);
             SetPanelActive(mMainMenuPanel, false);
-            SetPanelActive(mLLMAgentPanel, false);
-            SetPanelActive(mLLMMemoryPanel, false);
-            SetPanelActive(mEmbeddingPanel, false);
-            SetPanelActive(mRerankerPanel, false);
             SetPanelActive(mSettingPanel, true);
             LockInput();
-            // 返回设置总览：刷新回填（子面板若有未保存编辑，在此丢弃回文件值）
+            // 复位到默认 Tab（隐藏全部配置子面板），并刷新回填（子面板若有未保存编辑，在此丢弃回文件值）
             if (mSetting != null)
-                mSetting.RefreshInputsFromConfig();
+                mSetting.ResetToDefaultTab();
+            if (mModelConfig != null)
+                mModelConfig.RefreshInputsFromConfig();
         }
 
         /// <summary>
-        /// 打开「LLM Agent」配置子面板。
+        /// 打开「LLM Agent」配置子面板（内部显隐由 UISetting 调度）。
         /// </summary>
         public void OnClickLLMAgentSetting()
         {
-            SetSubPanelActive(mLLMAgentPanel);
+            if (mSetting != null)
+                mSetting.OnClickLLMAgentSetting();
+            LockInput();
         }
 
         /// <summary>
-        /// 打开「LLM Memory」配置子面板。
+        /// 打开「LLM Memory」配置子面板（内部显隐由 UISetting 调度）。
         /// </summary>
         public void OnClickLLMMemorySetting()
         {
-            SetSubPanelActive(mLLMMemoryPanel);
+            if (mSetting != null)
+                mSetting.OnClickLLMMemorySetting();
+            LockInput();
         }
 
         /// <summary>
-        /// 打开「Embedding」配置子面板。
+        /// 打开「Embedding」配置子面板（内部显隐由 UISetting 调度）。
         /// </summary>
         public void OnClickEmbeddingSetting()
         {
-            SetSubPanelActive(mEmbeddingPanel);
+            if (mSetting != null)
+                mSetting.OnClickEmbeddingSetting();
+            LockInput();
         }
 
         /// <summary>
-        /// 打开「Reranker」配置子面板。
+        /// 打开「Reranker」配置子面板（内部显隐由 UISetting 调度）。
         /// </summary>
         public void OnClickRerankerSetting()
         {
-            SetSubPanelActive(mRerankerPanel);
-        }
-
-        private void SetSubPanelActive(GameObject subPanel)
-        {
-            SetPanelActive(mLLMAgentPanel, subPanel == mLLMAgentPanel);
-            SetPanelActive(mLLMMemoryPanel, subPanel == mLLMMemoryPanel);
-            SetPanelActive(mEmbeddingPanel, subPanel == mEmbeddingPanel);
-            SetPanelActive(mRerankerPanel, subPanel == mRerankerPanel);
-            SetPanelActive(mSettingPanel, false);
-            LockInput();
-            // 打开子面板前确保回填文件值
             if (mSetting != null)
-                mSetting.RefreshInputsFromConfig();
+                mSetting.OnClickRerankerSetting();
+            LockInput();
         }
 
+        /// <summary>是否有配置子面板激活（委托给 UISetting，供 ESC 分发判断）。</summary>
         private bool IsSubPanelActive()
         {
-            return (mLLMAgentPanel != null && mLLMAgentPanel.activeSelf)
-                || (mLLMMemoryPanel != null && mLLMMemoryPanel.activeSelf)
-                || (mEmbeddingPanel != null && mEmbeddingPanel.activeSelf)
-                || (mRerankerPanel != null && mRerankerPanel.activeSelf);
+            return mSetting != null && mSetting.IsSubPanelActive();
         }
 
         /// <summary>
-        /// ESC 从子面板返回：有编辑 → 弹 MsgboxSaveApiKey；无编辑 → 直接返回设置。
+        /// ESC 从子面板返回：先判空项（有空 → MsgboxEmptyApiKey）；有变更 → MsgboxSaveApiKey；无变更 → 返回设置。
         /// </summary>
         private void TryLeaveSubPanel()
         {
-            bool changed = mSetting != null && mSetting.HasConfigChanged();
-            if (changed)
-            {
-                ShowSaveApiKeyMsgBox();
-            }
-            else
+            bool changed = mModelConfig != null && mModelConfig.HasConfigChanged();
+            if (!changed)
             {
                 ShowSetting();
+                return;
             }
+            if (mModelConfig != null && mModelConfig.HasEmptyFieldInActivePanel())
+            {
+                ShowEmptyApiKeyMsgBox();   // 有空框 → 配置不完整提示
+                return;
+            }
+            ShowSaveApiKeyMsgBox();        // 无空框且有变更 → 原有保存确认
+        }
+
+        /// <summary>
+        /// 弹出 MsgboxEmptyApiKey（配置子面板有文本框为空时退出提示）。
+        /// </summary>
+        private void ShowEmptyApiKeyMsgBox()
+        {
+            if (mEmptyApiKeyMsgbox != null)
+            {
+                mEmptyApiKeyMsgbox.SetActive(true);
+                LockInput();
+            }
+        }
+
+        /// <summary>
+        /// ESC 从设置页（PanelTab）返回：画面设置有变更 → 弹 MsgboxSaveSetting；无变更 → 直接返回主菜单。
+        /// </summary>
+        private void TryLeaveSettingTab()
+        {
+            if (mSetting != null && mSetting.HasDisplaySettingsChanged())
+            {
+                ShowSaveSettingMsgBox();
+                return;
+            }
+            ShowMainMenu();
+        }
+
+        /// <summary>
+        /// 弹出 MsgboxSaveSetting（画面设置变更确认）。
+        /// </summary>
+        private void ShowSaveSettingMsgBox()
+        {
+            if (mSaveSettingMsgBox != null)
+            {
+                mSaveSettingMsgBox.SetActive(true);
+                LockInput();
+            }
+        }
+
+        // ===== MsgboxEmptyApiKey 按钮（由用户在场景中绑定到 UITitle 公开方法） =====
+
+        /// <summary>Btn1「继续配置」：关弹窗，停留当前子面板。</summary>
+        public void OnClickEmptyContinue()
+        {
+            if (mEmptyApiKeyMsgbox != null)
+                mEmptyApiKeyMsgbox.SetActive(false);
+            LockInput();
+        }
+
+        /// <summary>Btn2「退出」：关弹窗，返回设置页主界面（不保存）。</summary>
+        public void OnClickEmptyExit()
+        {
+            if (mEmptyApiKeyMsgbox != null)
+                mEmptyApiKeyMsgbox.SetActive(false);
+            if (mModelConfig != null)
+                mModelConfig.OnExitToSetting();
+        }
+
+        // ===== MsgboxSaveSetting 按钮（由用户在场景中绑定到 UITitle 公开方法） =====
+
+        /// <summary>Btn1「保存并退出」：保存画面设置，返回主菜单。</summary>
+        public void OnClickSaveSettingAndExit()
+        {
+            if (mSaveSettingMsgBox != null)
+                mSaveSettingMsgBox.SetActive(false);
+            if (mSetting != null)
+                mSetting.SaveDisplaySettings();
+            ShowMainMenu();
+        }
+
+        /// <summary>Btn2「退出」：不保存画面设置，还原为文件已保存值后返回主菜单。</summary>
+        public void OnClickExitSetting()
+        {
+            if (mSaveSettingMsgBox != null)
+                mSaveSettingMsgBox.SetActive(false);
+            if (mSetting != null)
+                mSetting.RevertDisplaySettings();
+            ShowMainMenu();
+        }
+
+        /// <summary>Btn3「取消」：仅关弹窗，留在设置页。</summary>
+        public void OnClickCancelSaveSetting()
+        {
+            if (mSaveSettingMsgBox != null)
+                mSaveSettingMsgBox.SetActive(false);
+            LockInput();
         }
 
         /// <summary>
@@ -292,25 +367,25 @@ namespace IndependentAgentProject
             LockInput();
         }
 
-        /// <summary>Btn2「退出」：不保存，固定返回 PanelSetting。</summary>
+        /// <summary>Btn2「退出」：不保存，固定返回设置页主界面。</summary>
         public void OnClickExitSaveApiKey()
         {
             if (mSaveApiKeyMsgBox != null)
                 mSaveApiKeyMsgBox.SetActive(false);
-            if (mSetting != null)
-                mSetting.OnExitToSetting();
+            if (mModelConfig != null)
+                mModelConfig.OnExitToSetting();
         }
 
-        /// <summary>Btn3「测试后保存」：关 SaveApiKey，由 UISetting 发起测试。</summary>
+        /// <summary>Btn3「测试后保存」：关 SaveApiKey，由 UIModelConfig 发起测试。</summary>
         public void OnClickConfirmTestApiKey()
         {
             if (mSaveApiKeyMsgBox != null)
                 mSaveApiKeyMsgBox.SetActive(false);
-            if (mSetting != null)
-                mSetting.OnConfirmTestConfig();
+            if (mModelConfig != null)
+                mModelConfig.OnConfirmTestConfig();
         }
 
-        // ===== 测试流程回调（由 UISetting 注入到 Awake，勿手动绑定） =====
+        // ===== 测试流程回调（由 UIModelConfig 注入到 Awake，勿手动绑定） =====
 
         /// <summary>开始测试：关 SaveApiKey、开 ModelTesting、锁输入。</summary>
         private void OnStartApiTest(string category)
@@ -348,8 +423,8 @@ namespace IndependentAgentProject
         /// <summary>MsgboxModelTesting.Btn1「取消」：停止测试（丢弃异步结果），关弹窗，停留当前面板。</summary>
         public void OnClickCancelTestApiKey()
         {
-            if (mSetting != null)
-                mSetting.CancelApiTest();
+            if (mModelConfig != null)
+                mModelConfig.CancelApiTest();
             if (mModelTestingMsgbox != null)
                 mModelTestingMsgbox.gameObject.SetActive(false);
             LockInput();
@@ -363,13 +438,13 @@ namespace IndependentAgentProject
             LockInput();
         }
 
-        /// <summary>MsgboxModelAvailable.Btn2「保存退出」：此刻才保存配置并返回 PanelSetting。</summary>
+        /// <summary>MsgboxModelAvailable.Btn2「保存退出」：此刻才保存配置并返回设置页主界面。</summary>
         public void OnClickSaveApiKeyExit()
         {
             if (mModelAvailableMsgbox != null)
                 mModelAvailableMsgbox.gameObject.SetActive(false);
-            if (mSetting != null)
-                mSetting.OnConfirmSaveAfterTest();
+            if (mModelConfig != null)
+                mModelConfig.OnConfirmSaveAfterTest();
         }
 
         /// <summary>MsgboxModelUnavailable.Btn1「继续配置」：关弹窗，留在当前 Panel。</summary>
@@ -380,13 +455,13 @@ namespace IndependentAgentProject
             LockInput();
         }
 
-        /// <summary>MsgboxModelUnavailable.Btn2「退出」：关弹窗，返回 PanelSetting（不保存）。</summary>
+        /// <summary>MsgboxModelUnavailable.Btn2「退出」：关弹窗，返回设置页主界面（不保存）。</summary>
         public void OnClickExitUnavailable()
         {
             if (mModelUnavailableMsgbox != null)
                 mModelUnavailableMsgbox.gameObject.SetActive(false);
-            if (mSetting != null)
-                mSetting.OnExitToSetting();
+            if (mModelConfig != null)
+                mModelConfig.OnExitToSetting();
         }
 
         private void SetPanelActive(GameObject panel, bool active)
@@ -404,7 +479,7 @@ namespace IndependentAgentProject
 
         public void OnClickNewGame()
         {
-            if (mSetting != null && !mSetting.IsConfigReady())
+            if (mModelConfig != null && !mModelConfig.IsConfigReady())
             {
                 if (mNoApiKeyMsgbox != null)
                 {
@@ -418,7 +493,7 @@ namespace IndependentAgentProject
 
         public void OnClickContinueGame()
         {
-            if (mSetting != null && !mSetting.IsConfigReady())
+            if (mModelConfig != null && !mModelConfig.IsConfigReady())
             {
                 if (mNoApiKeyMsgbox != null)
                 {

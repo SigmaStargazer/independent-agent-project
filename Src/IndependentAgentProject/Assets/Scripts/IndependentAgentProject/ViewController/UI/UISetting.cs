@@ -1,349 +1,367 @@
-using Cysharp.Threading.Tasks;
+using FrameworkDesign;
 using Services;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace IndependentAgentProject
 {
     /// <summary>
-    /// v0.23.1：API 配置读写组件（挂载在场景 UIConfig 上）。
-    /// 负责 12 个 TMP_InputField 的读取 / 回填 / 变更检测 / 保存 / 完整性校验 / API 可用性测试。
-    /// 页面切换方法全部在 UITitle；本组件仅通过回调请求切换（不持有面板引用）。
+    /// Tab 配置项（数据驱动）：Tab 按钮 + 对应内容区 + 文案 key。
     /// </summary>
-    public class UISetting : MonoBehaviour
+    [System.Serializable]
+    public class SettingsTabConfig
     {
-        // ===== v0.23.0：API 配置面板（4 组 × 3 个 TMP_InputField = 12 个） =====
-        [Header("API 配置：LLM Agent 子面板")]
-        [SerializeField]
-        private TMP_InputField mAgentBaseInput;
-        [SerializeField]
-        private TMP_InputField mAgentKeyInput;
-        [SerializeField]
-        private TMP_InputField mAgentModelInput;
-        [Header("API 配置：LLM Memory 子面板")]
-        [SerializeField]
-        private TMP_InputField mMemoryBaseInput;
-        [SerializeField]
-        private TMP_InputField mMemoryKeyInput;
-        [SerializeField]
-        private TMP_InputField mMemoryModelInput;
-        [Header("API 配置：Embedding 子面板")]
-        [SerializeField]
-        private TMP_InputField mEmbeddingBaseInput;
-        [SerializeField]
-        private TMP_InputField mEmbeddingKeyInput;
-        [SerializeField]
-        private TMP_InputField mEmbeddingModelInput;
-        [Header("API 配置：Reranker 子面板")]
-        [SerializeField]
-        private TMP_InputField mRerankerBaseInput;
-        [SerializeField]
-        private TMP_InputField mRerankerKeyInput;
-        [SerializeField]
-        private TMP_InputField mRerankerModelInput;
+        public Button tabButton;       // Tab 切换按钮（场景拖拽）
+        public GameObject content;     // 对应内容区
+        public UITextKey titleKey;     // 文案 key（枚举下拉选择，None 表示不赋值）；经 UITextProvider 取显示名
+    }
 
-        /// <summary>当前已加载的配置（进入配置面板时从文件读取，保存时写回）。</summary>
-        private ApiConfig mCurrentConfig;
+    /// <summary>
+    /// v0.23.4：设置页根容器脚本（挂 PanelSetting，唯一脚本）。
+    /// 职责：数据驱动 Tab 切换（SettingsTabConfig 表）+ 子面板切换（4 个模型配置 Panel）+ 画面配置（显示模式/分辨率）。
+    /// 画面配置 MVC 化：数据在 IGameSettingsModel（BindableProperty 驱动 UI 自动刷新），
+    /// 修改经 Command（ChangeDisplayModeCommand / ChangeResolutionCommand），落盘经 SaveGameSettingsCommand。
+    /// 模型配置数据逻辑在 UIModelConfig（挂 ContentModelConfig），测试回调由 UITitle 直接注入 UIModelConfig。
+    /// PanelSetting 作为设置页根容器，配置期间保持激活（切换 Tab / 子面板只改内部节点显隐，不失活根节点）。
+    /// </summary>
+    public class UISetting : MonoBehaviour, IController
+    {
+        // ===== 子面板（4 个模型配置 Panel，PanelSetting 的子节点，与 PanelTab 同层互斥） =====
+        [Header("配置子面板（PanelSetting 子节点，与 PanelTab 同层互斥）")]
+        [SerializeField]
+        private GameObject mLLMAgentPanel;
+        [SerializeField]
+        private GameObject mLLMMemoryPanel;
+        [SerializeField]
+        private GameObject mEmbeddingPanel;
+        [SerializeField]
+        private GameObject mRerankerPanel;
+        [SerializeField]
+        private GameObject mPanelTab;   // PanelTab（Tab 按钮 + 内容区容器）
 
-        /// <summary>12 个输入框的统一集合（与 ApiConfig 字段顺序一致），供批量回填/收集/变更检测。</summary>
-        private TMP_InputField[] mAllInputs;
+        /// <summary>请求退出设置页（UITitle 注入：关闭 PanelSetting 回主菜单）。</summary>
+        public System.Action OnRequestExit { get; set; }
 
-        /// <summary>v0.23.1：测试进行中是否已被用户取消（MsgboxModelTesting 点「取消」置 true）。</summary>
-        private bool mTestCancelled;
+        // ===== 模型配置数据组件引用（ContentModelConfig 上的 UIModelConfig，打开子面板前回填用） =====
+        [Header("模型配置数据组件（ContentModelConfig 上的 UIModelConfig）")]
+        [SerializeField]
+        private UIModelConfig mModelConfig;
 
-        // ===== v0.23.1 新增回调（由 UITitle 注入） =====
-        /// <summary>开始 API 测试（参数：测试类型 llm/embedding/rerank）。UITitle 据此关 SaveApiKey、开 ModelTesting。</summary>
-        public System.Action<string> OnStartApiTest { get; set; }
+        // ===== 设置页 Tab（数据驱动，可扩展任意数量） =====
+        [Header("设置页 Tab（数据驱动，可扩展任意数量）")]
+        [SerializeField]
+        private SettingsTabConfig[] mSettingsTabs;   // 顺序即 Tab 顺序
 
-        /// <summary>API 测试完成（参数：success, errormsg）。UITitle 据此关 ModelTesting、开 Available/Unavailable。</summary>
-        public System.Action<bool, string> OnApiTestFinished { get; set; }
+        private int mCurrentTabIndex;
 
-        /// <summary>请求返回 PanelSetting（UITitle 注入，内部直接 ShowSetting()）。固定目标，无需来源层级。</summary>
-        public System.Action OnRequestBackToSetting { get; set; }
+        // ===== 画面配置（ContentDisplaySettings 内容区，由 UISetting 引用驱动） =====
+        [Header("画面配置（ContentDisplaySettings 内容区）")]
+        [SerializeField]
+        private TMP_Text mDisplayModeText;
+        [SerializeField]
+        private Button mDisplayModeLeft;   // ◀
+        [SerializeField]
+        private Button mDisplayModeRight;  // ▶
+        [SerializeField]
+        private TMP_Text mResolutionText;
+        [SerializeField]
+        private Button mResolutionLeft;
+        [SerializeField]
+        private Button mResolutionRight;
+
+        private static readonly FullScreenMode[] kModes =
+        {
+            FullScreenMode.Windowed,
+            FullScreenMode.FullScreenWindow,
+            FullScreenMode.ExclusiveFullScreen,
+        };
+
+        private static readonly (int w, int h)[] kResolutions =
+        {
+            (1024, 768),   // 常见 4:3
+            (1280, 720),
+            (1920, 1080),  // 需求要求必须含 1920x1080
+            (2560, 1440),
+        };
 
         void Awake()
         {
-            mAllInputs = new TMP_InputField[]
-            {
-                mAgentBaseInput, mAgentKeyInput, mAgentModelInput,
-                mMemoryBaseInput, mMemoryKeyInput, mMemoryModelInput,
-                mEmbeddingBaseInput, mEmbeddingKeyInput, mEmbeddingModelInput,
-                mRerankerBaseInput, mRerankerKeyInput, mRerankerModelInput,
-            };
+            InitSettingsTabs();
+            InitDisplaySettings();
+            InitDisplayButtons();
+            RegisterDisplayModelEvents();
+        }
 
-            // TMP_InputField 默认「按 ESC 恢复原始文本」（撤销用户输入），
-            // 与 UITitle 的 ESC 退出检测冲突：ESC 会先被输入框吞掉并还原输入，
-            // 导致「只改一个值 ESC 不弹保存确认」且修改丢失。这里统一关闭。
-            foreach (TMP_InputField input in mAllInputs)
+        // ===== 子面板切换（4 个模型配置 Panel，与 PanelTab 同层互斥） =====
+
+        /// <summary>打开「LLM Agent」配置子面板。</summary>
+        public void OnClickLLMAgentSetting()   { OpenSubPanel(mLLMAgentPanel); }
+        /// <summary>打开「LLM Memory」配置子面板。</summary>
+        public void OnClickLLMMemorySetting()  { OpenSubPanel(mLLMMemoryPanel); }
+        /// <summary>打开「Embedding」配置子面板。</summary>
+        public void OnClickEmbeddingSetting()  { OpenSubPanel(mEmbeddingPanel); }
+        /// <summary>打开「Reranker」配置子面板。</summary>
+        public void OnClickRerankerSetting()   { OpenSubPanel(mRerankerPanel); }
+
+        /// <summary>
+        /// 打开指定配置子面板：隐藏 PanelTab，显示对应子面板。
+        /// 根节点 PanelSetting 保持激活（新架构下子面板是 PanelSetting 子节点，若失活父节点会连带失活子面板）。
+        /// </summary>
+        private void OpenSubPanel(GameObject subPanel)
+        {
+            SetActive(mLLMAgentPanel, subPanel == mLLMAgentPanel);
+            SetActive(mLLMMemoryPanel, subPanel == mLLMMemoryPanel);
+            SetActive(mEmbeddingPanel, subPanel == mEmbeddingPanel);
+            SetActive(mRerankerPanel, subPanel == mRerankerPanel);
+            SetActive(mPanelTab, false);   // 隐藏 Tab 界面（PanelSetting 保持激活）
+            if (mModelConfig != null)
             {
-                if (input != null)
+                mModelConfig.RefreshInputsFromConfig();   // 打开子面板前确保回填文件值
+            }
+        }
+
+        /// <summary>返回设置页主界面（隐藏全部子面板，显示 PanelTab）。</summary>
+        public void BackToSettingTab()
+        {
+            SetActive(mLLMAgentPanel, false);
+            SetActive(mLLMMemoryPanel, false);
+            SetActive(mEmbeddingPanel, false);
+            SetActive(mRerankerPanel, false);
+            SetActive(mPanelTab, true);
+        }
+
+        /// <summary>当前是否有配置子面板激活（供 UITitle ESC 分发判断）。</summary>
+        public bool IsSubPanelActive()
+        {
+            return (mLLMAgentPanel != null && mLLMAgentPanel.activeSelf)
+                || (mLLMMemoryPanel != null && mLLMMemoryPanel.activeSelf)
+                || (mEmbeddingPanel != null && mEmbeddingPanel.activeSelf)
+                || (mRerankerPanel != null && mRerankerPanel.activeSelf);
+        }
+
+        private static void SetActive(GameObject go, bool active)
+        {
+            if (go != null)
+            {
+                go.SetActive(active);
+            }
+        }
+
+        // ===== Tab 切换（数据驱动） =====
+
+        private void InitSettingsTabs()
+        {
+            mCurrentTabIndex = 0;
+            if (mSettingsTabs == null)
+            {
+                return;
+            }
+            for (int i = 0; i < mSettingsTabs.Length; i++)
+            {
+                int idx = i;   // 闭包捕获
+                var tab = mSettingsTabs[i];
+                if (tab.tabButton != null)
                 {
-                    input.restoreOriginalTextOnEscape = false;
+                    tab.tabButton.onClick.RemoveAllListeners();
+                    tab.tabButton.onClick.AddListener(() => SelectTab(idx));
+                }
+                if (tab.content != null)
+                {
+                    tab.content.SetActive(i == 0);
+                }
+            }
+            RefreshTabTitles();
+        }
+
+        /// <summary>切到指定 Tab（供 UI 内点击 / 外部复位默认调用）。</summary>
+        public void SelectTab(int index)
+        {
+            if (mSettingsTabs == null || index < 0 || index >= mSettingsTabs.Length)
+            {
+                return;
+            }
+            mCurrentTabIndex = index;
+            for (int i = 0; i < mSettingsTabs.Length; i++)
+            {
+                if (mSettingsTabs[i].content != null)
+                {
+                    mSettingsTabs[i].content.SetActive(i == index);
+                }
+            }
+            RefreshTabTitles();
+        }
+
+        /// <summary>复位到第一个 Tab（UITitle.ShowSetting 打开设置页时调用）；同时返回设置页主界面（隐藏子面板）。</summary>
+        public void ResetToDefaultTab()
+        {
+            BackToSettingTab();
+            SelectTab(0);
+        }
+
+        private void RefreshTabTitles()
+        {
+            if (mSettingsTabs == null)
+            {
+                return;
+            }
+            // 为每个 Tab 按钮下的子 Text 按 titleKey 赋文案（None 表示不赋值，保持场景手动配置）
+            for (int i = 0; i < mSettingsTabs.Length; i++)
+            {
+                var tab = mSettingsTabs[i];
+                if (tab.tabButton != null && tab.titleKey != UITextKey.None)
+                {
+                    TMP_Text txt = tab.tabButton.GetComponentInChildren<TMP_Text>();
+                    if (txt != null)
+                    {
+                        txt.text = UITextProvider.Get(tab.titleKey);
+                    }
                 }
             }
         }
 
-        /// <summary>
-        /// 入口校验：配置完整才放行；否则返回 false（由 UITitle 决定弹提示）。
-        /// </summary>
-        public bool IsConfigReady()
+        // ===== 画面配置（MVC：数据在 IGameSettingsModel，修改经 Command） =====
+
+        /// <summary>启动/打开设置页时应用已加载画面设置（Model 在 OnInit 已从文件解析，此处只应用 + 刷新，不写盘）。</summary>
+        public void InitDisplaySettings()
         {
-            LoadConfigOnce();
-            return mCurrentConfig != null && mCurrentConfig.IsComplete();
+            ApplyScreen();   // 应用已加载的分辨率/模式到 Screen
+            RefreshDisplayUI();
         }
 
-        /// <summary>
-        /// 当前文本框内容是否与已加载配置不同（供退出子面板时判断 dirty）。
-        /// </summary>
-        public bool HasConfigChanged()
+        /// <summary>绑定画面箭头按钮（onClick → 加减方法）。场景不手动绑 OnClick，由本组件在 Awake 统一绑定。</summary>
+        private void InitDisplayButtons()
         {
-            if (mCurrentConfig == null)
+            if (mDisplayModeLeft != null)
             {
-                return false;
+                mDisplayModeLeft.onClick.RemoveAllListeners();
+                mDisplayModeLeft.onClick.AddListener(OnModeLeft);
             }
-            return !string.Equals(GetInput(mAgentBaseInput), mCurrentConfig.AGENT_API_BASE)
-                || !string.Equals(GetInput(mAgentKeyInput), mCurrentConfig.AGENT_API_KEY)
-                || !string.Equals(GetInput(mAgentModelInput), mCurrentConfig.AGENT_MODEL)
-                || !string.Equals(GetInput(mMemoryBaseInput), mCurrentConfig.MEMORY_API_BASE)
-                || !string.Equals(GetInput(mMemoryKeyInput), mCurrentConfig.MEMORY_API_KEY)
-                || !string.Equals(GetInput(mMemoryModelInput), mCurrentConfig.MEMORY_MODEL)
-                || !string.Equals(GetInput(mEmbeddingBaseInput), mCurrentConfig.EMBEDDING_API_BASE)
-                || !string.Equals(GetInput(mEmbeddingKeyInput), mCurrentConfig.EMBEDDING_API_KEY)
-                || !string.Equals(GetInput(mEmbeddingModelInput), mCurrentConfig.EMBEDDING_MODEL)
-                || !string.Equals(GetInput(mRerankerBaseInput), mCurrentConfig.RERANKER_API_BASE)
-                || !string.Equals(GetInput(mRerankerKeyInput), mCurrentConfig.RERANKER_API_KEY)
-                || !string.Equals(GetInput(mRerankerModelInput), mCurrentConfig.RERANKER_MODEL);
-        }
-
-        /// <summary>
-        /// 把文件中的配置回填到 12 个文本框（打开子面板 / 保存后调用）。
-        /// 总是重新从文件读取，避免 mCurrentConfig 缓存陈旧导致回填过期值。
-        /// </summary>
-        public void RefreshInputsFromConfig()
-        {
-            mCurrentConfig = ApiConfigStore.Load();
-            SetInput(mAgentBaseInput, mCurrentConfig.AGENT_API_BASE);
-            SetInput(mAgentKeyInput, mCurrentConfig.AGENT_API_KEY);
-            SetInput(mAgentModelInput, mCurrentConfig.AGENT_MODEL);
-            SetInput(mMemoryBaseInput, mCurrentConfig.MEMORY_API_BASE);
-            SetInput(mMemoryKeyInput, mCurrentConfig.MEMORY_API_KEY);
-            SetInput(mMemoryModelInput, mCurrentConfig.MEMORY_MODEL);
-            SetInput(mEmbeddingBaseInput, mCurrentConfig.EMBEDDING_API_BASE);
-            SetInput(mEmbeddingKeyInput, mCurrentConfig.EMBEDDING_API_KEY);
-            SetInput(mEmbeddingModelInput, mCurrentConfig.EMBEDDING_MODEL);
-            SetInput(mRerankerBaseInput, mCurrentConfig.RERANKER_API_BASE);
-            SetInput(mRerankerKeyInput, mCurrentConfig.RERANKER_API_KEY);
-            SetInput(mRerankerModelInput, mCurrentConfig.RERANKER_MODEL);
-        }
-
-        // ===== v0.23.1：文本框读写（供 UILLMAgent / UILLMMemory / UILLMRerank 复制按钮使用） =====
-
-        /// <summary>读某组 Base 文本框。group: agent | memory | embedding | reranker。</summary>
-        public string GetBase(string group)
-        {
-            return GetGroupInput(group, 0);
-        }
-
-        /// <summary>读某组 Key 文本框。group: agent | memory | embedding | reranker。</summary>
-        public string GetKey(string group)
-        {
-            return GetGroupInput(group, 1);
-        }
-
-        /// <summary>读某组 Model 文本框。group: agent | memory | embedding | reranker。</summary>
-        public string GetModel(string group)
-        {
-            return GetGroupInput(group, 2);
-        }
-
-        /// <summary>覆盖某组 3 个文本框。group: agent | memory | embedding | reranker。不写盘。</summary>
-        public void SetGroup(string group, string baseV, string keyV, string modelV)
-        {
-            TMP_InputField[] fields = GetGroupFields(group);
-            if (fields == null)
+            if (mDisplayModeRight != null)
             {
-                Debug.LogWarning($"[UISetting] SetGroup 未知配置组: {group}");
+                mDisplayModeRight.onClick.RemoveAllListeners();
+                mDisplayModeRight.onClick.AddListener(OnModeRight);
+            }
+            if (mResolutionLeft != null)
+            {
+                mResolutionLeft.onClick.RemoveAllListeners();
+                mResolutionLeft.onClick.AddListener(OnResLeft);
+            }
+            if (mResolutionRight != null)
+            {
+                mResolutionRight.onClick.RemoveAllListeners();
+                mResolutionRight.onClick.AddListener(OnResRight);
+            }
+        }
+
+        /// <summary>订阅 Model 的 BindableProperty，值变化自动刷新 UI（不依赖手动调 RefreshDisplayUI）。</summary>
+        private void RegisterDisplayModelEvents()
+        {
+            var model = this.GetModel<IGameSettingsModel>();
+            model.DisplayModeIndex.RegisterOnValueChanged(_ => OnDisplayModelChanged())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            model.ResolutionIndex.RegisterOnValueChanged(_ => OnDisplayModelChanged())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        private void OnDisplayModelChanged()
+        {
+            ApplyScreen();
+            RefreshDisplayUI();
+        }
+
+        public void OnModeLeft()  { SendModeDelta(-1); }
+        public void OnModeRight() { SendModeDelta(1); }
+        public void OnResLeft()   { SendResDelta(-1); }
+        public void OnResRight()  { SendResDelta(1); }
+
+        private void SendModeDelta(int delta)
+        {
+            var model = this.GetModel<IGameSettingsModel>();
+            int next = model.DisplayModeIndex.Value + delta;
+            if (next < 0 || next >= kModes.Length)
+            {
+                return;   // 越界：按钮 interactable 已禁用，这里再兜底
+            }
+            this.SendCommand(new ChangeDisplayModeCommand(delta));
+        }
+
+        private void SendResDelta(int delta)
+        {
+            var model = this.GetModel<IGameSettingsModel>();
+            int next = model.ResolutionIndex.Value + delta;
+            if (next < 0 || next >= kResolutions.Length)
+            {
                 return;
             }
-            SetInput(fields[0], baseV);
-            SetInput(fields[1], keyV);
-            SetInput(fields[2], modelV);
+            this.SendCommand(new ChangeResolutionCommand(delta));
         }
 
-        // ===== v0.23.1：测试后保存流程 =====
+        private int ModeIndex => CurrentSettings.DisplayModeIndex;
+        private int ResIndex => CurrentSettings.ResolutionIndex;
 
-        /// <summary>
-        /// 【测试后保存】（MsgboxSaveApiKey.Btn3）：不写盘，仅用文本框当前值发起「当前面板模型」的 API 可用性测试。
-        /// 测试通过与否由 MsgboxModelAvailable / MsgboxModelUnavailable 决定是否写盘。
-        /// </summary>
-        public async void OnConfirmTestConfig()
+        /// <summary>画面设置只读数据（经 GetGameSettingsQuery 统一获取）。</summary>
+        private GameSettingsSnapshot CurrentSettings => this.SendQuery(new GetGameSettingsQuery());
+
+        /// <summary>把 Model 当前值应用到 Screen（分辨率 + 全屏模式）。</summary>
+        private void ApplyScreen()
         {
-            // 1. 不保存到 api_config.json——用文本框当前值测试，避免不可用配置覆盖原可用配置。
-            //    注意：不要改 mCurrentConfig（dirty 检测基准）。测试值由 GetCurrentGroupConfig()
-            //    从文本框实时读取；mCurrentConfig 保持为文件原值，点「继续配置」后 ESC 仍能
-            //    正确检测到文本框与文件不一致并弹 MsgboxSaveApiKey。
-            mTestCancelled = false;
+            int mode = Mathf.Clamp(ModeIndex, 0, kModes.Length - 1);
+            int res = Mathf.Clamp(ResIndex, 0, kResolutions.Length - 1);
+            var (w, h) = kResolutions[res];
+            Screen.fullScreenMode = kModes[mode];
+            Screen.SetResolution(w, h, kModes[mode]);
+        }
 
-            // 2. 请求 UITitle 进入「测试中」状态（关 MsgboxSaveApiKey、开 ModelTesting、锁输入）
-            OnStartApiTest?.Invoke(CurrentTestCategory());
-
-            // 3. 发起测试（异步，await；用户取消时丢弃结果）
-            bool ok;
-            string errmsg;
-            try
+        private void RefreshDisplayUI()
+        {
+            int mode = Mathf.Clamp(ModeIndex, 0, kModes.Length - 1);
+            int res = Mathf.Clamp(ResIndex, 0, kResolutions.Length - 1);
+            if (mDisplayModeText != null)
             {
-                var (cat, baseV, keyV, modelV) = GetCurrentGroupConfig();
-                await AgentServiceAsyncExtensions.ApiTestAsync(cat, baseV, keyV, modelV);
-                ok = true; errmsg = "";
+                mDisplayModeText.text = UITextProvider.Get("mode_" + ModeKey(mode));
             }
-            catch (System.Exception e)
+            if (mResolutionText != null)
             {
-                ok = false; errmsg = e.Message;
+                mResolutionText.text = string.Format(UITextProvider.Get("resolution_format"), kResolutions[res].w, kResolutions[res].h);
             }
+            if (mDisplayModeLeft != null)   mDisplayModeLeft.interactable = mode > 0;
+            if (mDisplayModeRight != null)  mDisplayModeRight.interactable = mode < kModes.Length - 1;
+            if (mResolutionLeft != null)    mResolutionLeft.interactable = res > 0;
+            if (mResolutionRight != null)   mResolutionRight.interactable = res < kResolutions.Length - 1;
+        }
 
-            // 4. 通知 UITitle 测试完成（关 ModelTesting、开 Available/Unavailable）。
-            //    用户已在 Testing 弹窗点「取消」时，丢弃结果：不弹结果弹窗，停留当前面板。
-            if (!mTestCancelled)
+        private string ModeKey(int idx)
+        {
+            switch (idx)
             {
-                OnApiTestFinished?.Invoke(ok, errmsg);
-            }
-        }
-
-        /// <summary>
-        /// 测试期间取消（MsgboxModelTesting.Btn1「取消」）：置取消标志，丢弃异步结果，停留当前面板。
-        /// 由 UITitle 的 CloseModelTestingMsgBox() 调用。
-        /// </summary>
-        public void CancelApiTest()
-        {
-            mTestCancelled = true;
-        }
-
-        /// <summary>
-        /// 【保存退出】（MsgboxModelAvailable.Btn3「保存退出」）：测试通过后此刻才保存并返回 PanelSetting。
-        /// </summary>
-        public void OnConfirmSaveAfterTest()
-        {
-            mCurrentConfig = CollectInputsToApiConfig();   // 从文本框收集（仍为当前面板那组）
-            ApiConfigStore.Save(mCurrentConfig);           // 测试通过后才写盘
-            RefreshInputsFromConfig();
-            OnRequestBackToSetting?.Invoke();               // 固定返回 PanelSetting（UITitle 切换）
-        }
-
-        /// <summary>
-        /// 【退出】（MsgboxSaveApiKey.Btn2「退出」 / MsgboxModelUnavailable.Btn2「退出」）：
-        /// 不保存，固定返回 PanelSetting。因退出目标固定，无需来源层级记录。
-        /// </summary>
-        public void OnExitToSetting()
-        {
-            OnRequestBackToSetting?.Invoke();
-        }
-
-        /// <summary>
-        /// 当前面板对应测试类型：LLMAgent/LLMMemory → llm；Embedding → embedding；Reranker → rerank。
-        /// 按当前激活的子面板判断。
-        /// </summary>
-        private string CurrentTestCategory()
-        {
-            if (IsActive(mAgentBaseInput)) return "llm";
-            if (IsActive(mMemoryBaseInput)) return "llm";
-            if (IsActive(mEmbeddingBaseInput)) return "embedding";
-            if (IsActive(mRerankerBaseInput)) return "rerank";
-            return "llm";
-        }
-
-        /// <summary>
-        /// 取当前面板那组文本框的 (测试类型, base, key, model)。测试类型与 CurrentTestCategory 一致。
-        /// </summary>
-        private (string cat, string baseV, string keyV, string modelV) GetCurrentGroupConfig()
-        {
-            if (IsActive(mAgentBaseInput)) return ("llm", GetInput(mAgentBaseInput), GetInput(mAgentKeyInput), GetInput(mAgentModelInput));
-            if (IsActive(mMemoryBaseInput)) return ("llm", GetInput(mMemoryBaseInput), GetInput(mMemoryKeyInput), GetInput(mMemoryModelInput));
-            if (IsActive(mEmbeddingBaseInput)) return ("embedding", GetInput(mEmbeddingBaseInput), GetInput(mEmbeddingKeyInput), GetInput(mEmbeddingModelInput));
-            if (IsActive(mRerankerBaseInput)) return ("rerank", GetInput(mRerankerBaseInput), GetInput(mRerankerKeyInput), GetInput(mRerankerModelInput));
-            return ("llm", "", "", "");
-        }
-
-        // ===== 内部辅助 =====
-
-        /// <summary>输入框所在面板是否激活（用于判断当前处于哪个配置面板）。</summary>
-        private static bool IsActive(TMP_InputField input)
-        {
-            return input != null && input.isActiveAndEnabled && input.gameObject.activeInHierarchy;
-        }
-
-        /// <summary>按 group 取 3 个输入框（Base/Key/Model）。未知 group 返回 null。</summary>
-        private TMP_InputField[] GetGroupFields(string group)
-        {
-            switch (group)
-            {
-                case "agent":
-                    return new[] { mAgentBaseInput, mAgentKeyInput, mAgentModelInput };
-                case "memory":
-                    return new[] { mMemoryBaseInput, mMemoryKeyInput, mMemoryModelInput };
-                case "embedding":
-                    return new[] { mEmbeddingBaseInput, mEmbeddingKeyInput, mEmbeddingModelInput };
-                case "reranker":
-                    return new[] { mRerankerBaseInput, mRerankerKeyInput, mRerankerModelInput };
-                default:
-                    return null;
+                case 0: return "windowed";
+                case 1: return "borderless";
+                default: return "fullscreen";
             }
         }
 
-        private string GetGroupInput(string group, int index)
+        /// <summary>画面设置是否有未保存变更（经 GetGameSettingsQuery 统一获取，不依赖内容区是否激活）。</summary>
+        public bool HasDisplaySettingsChanged()
         {
-            TMP_InputField[] fields = GetGroupFields(group);
-            if (fields == null)
-            {
-                Debug.LogWarning($"[UISetting] GetGroupInput 未知配置组: {group}");
-                return "";
-            }
-            return GetInput(fields[index]);
+            return CurrentSettings.HasChanged;
         }
 
-        /// <summary>
-        /// 从 api_config.json 加载一次配置（幂等，供回填与入口校验）。
-        /// </summary>
-        private void LoadConfigOnce()
+        /// <summary>保存当前画面设置（MsgboxSaveSetting「保存并退出」调用，经 Command 落盘）。</summary>
+        public void SaveDisplaySettings()
         {
-            if (mCurrentConfig == null)
-            {
-                mCurrentConfig = ApiConfigStore.Load();
-            }
+            this.SendCommand<SaveGameSettingsCommand>();
         }
 
-        /// <summary>
-        /// 从 12 个文本框收集值构造 ApiConfig。
-        /// </summary>
-        private ApiConfig CollectInputsToApiConfig()
+        /// <summary>还原画面设置为文件已保存值（MsgboxSaveSetting「退出」调用，经 Command 写回 Model，订阅回调自动恢复实际分辨率与 UI）。</summary>
+        public void RevertDisplaySettings()
         {
-            return new ApiConfig
-            {
-                AGENT_API_BASE = GetInput(mAgentBaseInput),
-                AGENT_API_KEY = GetInput(mAgentKeyInput),
-                AGENT_MODEL = GetInput(mAgentModelInput),
-                MEMORY_API_BASE = GetInput(mMemoryBaseInput),
-                MEMORY_API_KEY = GetInput(mMemoryKeyInput),
-                MEMORY_MODEL = GetInput(mMemoryModelInput),
-                EMBEDDING_API_BASE = GetInput(mEmbeddingBaseInput),
-                EMBEDDING_API_KEY = GetInput(mEmbeddingKeyInput),
-                EMBEDDING_MODEL = GetInput(mEmbeddingModelInput),
-                RERANKER_API_BASE = GetInput(mRerankerBaseInput),
-                RERANKER_API_KEY = GetInput(mRerankerKeyInput),
-                RERANKER_MODEL = GetInput(mRerankerModelInput),
-            };
+            this.SendCommand<RevertGameSettingsCommand>();
         }
 
-        private static void SetInput(TMP_InputField input, string value)
+        public IArchitecture GetArchitecture()
         {
-            if (input != null)
-            {
-                input.text = value ?? "";
-            }
-        }
-
-        private static string GetInput(TMP_InputField input)
-        {
-            return input != null ? input.text ?? "" : "";
+            return IndependentAgentProject.Instance;
         }
     }
 }

@@ -112,16 +112,6 @@ def load_idle_wakeup_config() -> dict:
 
 IDLE_WAKEUP_CONFIG = load_idle_wakeup_config()
 
-# # 千问
-# model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-# model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
-# model_name = "qwen-max"
-
-# # moonshot
-# model_api_base = "https://api.moonshot.cn/v1"
-# model_api_key = "sk-0cYUM2FsdWqmyJeth1He0FXlCVlcxScjNb3YPYHjl78vyEgY"
-# model_name = "kimi-k2-0711-preview"
-
 model_api_base = os.getenv("AGENT_API_BASE")
 model_api_key = os.getenv("AGENT_API_KEY")
 model_name = os.getenv("AGENT_MODEL")

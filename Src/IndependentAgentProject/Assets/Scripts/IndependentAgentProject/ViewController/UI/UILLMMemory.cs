@@ -9,25 +9,25 @@ namespace IndependentAgentProject
     /// </summary>
     public class UILLMMemory : MonoBehaviour
     {
-        [Header("API 配置读写组件（挂 UIConfig 上的 UISetting）")]
+        [Header("模型配置数据组件（挂 ContentModelConfig 上的 UIModelConfig）")]
         [SerializeField]
-        private UISetting mSetting;
+        private UIModelConfig mModelConfig;
 
         /// <summary>
         /// 把 Agent 组配置复制到当前（Memory）面板。
         /// </summary>
         public void OnClickCopy()
         {
-            if (mSetting == null)
+            if (mModelConfig == null)
             {
                 Debug.LogWarning("[UILLMMemory] mSetting 未绑定，无法复制配置", this);
                 return;
             }
-            mSetting.SetGroup(
+            mModelConfig.SetGroup(
                 "memory",
-                mSetting.GetBase("agent"),
-                mSetting.GetKey("agent"),
-                mSetting.GetModel("agent"));
+                mModelConfig.GetBase("agent"),
+                mModelConfig.GetKey("agent"),
+                mModelConfig.GetModel("agent"));
             Debug.Log("[UILLMMemory] 已将 Agent 组配置复制到 Memory 面板（未保存，按 ESC 决定是否落盘）", this);
         }
     }
