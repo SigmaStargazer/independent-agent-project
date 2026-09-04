@@ -411,7 +411,8 @@ namespace IndependentAgentProject
             {
                 if (mModelUnavailableMsgbox != null)
                 {
-                    mModelUnavailableMsgbox.SetText("模型不可用：\n" + errmsg);
+                    // v0.23.5：前缀「模型不可用：」走文案表，errmsg 原样透传（用户已确认）；换行由代码拼接，Excel 值不含 \n
+                    mModelUnavailableMsgbox.SetText(UITextProvider.Get("msg_model_unavailable_prefix") + "\n" + errmsg);
                     mModelUnavailableMsgbox.gameObject.SetActive(true);
                 }
             }

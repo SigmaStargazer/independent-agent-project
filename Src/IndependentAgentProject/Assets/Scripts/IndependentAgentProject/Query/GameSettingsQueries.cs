@@ -35,9 +35,10 @@ namespace IndependentAgentProject
         protected override GameSettingsSnapshot OnDo()
         {
             var m = this.GetModel<IGameSettingsModel>();
-            var (_, savedMode, savedRes) = Services.GameSettingsStore.Load();
+            var (_, savedMode, savedRes, savedLang) = Services.GameSettingsStore.Load();
             bool hasChanged = m.DisplayModeIndex.Value != savedMode
-                || m.ResolutionIndex.Value != savedRes;
+                || m.ResolutionIndex.Value != savedRes
+                || m.Language.Value != savedLang;   // v0.23.5：语言变更也纳入「设置变更」（ESC 弹保存确认）
             return new GameSettingsSnapshot(m.DisplayModeIndex.Value, m.ResolutionIndex.Value, hasChanged);
         }
     }

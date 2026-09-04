@@ -1153,7 +1153,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u8BF7\u8F93\u5165\u6587\u672C"
+  m_Text: No Text
 --- !u!222 &1866176100
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1296,3 +1296,23 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8381970375816613132, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
   m_PrefabInstance: {fileID: 2144841533}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2144841537 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8381970375948533887, guid: 2651c452949a70c468e6e4c8dcd24dce, type: 3}
+  m_PrefabInstance: {fileID: 2144841533}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2144841538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144841537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d38f89d8f1c321f4899715323749d559, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mKey: btn_ok
+  mText: {fileID: 0}
+  mTmpText: {fileID: 0}

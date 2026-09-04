@@ -8,15 +8,18 @@ namespace IndependentAgentProject
     /// 从 GameSettingsStore 读已保存值写回 Model（MsgboxSaveSetting「退出」时由 UITitle 发送）。
     /// 值变化会触发 IGameSettingsModel 的 BindableProperty 回调 → 自动 ApplyScreen + 刷新 UI，
     /// 从而同时还原实际显示模式/分辨率与设置面板显示的数值。
+    /// v0.23.5：同时还原语言（language + UITextProvider 当前语言）。
     /// </summary>
     public class RevertGameSettingsCommand : AbstractCommand
     {
         protected override void OnExecute()
         {
             var model = this.GetModel<IGameSettingsModel>();
-            var (_, mode, res) = GameSettingsStore.Load();
+            var (_, mode, res, language) = GameSettingsStore.Load();
             model.DisplayModeIndex.Value = mode;
             model.ResolutionIndex.Value = res;
+            model.Language.Value = language;
+            UITextProvider.SetLanguage((UITextLanguage)language);
         }
     }
 }

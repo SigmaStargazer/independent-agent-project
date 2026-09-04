@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 { 
     public class StartAgentStep : IFlowStep
     {
-        public string DisplayName => "启动Agent";
+        public string DisplayName => UITextProvider.Get("step_start_agent");
 
         private readonly int mapId;
 

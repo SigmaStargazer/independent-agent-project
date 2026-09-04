@@ -70,6 +70,15 @@ namespace IndependentAgentProject
         [SerializeField]
         private Button mResolutionRight;
 
+        // ===== 语言配置（ContentGameSettings → PanelLanguage，v0.23.5） =====
+        [Header("语言配置（ContentGameSettings → PanelLanguage）")]
+        [SerializeField]
+        private TMP_Text mLanguageNameText;   // 当前语言名（TxtContent）
+        [SerializeField]
+        private Button mLanguageLeft;          // ◀
+        [SerializeField]
+        private Button mLanguageRight;         // ▶
+
         private static readonly FullScreenMode[] kModes =
         {
             FullScreenMode.Windowed,
@@ -85,12 +94,20 @@ namespace IndependentAgentProject
             (2560, 1440),
         };
 
+        private static readonly UITextLanguage[] kLanguages =
+        {
+            UITextLanguage.ChineseSimplified,
+            UITextLanguage.English,
+        };
+
         void Awake()
         {
             InitSettingsTabs();
             InitDisplaySettings();
             InitDisplayButtons();
             RegisterDisplayModelEvents();
+            InitLanguageSettings();
+            RegisterLanguageModelEvents();
         }
 
         // ===== 子面板切换（4 个模型配置 Panel，与 PanelTab 同层互斥） =====
@@ -357,6 +374,70 @@ namespace IndependentAgentProject
         public void RevertDisplaySettings()
         {
             this.SendCommand<RevertGameSettingsCommand>();
+        }
+
+        // ===== 语言配置（v0.23.5：MVC，数据在 IGameSettingsModel.Language） =====
+
+        /// <summary>初始化语言区显示（按当前语言刷新语言名文本）。</summary>
+        private void InitLanguageSettings()
+        {
+            RefreshLanguageUI();
+        }
+
+        /// <summary>绑定语言箭头按钮（onClick → 加减方法）+ 订阅 Model.Language 变化。</summary>
+        private void RegisterLanguageModelEvents()
+        {
+            if (mLanguageLeft != null)
+            {
+                mLanguageLeft.onClick.RemoveAllListeners();
+                mLanguageLeft.onClick.AddListener(OnLangLeft);
+            }
+            if (mLanguageRight != null)
+            {
+                mLanguageRight.onClick.RemoveAllListeners();
+                mLanguageRight.onClick.AddListener(OnLangRight);
+            }
+
+            var model = this.GetModel<IGameSettingsModel>();
+            model.Language.RegisterOnValueChanged(_ => OnLanguageModelChanged())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        /// <summary>语言 Model 值变化：同步 UITextProvider（换表 + 全局刷新）+ 刷新本页语言名 / Tab 标题 / 画面配置文案。</summary>
+        private void OnLanguageModelChanged()
+        {
+            var model = this.GetModel<IGameSettingsModel>();
+            UITextProvider.SetLanguage((UITextLanguage)model.Language.Value);
+            RefreshLanguageUI();
+            RefreshTabTitles();
+            RefreshDisplayUI();
+        }
+
+        /// <summary>刷新语言名文本（如「简体中文」/「English」）+ 边界箭头禁用（最左/最右不可点，对齐画面配置交互）。</summary>
+        private void RefreshLanguageUI()
+        {
+            var model = this.GetModel<IGameSettingsModel>();
+            int lang = Mathf.Clamp(model.Language.Value, 0, kLanguages.Length - 1);
+            if (mLanguageNameText != null)
+            {
+                mLanguageNameText.text = UITextProvider.Get(UITextProvider.GetLanguageNameKey((UITextLanguage)lang));
+            }
+            if (mLanguageLeft != null)   mLanguageLeft.interactable = lang > 0;
+            if (mLanguageRight != null)  mLanguageRight.interactable = lang < kLanguages.Length - 1;
+        }
+
+        public void OnLangLeft()  { SendLangDelta(-1); }
+        public void OnLangRight() { SendLangDelta(1); }
+
+        private void SendLangDelta(int delta)
+        {
+            var model = this.GetModel<IGameSettingsModel>();
+            int next = model.Language.Value + delta;
+            if (next < 0 || next >= kLanguages.Length)
+            {
+                return;   // 越界：按钮 interactable 已禁用，这里再兜底（语言非循环，对齐画面配置交互）
+            }
+            this.SendCommand(new ChangeLanguageCommand(delta));
         }
 
         public IArchitecture GetArchitecture()

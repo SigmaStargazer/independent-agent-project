@@ -10,7 +10,7 @@ namespace IndependentAgentProject
 {
     public class StopAgentStep : IFlowStep
     {
-        public string DisplayName => "停止Agent";
+        public string DisplayName => UITextProvider.Get("step_stop_agent");
 
         public async UniTask Execute()
         {

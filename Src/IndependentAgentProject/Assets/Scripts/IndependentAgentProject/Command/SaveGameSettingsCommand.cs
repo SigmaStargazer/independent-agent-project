@@ -12,7 +12,7 @@ namespace IndependentAgentProject
         protected override void OnExecute()
         {
             var model = this.GetModel<IGameSettingsModel>();
-            GameSettingsStore.Save(model.DisplayModeIndex.Value, model.ResolutionIndex.Value);
+            GameSettingsStore.Save(model.DisplayModeIndex.Value, model.ResolutionIndex.Value, model.Language.Value);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using FrameworkDesign;
+using IndependentAgentProject;
 
 namespace GameFlow
 {
@@ -50,7 +51,7 @@ namespace GameFlow
                 // 4. 隐藏加载界面
                 if (flow.ShowLoadingScreen)
                 {
-                    TransitionUI.Instance.SetProgress(1f,"完成");
+                    TransitionUI.Instance.SetProgress(1f, UITextProvider.Get("flow_done"));
                     await UniTask.Delay(150);
                     await TransitionUI.Instance.FadeOut();
                 }

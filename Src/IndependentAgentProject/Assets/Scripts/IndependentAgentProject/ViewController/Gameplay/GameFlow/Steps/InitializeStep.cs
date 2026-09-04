@@ -10,7 +10,7 @@ namespace IndependentAgentProject
     /// 幂等：Python 侧 AgentLifecycle.enter_game() 已初始化时直接返回。</summary>
     public class InitializeStep : IFlowStep
     {
-        public string DisplayName => "初始化Agent系统";
+        public string DisplayName => UITextProvider.Get("step_initialize");
 
         public async UniTask Execute()
         {

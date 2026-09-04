@@ -10,7 +10,7 @@ namespace IndependentAgentProject
 {
     public class LoadAgentStep : IFlowStep
     {
-        public string DisplayName => "加载Agent";
+        public string DisplayName => UITextProvider.Get("step_load_agent");
 
         public async UniTask Execute()
         {

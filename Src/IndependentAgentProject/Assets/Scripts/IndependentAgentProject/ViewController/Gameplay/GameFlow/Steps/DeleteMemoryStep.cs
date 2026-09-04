@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class CreateAgentStep : IFlowStep
     {
-        public string DisplayName => "创建Agent";
+        public string DisplayName => UITextProvider.Get("step_create_agent");
 
         private readonly string name;
         private readonly string desc;

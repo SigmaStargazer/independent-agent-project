@@ -11,7 +11,7 @@ namespace IndependentAgentProject
 {
     public class LoadSceneStep : IFlowStep
     {
-        public string DisplayName => "加载场景";
+        public string DisplayName => UITextProvider.Get("step_load_scene");
 
         private readonly string levalName;
         public LoadSceneStep(string levelName)

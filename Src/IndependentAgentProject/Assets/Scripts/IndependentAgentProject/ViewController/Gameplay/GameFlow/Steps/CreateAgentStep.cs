@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class DeleteMemoryStep : IFlowStep
     {
-        public string DisplayName => "删除旧记忆";
+        public string DisplayName => UITextProvider.Get("step_delete_memory");
         public async UniTask Execute()
         {
             await AgentServiceAsyncExtensions.DeleteMemoryAsync();

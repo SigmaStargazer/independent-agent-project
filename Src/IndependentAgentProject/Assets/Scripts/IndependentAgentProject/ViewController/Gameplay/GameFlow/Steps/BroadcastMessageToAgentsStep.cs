@@ -9,7 +9,7 @@ namespace IndependentAgentProject
 {
     public class BroadcastMessageToAgentsStep : IFlowStep
     {
-        public string DisplayName => "向所有Agent发送数据";
+        public string DisplayName => UITextProvider.Get("step_broadcast_message");
 
         private readonly string mMessage;
 
