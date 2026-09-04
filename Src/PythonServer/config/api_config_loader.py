@@ -9,6 +9,8 @@
 """
 import os
 
+from runtime.path_config import get_api_config_file
+
 # 与打包方案 §4.2 / Unity ApiConfigStore 字段一致的 12 项配置键
 API_CONFIG_KEYS = [
     "AGENT_API_BASE", "AGENT_API_KEY", "AGENT_MODEL",
@@ -17,17 +19,10 @@ API_CONFIG_KEYS = [
     "RERANKER_API_BASE", "RERANKER_API_KEY", "RERANKER_MODEL",
 ]
 
-# 当前 PythonServer 目录（本文件位于 PythonServer/config/ 下，上级即 PythonServer）
-_PYTHON_SERVER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-
 
 def api_config_path() -> str:
-    """返回 Data/Config/api_config.json 的绝对路径。
-
-    与 main.PORT_CONFIG_FILE 同规则：PythonServer 上级（Src）-> Data/Config。
-    """
-    project_root = os.path.abspath(os.path.join(_PYTHON_SERVER_DIR, ".."))
-    return os.path.join(project_root, "Data", "Config", "api_config.json")
+    """返回 Data/Config/api_config.json 的绝对路径（统一走 runtime.path_config）。"""
+    return get_api_config_file()
 
 
 def load_api_config_into_env(force: bool = False) -> dict:

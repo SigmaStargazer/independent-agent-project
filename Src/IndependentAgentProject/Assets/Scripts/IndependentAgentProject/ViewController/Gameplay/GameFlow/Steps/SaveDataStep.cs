@@ -8,7 +8,7 @@ namespace IndependentAgentProject
 {
     public class SaveDataStep : IFlowStep
     {
-        public string DisplayName => "保存游戏数据";
+        public string DisplayName => UITextProvider.Get("step_save_data");
 
         private readonly string levalName;
 

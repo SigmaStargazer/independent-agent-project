@@ -43,15 +43,17 @@ from tools.perf_tool import aperf_print
 from dotenv import load_dotenv
 load_dotenv()
 
+from runtime.path_config import get_runtime_root, get_log_dir
+
 # ===== Prompt 保存与上下文裁剪配置 =====
 PROMPT_SAVE_ENABLED = os.getenv("PROMPT_SAVE_ENABLED", "false").lower() == "true"
 PROMPT_SAVE_DIR = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), "..", "..",
-    os.getenv("PROMPT_SAVE_DIR", "logs/prompts")
+    get_log_dir(),
+    os.getenv("PROMPT_SAVE_DIR", "prompts")
 ))
 
 IDLE_WAKEUP_CONFIG_PATH = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), "..", "..",
+    get_runtime_root(),
     "config", "idle_wakeup.json"
 ))
 DEFAULT_IDLE_WAKEUP_CONFIG = {
@@ -109,16 +111,6 @@ def load_idle_wakeup_config() -> dict:
 
 
 IDLE_WAKEUP_CONFIG = load_idle_wakeup_config()
-
-# # 千问
-# model_api_base = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-# model_api_key = "sk-7a3958e0fdf840e49a2edd83b25dd228"
-# model_name = "qwen-max"
-
-# # moonshot
-# model_api_base = "https://api.moonshot.cn/v1"
-# model_api_key = "sk-0cYUM2FsdWqmyJeth1He0FXlCVlcxScjNb3YPYHjl78vyEgY"
-# model_name = "kimi-k2-0711-preview"
 
 model_api_base = os.getenv("AGENT_API_BASE")
 model_api_key = os.getenv("AGENT_API_KEY")

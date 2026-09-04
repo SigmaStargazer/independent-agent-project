@@ -3,11 +3,27 @@ import sys
 from datetime import datetime
 
 
+class _NullStream:
+    """丢弃型流：noconsole 打包 exe 中 sys.stdout/sys.stderr 为 None 时兜底。"""
+
+    def write(self, data):
+        return len(data)
+
+    def flush(self):
+        pass
+
+    def isatty(self):
+        return False
+
+    def __getattr__(self, name):
+        raise AttributeError(name)
+
+
 class TeeWriter:
     """把写入镜像到原始 stream 与日志文件，每行写后即 flush。"""
 
     def __init__(self, original, file):
-        self._original = original
+        self._original = original if original is not None else _NullStream()
         self._file = file
 
     def write(self, data):

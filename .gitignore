@@ -137,3 +137,9 @@ Src/PythonServer/.venv/
 # 正确写法是 `>/dev/null`。下面的规则作为兜底，避免误创建后污染 git 状态。
 /nul
 /NUL
+
+# ===== Python 打包验证产物（v0.23.3b 调研） =====
+# PyInstaller / Nuitka 等打包工具的输出，验证阶段产物，勿进 Git
+Src/PythonServer/build/
+Src/PythonServer/dist/
+Src/PythonServer/*.spec

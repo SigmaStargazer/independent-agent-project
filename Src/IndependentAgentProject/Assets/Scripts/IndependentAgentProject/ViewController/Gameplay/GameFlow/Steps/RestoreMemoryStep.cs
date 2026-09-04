@@ -10,7 +10,7 @@ namespace IndependentAgentProject
 {
     public class RestoreMemoryStep : IFlowStep
     {
-        public string DisplayName => "读取记忆";
+        public string DisplayName => UITextProvider.Get("step_restore_memory");
 
         private readonly int slotId;
 

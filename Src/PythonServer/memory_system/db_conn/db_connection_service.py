@@ -31,9 +31,94 @@ import kuzu
 
 from agent_framwork.base.singleton import singleton
 
+from runtime.path_config import get_data_dir
+
 # 数据库默认配置（与历史 memory_manager 保持一致）
-DB_ROOT = "db"
+# v0.23.3b：改为绝对路径（运行时数据根），消除对进程工作目录的隐式依赖。
+# 开发态 = PythonServer/db，打包态 = exe 同级 db，两种形态下 db/graphiti.kuzu 位置一致。
+DB_ROOT = get_data_dir()
 DB_NAME = "graphiti"
+
+
+# ---------------------------------------------------------------------------
+# Windows 中文路径规避（Kuzu C++ 底层用 CreateFileA/ANSI，非 ASCII 路径在中文
+# Windows 上被按 GBK 误解，新建库报 Error 3 / UnicodeDecodeError。业界解法：
+# 8.3 短路径（多数机器未启用）或 NTFS junction。本项目用 junction，已实测可行，
+# 且 mklink /J 不需管理员权限）。
+# 纯 ASCII 路径零开销直通；仅含非 ASCII 时建 junction。
+# ---------------------------------------------------------------------------
+
+
+def _path_is_ascii(p: str) -> bool:
+    try:
+        p.encode("ascii")
+        return True
+    except UnicodeEncodeError:
+        return False
+
+
+_JUNCTION_CACHE: dict = {}
+_JUNCTION_CLEANUP_REGISTERED = False
+
+
+def _cleanup_junction() -> None:
+    """进程退出时尽力删除本进程创建的全部 junction（junction 是目录链接，用 os.rmdir）。"""
+    global _JUNCTION_CACHE
+    for link in list(_JUNCTION_CACHE.values()):
+        try:
+            import pathlib
+
+            if os.path.isdir(link) and pathlib.Path(link).is_junction():
+                os.rmdir(link)
+        except Exception:
+            pass
+    _JUNCTION_CACHE.clear()
+
+
+def _kuzu_safe_path(db_path: str) -> str:
+    """把 Kuzu 要打开的路径转成纯 ASCII 等价路径（仅 Windows 且含非 ASCII 时）。
+
+    junction 名按 db 目录绝对路径的 hash 隔离：不同运行根（开发版 / 打包版 /
+    不同游戏根）各用各的 junction，避免共享同一固定 junction 导致 Kuzu
+    文件锁冲突（Could not set lock）。同路径复用缓存，不重复创建。
+    """
+    global _JUNCTION_CACHE, _JUNCTION_CLEANUP_REGISTERED
+
+    if os.name != "nt":
+        return db_path
+    if _path_is_ascii(db_path):
+        return db_path
+
+    db_dir = os.path.abspath(os.path.dirname(db_path))
+    import hashlib
+
+    tag = hashlib.sha1(db_dir.encode("utf-8")).hexdigest()[:12]
+    if tag in _JUNCTION_CACHE:
+        return os.path.join(_JUNCTION_CACHE[tag], os.path.basename(db_path))
+
+    import atexit
+    import subprocess
+    import tempfile
+
+    junction_base = os.path.join(tempfile.gettempdir(), "pskuzu")
+    link_dir = os.path.join(junction_base, tag, "db")
+    try:
+        os.makedirs(os.path.dirname(link_dir), exist_ok=True)
+        if not os.path.exists(link_dir):
+            r = subprocess.run(
+                ["cmd", "/c", "mklink", "/J", link_dir, db_dir],
+                capture_output=True,
+            )
+            if r.returncode != 0:
+                return db_path
+        _JUNCTION_CACHE[tag] = link_dir
+        if not _JUNCTION_CLEANUP_REGISTERED:
+            atexit.register(_cleanup_junction)
+            _JUNCTION_CLEANUP_REGISTERED = True
+    except Exception:
+        return db_path
+
+    return os.path.join(link_dir, os.path.basename(db_path))
 
 
 @singleton
@@ -71,6 +156,16 @@ class DBConnectionService:
     def wal_path(self) -> str:
         return os.path.join(self._db_root, f"{self._db_name}.wal")
 
+    def _open_database(self, db_path: str) -> kuzu.Database:
+        """打开/新建 Kuzu 数据库，规避 Windows 中文路径 bug。
+
+        Kuzu C++ 底层用 CreateFileA（ANSI），非 ASCII 路径在中文 Windows 上被
+        按 GBK 误解：新建库报 Error 3，或 UnicodeDecodeError。这里把路径转成
+        纯 ASCII 等价路径（NTFS junction，见模块级 _kuzu_safe_path）再打开。
+        纯 ASCII 路径（如 CI / 英文目录）零开销直通。
+        """
+        return kuzu.Database(_kuzu_safe_path(db_path))
+
     def get_conn(self) -> kuzu.AsyncConnection:
         if self._conn is None:
             raise RuntimeError("DBConnectionService 尚未初始化，先调用 await initialize()")
@@ -100,7 +195,7 @@ class DBConnectionService:
 
             opened = False
             try:
-                self._kuzu_db = kuzu.Database(db_path)
+                self._kuzu_db = self._open_database(db_path)
                 opened = True
             except Exception as e:
                 print("⚠️ [DBConn] 数据库打开失败，尝试清理 WAL:", e)
@@ -116,7 +211,7 @@ class DBConnectionService:
 
             if not opened:
                 try:
-                    self._kuzu_db = kuzu.Database(db_path)
+                    self._kuzu_db = self._open_database(db_path)
                     print("✅ [DBConn] 数据库已通过 clean start 打开")
                 except Exception as retry_err:
                     print("❌ [DBConn] clean start 仍失败:", retry_err)

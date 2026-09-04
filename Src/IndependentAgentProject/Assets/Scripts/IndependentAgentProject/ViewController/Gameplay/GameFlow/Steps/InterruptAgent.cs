@@ -10,7 +10,7 @@ namespace IndependentAgentProject
 {
     public class InterruptAgentStep : IFlowStep
     {
-        public string DisplayName => "Agent中断";
+        public string DisplayName => UITextProvider.Get("step_interrupt_agent");
 
         private readonly string mStopReason;
 

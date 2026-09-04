@@ -2,8 +2,8 @@
 """默认技能加载器。
 
 加载顺序：
-1. ``Src/PythonServer/db/default_skills/<group_id>.yaml``（按 Agent 定制）
-2. ``Src/PythonServer/db/default_skills/default.yaml``（兜底）
+1. ``<data_dir>/db/default_skills/<group_id>.yaml``（按 Agent 定制）
+2. ``<data_dir>/db/default_skills/default.yaml``（兜底）
 
 把 YAML 解析为 ``List[dict]``，供 ``main.handle_agent_create_request``
 在 Agent 创建后注入到 Kuzu。
@@ -13,10 +13,12 @@ from __future__ import annotations
 import os
 from typing import List
 
+from runtime.path_config import get_data_dir
 
-# ../../db/default_skills 相对于本文件 (memory_system/action_skill_system/default_skill_loader.py)
+
+# 相对运行根（开发态=PythonServer，打包态=exe 同级）db/default_skills
 DEFAULT_SKILLS_DIR = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), "..", "..", "db", "default_skills"
+    get_data_dir(), "default_skills"
 ))
 
 

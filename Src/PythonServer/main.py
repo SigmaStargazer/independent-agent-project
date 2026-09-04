@@ -23,13 +23,21 @@ from memory_system.action_skill_system import load_default_skills
 from tools.console_logger import start_console_logging, stop_console_logging
 from lifecycle import AgentLifecycle
 from config.api_tester import test_api_connectivity
+from runtime.path_config import (
+    get_runtime_root,
+    get_port_config_file,
+    get_data_dir,
+    get_proto_dir,
+    ensure_runtime_writable,
+)
+from runtime.single_instance import acquire as acquire_single_instance, release as release_single_instance
 
-# 项目根目录
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-PORT_CONFIG_FILE = os.path.abspath(os.path.join(PROJECT_ROOT, 'Data', 'Config', 'agent_server_port.txt'))
+# 运行根（v0.23.3b：统一走 path_config，兼容开发态 venv 与打包态 exe）
+RUNTIME_ROOT = get_runtime_root()
+PORT_CONFIG_FILE = get_port_config_file()
 
-# 添加proto路径
-sys.path.append(os.path.join(PROJECT_ROOT, 'Lib', 'proto'))
+# 添加proto路径（相对运行根 Lib/proto）
+sys.path.append(get_proto_dir())
 
 # 获取单例
 server = AgentServerNetMessage(port_config_file=PORT_CONFIG_FILE)
@@ -360,7 +368,7 @@ async def handle_agent_export_skills_request(msg, context):
         skills = await MemoryManager().action_skill.get_all_skills(group_id)
 
         export_dir = os.path.join(
-            os.path.dirname(__file__), "db", "default_skills", "exports"
+            get_data_dir(), "default_skills", "exports"
         )
         os.makedirs(export_dir, exist_ok=True)
 
@@ -390,30 +398,44 @@ async def other_tasks():
     print("Other tasks done")
 
 async def main(auto_init: bool = False):
-    # 0. 安装终端日志镜像（stdout/stderr 同时写入 logs/console/{时间戳}.log）
-    log_file, stdout_orig, stderr_orig = start_console_logging(
-        base_dir=os.path.dirname(__file__)
-    )
+    # 0. 打包态单实例互斥（多开防线）：已有 Python 实例则退出（多开互斥 S6）。
+    #    开发态（非 frozen）也执行——同一份代码在开发期多开同样应被拦截。
+    if not acquire_single_instance():
+        return
     try:
-        # 1. v0.23.0：默认无 Key 启动——不初始化记忆系统，仅监听端口，等 Unity 的 InitRequest。
-        #    开发期可传 --auto-init 等效 init 信号（读 api_config.json -> 初始化）。
-        if auto_init:
-            print("--auto-init：执行初始化（等效收到 InitRequest）")
-            await AgentLifecycle.enter_game()
-        else:
-            print("无 Key 启动模式：等待 Unity 发送 InitRequest 后再初始化记忆系统。")
+        # 0.1 打包态 db/ 可写自检（方案 B 兜底）：不可写则提示后退出，避免 Kuzu 静默崩溃。
+        if not ensure_runtime_writable():
+            print("[main] 运行目录不可写（可能解压到了只读位置如 Program Files）。")
+            print("[main] 请将游戏解压到可写目录后重试。")
+            return
 
-        # TimeSystem 不在启动时设置时间基准（v0.23.0b）：Title 阶段完全零状态，
-        # 进游戏由 SceneStart 设置，回 Title 由 leave_game 归零。见 DevDocs/Architecture/生命周期架构.md。
-
-        print("正在启动服务器...")
-        # 2. 系统初始化完成后，再启动网络服务和其他任务
-        await asyncio.gather(
-            server.astart(),
-            other_tasks()
+        # 0.2 安装终端日志镜像（stdout/stderr 同时写入 logs/console/{时间戳}.log）
+        log_file, stdout_orig, stderr_orig = start_console_logging(
+            base_dir=get_runtime_root()
         )
+        try:
+            # 1. v0.23.0：默认无 Key 启动——不初始化记忆系统，仅监听端口，等 Unity 的 InitRequest。
+            #    开发期可传 --auto-init 等效 init 信号（读 api_config.json -> 初始化）。
+            if auto_init:
+                print("--auto-init：执行初始化（等效收到 InitRequest）")
+                await AgentLifecycle.enter_game()
+            else:
+                print("无 Key 启动模式：等待 Unity 发送 InitRequest 后再初始化记忆系统。")
+
+            # TimeSystem 不在启动时设置时间基准（v0.23.0b）：Title 阶段完全零状态，
+            # 进游戏由 SceneStart 设置，回 Title 由 leave_game 归零。见 DevDocs/Architecture/生命周期架构.md。
+
+            print("正在启动服务器...")
+            # 2. 系统初始化完成后，再启动网络服务和其他任务
+            await asyncio.gather(
+                server.astart(),
+                other_tasks()
+            )
+        finally:
+            stop_console_logging(log_file, stdout_orig, stderr_orig)
     finally:
-        stop_console_logging(log_file, stdout_orig, stderr_orig)
+        # 释放单实例锁（尽力而为；强杀时不会执行，由下次启动的存活检测兜底）
+        release_single_instance()
 
 if __name__ == "__main__":
     import argparse
